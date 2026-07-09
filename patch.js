@@ -16,7 +16,7 @@
             '  position: fixed; bottom: 0; left: 0; right: 0; z-index: 99999;',
             '  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);',
             '  color: #e0e0e0; text-align: center; padding: 6px 12px;',
-            '  font-size: 12px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif;',
+            '  font-size: 12px; font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;',
             '  letter-spacing: 0.5px; border-top: 1px solid rgba(255,255,255,0.1);',
             '  display: flex; justify-content: center; align-items: center; gap: 16px;',
             '  flex-wrap: wrap;',
