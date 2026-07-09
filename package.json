@@ -1,0 +1,16 @@
+{
+  "name": "focustodo",
+  "version": "1.0.0",
+  "description": "FocusTodo web version",
+  "main": "patch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "acorn": "^8.17.0"
+  }
+}
