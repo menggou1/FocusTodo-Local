@@ -1,21 +1,21 @@
 ﻿/* ===== 中文字体：思源黑体 (Noto Sans SC) ===== */
 @font-face {
     font-family: 'Noto Sans SC';
-    src: url('font/NotoSansSC-Regular.otf') format('opentype');
+    src: url('font/NotoSansSC-Regular.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
     font-family: 'Noto Sans SC';
-    src: url('font/NotoSansSC-Medium.otf') format('opentype');
+    src: url('font/NotoSansSC-Medium.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
     font-family: 'Noto Sans SC';
-    src: url('font/NotoSansSC-Bold.otf') format('opentype');
+    src: url('font/NotoSansSC-Bold.ttf') format('truetype');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
