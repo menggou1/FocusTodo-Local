@@ -55,6 +55,46 @@
     }
 
     // ========== 1. 设置永久高级版（ExpiredDate=0 表示永不过期）==========
+
+    // ========== 字体统一：body 层面使用思源黑体，子元素自然继承 ==========
+    (function() {
+        // 注入 CSS：仅设置 body/#root 字体，!important 抵御 JS 内联样式覆盖
+        var fontStyle = document.createElement('style');
+        fontStyle.id = 'lexible-font-unify';
+        fontStyle.textContent = [
+            '/* 全局中文字体 - 仅 body 层面，子元素自然继承，DINCond 元素不受影响 */',
+            'html, body, #root, #modal-root {',
+            '  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif !important;',
+            '}'
+        ].join('\n');
+        document.head.appendChild(fontStyle);
+
+        // MutationObserver：main.js 会动态设置 body.style.fontFamily，
+        // 但 !important CSS 优先级高于内联样式，所以这个只是双保险
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    var current = document.body.style.fontFamily;
+                    if (current && current.indexOf('"Noto Sans SC"') > 0) {
+                        document.body.style.fontFamily = '"Noto Sans SC", ' +
+                            current.replace(/"Noto Sans SC",?\s*/g, '');
+                    }
+                }
+            });
+        });
+
+        function startObserve() {
+            if (document.body) {
+                observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+            }
+        }
+
+        if (document.body) {
+            startObserve();
+        } else {
+            document.addEventListener('DOMContentLoaded', startObserve);
+        }
+    })();
     localStorage.setItem('ExpiredDate', '0');
 
     // ========== 2. 设置本地用户登录凭证 ==========
