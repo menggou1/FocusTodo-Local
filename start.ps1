@@ -11,16 +11,29 @@
     Write-Host $banner
     Write-Host '正在启动本地服务器...'
 
+    $siteUrl = 'http://127.0.0.1:5500/index.html'
+
+    try {
+        Start-Job -ScriptBlock {
+            param($url)
+            Start-Sleep -Seconds 1
+            Start-Process $url
+        } -ArgumentList $siteUrl | Out-Null
+    }
+    catch {
+        Write-Host '[提示] 自动打开浏览器失败，将继续启动服务器。'
+    }
+
     if (Get-Command python -ErrorAction SilentlyContinue) {
         Write-Host '使用 Python HTTP 服务器'
-        Write-Host '请在浏览器打开: http://127.0.0.1:5500/index.html'
+        Write-Host "请在浏览器打开: $siteUrl"
         Write-Host '按 Ctrl+C 停止服务器'
         Write-Host ''
         python -m http.server 5500
     }
     elseif (Get-Command npx -ErrorAction SilentlyContinue) {
         Write-Host '使用 Node.js http-server'
-        Write-Host '请在浏览器打开: http://127.0.0.1:5500/index.html'
+        Write-Host "请在浏览器打开: $siteUrl"
         Write-Host '按 Ctrl+C 停止服务器'
         Write-Host ''
         npx http-server -p 5500 -c-1
