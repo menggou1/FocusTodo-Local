@@ -8,51 +8,82 @@
 (function() {
     'use strict';
 
-    // ========== 0. 版本声明 Banner ==========
-    function injectVersionBanner() {
-        var style = document.createElement('style');
-        style.textContent = [
-            '#lexible-version-banner {',
-            '  position: fixed; bottom: 0; left: 0; right: 0; z-index: 99999;',
-            '  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);',
-            '  color: #e0e0e0; text-align: center; padding: 6px 12px;',
-            '  font-size: 12px; font-family: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;',
-            '  letter-spacing: 0.5px; border-top: 1px solid rgba(255,255,255,0.1);',
-            '  display: flex; justify-content: center; align-items: center; gap: 16px;',
-            '  flex-wrap: wrap;',
-            '}',
-            '#lexible-version-banner .ver-tag {',
-            '  background: rgba(255,255,255,0.12); padding: 2px 10px; border-radius: 10px;',
-            '  font-weight: bold; color: #64ffda;',
-            '}',
-            '#lexible-version-banner .ver-author {',
-            '  color: #bb86fc; font-weight: bold;',
-            '}',
-            '#lexible-version-banner .ver-date {',
-            '  color: #ffb74d;',
-            '}',
-            '#lexible-version-banner .ver-desc {',
-            '  color: #9e9e9e; font-size: 11px;',
-            '}'
-        ].join('\n');
-        document.head.appendChild(style);
+    // ========== 0. 关于页版本信息（插入到版本行下面） ==========
+    (function() {
+        var infoRowId = 'lexible-about-info-row';
 
-        var banner = document.createElement('div');
-        banner.id = 'lexible-version-banner';
-        banner.innerHTML = [
-            '<span class="ver-tag">🏠 完全本地版</span>',
-            '<span>修改者：<span class="ver-author">Lexible</span></span>',
-            '<span>日期：<span class="ver-date">2026/7/9</span></span>',
-            '<span class="ver-desc">所有数据仅存储在本地浏览器 · 无服务器通信</span>'
-        ].join('');
-        document.body.appendChild(banner);
-    }
+        function findVersionRow(modalRoot) {
+            var rows = modalRoot.querySelectorAll('tr');
+            for (var i = 0; i < rows.length; i++) {
+                var row = rows[i];
+                var text = (row.textContent || '').replace(/\s+/g, ' ').trim();
+                if (text.indexOf('版本') >= 0 || text.indexOf('Version') >= 0) {
+                    return row;
+                }
+            }
+            return null;
+        }
 
-    if (document.body) {
-        injectVersionBanner();
-    } else {
-        document.addEventListener('DOMContentLoaded', injectVersionBanner);
-    }
+        function findAboutRoot() {
+            return document.querySelector('[class*="AboutSettings-root"]') ||
+                document.querySelector('[class*="Settings-content"]') ||
+                document.querySelector('[class*="Settings-root"]');
+        }
+
+        function mountAboutInfo() {
+            // 如果行已存在且还在 DOM 中，不做任何操作，避免闪烁
+            var existing = document.getElementById(infoRowId);
+            if (existing && existing.isConnected) {
+                return true;
+            }
+
+            var aboutRoot = findAboutRoot();
+            if (!aboutRoot) {
+                return false;
+            }
+
+            var versionRow = findVersionRow(aboutRoot);
+            if (!versionRow || !versionRow.parentNode) {
+                return false;
+            }
+
+            if (existing && existing.parentNode) {
+                existing.parentNode.removeChild(existing);
+            }
+
+            var infoRow = document.createElement('tr');
+            infoRow.id = infoRowId;
+            infoRow.innerHTML = [
+                '<td class="' + 'setting-title' + '">修改者</td>',
+                '<td class="' + 'setting-value' + '" style="line-height:1.6;">',
+                'Lexible · 2026/7/9',
+                '<div style="margin-top:4px;color:#666;">完全本地版，所有数据仅保存在本地浏览器</div>',
+                '</td>'
+            ].join('');
+
+            versionRow.parentNode.insertBefore(infoRow, versionRow.nextSibling);
+            return true;
+        }
+
+        function start() {
+            if (!document.body) {
+                return;
+            }
+
+            // 用 MutationObserver 替换轮询，只在 DOM 变化时尝试插入，不会闪烁
+            var observer = new MutationObserver(function() {
+                mountAboutInfo();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            mountAboutInfo();
+        }
+
+        if (document.body) {
+            start();
+        } else {
+            document.addEventListener('DOMContentLoaded', start);
+        }
+    })();
 
     // ========== 1. 设置永久高级版（ExpiredDate=0 表示永不过期）==========
 
