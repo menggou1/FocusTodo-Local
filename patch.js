@@ -181,15 +181,45 @@
         _origRemoveItem(key);
     };
 
-    // 定期确保关键数据存在
+    // 定期确保关键数据存在且有效
     setInterval(function() {
         if (localStorage.getItem('ExpiredDate') !== '0') {
             _origSetItem('ExpiredDate', '0');
         }
+        // 检查 cookies 是否存在
         for (var ck in localCookies) {
             if (localCookies.hasOwnProperty(ck) && !localStorage.getItem(ck)) {
                 _origSetItem(ck, localCookies[ck]);
             }
+        }
+        // 修复乱码：验证 NAME 和 ACCT 能否正确解码，不能则恢复默认
+        try {
+            var nameVal = localStorage.getItem('cookie.NAME');
+            if (nameVal) {
+                var decoded = decodeURIComponent(atob(nameVal).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                // 解码后应该是可读的中文/英文，如果全是乱码字符则修复
+                if (!decoded || decoded.length === 0 || /^[\x00-\x1f\x7f-\x9f]+$/.test(decoded)) {
+                    _origSetItem('cookie.NAME', utf8Base64Encode(localName));
+                }
+            }
+        } catch (e) {
+            // atob 失败（非 Base64）→ 修复
+            _origSetItem('cookie.NAME', utf8Base64Encode(localName));
+        }
+        try {
+            var acctVal = localStorage.getItem('cookie.ACCT');
+            if (acctVal) {
+                var acctDecoded = decodeURIComponent(atob(acctVal).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                if (!acctDecoded || acctDecoded.length === 0 || acctDecoded.indexOf('@') < 0) {
+                    _origSetItem('cookie.ACCT', utf8Base64Encode(localAccount));
+                }
+            }
+        } catch (e) {
+            _origSetItem('cookie.ACCT', utf8Base64Encode(localAccount));
         }
     }, 1000);
 
@@ -199,16 +229,28 @@
     window.XMLHttpRequest = function() {
         var xhr = new OrigXHR();
         var origOpen = xhr.open;
+        var origSetRequestHeader = xhr.setRequestHeader;
         xhr.open = function(method, url) {
-            // 仅允许加载本地资源（相对路径）
             if (url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0)) {
-                // 阻止所有远程请求，静默返回成功
-                var blockedUrl = url;
+                // 标记拦截，但先调用原始 open 设置状态为 OPENED
+                // 这样 setRequestHeader 才能正常工作
                 xhr._blocked = true;
-                // 不调用原始 open，避免实际网络请求
+                xhr._blockedMethod = method;
+                xhr._blockedUrl = url;
+                // 调用原始 open 使状态进入 OPENED
+                // 使用一个安全的 dummy URL，避免真的发出请求
+                origOpen.call(xhr, method, 'data:text/plain,');
                 return;
             }
             return origOpen.apply(xhr, arguments);
+        };
+        // 静默处理 setRequestHeader —— blocked 状态下不抛异常
+        xhr.setRequestHeader = function(header, value) {
+            if (xhr._blocked) {
+                // 阻止的请求，忽略 setRequestHeader
+                return;
+            }
+            return origSetRequestHeader.apply(xhr, arguments);
         };
         var origSend = xhr.send;
         xhr.send = function(data) {
@@ -244,23 +286,150 @@
         };
     }
 
-    // ========== 5. 拦截 jQuery.ajax（应用使用 jQuery 发送请求）==========
-    // 在 jQuery 加载后进行拦截
+    // ========== 5. 拦截 jQuery.ajax + 删除数据用户名校验 + 重置为默认状态 ==========
     var _checkJQuery = setInterval(function() {
         if (window.jQuery && window.jQuery.ajax) {
             clearInterval(_checkJQuery);
             var _origAjax = window.jQuery.ajax;
+
+            // ===== 彻底重置为默认状态 =====
+            // 策略：先保存 app 初始化必需的 key，清空全部，再写入默认值并恢复必需 key
+            function _resetToDefaults() {
+                console.log('[Lexible] Full reset to defaults...');
+
+                // 1. 保存 app 初始化必需的关键 key（缺了会白屏）
+                var _criticalKeys = [
+                    'ServerAccessInfo', 'ServerUrls', 'Version', 'app_language',
+                    'PK1', 'OverseaServerUrl', 'RegionCode', 'LstRlsVer',
+                    'UpdAltCnt', 'UpdAltDate'
+                ];
+                var _saved = {};
+                for (var ci = 0; ci < _criticalKeys.length; ci++) {
+                    var v = localStorage.getItem(_criticalKeys[ci]);
+                    if (v !== null && v !== undefined) {
+                        _saved[_criticalKeys[ci]] = v;
+                    }
+                }
+
+                // 2. 清空所有 localStorage（绕过 Section 3 保护）
+                var _allKeys = [];
+                for (var i = 0; i < localStorage.length; i++) {
+                    var k = localStorage.key(i);
+                    if (k) _allKeys.push(k);
+                }
+                for (var ri = 0; ri < _allKeys.length; ri++) {
+                    try { _origRemoveItem(_allKeys[ri]); } catch (e) {}
+                }
+                console.log('[Lexible] Cleared ' + _allKeys.length + ' localStorage keys');
+
+                // 3. 写入默认身份数据
+                var _defaults = {
+                    'cookie.ACCT': utf8Base64Encode('local@local'),
+                    'cookie.NAME': utf8Base64Encode('本地用户'),
+                    'cookie.PID': 'local-' + Math.random().toString(36).substr(2, 9),
+                    'cookie.UID': 'local-' + Math.random().toString(36).substr(2, 9),
+                    'cookie.JSESSIONID': Math.random().toString(36).substr(2, 16),
+                    'ExpiredDate': '0',
+                    'Portrait': 'img/header-portrait.png'
+                };
+                for (var dk in _defaults) {
+                    if (_defaults.hasOwnProperty(dk)) {
+                        try { _origSetItem(dk, _defaults[dk]); } catch (e) {}
+                    }
+                }
+
+                // 4. 恢复 app 初始化必需的 key
+                for (var sk in _saved) {
+                    if (_saved.hasOwnProperty(sk)) {
+                        try { _origSetItem(sk, _saved[sk]); } catch (e) {}
+                    }
+                }
+
+                // 5. 清除 IndexedDB 所有数据
+                try {
+                    var _openReq = window.indexedDB.open('PomodoroDB6', 2);
+                    _openReq.onsuccess = function() {
+                        var _db = _openReq.result;
+                        var _stores = [];
+                        try {
+                            for (var _s = 0; _s < _db.objectStoreNames.length; _s++) {
+                                _stores.push(_db.objectStoreNames[_s]);
+                            }
+                        } catch (e) {
+                            _stores = ['Project', 'Task', 'Subtask', 'Pomodoro', 'Schedule', 'Group', 'GroupUser', 'Message'];
+                        }
+                        if (_stores.length > 0) {
+                            var _tx = _db.transaction(_stores, 'readwrite');
+                            _stores.forEach(function(name) {
+                                try { _tx.objectStore(name).clear(); } catch (e) {}
+                            });
+                            _tx.oncomplete = function() {
+                                _db.close();
+                                console.log('[Lexible] IndexedDB all stores cleared');
+                            };
+                            _tx.onerror = function() {
+                                _db.close();
+                                console.log('[Lexible] IndexedDB clear tx error');
+                            };
+                        } else {
+                            _db.close();
+                        }
+                    };
+                    _openReq.onerror = function() {
+                        console.log('[Lexible] IndexedDB open failed during reset');
+                    };
+                } catch (e) {
+                    console.log('[Lexible] IndexedDB clear error:', e.message);
+                }
+
+                console.log('[Lexible] Reset complete. Defaults: ' + Object.keys(_defaults).length + ' keys. Critical: ' + Object.keys(_saved).length + ' keys preserved.');
+            }
+
             window.jQuery.ajax = function(options) {
                 var url = typeof options === 'string' ? options : (options && options.url);
-                if (url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0)) {
-                    // 阻止远程请求
+
+                // 匹配所有需要拦截的 URL：
+                // - http:// 或 https:// 开头的远程 URL
+                // - 包含 v63/user 的调用（可能是相对路径，如 serverUrl 为空时）
+                var isRemote = url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0);
+                var isUserEndpoint = url && url.indexOf('v63/user') >= 0;
+
+                if (isRemote || isUserEndpoint) {
+                    console.log('[Lexible] Intercepted AJAX:', url);
+
+                    // === 删除数据/注销账号：直接重置，无需密码或用户名校验 ===
+                    if (isUserEndpoint) {
+                        var data = (typeof options === 'object') ? options.data : null;
+                        if (data) {
+                            var isReset = false;
+                            var isCancellation = false;
+
+                            if (typeof data === 'string') {
+                                var pairs = data.split('&');
+                                for (var pi = 0; pi < pairs.length; pi++) {
+                                    var kv = pairs[pi].split('=');
+                                    if (kv[0] === 'reset') isReset = true;
+                                    if (kv[0] === 'cancellation') isCancellation = true;
+                                }
+                            } else if (typeof data === 'object' && data !== null) {
+                                isReset = 'reset' in data;
+                                isCancellation = 'cancellation' in data;
+                            }
+
+                            if (isReset || isCancellation) {
+                                console.log('[Lexible] Delete/cancel detected. Resetting to defaults...');
+                                _resetToDefaults();
+                            }
+                        }
+                    }
+
+                    // 阻止远程请求，返回成功
                     var success = (typeof options === 'object') ? (options.success || options.done) : null;
                     if (success) {
                         setTimeout(function() {
                             success('{"status":0}');
                         }, 0);
                     }
-                    // 返回一个 mock jqXHR
                     return {
                         done: function(cb) { setTimeout(function() { cb('{"status":0}'); }, 0); return this; },
                         fail: function() { return this; },
@@ -269,13 +438,14 @@
                 }
                 return _origAjax.apply(this, arguments);
             };
+            console.log('[Lexible] jQuery.ajax interception + delete-to-defaults installed');
         }
-    }, 100);
-    // 最多检查 50 次（5 秒）
+    }, 50); // 加快检查频率
     setTimeout(function() { clearInterval(_checkJQuery); }, 5000);
 
     console.log('[Lexible] FocusTodo 完全本地版已激活 (2026/7/9)');
     console.log('[Lexible] 所有网络请求已阻断，数据仅存储在本地浏览器。');
+    // ("FocusTodo 完全本地版已激活" / "所有网络请求已阻断，数据仅存储在本地浏览器。")
 
     // ========== 6. 数据导出/导入功能 ==========
     (function() {
@@ -785,5 +955,62 @@
         setTimeout(injectButtons, 10000);
 
         console.log('[Lexible] 数据导出/导入模块已加载');
+    })();
+
+    // ========== 7. 删除确认弹窗 - 注入提示 ==========
+    (function() {
+        'use strict';
+
+        function injectWarning(modalRoot) {
+            var allPwd = modalRoot.querySelectorAll('input[type="password"]');
+            for (var i = 0; i < allPwd.length; i++) {
+                var inp = allPwd[i];
+                var container = inp.closest('[class*="modal"]') ||
+                                inp.closest('[class*="dialog"]') ||
+                                modalRoot;
+                if (!container) continue;
+
+                // 只处理单个密码框的弹窗（删除确认）
+                if (container.querySelectorAll('input[type="password"]').length !== 1) continue;
+                if (container._lexibleWarned) continue;
+                container._lexibleWarned = true;
+
+                // 注入警告提示
+                var warnId = 'lexible-delete-warning';
+                if (!container.querySelector('#' + warnId)) {
+                    var warn = document.createElement('div');
+                    warn.id = warnId;
+                    warn.style.cssText = 'color:#e74c3c;font-size:13px;margin-top:8px;text-align:center;font-weight:500;';
+                    warn.textContent = '⚠ 此操作将删除所有数据并重置为默认状态';
+                    var parent = inp.parentNode;
+                    if (parent) {
+                        parent.insertBefore(warn, inp.nextSibling);
+                    }
+                }
+            }
+        }
+
+        (function poll() {
+            var start = Date.now();
+            var timer = setInterval(function() {
+                var mr = document.getElementById('modal-root');
+                if (mr) injectWarning(mr);
+                if (Date.now() - start > 30000) clearInterval(timer);
+            }, 300);
+
+            var moStart = Date.now();
+            var moTimer = setInterval(function() {
+                var mr = document.getElementById('modal-root');
+                if (mr) {
+                    clearInterval(moTimer);
+                    new MutationObserver(function() {
+                        injectWarning(mr);
+                    }).observe(mr, { childList: true, subtree: true });
+                }
+                if (Date.now() - moStart > 10000) clearInterval(moTimer);
+            }, 200);
+        })();
+
+        console.log('[Lexible] 删除确认提示模块已加载');
     })();
 })();
