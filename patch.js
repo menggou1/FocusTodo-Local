@@ -231,14 +231,13 @@
         var origOpen = xhr.open;
         var origSetRequestHeader = xhr.setRequestHeader;
         xhr.open = function(method, url) {
-            if (url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0)) {
-                // 标记拦截，但先调用原始 open 设置状态为 OPENED
-                // 这样 setRequestHeader 才能正常工作
+            // 拦截所有远程 URL 以及包含 v63/user 的相对路径
+            var isRemote = url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0);
+            var isUserApi = url && url.indexOf('v63/user') >= 0;
+            if (isRemote || isUserApi) {
                 xhr._blocked = true;
                 xhr._blockedMethod = method;
                 xhr._blockedUrl = url;
-                // 调用原始 open 使状态进入 OPENED
-                // 使用一个安全的 dummy URL，避免真的发出请求
                 origOpen.call(xhr, method, 'data:text/plain,');
                 return;
             }
@@ -247,7 +246,6 @@
         // 静默处理 setRequestHeader —— blocked 状态下不抛异常
         xhr.setRequestHeader = function(header, value) {
             if (xhr._blocked) {
-                // 阻止的请求，忽略 setRequestHeader
                 return;
             }
             return origSetRequestHeader.apply(xhr, arguments);
@@ -255,11 +253,43 @@
         var origSend = xhr.send;
         xhr.send = function(data) {
             if (xhr._blocked) {
-                // 模拟异步成功响应
+                // 构建响应数据
+                var _xhrResponse = { status: 0 };
+
+                // 检查是否是修改用户名的请求
+                if (xhr._blockedUrl && xhr._blockedUrl.indexOf('v63/user') >= 0 && data) {
+                    try {
+                        var _xhrDataStr = typeof data === 'string' ? data : '';
+                        // 解析 form data 中的 username 参数
+                        var _pairs = _xhrDataStr.split('&');
+                        for (var _pi = 0; _pi < _pairs.length; _pi++) {
+                            var _kv = _pairs[_pi].split('=');
+                            if (_kv[0] === 'username' && _kv[1]) {
+                                var _rawName = decodeURIComponent(_kv[1].replace(/\+/g, ' '));
+                                if (_rawName) {
+                                    console.log('[Lexible XHR] Username change:', _rawName);
+                                    var _encodeFn = (window.Base64 && window.Base64.encode)
+                                        ? function(s) { return window.Base64.encode(s); }
+                                        : utf8Base64Encode;
+                                    var _encoded = _encodeFn(_rawName);
+                                    // 写入 localStorage
+                                    try { _origSetItem('cookie.NAME', _encoded); } catch (e) {}
+                                    _xhrResponse.name = _encoded;
+                                    console.log('[Lexible XHR] Saved to cookie.NAME');
+                                }
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[Lexible XHR] Error parsing username:', e);
+                    }
+                }
+
+                var _xhrRespStr = JSON.stringify(_xhrResponse);
                 setTimeout(function() {
                     Object.defineProperty(xhr, 'readyState', { value: 4, writable: true });
                     Object.defineProperty(xhr, 'status', { value: 200, writable: true });
-                    Object.defineProperty(xhr, 'responseText', { value: '{"status":0}', writable: true });
+                    Object.defineProperty(xhr, 'responseText', { value: _xhrRespStr, writable: true });
                     if (xhr.onload) xhr.onload();
                     if (xhr.onreadystatechange) xhr.onreadystatechange();
                 }, 0);
@@ -397,12 +427,16 @@
                 if (isRemote || isUserEndpoint) {
                     console.log('[Lexible] Intercepted AJAX:', url);
 
-                    // === 删除数据/注销账号：直接重置，无需密码或用户名校验 ===
+                    // 构建响应数据（默认成功）
+                    var _responseData = { status: 0 };
+
+                    // === 处理 v63/user 端点的各种操作 ===
                     if (isUserEndpoint) {
                         var data = (typeof options === 'object') ? options.data : null;
                         if (data) {
                             var isReset = false;
                             var isCancellation = false;
+                            var newUsername = null;
 
                             if (typeof data === 'string') {
                                 var pairs = data.split('&');
@@ -410,12 +444,32 @@
                                     var kv = pairs[pi].split('=');
                                     if (kv[0] === 'reset') isReset = true;
                                     if (kv[0] === 'cancellation') isCancellation = true;
+                                    if (kv[0] === 'username') newUsername = decodeURIComponent(kv[1] || '');
                                 }
                             } else if (typeof data === 'object' && data !== null) {
                                 isReset = 'reset' in data;
                                 isCancellation = 'cancellation' in data;
+                                if ('username' in data && data.username) {
+                                    newUsername = data.username;
+                                }
                             }
 
+                            // === 修改用户名：保存到本地 ===
+                            if (newUsername !== null && newUsername.length > 0) {
+                                console.log('[Lexible] Username change detected:', newUsername);
+                                // 优先使用应用内置的 Base64 编码（完美兼容），回退到 utf8Base64Encode
+                                var encodeFn = (window.Base64 && window.Base64.encode)
+                                    ? function(s) { return window.Base64.encode(s); }
+                                    : utf8Base64Encode;
+                                var encodedName = encodeFn(newUsername);
+                                // 1) 直接写入 localStorage（绕过 Section 3 保护）
+                                try { _origSetItem('cookie.NAME', encodedName); } catch (e) {}
+                                // 2) 同时放入响应，让 setCookie 也写一次（同一个值，幂等）
+                                _responseData.name = encodedName;
+                                console.log('[Lexible] Username saved. Encoded:', encodedName);
+                            }
+
+                            // === 删除数据/注销账号：直接重置 ===
                             if (isReset || isCancellation) {
                                 console.log('[Lexible] Delete/cancel detected. Resetting to defaults...');
                                 _resetToDefaults();
@@ -423,15 +477,16 @@
                         }
                     }
 
-                    // 阻止远程请求，返回成功
+                    // 阻止远程请求，返回本地处理结果
+                    var _responseStr = JSON.stringify(_responseData);
                     var success = (typeof options === 'object') ? (options.success || options.done) : null;
                     if (success) {
                         setTimeout(function() {
-                            success('{"status":0}');
+                            success(_responseStr);
                         }, 0);
                     }
                     return {
-                        done: function(cb) { setTimeout(function() { cb('{"status":0}'); }, 0); return this; },
+                        done: function(cb) { setTimeout(function() { cb(_responseStr); }, 0); return this; },
                         fail: function() { return this; },
                         always: function(cb) { setTimeout(cb, 0); return this; }
                     };
@@ -1013,4 +1068,25 @@
 
         console.log('[Lexible] 删除确认提示模块已加载');
     })();
+
+    // ========== 8. 调试工具：手动修改用户名 ==========
+    // 在控制台输入 testSetUsername("新名字") 测试
+    window.testSetUsername = function(newName) {
+        console.log('[Lexible Test] Input:', newName);
+        // 使用应用内置编码
+        var encoded = (window.Base64 && window.Base64.encode)
+            ? window.Base64.encode(newName)
+            : utf8Base64Encode(newName);
+        console.log('[Lexible Test] Encoded:', encoded);
+        // 写入
+        try { _origSetItem('cookie.NAME', encoded); } catch (e) {}
+        // 验证
+        var stored = localStorage.getItem('cookie.NAME');
+        console.log('[Lexible Test] Stored in cookie.NAME:', stored);
+        // 解码验证
+        if (window.Base64 && window.Base64.decode) {
+            console.log('[Lexible Test] App decode result:', window.Base64.decode(stored));
+        }
+        console.log('[Lexible Test] 已写入，请切换页面再回来查看效果');
+    };
 })();

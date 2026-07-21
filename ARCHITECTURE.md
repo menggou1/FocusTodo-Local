@@ -178,7 +178,7 @@ App
 | 2 | 本地登录凭证 | 伪造 `local@local` 用户 |
 | 3 | 数据保护 | 防止 ExpiredDate 和 cookies 被清除 |
 | 4 | 网络阻断 | XMLHttpRequest + fetch 拦截 |
-| 5 | jQuery 阻断 + 用户名校验 | jQuery.ajax 拦截；v63/user 端点验证用户名后清除 cookie+Portrait |
+| 5 | jQuery 阻断 + 用户操作 | jQuery.ajax 拦截；v63/user 端点：修改用户名保存到本地 / 删除数据重置 / 注销账号 |
 | 6 | 数据导出/导入 | 完整数据迁移 (IndexedDB + localStorage) |
 | 7 | 删除提示美化 | 尝试将密码框改为用户名输入框（视觉提示），实际校验在 Section 5 |
 
