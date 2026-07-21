@@ -56,8 +56,8 @@
             infoRow.innerHTML = [
                 '<td class="' + 'setting-title' + '">修改者</td>',
                 '<td class="' + 'setting-value' + '" style="line-height:1.6;">',
-                'Lexible · 2026/7/9',
-                '<div style="margin-top:4px;color:#666;">完全本地版，所有数据仅保存在本地浏览器</div>',
+                'Lexible · 2026/7/21',
+                '<div style="margin-top:4px;color:#666;">本地学习版，请勿用于商业用途</div>',
                 '</td>'
             ].join('');
 
@@ -224,6 +224,16 @@
     }, 1000);
 
     // ========== 4. 完全阻断所有网络请求（确保纯本地运行）==========
+    // 域名白名单：白名单内的域名不受拦截（用于获取Bing壁纸等外部资源）
+    var _REQUEST_WHITELIST = ['www.bing.com', 'bing.com', 'bing.biturl.top'];
+    function _isWhitelisted(u) {
+        if (!u) return false;
+        for (var _wl = 0; _wl < _REQUEST_WHITELIST.length; _wl++) {
+            if (u.indexOf(_REQUEST_WHITELIST[_wl]) >= 0) return true;
+        }
+        return false;
+    }
+
     // 拦截 XMLHttpRequest
     var OrigXHR = window.XMLHttpRequest;
     window.XMLHttpRequest = function() {
@@ -234,6 +244,10 @@
             // 拦截所有远程 URL 以及包含 v63/user 的相对路径
             var isRemote = url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0);
             var isUserApi = url && url.indexOf('v63/user') >= 0;
+            // 白名单放行：Bing API / 图片请求不受拦截
+            if (isRemote && _isWhitelisted(url)) {
+                return origOpen.apply(xhr, arguments);
+            }
             if (isRemote || isUserApi) {
                 xhr._blocked = true;
                 xhr._blockedMethod = method;
@@ -306,6 +320,10 @@
         var origFetch = window.fetch;
         window.fetch = function(url, options) {
             if (typeof url === 'string' && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0)) {
+                // 白名单放行：Bing API / 图片请求不受拦截
+                if (_isWhitelisted(url)) {
+                    return origFetch.apply(this, arguments);
+                }
                 // 阻止远程 fetch，返回模拟成功响应
                 return Promise.resolve(new Response('{"status":0}', {
                     status: 200,
@@ -1197,7 +1215,641 @@
         console.log('[Lexible] 评分弹窗已永久禁用 (HasRated=true, ShowRateDialog=false)');
     })();
 
-    // ========== 10. 调试工具：手动修改用户名 ==========
+    // ========== 10. 自定义主题管理器（Bing每日壁纸 + 本地上传）==========
+    (function() {
+        'use strict';
+
+        // ---- 常量 ----
+        var STORAGE_KEY = 'lexible-custom-themes';
+        var ACTIVE_KEY = 'lexible-active-custom-theme';
+        var BING_ID = '__bing_daily__';
+        var CUSTOM_PREFIX = 'custom_';
+        var BING_EXPIRY_MS = 12 * 60 * 60 * 1000; // 12小时
+
+        // ---- 工具函数 ----
+        function _safeSet(k, v) {
+            try {
+                (typeof _origSetItem !== 'undefined' ? _origSetItem : localStorage.setItem.bind(localStorage))(k, v);
+            } catch(e) { console.warn('[Lexible Theme] setItem failed:', k, e.message); }
+        }
+        function _safeRemove(k) {
+            try {
+                (typeof _origRemoveItem !== 'undefined' ? _origRemoveItem : localStorage.removeItem.bind(localStorage))(k);
+            } catch(e) {}
+        }
+
+        function getCustomThemes() {
+            try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+            catch(e) { return {}; }
+        }
+
+        function saveCustomThemes(data) {
+            try { _safeSet(STORAGE_KEY, JSON.stringify(data)); }
+            catch(e) { alert('保存主题失败：存储空间不足。请删除一些自定义主题后重试。'); }
+        }
+
+        function getActiveId() {
+            return localStorage.getItem(ACTIVE_KEY) || null;
+        }
+
+        function setActiveId(id) {
+            if (id) { _safeSet(ACTIVE_KEY, id); }
+            else { _safeRemove(ACTIVE_KEY); }
+        }
+
+        function genId() {
+            return CUSTOM_PREFIX + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+        }
+
+        // 查找所有计时器背景元素
+        function findBgiElements() {
+            var els = [];
+            var bgi = document.querySelector('[class*="Timer-bgi"]');
+            if (bgi) els.push(bgi);
+            document.querySelectorAll('[class*="Fullscreen"] [class*="bgi"], [class*="Float"] [class*="bgi"]').forEach(function(el) {
+                els.push(el);
+            });
+            return els;
+        }
+
+        // 应用自定义背景
+        function applyCustomBackground(dataUrl) {
+            if (!dataUrl) return;
+            findBgiElements().forEach(function(el) {
+                el.style.backgroundImage = 'url(' + dataUrl + ')';
+                el.style.backgroundSize = 'cover';
+                el.style.backgroundPosition = 'center';
+            });
+        }
+
+        // 清除自定义背景（使用 removeProperty 而非设空串，避免覆盖 React 的 inline style）
+        function clearCustomBackground() {
+            findBgiElements().forEach(function(el) {
+                el.style.removeProperty('background-image');
+                el.style.removeProperty('background-size');
+                el.style.removeProperty('background-position');
+            });
+        }
+
+        // ---- 防重入标志（防止 refreshThemeUI 修改 DOM 后触发自身）----
+        var _isRefreshing = false;
+
+        // ---- 背景守护 + Theme 变化检测 ----
+        var _bgWatcherId = null;
+        var _lastObservedTheme = null;
+        function startBackgroundWatcher() {
+            if (_bgWatcherId) return;
+            _lastObservedTheme = localStorage.getItem('Theme');
+            _bgWatcherId = setInterval(function() {
+                // 检测 Theme 是否被 React UI 修改（用户点击了内置主题按钮）
+                var currentTheme = localStorage.getItem('Theme');
+                if (currentTheme !== _lastObservedTheme) {
+                    _lastObservedTheme = currentTheme;
+                    var activeId = getActiveId();
+                    if (activeId && currentTheme && !getCustomThemes()[currentTheme]) {
+                        // 用户通过 React UI 选择了内置主题 → 清除自定义状态
+                        // 注意：不调 clearCustomBackground()！React 已经设置了正确的背景
+                        // clearCustomBackground 会 setProperty('') 覆盖 React 的 inline style
+                        setActiveId(null);
+                        refreshThemeUI();
+                        return;
+                    }
+                }
+
+                var activeId = getActiveId();
+                if (!activeId) return;
+                var themes = getCustomThemes();
+                var theme = themes[activeId];
+                if (!theme || !theme.dataUrl) return;
+
+                findBgiElements().forEach(function(el) {
+                    var cur = el.style.backgroundImage || '';
+                    if (cur.indexOf(theme.dataUrl) < 0) {
+                        el.style.backgroundImage = 'url(' + theme.dataUrl + ')';
+                        el.style.backgroundSize = 'cover';
+                        el.style.backgroundPosition = 'center';
+                    }
+                });
+            }, 1000);
+        }
+
+        // ---- 图片下载与压缩 ----
+        function downloadImageAsDataUrl(imageUrl) {
+            return new Promise(function(resolve, reject) {
+                var img = new Image();
+                img.crossOrigin = 'anonymous';
+                var timer = setTimeout(function() { reject(new Error('图片加载超时')); }, 20000);
+                img.onload = function() {
+                    clearTimeout(timer);
+                    try {
+                        var MAX_W = 1920, MAX_H = 1080;
+                        var w = img.naturalWidth, h = img.naturalHeight;
+                        if (w > MAX_W || h > MAX_H) {
+                            var ratio = Math.min(MAX_W / w, MAX_H / h);
+                            w = Math.round(w * ratio);
+                            h = Math.round(h * ratio);
+                        }
+                        var canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    } catch(e) { reject(new Error('Canvas处理失败: ' + e.message)); }
+                };
+                img.onerror = function() {
+                    clearTimeout(timer);
+                    reject(new Error('图片加载失败，可能存在跨域限制'));
+                };
+                img.src = imageUrl;
+            });
+        }
+
+        // 创建缩略图 240×160
+        function createThumbnail(dataUrl) {
+            return new Promise(function(resolve) {
+                var img = new Image();
+                img.onload = function() {
+                    var c = document.createElement('canvas');
+                    c.width = 240; c.height = 160;
+                    c.getContext('2d').drawImage(img, 0, 0, 240, 160);
+                    resolve(c.toDataURL('image/jpeg', 0.8));
+                };
+                img.onerror = function() { resolve(dataUrl); };
+                img.src = dataUrl;
+            });
+        }
+
+        // ---- Bing 每日壁纸获取（多API容错）----
+        function fetchBingWallpaper() {
+            return new Promise(function(resolve, reject) {
+                var apis = [
+                    'https://bing.biturl.top/?format=json&index=0&mkt=zh-CN',
+                    'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN'
+                ];
+                function tryApi(idx) {
+                    if (idx >= apis.length) { reject(new Error('所有API端点均不可用')); return; }
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('GET', apis[idx], true);
+                    xhr.timeout = 10000;
+                    xhr.onload = function() {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            var imageUrl = null, copyright = '';
+                            if (data && data.url) {
+                                imageUrl = data.url;
+                                copyright = data.copyright || '';
+                            } else if (data && data.images && data.images.length > 0) {
+                                var urlbase = data.images[0].urlbase || '';
+                                imageUrl = 'https://www.bing.com' + urlbase + '_UHD.jpg';
+                                copyright = data.images[0].copyright || '';
+                            }
+                            if (imageUrl) {
+                                if (imageUrl.indexOf('_UHD') < 0) {
+                                    imageUrl = imageUrl.replace(/_1920x1080\.jpg/g, '_UHD.jpg');
+                                }
+                                resolve({ url: imageUrl, copyright: copyright });
+                            } else { tryApi(idx + 1); }
+                        } catch(e) { tryApi(idx + 1); }
+                    };
+                    xhr.onerror = function() { tryApi(idx + 1); };
+                    xhr.ontimeout = function() { tryApi(idx + 1); };
+                    xhr.send();
+                }
+                tryApi(0);
+            });
+        }
+
+        // ---- 用户手动点击获取Bing壁纸 ----
+        var _bingLoading = false;
+        function fetchAndApplyBing(labelEl) {
+            if (_bingLoading) return;
+            _bingLoading = true;
+            if (labelEl) labelEl.textContent = '下载中...';
+
+            fetchBingWallpaper().then(function(result) {
+                return downloadImageAsDataUrl(result.url).then(function(dataUrl) {
+                    return createThumbnail(dataUrl).then(function(thumb) {
+                        return { dataUrl: dataUrl, thumbnail: thumb, copyright: result.copyright };
+                    });
+                });
+            }).then(function(data) {
+                var themes = getCustomThemes();
+                themes[BING_ID] = {
+                    name: 'Bing每日壁纸', dataUrl: data.dataUrl,
+                    thumbnail: data.thumbnail, type: 'bing',
+                    updatedAt: Date.now(), copyright: data.copyright || ''
+                };
+                saveCustomThemes(themes);
+                setActiveId(BING_ID);
+                _safeSet('Theme', BING_ID);
+                applyCustomBackground(data.dataUrl);
+                refreshThemeUI();
+                console.log('[Lexible] Bing wallpaper applied');
+            }).catch(function(err) {
+                console.warn('[Lexible] Bing fetch failed:', err.message || err);
+                alert('获取 Bing 每日壁纸失败。\n\n' + ((err && err.message) || '网络错误，请检查网络连接后重试。'));
+            }).finally(function() {
+                _bingLoading = false;
+                if (labelEl) labelEl.textContent = 'Bing 每日';
+            });
+        }
+
+        // ---- Bing 过期自动刷新（12小时）----
+        function checkBingExpiry() {
+            var activeId = getActiveId();
+            if (activeId !== BING_ID) return;
+            var themes = getCustomThemes();
+            var bing = themes[BING_ID];
+            if (!bing) return;
+            if (Date.now() - (bing.updatedAt || 0) < BING_EXPIRY_MS) return;
+
+            console.log('[Lexible] Bing wallpaper expired, auto-refreshing...');
+            fetchBingWallpaper().then(function(result) {
+                return downloadImageAsDataUrl(result.url).then(function(dataUrl) {
+                    return createThumbnail(dataUrl).then(function(thumb) {
+                        return { dataUrl: dataUrl, thumbnail: thumb, copyright: result.copyright };
+                    });
+                });
+            }).then(function(data) {
+                var themes = getCustomThemes();
+                themes[BING_ID] = {
+                    name: 'Bing每日壁纸', dataUrl: data.dataUrl,
+                    thumbnail: data.thumbnail, type: 'bing',
+                    updatedAt: Date.now(), copyright: data.copyright || ''
+                };
+                saveCustomThemes(themes);
+                applyCustomBackground(data.dataUrl);
+                console.log('[Lexible] Bing wallpaper auto-refreshed');
+            }).catch(function(err) {
+                console.warn('[Lexible] Bing auto-refresh failed:', err.message || err);
+            });
+        }
+
+        // ---- 选择自定义主题 ----
+        function selectCustomTheme(id) {
+            var themes = getCustomThemes();
+            if (!themes[id]) return;
+            setActiveId(id);
+            _safeSet('Theme', id);
+            applyCustomBackground(themes[id].dataUrl);
+            refreshThemeUI();
+        }
+
+        // ---- 删除自定义主题 ----
+        function deleteCustomTheme(id) {
+            if (!confirm('确定要删除此自定义主题吗？')) return;
+            var themes = getCustomThemes();
+            delete themes[id];
+            saveCustomThemes(themes);
+            if (getActiveId() === id) {
+                setActiveId(null);
+                _safeSet('Theme', 'Leaf');
+                clearCustomBackground();
+            }
+            refreshThemeUI();
+        }
+
+        // ---- 动态查找现有 CSS 类名（避免硬编码 hash） ----
+        var _cachedClasses = null;
+        function getThemeClasses(table) {
+            if (_cachedClasses) return _cachedClasses;
+            // 从传入的 table 或全局查找第一个主题 td
+            var firstTd = table ? table.querySelector('td') : document.querySelector('[class*="AppearanceSettings"] td');
+            if (!firstTd) return {};
+            var img = firstTd.querySelector('img');
+            if (!img) return {};
+            _cachedClasses = {
+                tdClass: firstTd.className.split(' ').filter(function(c) { return c.indexOf('theme-') >= 0 || c.indexOf('theme') >= 0; })[0] || '',
+                imgClass: img.className.split(' ').filter(function(c) { return c.indexOf('themeImg') >= 0; })[0] || '',
+                wrapperClass: (firstTd.querySelector('div') || {}).className ? (firstTd.querySelector('div').className.split(' ').filter(function(c) { return c.indexOf('wrapper') >= 0 || c.indexOf('imgWrapper') >= 0; })[0] || '') : ''
+            };
+            return _cachedClasses;
+        }
+
+        function clearClassCache() { _cachedClasses = null; }
+
+        // 通过"主题"标题 div 定位主题按钮 table（比 CSS 类名搜索更可靠）
+        function findThemeTable() {
+            var titleDivs = document.querySelectorAll('div[class*="AppearanceSettings-title"][class*="theme"]');
+            for (var i = 0; i < titleDivs.length; i++) {
+                var text = (titleDivs[i].textContent || '').trim();
+                if (text === '主题' || text === 'Theme') {
+                    var tbl = titleDivs[i].nextElementSibling;
+                    while (tbl && tbl.tagName !== 'TABLE') {
+                        tbl = tbl.nextElementSibling;
+                    }
+                    return tbl || null;
+                }
+            }
+            return null;
+        }
+
+        // ---- 创建主题按钮 ----
+        function createThemeButton(id, name, thumbnailUrl, isSelected, isCustom) {
+            var cls = getThemeClasses();
+            var td = document.createElement('td');
+            if (cls.tdClass) td.className = cls.tdClass;
+            td.setAttribute('data-theme-id', id);
+            td.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;';
+
+            var wrapper = document.createElement('div');
+            if (cls.wrapperClass) wrapper.className = cls.wrapperClass;
+            wrapper.style.cssText = 'display:inline-block;padding:4px;border:1px solid ' +
+                (isSelected ? 'var(--theme-red, #e74c3c)' : 'transparent') + ';border-radius:10px;';
+
+            var img = document.createElement('img');
+            if (cls.imgClass) img.className = cls.imgClass;
+            img.style.cssText = 'width:240px;height:160px;border-radius:8px;object-fit:cover;';
+            img.src = thumbnailUrl || 'img/setting-theme.png';
+
+            wrapper.appendChild(img);
+            td.appendChild(wrapper);
+
+            if (isSelected) {
+                var chk = document.createElement('img');
+                chk.style.cssText = 'position:absolute;bottom:36px;right:36px;width:20px;height:20px;';
+                chk.src = 'img/theme-selected.png';
+                td.appendChild(chk);
+            }
+
+            if (isCustom) {
+                var label = document.createElement('div');
+                label.style.cssText = 'position:absolute;bottom:14px;left:4px;background:rgba(0,0,0,0.6);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:5;';
+                label.textContent = (name && name.length > 10) ? name.substring(0, 8) + '...' : (name || '自定义');
+                td.appendChild(label);
+
+                var delBtn = document.createElement('span');
+                delBtn.textContent = '×';
+                delBtn.title = '删除此主题';
+                delBtn.style.cssText = 'position:absolute;top:2px;right:10px;width:22px;height:22px;line-height:20px;text-align:center;background:rgba(0,0,0,0.5);color:#fff;border-radius:50%;cursor:pointer;font-size:16px;font-weight:bold;z-index:10;user-select:none;';
+                delBtn.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); deleteCustomTheme(id); });
+                td.appendChild(delBtn);
+            }
+
+            td.addEventListener('click', function() { selectCustomTheme(id); });
+            return td;
+        }
+
+        // ---- 刷新主题按钮 UI ----
+        var _refreshTimer = null;
+        var _initialInjectionDone = false;
+        function refreshThemeUI() {
+            if (_refreshTimer) { clearTimeout(_refreshTimer); }
+            if (!_initialInjectionDone) {
+                // 首次注入立即执行，不等待 debounce
+                doRefreshUI();
+                return;
+            }
+            _refreshTimer = setTimeout(doRefreshUI, 0);
+        }
+
+        function doRefreshUI() {
+            if (_isRefreshing) return;
+            _isRefreshing = true;
+            try {
+
+            // 通过"主题"标题 div 找到 table（不依赖 themeImg 元素是否存在）
+            var table = findThemeTable();
+            if (!table) return;
+            var tbody = table.querySelector('tbody') || table;
+
+            clearClassCache();
+            var cls = getThemeClasses(table);
+            if (!cls.imgClass) return;
+
+            // 清除之前注入的行
+            tbody.querySelectorAll('[data-lexible-theme-row]').forEach(function(el) { el.remove(); });
+
+            var themes = getCustomThemes();
+            var activeId = getActiveId();
+
+            // 管理内置主题的选中标记：自定义主题激活时，通过 CSS 规则强制清除粉框
+            // 使用 stylesheet 而非 inline style，因为 React 重渲染时可能替换 DOM 节点
+            var styleEl = document.getElementById('lexible-theme-override');
+            if (!styleEl) {
+                styleEl = document.createElement('style');
+                styleEl.id = 'lexible-theme-override';
+                document.head.appendChild(styleEl);
+            }
+            if (activeId) {
+                styleEl.textContent = '[class*="AppearanceSettings-theme"] [class*="imgWrapper"] { border-color: transparent !important; }';
+            } else {
+                styleEl.textContent = '';
+            }
+            // 隐藏/恢复勾选标记（inline display 没问题，React 不常替换这个）
+            var builtinRows = tbody.querySelectorAll('tr:not([data-lexible-theme-row])');
+            builtinRows.forEach(function(row) {
+                var marks = row.querySelectorAll('[class*="chkImg"]');
+                marks.forEach(function(m) { m.style.display = activeId ? 'none' : ''; });
+            });
+
+            // ---- 第一行：Bing + 上传 ----
+            var actionRow = document.createElement('tr');
+            actionRow.setAttribute('data-lexible-theme-row', 'actions');
+
+            // Bing 按钮
+            var bingData = themes[BING_ID];
+            var isBingActive = activeId === BING_ID;
+            var bingTd = document.createElement('td');
+            if (cls.tdClass) bingTd.className = cls.tdClass;
+            bingTd.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;';
+
+            var bingWrapper = document.createElement('div');
+            if (cls.wrapperClass) bingWrapper.className = cls.wrapperClass;
+            bingWrapper.style.cssText = 'display:inline-block;padding:4px;border:1px solid ' +
+                (isBingActive ? 'var(--theme-red, #e74c3c)' : 'transparent') + ';border-radius:10px;';
+
+            var bingImg = document.createElement('img');
+            if (cls.imgClass) bingImg.className = cls.imgClass;
+            bingImg.style.cssText = 'width:240px;height:160px;border-radius:8px;object-fit:cover;';
+            bingImg.src = (bingData && bingData.thumbnail) ? bingData.thumbnail : 'img/setting-theme.png';
+            bingWrapper.appendChild(bingImg);
+            bingTd.appendChild(bingWrapper);
+
+            var bingLabel = document.createElement('div');
+            bingLabel.style.cssText = 'position:absolute;bottom:14px;left:4px;background:rgba(0,0,0,0.6);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:5;';
+            bingLabel.textContent = 'Bing 每日';
+            bingTd.appendChild(bingLabel);
+
+            if (isBingActive) {
+                var bingChk = document.createElement('img');
+                bingChk.style.cssText = 'position:absolute;bottom:36px;right:36px;width:20px;height:20px;';
+                bingChk.src = 'img/theme-selected.png';
+                bingTd.appendChild(bingChk);
+            }
+
+            bingTd.addEventListener('click', function() { fetchAndApplyBing(bingLabel); });
+            actionRow.appendChild(bingTd);
+
+            // 上传按钮
+            var uploadTd = document.createElement('td');
+            if (cls.tdClass) uploadTd.className = cls.tdClass;
+            uploadTd.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;cursor:pointer;';
+
+            var uploadWrapper = document.createElement('div');
+            if (cls.wrapperClass) uploadWrapper.className = cls.wrapperClass;
+            uploadWrapper.style.cssText = 'display:inline-block;padding:4px;border:1px solid transparent;border-radius:10px;';
+
+            var placeholder = document.createElement('div');
+            placeholder.style.cssText = 'width:240px;height:160px;border-radius:8px;background:var(--bg-hover, #f5f5f5);display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border, #ccc);box-sizing:border-box;';
+            var ico = document.createElement('span');
+            ico.textContent = '📁';
+            ico.style.cssText = 'font-size:36px;line-height:1;margin-bottom:6px;';
+            placeholder.appendChild(ico);
+            var txt = document.createElement('span');
+            txt.textContent = '本地上传';
+            txt.style.cssText = 'color:var(--text-title, #666);font-size:14px;';
+            placeholder.appendChild(txt);
+            uploadWrapper.appendChild(placeholder);
+            uploadTd.appendChild(uploadWrapper);
+
+            // 隐藏的文件选择器
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            uploadTd.addEventListener('click', function() { fileInput.click(); });
+            fileInput.addEventListener('change', function(e) {
+                if (!e.target.files || e.target.files.length === 0) return;
+                var file = e.target.files[0];
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('图片文件过大，请选择小于 10MB 的图片。');
+                    e.target.value = '';
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(evt) {
+                    var rawDataUrl = evt.target.result;
+                    createThumbnail(rawDataUrl).then(function(thumb) {
+                        // 对原图进行压缩（最大 1920x1080）
+                        return downloadImageAsDataUrl(rawDataUrl).then(function(compressed) {
+                            return { dataUrl: compressed, thumbnail: thumb };
+                        }).catch(function() {
+                            return { dataUrl: rawDataUrl, thumbnail: thumb };
+                        });
+                    }).then(function(result) {
+                        var id = genId();
+                        var themes = getCustomThemes();
+                        themes[id] = {
+                            name: file.name, dataUrl: result.dataUrl,
+                            thumbnail: result.thumbnail, type: 'custom',
+                            createdAt: Date.now(), originalName: file.name
+                        };
+                        saveCustomThemes(themes);
+                        setActiveId(id);
+                        _safeSet('Theme', id);
+                        applyCustomBackground(result.dataUrl);
+                        refreshThemeUI();
+                    });
+                };
+                reader.readAsDataURL(file);
+                e.target.value = '';
+            });
+
+            actionRow.appendChild(uploadTd);
+            tbody.appendChild(actionRow);
+            _initialInjectionDone = true;  // 首次注入成功，后续走 debounce
+
+            // ---- 自定义主题行 ----
+            var customIds = Object.keys(themes).filter(function(k) { return k !== BING_ID; });
+            if (customIds.length > 0) {
+                customIds.sort(function(a, b) { return (themes[a].createdAt || 0) - (themes[b].createdAt || 0); });
+                for (var row = 0; row < customIds.length; row += 2) {
+                    var tr = document.createElement('tr');
+                    tr.setAttribute('data-lexible-theme-row', 'custom');
+                    for (var col = 0; col < 2; col++) {
+                        var cid = customIds[row + col];
+                        if (cid) {
+                            var t = themes[cid];
+                            tr.appendChild(createThemeButton(cid, t.originalName || t.name, t.thumbnail, activeId === cid, true));
+                        } else {
+                            var empty = document.createElement('td');
+                            if (cls.tdClass) empty.className = cls.tdClass;
+                            empty.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;';
+                            tr.appendChild(empty);
+                        }
+                    }
+                    tbody.appendChild(tr);
+                }
+            }
+            } finally { _isRefreshing = false; }
+        }
+
+        // ---- 启动 ----
+        function start() {
+            if (!document.body) return;
+            startBackgroundWatcher();
+
+            // 延迟多次注入（设置页面可能延迟渲染，覆盖冷启动场景）
+            [800, 2000, 4000, 8000].forEach(function(d) { setTimeout(refreshThemeUI, d); });
+
+            // 阶段1：MutationObserver — childList + attributes 双重检测
+            // 一旦注入成功立即断开，不会造成反馈循环
+            var _initObserver = new MutationObserver(function(mutations) {
+                // 快速检查：是否有 mutations 来自设置面板区域
+                if (findThemeTable()) {
+                    console.log('[Lexible] Observer 检测到主题表，开始注入');
+                    refreshThemeUI();
+                    _initObserver.disconnect();
+                    _slowDownPolling();
+                }
+            });
+            _initObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+
+            // 阶段2：快速轮询（并行于 observer，捕获 tab 切换等 observer 遗漏的场景）
+            var _fastPollId = setInterval(function() {
+                if (_isRefreshing) return;
+                if (findThemeTable()) {
+                    refreshThemeUI();
+                }
+            }, 500);
+
+            // 首次注入成功后关闭快速轮询，降级为低频轮询
+            var _pollingStarted = false;
+            function _slowDownPolling() {
+                if (_pollingStarted) return;
+                _pollingStarted = true;
+                clearInterval(_fastPollId);
+                setInterval(function() {
+                    if (_isRefreshing) return;
+                    if (findThemeTable()) {
+                        refreshThemeUI();
+                    }
+                }, 3000);
+            }
+
+            // 30秒兜底：超时后断开 observer + 降级轮询
+            setTimeout(function() {
+                try { _initObserver.disconnect(); } catch(e) {}
+                _slowDownPolling();
+            }, 30000);
+
+            // Bing 过期检测（每5分钟 + 首次8秒后）
+            setInterval(checkBingExpiry, 5 * 60 * 1000);
+            setTimeout(checkBingExpiry, 8000);
+
+            // 启动时如果有活跃自定义主题，恢复背景
+            setTimeout(function() {
+                var activeId = getActiveId();
+                if (activeId) {
+                    var themes = getCustomThemes();
+                    if (themes[activeId] && themes[activeId].dataUrl) {
+                        applyCustomBackground(themes[activeId].dataUrl);
+                    }
+                }
+            }, 2000);
+
+            console.log('[Lexible] 自定义主题模块已加载 (Bing每日壁纸 + 本地上传)');
+        }
+
+        if (document.body) { start(); }
+        else { document.addEventListener('DOMContentLoaded', start); }
+    })();
+
+    // ========== 11. 调试工具：手动修改用户名 ==========
     // 在控制台输入 testSetUsername("新名字") 测试
     window.testSetUsername = function(newName) {
         console.log('[Lexible Test] Input:', newName);
