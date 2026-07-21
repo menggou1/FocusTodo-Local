@@ -49,7 +49,11 @@ FocusTodo/
   │     ├─ 阻断 XMLHttpRequest / fetch / jQuery.ajax
   │     ├─ 注册导出/导入功能
   │     │     └─ v63/user 端点：拦截删除/注销，验证用户名后清除 cookie+Portrait 再放行
-  │     └─ 注册删除数据视觉提示（密码→用户名）
+  │     ├─ 注册删除数据视觉提示（密码→用户名）
+  │     ├─ 隐藏"功能开关"设置项
+  │     ├─ 禁用评分弹窗
+  │     ├─ 自定义主题管理器（Bing每日壁纸 + 本地上传）
+  │     └─ 调试工具：手动修改用户名
   │
   ├─ 2. 加载 js/main.js（React 应用启动）
   │     ├─ 初始化 IndexedDB (PomodoroDB6)
@@ -94,6 +98,7 @@ FocusTodo/
 | 小组件 | `WidgetExpanded`, `Widgets`, `AllWidgets` | 计时器小组件 |
 | 定时器 | `timingTaskId`, `timingSubtaskId` | 当前计时的任务 |
 | 同步 | `SyncTimestamp`, `ConfigTimestamp`, `ServerTimestamp` | 同步时间戳 |
+| 自定义主题 | `lexible-custom-themes`, `lexible-active-custom-theme` | Bing每日壁纸 + 本地上传主题 |
 
 ## 应用架构
 
@@ -144,7 +149,8 @@ App
 │   └── SettingsView (设置视图)
 │       ├── AccountSettings (账号设置) ★ 导出/导入按钮
 │       ├── PurchaseSettings (高级版)
-│       ├── GeneralSettings (通用设置)
+│       ├── AppearanceSettings (外观设置) ★ 自定义主题
+│       ├── GeneralSettings (通用设置) ★ 功能开关已隐藏
 │       ├── PomodoroSettings (番茄设置)
 │       ├── ProjectManagement (清单管理)
 │       └── AboutSettings (关于)
@@ -173,14 +179,18 @@ App
 
 | 节 | 功能 | 说明 |
 |----|------|------|
-| 0 | 关于页信息 | 在版本行下方注入修改者信息 |
-| 1 | 字体统一 | Noto Sans SC 全局字体 |
-| 2 | 本地登录凭证 | 伪造 `local@local` 用户 |
-| 3 | 数据保护 | 防止 ExpiredDate 和 cookies 被清除 |
-| 4 | 网络阻断 | XMLHttpRequest + fetch 拦截 |
+| 0 | 关于页信息 | 在版本行下方注入修改者信息 (Lexible · 2026/7/9) |
+| 1 | 字体统一 | Noto Sans SC 全局字体，抵御 JS 内联样式覆盖 |
+| 2 | 本地登录凭证 | 伪造 `local@local` 用户，自动修复乱码 |
+| 3 | 数据保护 | 防止 ExpiredDate 和 cookies 被清除，定期检查并恢复 |
+| 4 | 网络阻断 | XMLHttpRequest + fetch 拦截，白名单放行 Bing 壁纸 |
 | 5 | jQuery 阻断 + 用户操作 | jQuery.ajax 拦截；v63/user 端点：修改用户名保存到本地 / 删除数据重置 / 注销账号 |
-| 6 | 数据导出/导入 | 完整数据迁移 (IndexedDB + localStorage) |
-| 7 | 删除提示美化 | 尝试将密码框改为用户名输入框（视觉提示），实际校验在 Section 5 |
+| 6 | 数据导出/导入 | 完整数据迁移 (IndexedDB + localStorage)，自动备份，导入前确认 |
+| 7 | 删除提示美化 | 密码框上方显示警告提示"此操作将删除所有数据并重置为默认状态" |
+| 8 | 禁用评分弹窗 | HasRated=true, ShowRateDialog=false，禁用 React Fiber 中的 isSupportRating |
+| 9 | 隐藏功能开关 | 隐藏"通用设置"中的"功能开关"分类标题和分隔线 |
+| 10 | 自定义主题管理器 | Bing每日壁纸（12小时自动刷新）+ 本地上传图片，缩略图预览，删除功能 |
+| 11 | 调试工具 | window.testSetUsername(name) 手动测试用户名修改 |
 
 ## 国际化 (i18n)
 
@@ -210,3 +220,9 @@ App
 - 每 4 个番茄触发长休
 - 计时模式: 倒计时 / 正向计时
 - 支持白噪音背景音和完成铃声
+
+### 自定义主题系统
+- Bing 每日壁纸：多 API 容错（biturl.top → bing.com），12小时自动刷新
+- 本地上传：最大 10MB，压缩至 1920×1080，生成 240×160 缩略图
+- 存储结构：`lexible-custom-themes` (JSON) + `lexible-active-custom-theme` (ID)
+- 背景守护：1秒轮询检测 Theme 变化，自动恢复自定义背景
