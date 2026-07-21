@@ -6,21 +6,35 @@ FocusTodo 专注清单 - 完全本地版
 
 FocusTodo 是一款番茄钟 + 任务管理 Web 应用。经 **Lexible** (2026/7) 修改为**完全本地版**，所有数据仅存储在浏览器本地，不产生任何网络请求。
 
+## 必要环境
+
+### 方式一：Python（推荐）
+- Python 3.6+
+- 无需安装任何依赖，直接运行启动脚本
+
+### 方式二：Node.js
+- Node.js 14+
+- 可选安装 `http-server`：`npm install -g http-server`
+
+### 方式三：浏览器直接打开
+- 双击 `index.html` 即可运行（部分浏览器可能限制 localStorage/IndexedDB 功能）
+
 ## 快速开始
 
 ### Windows
-双击 `启动.bat` 或运行 `start.ps1`
+双击 `启动.bat` 或运行 PowerShell `.\start.ps1`
 
-### 命令行
+### macOS / Linux
 ```bash
-# Python
-python -m http.server 8080
-
-# Node.js
+python3 -m http.server 8080
+# 或
 npx http-server -p 8080
 ```
 
-然后访问 http://localhost:8080
+### 浏览器访问
+```
+http://localhost:8080
+```
 
 ## 主要功能
 
@@ -58,6 +72,10 @@ FocusTodo/
 
 - **IndexedDB**: 任务、番茄记录、日程等
 - **localStorage**: 设置、用户凭证、主题等
+
+## 文档
+
+- [前端架构文档](./ARCHITECTURE.md) - 详细的技术架构说明
 
 ## 许可证
 
