@@ -1115,7 +1115,89 @@
         }
     })();
 
-    // ========== 8. 调试工具：手动修改用户名 ==========
+    // ========== 8. 禁用评分弹窗（"喜欢专注清单吗"）==========
+    // main.js 中 showRateDialog() 检查 isSupportRating && shouldShowRateDialog
+    // 注：7 和 9 已存在，这里编号 8 以保持与之前一致
+    (function() {
+        // 直接写 localStorage，确保弹窗条件不满足
+        var _setItem = typeof _origSetItem !== 'undefined' ? _origSetItem : localStorage.setItem;
+        _setItem('HasRated', 'true');
+        _setItem('ShowRateDialog', 'false');
+
+        // 定期检查并维持值，防止应用内代码修改
+        setInterval(function() {
+            if (localStorage.getItem('HasRated') !== 'true') {
+                (_origSetItem || localStorage.setItem)('HasRated', 'true');
+            }
+            if (localStorage.getItem('ShowRateDialog') !== 'false') {
+                (_origSetItem || localStorage.setItem)('ShowRateDialog', 'false');
+            }
+        }, 500);
+
+        // 挂载到 DOM 后，找到 showRateDialog 方法，直接覆盖 isSupportRating
+        // 这样即使 React 组件重新创建，也不会弹出评分
+        function patchRateDialog() {
+            // 遍历 React 内部状态，找到 Timer 组件并禁用其 isSupportRating
+            var root = document.getElementById('root');
+            if (!root) return false;
+
+            // 查找所有 React 组件实例中可能包含 showRateDialog 的对象
+            // 方法：遍历 window 上 ReactDOM 管理的 fiber 树
+            try {
+                var rootFiber = root._reactRootContainer?._internalRoot?.current;
+                if (rootFiber) {
+                    traverseFiber(rootFiber);
+                }
+            } catch(e) {
+                // 不抛出错误
+            }
+            return true;
+        }
+
+        function traverseFiber(fiber) {
+            if (!fiber) return;
+            // 检查是否有 shared 对象包含 isSupportRating
+            var shared = fiber.stateNode?.shared;
+            if (shared && typeof shared.isSupportRating !== 'undefined') {
+                shared.isSupportRating = false;
+            }
+            // 递归子节点和兄弟节点
+            traverseFiber(fiber.child);
+            traverseFiber(fiber.sibling);
+        }
+
+        // 另一种方法：直接劫持 Object.defineProperty 来拦截 isSupportRating
+        // 但更稳妥的方式是直接覆盖 showRateDialog 方法
+        // 这里使用 MutationObserver 确保在 React 渲染后执行
+        if (document.body) {
+            var _obs = new MutationObserver(function() {
+                // 反复清除 localStorage 值
+                (_origSetItem || localStorage.setItem)('HasRated', 'true');
+                (_origSetItem || localStorage.setItem)('ShowRateDialog', 'false');
+                // 尝试 fiber 遍历
+                try {
+                    var _f = document.getElementById('root');
+                    if (_f) {
+                        var _root = _f._reactRootContainer?._internalRoot?.current;
+                        if (_root) {
+                            (function walk(n) {
+                                if (!n) return;
+                                var s = n.stateNode?.shared;
+                                if (s && typeof s.isSupportRating !== 'undefined') s.isSupportRating = false;
+                                walk(n.child);
+                                walk(n.sibling);
+                            })(_root);
+                        }
+                    }
+                } catch(e) {}
+            });
+            _obs.observe(document.body, { childList: true, subtree: true });
+        }
+
+        console.log('[Lexible] 评分弹窗已永久禁用 (HasRated=true, ShowRateDialog=false)');
+    })();
+
+    // ========== 10. 调试工具：手动修改用户名 ==========
     // 在控制台输入 testSetUsername("新名字") 测试
     window.testSetUsername = function(newName) {
         console.log('[Lexible Test] Input:', newName);
