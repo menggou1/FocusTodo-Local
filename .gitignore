@@ -1,0 +1,23 @@
+# VS Code
+.vscode/
+
+# Node.js
+node_modules/
+
+# System files
+*.ps1
+*.bat
+
+# IDE / Editor
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Build / local config
+package-lock.json
+_syntax_check.js
+
+# OS junk
+desktop.ini
