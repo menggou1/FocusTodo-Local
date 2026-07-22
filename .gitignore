@@ -1,12 +1,12 @@
 # VS Code
 .vscode/
 
+.tokenicode/
+
 # Node.js
 node_modules/
 
-# System files
-*.ps1
-*.bat
+
 
 # IDE / Editor
 *.swp
