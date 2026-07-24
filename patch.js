@@ -1272,23 +1272,50 @@
             return els;
         }
 
-        // 应用自定义背景
-        function applyCustomBackground(dataUrl) {
+        // 保存经典主题背景及对应主题ID（模块级变量，不受 React 替换 DOM 影响）
+        var _savedClassicBg = null;
+        var _savedClassicThemeId = null;
+
+        // 应用自定义背景（保存当前经典背景以便切回同一主题时恢复）
+        function applyCustomBackground(dataUrl, classicThemeId) {
             if (!dataUrl) return;
-            findBgiElements().forEach(function(el) {
+            var els = findBgiElements();
+            // 首次覆盖经典主题前，保存其 inline 背景及主题 ID
+            // classicThemeId 必须由调用方在修改 Theme 之前读取传入
+            if (els.length > 0 && !_savedClassicBg) {
+                var cur = els[0].style.backgroundImage || '';
+                if (cur && cur.indexOf('data:image/') < 0) {
+                    _savedClassicBg = cur;
+                    _savedClassicThemeId = classicThemeId || localStorage.getItem('Theme');
+                }
+            }
+            els.forEach(function(el) {
                 el.style.backgroundImage = 'url(' + dataUrl + ')';
                 el.style.backgroundSize = 'cover';
                 el.style.backgroundPosition = 'center';
             });
         }
 
-        // 清除自定义背景（使用 removeProperty 而非设空串，避免覆盖 React 的 inline style）
-        function clearCustomBackground() {
+        // 清除自定义背景，恢复之前保存的经典主题背景（仅当目标主题匹配时）
+        function clearCustomBackground(expectedThemeId) {
+            // 仅当切回的是保存时的同一经典主题才需要恢复
+            //（不同主题时 React 已自行重渲染，不应覆盖）
+            if (expectedThemeId !== undefined && expectedThemeId !== _savedClassicThemeId) {
+                _savedClassicBg = null;
+                _savedClassicThemeId = null;
+                return;
+            }
             findBgiElements().forEach(function(el) {
-                el.style.removeProperty('background-image');
+                if (_savedClassicBg) {
+                    el.style.backgroundImage = _savedClassicBg;
+                } else {
+                    el.style.removeProperty('background-image');
+                }
                 el.style.removeProperty('background-size');
                 el.style.removeProperty('background-position');
             });
+            _savedClassicBg = null;
+            _savedClassicThemeId = null;
         }
 
         // ---- 防重入标志（防止 refreshThemeUI 修改 DOM 后触发自身）----
@@ -1308,9 +1335,10 @@
                     var activeId = getActiveId();
                     if (activeId && currentTheme && !getCustomThemes()[currentTheme]) {
                         // 用户通过 React UI 选择了内置主题 → 清除自定义状态
-                        // 注意：不调 clearCustomBackground()！React 已经设置了正确的背景
-                        // clearCustomBackground 会 setProperty('') 覆盖 React 的 inline style
+                        // 必须清除自定义背景！否则切回同一经典主题时 React 跳过渲染，
+                        // 导致自定义背景的 inline style 残留覆盖
                         setActiveId(null);
+                        clearCustomBackground(currentTheme);
                         refreshThemeUI();
                         return;
                     }
@@ -1442,8 +1470,9 @@
                 };
                 saveCustomThemes(themes);
                 setActiveId(BING_ID);
+                var _prevBing = localStorage.getItem('Theme');
                 _safeSet('Theme', BING_ID);
-                applyCustomBackground(data.dataUrl);
+                applyCustomBackground(data.dataUrl, _prevBing);
                 refreshThemeUI();
                 console.log('[Lexible] Bing wallpaper applied');
             }).catch(function(err) {
@@ -1490,9 +1519,10 @@
         function selectCustomTheme(id) {
             var themes = getCustomThemes();
             if (!themes[id]) return;
+            var prevTheme = localStorage.getItem('Theme');
             setActiveId(id);
             _safeSet('Theme', id);
-            applyCustomBackground(themes[id].dataUrl);
+            applyCustomBackground(themes[id].dataUrl, prevTheme);
             refreshThemeUI();
         }
 
@@ -1531,7 +1561,12 @@
 
         // 通过"主题"标题 div 定位主题按钮 table（比 CSS 类名搜索更可靠）
         function findThemeTable() {
-            var titleDivs = document.querySelectorAll('div[class*="AppearanceSettings-title"][class*="theme"]');
+            // 先找到 AppearanceSettings 的根容器
+            var settingsRoot = document.querySelector('[class*="AppearanceSettings-root"]');
+            if (!settingsRoot) return null;
+
+            // 在容器内查找包含"主题"/"Theme"字样的标题 div
+            var titleDivs = settingsRoot.querySelectorAll('[class*="AppearanceSettings-title"]');
             for (var i = 0; i < titleDivs.length; i++) {
                 var text = (titleDivs[i].textContent || '').trim();
                 if (text === '主题' || text === 'Theme') {
@@ -1591,9 +1626,31 @@
             return td;
         }
 
+        // ---- 轮询管理（必须定义在 refreshThemeUI 之前，因为 doRefreshUI 也会调用）----
+        var _fastPollId = null;
+        var _pollingStarted = false;
+        function _slowDownPolling() {
+            if (_pollingStarted) return;
+            _pollingStarted = true;
+            if (_fastPollId) clearInterval(_fastPollId);
+            setInterval(function() {
+                if (_isRefreshing) return;
+                // 检查已注入的元素是否仍在 DOM 中（React 切换 tab/页面时会清除）
+                var existingAction = document.querySelector('[data-lexible-theme-row="actions"]');
+                if (existingAction && existingAction.isConnected) {
+                    return; // 元素还在，无需重建
+                }
+                // 元素被移除了（切换页面/tab），需要重新注入
+                if (findThemeTable()) {
+                    refreshThemeUI();
+                }
+            }, 3000);
+        }
+
         // ---- 刷新主题按钮 UI ----
         var _refreshTimer = null;
         var _initialInjectionDone = false;
+        var _lastInjectedAt = 0;
         function refreshThemeUI() {
             if (_refreshTimer) { clearTimeout(_refreshTimer); }
             if (!_initialInjectionDone) {
@@ -1602,6 +1659,71 @@
                 return;
             }
             _refreshTimer = setTimeout(doRefreshUI, 0);
+        }
+
+        // ---- 管理隐藏的 file input（避免累积）----
+        var _currentFileInput = null;
+        function getOrCreateFileInput() {
+            // 如果已有且仍在 DOM 中，直接复用
+            if (_currentFileInput && _currentFileInput.isConnected) {
+                return _currentFileInput;
+            }
+            // 清理所有旧的 lexible file inputs
+            document.querySelectorAll('input[data-lexible-upload]').forEach(function(el) { el.remove(); });
+            var input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            input.setAttribute('data-lexible-upload', '1');
+
+            // 只绑定一次 change 事件
+            input.addEventListener('change', function(e) {
+                if (!e.target.files || e.target.files.length === 0) return;
+                var file = e.target.files[0];
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('图片文件过大，请选择小于 10MB 的图片。');
+                    e.target.value = '';
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function(evt) {
+                    var rawDataUrl = evt.target.result;
+                    createThumbnail(rawDataUrl).then(function(thumb) {
+                        // 对原图进行压缩（最大 1920x1080）
+                        return downloadImageAsDataUrl(rawDataUrl).then(function(compressed) {
+                            return { dataUrl: compressed, thumbnail: thumb };
+                        }).catch(function() {
+                            return { dataUrl: rawDataUrl, thumbnail: thumb };
+                        });
+                    }).then(function(result) {
+                        var id = genId();
+                        var themes = getCustomThemes();
+                        themes[id] = {
+                            name: file.name, dataUrl: result.dataUrl,
+                            thumbnail: result.thumbnail, type: 'custom',
+                            createdAt: Date.now(), originalName: file.name
+                        };
+                        saveCustomThemes(themes);
+                        setActiveId(id);
+                        var _prevUp = localStorage.getItem('Theme');
+                        _safeSet('Theme', id);
+                        applyCustomBackground(result.dataUrl, _prevUp);
+                        refreshThemeUI();
+                    }).catch(function(err) {
+                        console.error('[Lexible] Upload failed:', err);
+                        alert('上传失败: ' + (err.message || '未知错误'));
+                    });
+                };
+                reader.onerror = function() {
+                    alert('文件读取失败，请重试。');
+                };
+                reader.readAsDataURL(file);
+                e.target.value = '';
+            });
+
+            document.body.appendChild(input);
+            _currentFileInput = input;
+            return input;
         }
 
         function doRefreshUI() {
@@ -1624,8 +1746,10 @@
             var themes = getCustomThemes();
             var activeId = getActiveId();
 
-            // 管理内置主题的选中标记：自定义主题激活时，通过 CSS 规则强制清除粉框
-            // 使用 stylesheet 而非 inline style，因为 React 重渲染时可能替换 DOM 节点
+            // 给 table 加自定义 class，作为 CSS 规则的可靠锚点
+            table.classList.add('lexible-theme-table');
+
+            // 管理内置主题的选中标记：自定义主题激活时，CSS 规则清除粉框（仅影响内置行）
             var styleEl = document.getElementById('lexible-theme-override');
             if (!styleEl) {
                 styleEl = document.createElement('style');
@@ -1633,11 +1757,12 @@
                 document.head.appendChild(styleEl);
             }
             if (activeId) {
-                styleEl.textContent = '[class*="AppearanceSettings-theme"] [class*="imgWrapper"] { border-color: transparent !important; }';
+                // tr 无 data-lexible-theme-row → 内置行；有该属性 → 自定义行（排除）
+                styleEl.textContent = '.lexible-theme-table tr:not([data-lexible-theme-row]) [class*="imgWrapper"] { border-color: transparent !important; }';
             } else {
                 styleEl.textContent = '';
             }
-            // 隐藏/恢复勾选标记（inline display 没问题，React 不常替换这个）
+            // 隐藏/恢复勾选标记
             var builtinRows = tbody.querySelectorAll('tr:not([data-lexible-theme-row])');
             builtinRows.forEach(function(row) {
                 var marks = row.querySelectorAll('[class*="chkImg"]');
@@ -1653,7 +1778,7 @@
             var isBingActive = activeId === BING_ID;
             var bingTd = document.createElement('td');
             if (cls.tdClass) bingTd.className = cls.tdClass;
-            bingTd.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;';
+            bingTd.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;cursor:pointer;';
 
             var bingWrapper = document.createElement('div');
             if (cls.wrapperClass) bingWrapper.className = cls.wrapperClass;
@@ -1704,54 +1829,15 @@
             uploadWrapper.appendChild(placeholder);
             uploadTd.appendChild(uploadWrapper);
 
-            // 隐藏的文件选择器
-            var fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            fileInput.style.display = 'none';
-            document.body.appendChild(fileInput);
-
+            // 复用隐藏文件选择器，避免每次重建时在 body 中累积
+            var fileInput = getOrCreateFileInput();
             uploadTd.addEventListener('click', function() { fileInput.click(); });
-            fileInput.addEventListener('change', function(e) {
-                if (!e.target.files || e.target.files.length === 0) return;
-                var file = e.target.files[0];
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('图片文件过大，请选择小于 10MB 的图片。');
-                    e.target.value = '';
-                    return;
-                }
-                var reader = new FileReader();
-                reader.onload = function(evt) {
-                    var rawDataUrl = evt.target.result;
-                    createThumbnail(rawDataUrl).then(function(thumb) {
-                        // 对原图进行压缩（最大 1920x1080）
-                        return downloadImageAsDataUrl(rawDataUrl).then(function(compressed) {
-                            return { dataUrl: compressed, thumbnail: thumb };
-                        }).catch(function() {
-                            return { dataUrl: rawDataUrl, thumbnail: thumb };
-                        });
-                    }).then(function(result) {
-                        var id = genId();
-                        var themes = getCustomThemes();
-                        themes[id] = {
-                            name: file.name, dataUrl: result.dataUrl,
-                            thumbnail: result.thumbnail, type: 'custom',
-                            createdAt: Date.now(), originalName: file.name
-                        };
-                        saveCustomThemes(themes);
-                        setActiveId(id);
-                        _safeSet('Theme', id);
-                        applyCustomBackground(result.dataUrl);
-                        refreshThemeUI();
-                    });
-                };
-                reader.readAsDataURL(file);
-                e.target.value = '';
-            });
 
             actionRow.appendChild(uploadTd);
             tbody.appendChild(actionRow);
             _initialInjectionDone = true;  // 首次注入成功，后续走 debounce
+            _lastInjectedAt = Date.now();
+            _slowDownPolling();  // 立刻停掉快速轮询，避免后续定时器重复触发
 
             // ---- 自定义主题行 ----
             var customIds = Object.keys(themes).filter(function(k) { return k !== BING_ID; });
@@ -1783,54 +1869,6 @@
             if (!document.body) return;
             startBackgroundWatcher();
 
-            // 延迟多次注入（设置页面可能延迟渲染，覆盖冷启动场景）
-            [800, 2000, 4000, 8000].forEach(function(d) { setTimeout(refreshThemeUI, d); });
-
-            // 阶段1：MutationObserver — childList + attributes 双重检测
-            // 一旦注入成功立即断开，不会造成反馈循环
-            var _initObserver = new MutationObserver(function(mutations) {
-                // 快速检查：是否有 mutations 来自设置面板区域
-                if (findThemeTable()) {
-                    console.log('[Lexible] Observer 检测到主题表，开始注入');
-                    refreshThemeUI();
-                    _initObserver.disconnect();
-                    _slowDownPolling();
-                }
-            });
-            _initObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-
-            // 阶段2：快速轮询（并行于 observer，捕获 tab 切换等 observer 遗漏的场景）
-            var _fastPollId = setInterval(function() {
-                if (_isRefreshing) return;
-                if (findThemeTable()) {
-                    refreshThemeUI();
-                }
-            }, 500);
-
-            // 首次注入成功后关闭快速轮询，降级为低频轮询
-            var _pollingStarted = false;
-            function _slowDownPolling() {
-                if (_pollingStarted) return;
-                _pollingStarted = true;
-                clearInterval(_fastPollId);
-                setInterval(function() {
-                    if (_isRefreshing) return;
-                    if (findThemeTable()) {
-                        refreshThemeUI();
-                    }
-                }, 3000);
-            }
-
-            // 30秒兜底：超时后断开 observer + 降级轮询
-            setTimeout(function() {
-                try { _initObserver.disconnect(); } catch(e) {}
-                _slowDownPolling();
-            }, 30000);
-
-            // Bing 过期检测（每5分钟 + 首次8秒后）
-            setInterval(checkBingExpiry, 5 * 60 * 1000);
-            setTimeout(checkBingExpiry, 8000);
-
             // 启动时如果有活跃自定义主题，恢复背景
             setTimeout(function() {
                 var activeId = getActiveId();
@@ -1841,6 +1879,72 @@
                     }
                 }
             }, 2000);
+
+            // ===== 改进: 精确的 DOM 信号监听 =====
+
+            // 阶段1：观察 document.body（设置面板可能通过 Portal 渲染到 modal-root）
+            var _lastAppearanceRoot = null; // 追踪根元素引用，避免重复触发
+            var _initObserver = new MutationObserver(function() {
+                // 检查 AppearanceSettings-root 是否被替换/新增（tab 切换时 React 重建 DOM）
+                var currentRoot = document.querySelector('[class*="AppearanceSettings-root"]');
+                if (currentRoot !== _lastAppearanceRoot) {
+                    _lastAppearanceRoot = currentRoot;
+                    if (currentRoot) {
+                        // 使用 requestAnimationFrame 确保 React 渲染完成
+                        requestAnimationFrame(function() {
+                            if (findThemeTable()) {
+                                console.log('[Lexible] Observer 检测到外观设置面板，注入自定义主题按钮');
+                                refreshThemeUI();
+                            }
+                        });
+                    }
+                }
+            });
+            _initObserver.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+            // 阶段2：检测 Overlay 弹出（设置面板打开时）
+            var overlayObserver = new MutationObserver(function() {
+                if (document.querySelector('[class*="Overlay-root"]')) {
+                    setTimeout(function() {
+                        if (_initialInjectionDone) return; // 已注入，跳过
+                        if (findThemeTable()) {
+                            refreshThemeUI();
+                        }
+                    }, 200);
+                }
+            });
+            overlayObserver.observe(document.body, { childList: true, subtree: false });
+
+            // 阶段3：加速的定时兜底（首次更快）
+            [100, 500, 1500, 4000].forEach(function(d) {
+                setTimeout(function() {
+                    if (_initialInjectionDone) return; // 已注入，跳过
+                    if (findThemeTable()) {
+                        refreshThemeUI();
+                        if (!_pollingStarted) _slowDownPolling();
+                    }
+                }, d);
+            });
+
+            // 阶段4：快速轮询（300ms，作为 observer 的兜底）
+            _fastPollId = setInterval(function() {
+                if (_isRefreshing) return;
+                if (_initialInjectionDone) return; // 已注入，等 _slowDownPolling 清理
+                if (findThemeTable()) {
+                    refreshThemeUI();
+                }
+            }, 300);
+
+            // 30秒兜底：超时后断开非关键 observer + 降级轮询
+            setTimeout(function() {
+                try { overlayObserver.disconnect(); } catch(e) {}
+                // 不断开 _initObserver：切换设置页面后再回到"外观"时仍需重新注入
+                _slowDownPolling();
+            }, 30000);
+
+            // Bing 过期检测（每5分钟 + 首次8秒后）
+            setInterval(checkBingExpiry, 5 * 60 * 1000);
+            setTimeout(checkBingExpiry, 8000);
 
             console.log('[Lexible] 自定义主题模块已加载 (Bing每日壁纸 + 本地上传)');
         }
