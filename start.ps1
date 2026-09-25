@@ -29,7 +29,7 @@
         Write-Host "请在浏览器打开: $siteUrl"
         Write-Host '按 Ctrl+C 停止服务器'
         Write-Host ''
-        npx http-server -p 5500 -c-1
+        npx http-server -a 127.0.0.1 -p 5500 -c-1
     }
     elseif (Get-Command python -ErrorAction SilentlyContinue) {
         Write-Host '使用 Python HTTP 服务器'
@@ -37,7 +37,7 @@
         Write-Host '按 Ctrl+C 停止服务器'
         Write-Host '提示: 修改文件后请用 Ctrl+Shift+R 强制刷新浏览器'
         Write-Host ''
-        python -m http.server 5500
+        python -m http.server 5500 --bind 127.0.0.1
     }
     else {
         Write-Host '[错误] 未找到 Node.js 或 Python，请安装其中之一后重试。'
