@@ -1,13 +1,16 @@
 {
   "name": "focustodo",
-  "version": "1.0.0",
+  "version": "7.1.1-local.1.1.0",
   "description": "FocusTodo web version",
   "main": "patch.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:release": "node scripts/build-release.cjs",
+    "test": "node --test tests/timer-core.test.cjs tests/server.test.cjs tests/release.test.cjs",
+    "test:browser": "node tests/browser-acceptance.cjs",
+    "check": "node scripts/check-syntax.cjs"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lexible",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {

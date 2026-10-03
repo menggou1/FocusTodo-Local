@@ -1,89 +1,14 @@
 // ================================================================
 // FocusTodo 完全本地版
 // 修改者：Lexible
-// 修改日期：2026/7/9
+// 版本与更新内容：release.json（由 local-release.js 加载）
 // 说明：已移除所有登录和服务器同步功能，所有数据完全存储于本地浏览器。
 //       请勿用于商业用途，仅供个人使用。
 // ================================================================
 (function() {
     'use strict';
 
-    // ========== 0. 关于页版本信息（插入到版本行下面） ==========
-    (function() {
-        var infoRowId = 'lexible-about-info-row';
-
-        function findVersionRow(modalRoot) {
-            var rows = modalRoot.querySelectorAll('tr');
-            for (var i = 0; i < rows.length; i++) {
-                var row = rows[i];
-                var text = (row.textContent || '').replace(/\s+/g, ' ').trim();
-                if (text.indexOf('版本') >= 0 || text.indexOf('Version') >= 0) {
-                    return row;
-                }
-            }
-            return null;
-        }
-
-        function findAboutRoot() {
-            return document.querySelector('[class*="AboutSettings-root"]') ||
-                document.querySelector('[class*="Settings-content"]') ||
-                document.querySelector('[class*="Settings-root"]');
-        }
-
-        function mountAboutInfo() {
-            // 如果行已存在且还在 DOM 中，不做任何操作，避免闪烁
-            var existing = document.getElementById(infoRowId);
-            if (existing && existing.isConnected) {
-                return true;
-            }
-
-            var aboutRoot = findAboutRoot();
-            if (!aboutRoot) {
-                return false;
-            }
-
-            var versionRow = findVersionRow(aboutRoot);
-            if (!versionRow || !versionRow.parentNode) {
-                return false;
-            }
-
-            if (existing && existing.parentNode) {
-                existing.parentNode.removeChild(existing);
-            }
-
-            var infoRow = document.createElement('tr');
-            infoRow.id = infoRowId;
-            infoRow.innerHTML = [
-                '<td class="' + 'setting-title' + '">修改者</td>',
-                '<td class="' + 'setting-value' + '" style="line-height:1.6;">',
-                'Lexible · 2026/7/21',
-                '<div style="margin-top:4px;color:#666;">本地学习版，请勿用于商业用途</div>',
-                '</td>'
-            ].join('');
-
-            versionRow.parentNode.insertBefore(infoRow, versionRow.nextSibling);
-            return true;
-        }
-
-        function start() {
-            if (!document.body) {
-                return;
-            }
-
-            // 用 MutationObserver 替换轮询，只在 DOM 变化时尝试插入，不会闪烁
-            var observer = new MutationObserver(function() {
-                mountAboutInfo();
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-            mountAboutInfo();
-        }
-
-        if (document.body) {
-            start();
-        } else {
-            document.addEventListener('DOMContentLoaded', start);
-        }
-    })();
+    // About and release notices are rendered by local-app-ui.js at explicit React boundaries.
 
     // ========== 1. 设置永久高级版（ExpiredDate=0 表示永不过期）==========
 
@@ -161,7 +86,11 @@
     var _origRemoveItem = localStorage.removeItem.bind(localStorage);
     var protectedKeys = ['ExpiredDate'].concat(Object.keys(localCookies));
 
-    localStorage.setItem = function(key, value) {
+    var _nativeSetItem = Storage.prototype.setItem;
+    var _nativeRemoveItem = Storage.prototype.removeItem;
+    Storage.prototype.setItem = function(key, value) {
+        if (this !== localStorage) return _nativeSetItem.call(this, key, value);
+        key = String(key);
         // 阻止将 ExpiredDate 设为空
         if (key === 'ExpiredDate' && (value === null || value === '' || value === undefined)) {
             return;
@@ -173,7 +102,9 @@
         _origSetItem(key, value);
     };
 
-    localStorage.removeItem = function(key) {
+    Storage.prototype.removeItem = function(key) {
+        if (this !== localStorage) return _nativeRemoveItem.call(this, key);
+        key = String(key);
         // 阻止删除 ExpiredDate
         if (key === 'ExpiredDate') return;
         // 阻止删除登录 cookies
@@ -226,12 +157,11 @@
     // ========== 4. 完全阻断所有网络请求（确保纯本地运行）==========
     // 域名白名单：白名单内的域名不受拦截（用于获取Bing壁纸等外部资源）
     var _REQUEST_WHITELIST = ['www.bing.com', 'bing.com', 'bing.biturl.top'];
-    function _isWhitelisted(u) {
-        if (!u) return false;
-        for (var _wl = 0; _wl < _REQUEST_WHITELIST.length; _wl++) {
-            if (u.indexOf(_REQUEST_WHITELIST[_wl]) >= 0) return true;
-        }
-        return false;
+    function _isWhitelisted(input) {
+        try {
+            var url = new URL(input instanceof Request ? input.url : String(input), location.href);
+            return url.protocol === 'https:' && _REQUEST_WHITELIST.indexOf(url.hostname) >= 0 && !url.username && !url.password;
+        } catch (_) { return false; }
     }
 
     // 拦截 XMLHttpRequest
@@ -318,23 +248,16 @@
     // 拦截 fetch API
     if (window.fetch) {
         var origFetch = window.fetch;
-        window.fetch = function(url, options) {
-            if (typeof url === 'string' && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0)) {
-                // 白名单放行：Bing API / 图片请求不受拦截
-                if (_isWhitelisted(url)) {
-                    return origFetch.apply(this, arguments);
-                }
-                // 阻止远程 fetch，返回模拟成功响应
-                return Promise.resolve(new Response('{"status":0}', {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' }
-                }));
-            }
-            return origFetch.apply(this, arguments);
+        window.fetch = function(input, options) {
+            var url;
+            try { url = new URL(input instanceof Request ? input.url : String(input), location.href); }
+            catch (error) { return Promise.reject(error); }
+            if (url.origin === location.origin || _isWhitelisted(url.href)) return origFetch.apply(this, arguments);
+            return Promise.reject(new TypeError('本地版已阻止外部请求：' + url.hostname));
         };
     }
 
-    // ========== 5. 拦截 jQuery.ajax + 删除数据用户名校验 + 重置为默认状态 ==========
+    // ========== 5. 旧 jQuery.ajax 端点兼容（主删除入口直接调用本地服务）==========
     var _checkJQuery = setInterval(function() {
         if (window.jQuery && window.jQuery.ajax) {
             clearInterval(_checkJQuery);
@@ -342,96 +265,7 @@
 
             // ===== 彻底重置为默认状态 =====
             // 策略：先保存 app 初始化必需的 key，清空全部，再写入默认值并恢复必需 key
-            function _resetToDefaults() {
-                console.log('[Lexible] Full reset to defaults...');
-
-                // 1. 保存 app 初始化必需的关键 key（缺了会白屏）
-                var _criticalKeys = [
-                    'ServerAccessInfo', 'ServerUrls', 'Version', 'app_language',
-                    'PK1', 'OverseaServerUrl', 'RegionCode', 'LstRlsVer',
-                    'UpdAltCnt', 'UpdAltDate'
-                ];
-                var _saved = {};
-                for (var ci = 0; ci < _criticalKeys.length; ci++) {
-                    var v = localStorage.getItem(_criticalKeys[ci]);
-                    if (v !== null && v !== undefined) {
-                        _saved[_criticalKeys[ci]] = v;
-                    }
-                }
-
-                // 2. 清空所有 localStorage（绕过 Section 3 保护）
-                var _allKeys = [];
-                for (var i = 0; i < localStorage.length; i++) {
-                    var k = localStorage.key(i);
-                    if (k) _allKeys.push(k);
-                }
-                for (var ri = 0; ri < _allKeys.length; ri++) {
-                    try { _origRemoveItem(_allKeys[ri]); } catch (e) {}
-                }
-                console.log('[Lexible] Cleared ' + _allKeys.length + ' localStorage keys');
-
-                // 3. 写入默认身份数据
-                var _defaults = {
-                    'cookie.ACCT': utf8Base64Encode('local@local'),
-                    'cookie.NAME': utf8Base64Encode('本地用户'),
-                    'cookie.PID': 'local-' + Math.random().toString(36).substr(2, 9),
-                    'cookie.UID': 'local-' + Math.random().toString(36).substr(2, 9),
-                    'cookie.JSESSIONID': Math.random().toString(36).substr(2, 16),
-                    'ExpiredDate': '0',
-                    'Portrait': 'img/header-portrait.png'
-                };
-                for (var dk in _defaults) {
-                    if (_defaults.hasOwnProperty(dk)) {
-                        try { _origSetItem(dk, _defaults[dk]); } catch (e) {}
-                    }
-                }
-
-                // 4. 恢复 app 初始化必需的 key
-                for (var sk in _saved) {
-                    if (_saved.hasOwnProperty(sk)) {
-                        try { _origSetItem(sk, _saved[sk]); } catch (e) {}
-                    }
-                }
-
-                // 5. 清除 IndexedDB 所有数据
-                try {
-                    var _openReq = window.indexedDB.open('PomodoroDB6', 2);
-                    _openReq.onsuccess = function() {
-                        var _db = _openReq.result;
-                        var _stores = [];
-                        try {
-                            for (var _s = 0; _s < _db.objectStoreNames.length; _s++) {
-                                _stores.push(_db.objectStoreNames[_s]);
-                            }
-                        } catch (e) {
-                            _stores = ['Project', 'Task', 'Subtask', 'Pomodoro', 'Schedule', 'Group', 'GroupUser', 'Message'];
-                        }
-                        if (_stores.length > 0) {
-                            var _tx = _db.transaction(_stores, 'readwrite');
-                            _stores.forEach(function(name) {
-                                try { _tx.objectStore(name).clear(); } catch (e) {}
-                            });
-                            _tx.oncomplete = function() {
-                                _db.close();
-                                console.log('[Lexible] IndexedDB all stores cleared');
-                            };
-                            _tx.onerror = function() {
-                                _db.close();
-                                console.log('[Lexible] IndexedDB clear tx error');
-                            };
-                        } else {
-                            _db.close();
-                        }
-                    };
-                    _openReq.onerror = function() {
-                        console.log('[Lexible] IndexedDB open failed during reset');
-                    };
-                } catch (e) {
-                    console.log('[Lexible] IndexedDB clear error:', e.message);
-                }
-
-                console.log('[Lexible] Reset complete. Defaults: ' + Object.keys(_defaults).length + ' keys. Critical: ' + Object.keys(_saved).length + ' keys preserved.');
-            }
+            function _resetToDefaults() { return window.FocusLocalData.reset(); }
 
             window.jQuery.ajax = function(options) {
                 var url = typeof options === 'string' ? options : (options && options.url);
@@ -447,6 +281,7 @@
 
                     // 构建响应数据（默认成功）
                     var _responseData = { status: 0 };
+                    var _operation = Promise.resolve();
 
                     // === 处理 v63/user 端点的各种操作 ===
                     if (isUserEndpoint) {
@@ -490,24 +325,22 @@
                             // === 删除数据/注销账号：直接重置 ===
                             if (isReset || isCancellation) {
                                 console.log('[Lexible] Delete/cancel detected. Resetting to defaults...');
-                                _resetToDefaults();
+                                _operation = _resetToDefaults();
                             }
                         }
                     }
 
-                    // 阻止远程请求，返回本地处理结果
-                    var _responseStr = JSON.stringify(_responseData);
-                    var success = (typeof options === 'object') ? (options.success || options.done) : null;
-                    if (success) {
-                        setTimeout(function() {
-                            success(_responseStr);
-                        }, 0);
-                    }
-                    return {
-                        done: function(cb) { setTimeout(function() { cb(_responseStr); }, 0); return this; },
-                        fail: function() { return this; },
-                        always: function(cb) { setTimeout(cb, 0); return this; }
-                    };
+                    var deferred = window.jQuery.Deferred();
+                    _operation.then(function() {
+                        var response = JSON.stringify(_responseData);
+                        if (options.success) options.success(response);
+                        deferred.resolve(response);
+                    }).catch(function(error) {
+                        window.FocusLocal.notice('操作失败，未报告成功：' + error.message);
+                        if (options.error) options.error({ statusText: error.message }, 'error', error);
+                        deferred.reject(error);
+                    });
+                    return deferred.promise();
                 }
                 return _origAjax.apply(this, arguments);
             };
@@ -516,8 +349,8 @@
     }, 50); // 加快检查频率
     setTimeout(function() { clearInterval(_checkJQuery); }, 5000);
 
-    console.log('[Lexible] FocusTodo 完全本地版已激活 (2026/7/9)');
-    console.log('[Lexible] 所有网络请求已阻断，数据仅存储在本地浏览器。');
+    console.log('[Lexible] Local release:', window.FocusRelease.version);
+    console.log('[Lexible] 本地数据服务已加载；外部资源按精确白名单限制。');
     // ("FocusTodo 完全本地版已激活" / "所有网络请求已阻断，数据仅存储在本地浏览器。")
 
     // ========== 6. 数据导出/导入功能 ==========
@@ -525,9 +358,9 @@
         'use strict';
 
         var DB_NAME = 'PomodoroDB6';
-        var DB_VERSION = 2;
-        var STORES = ['Project', 'Task', 'Subtask', 'Pomodoro', 'Schedule', 'Group', 'GroupUser', 'Message'];
-        var EXPORT_VERSION = 1;
+        var DB_VERSION = 3;
+        var STORES = window.FocusLocalData.DATA;
+        var EXPORT_VERSION = 2;
 
         // localStorage keys that should always be exported
         var LOCAL_STORAGE_KEYS = [
@@ -568,301 +401,22 @@
             'cookie.ACCT', 'cookie.NAME', 'cookie.PID', 'cookie.UID', 'cookie.JSESSIONID'
         ];
 
-        // ========== 辅助：读取整个 IndexedDB store ==========
-        function readAllFromStore(db, storeName) {
-            return new Promise(function(resolve, reject) {
-                try {
-                    var tx = db.transaction(storeName, 'readonly');
-                    var store = tx.objectStore(storeName);
-                    var request = store.getAll();
-                    request.onsuccess = function() {
-                        resolve(request.result || []);
-                    };
-                    request.onerror = function() {
-                        console.warn('[Lexible] Failed to read store: ' + storeName, request.error);
-                        resolve([]);
-                    };
-                } catch (e) {
-                    console.warn('[Lexible] Cannot read store: ' + storeName, e);
-                    resolve([]);
-                }
-            });
-        }
-
-        // ========== 辅助：写入所有数据到 IndexedDB store ==========
-        function writeAllToStore(db, storeName, records) {
-            return new Promise(function(resolve, reject) {
-                try {
-                    var tx = db.transaction(storeName, 'readwrite');
-                    var store = tx.objectStore(storeName);
-                    // Clear existing records first
-                    var clearReq = store.clear();
-                    clearReq.onsuccess = function() {
-                        var count = 0;
-                        if (!records || records.length === 0) {
-                            resolve();
-                            return;
-                        }
-                        records.forEach(function(record) {
-                            store.add(record);
-                            count++;
-                        });
-                        tx.oncomplete = function() {
-                            resolve();
-                        };
-                        tx.onerror = function() {
-                            console.warn('[Lexible] Transaction error on store: ' + storeName, tx.error);
-                            resolve();
-                        };
-                    };
-                    clearReq.onerror = function() {
-                        console.warn('[Lexible] Clear error on store: ' + storeName, clearReq.error);
-                        resolve();
-                    };
-                } catch (e) {
-                    console.warn('[Lexible] Cannot write to store: ' + storeName, e);
-                    resolve();
-                }
-            });
-        }
-
-        // ========== 导出全部数据 ==========
-        function exportAllData() {
-            console.log('[Lexible] Starting data export...');
-
-            var openReq = window.indexedDB.open(DB_NAME, DB_VERSION);
-            openReq.onsuccess = function() {
-                var db = openReq.result;
-                var promises = STORES.map(function(storeName) {
-                    return readAllFromStore(db, storeName).then(function(records) {
-                        return { name: storeName, records: records };
-                    });
-                });
-
-                Promise.all(promises).then(function(storeDataArray) {
-                    // Build the indexedDB data object
-                    var indexedDBData = {};
-                    storeDataArray.forEach(function(item) {
-                        indexedDBData[item.name] = item.records;
-                    });
-
-                    // Build localStorage snapshot
-                    var localStorageData = {};
-                    LOCAL_STORAGE_KEYS.forEach(function(key) {
-                        var val = localStorage.getItem(key);
-                        if (val !== null && val !== undefined) {
-                            localStorageData[key] = val;
-                        }
-                    });
-
-                    // Also capture any extra localStorage keys that might be dynamically added
-                    for (var i = 0; i < localStorage.length; i++) {
-                        var k = localStorage.key(i);
-                        if (k && !(k in localStorageData)) {
-                            // Include cookie.* keys and any app-specific keys
-                            if (k.indexOf('cookie.') === 0 ||
-                                k.indexOf('lexible-') === 0 ||
-                                k.indexOf('Pomodoro') === 0 ||
-                                k.indexOf('Focus') === 0) {
-                                localStorageData[k] = localStorage.getItem(k);
-                            }
-                        }
-                    }
-
-                    // Build the export object
-                    var exportData = {
-                        meta: {
-                            app: 'FocusTodo',
-                            exportVersion: EXPORT_VERSION,
-                            exportDate: new Date().toISOString(),
-                            dbName: DB_NAME,
-                            dbVersion: DB_VERSION
-                        },
-                        indexedDB: indexedDBData,
-                        localStorage: localStorageData
-                    };
-
-                    // Convert to JSON and trigger download
-                    var jsonStr = JSON.stringify(exportData, null, 2);
-                    var blob = new Blob([jsonStr], { type: 'application/json' });
-                    var url = URL.createObjectURL(blob);
-
-                    var timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                    var filename = 'FocusTodo-backup-' + timestamp + '.json';
-
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-
-                    db.close();
-                    console.log('[Lexible] Data export completed: ' + filename);
-                    alert('数据导出成功！\n文件名: ' + filename + '\n\n请妥善保存此文件，可用于数据恢复。');
-                }).catch(function(err) {
-                    console.error('[Lexible] Export failed:', err);
-                    db.close();
-                    alert('数据导出失败: ' + (err.message || err));
-                });
-            };
-
-            openReq.onerror = function() {
-                console.error('[Lexible] Failed to open database for export');
-                alert('数据导出失败：无法打开数据库');
-            };
-
-            openReq.onblocked = function() {
-                console.warn('[Lexible] Database open blocked during export');
-                alert('数据导出失败：数据库被占用，请关闭其他标签页后重试');
-            };
-        }
-
-        // ========== 导入全部数据 ==========
-        function importAllData(jsonStr) {
-            var data;
+        async function exportAllData() {
             try {
-                data = JSON.parse(jsonStr);
-            } catch (e) {
-                alert('文件格式错误，无法解析备份文件。');
-                return;
-            }
-
-            // Validate export structure
-            if (!data.meta || !data.indexedDB || !data.localStorage) {
-                alert('备份文件格式不正确，缺少必要的数据。');
-                return;
-            }
-
-            if (!confirm(
-                '确认导入数据？\n\n' +
-                '导入后当前所有数据将被覆盖，此操作不可撤销。\n\n' +
-                '导出日期: ' + (data.meta.exportDate || '未知') + '\n' +
-                '包含 ' + Object.keys(data.indexedDB).length + ' 个数据库表\n' +
-                '包含 ' + Object.keys(data.localStorage).length + ' 个设置项\n\n' +
-                '⚠️ 即将自动下载当前数据的备份文件，请保存好。\n' +
-                '导入后页面将自动刷新。'
-            )) {
-                return;
-            }
-
-            // Auto-backup: save localStorage snapshot before importing
-            console.log('[Lexible] Creating auto-backup before import...');
+                var snapshot = await window.FocusLocalData.snapshot();
+                window.FocusLocalData.download(snapshot, 'FocusTodo-backup');
+                alert('完整备份已生成，请确认浏览器已保存下载文件。');
+            } catch (error) { alert('导出失败：' + error.message); }
+        }
+        async function importAllData(jsonStr) {
             try {
-                // Quick snapshot of current localStorage
-                var currentLS = {};
-                for (var _i = 0; _i < localStorage.length; _i++) {
-                    var _k = localStorage.key(_i);
-                    if (_k) currentLS[_k] = localStorage.getItem(_k);
-                }
-
-                var backupBlob = new Blob([JSON.stringify({
-                    meta: {
-                        app: 'FocusTodo',
-                        exportVersion: EXPORT_VERSION,
-                        exportDate: new Date().toISOString(),
-                        dbName: DB_NAME,
-                        dbVersion: DB_VERSION,
-                        note: '导入前自动备份(仅localStorage)-如需完整备份请先用导出功能'
-                    },
-                    localStorage: currentLS
-                }, null, 2)], { type: 'application/json' });
-
-                var backupUrl = URL.createObjectURL(backupBlob);
-                var backupTs = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-                var backupA = document.createElement('a');
-                backupA.href = backupUrl;
-                backupA.download = 'FocusTodo-pre-import-backup-' + backupTs + '.json';
-                document.body.appendChild(backupA);
-                backupA.click();
-                document.body.removeChild(backupA);
-                URL.revokeObjectURL(backupUrl);
-                console.log('[Lexible] Auto-backup localStorage snapshot saved');
-            } catch (e) {
-                console.warn('[Lexible] Auto-backup failed, proceeding anyway:', e);
-            }
-
-            console.log('[Lexible] Starting data import...');
-
-            // Step 1: Restore localStorage first (before DB might be deleted)
-            var lsData = data.localStorage;
-
-            // Use _origSetItem to bypass the protection layer
-            var setItemFn = (typeof _origSetItem !== 'undefined') ? _origSetItem : localStorage.setItem.bind(localStorage);
-
-            // Clear existing localStorage keys (except runtime ones we want to keep)
-            var keysToRemove = [];
-            for (var i = 0; i < localStorage.length; i++) {
-                var k = localStorage.key(i);
-                if (k && k !== 'ExpiredDate') {
-                    keysToRemove.push(k);
-                }
-            }
-            keysToRemove.forEach(function(key) {
-                try {
-                    if (typeof _origRemoveItem !== 'undefined') {
-                        _origRemoveItem(key);
-                    } else {
-                        localStorage.removeItem(key);
-                    }
-                } catch (e) {
-                    console.warn('[Lexible] Failed to remove key: ' + key, e);
-                }
-            });
-
-            // Restore all localStorage values from backup
-            for (var key in lsData) {
-                if (lsData.hasOwnProperty(key)) {
-                    try {
-                        setItemFn(key, lsData[key]);
-                    } catch (e) {
-                        console.warn('[Lexible] Failed to restore key: ' + key, e);
-                    }
-                }
-            }
-
-            // Step 2: Open a second connection and clear + restore all stores
-            // We DON'T delete the database because the app already has an open connection.
-            // IndexedDB supports multiple concurrent connections.
-            var openReq = window.indexedDB.open(DB_NAME, DB_VERSION);
-            openReq.onsuccess = function() {
-                var db = openReq.result;
-                var indexedDBData = data.indexedDB;
-
-                // Build array of write promises (clear + add for each store)
-                var writePromises = [];
-                for (var storeName in indexedDBData) {
-                    if (indexedDBData.hasOwnProperty(storeName) && db.objectStoreNames.contains(storeName)) {
-                        writePromises.push(
-                            writeAllToStore(db, storeName, indexedDBData[storeName])
-                        );
-                    }
-                }
-
-                Promise.all(writePromises).then(function() {
-                    db.close();
-                    console.log('[Lexible] Data import completed successfully');
-                    alert('数据导入成功！页面即将刷新...');
-                    location.reload();
-                }).catch(function(err) {
-                    db.close();
-                    console.error('[Lexible] Import write failed:', err);
-                    alert('数据导入失败(写入阶段): ' + (err.message || err));
-                });
-            };
-
-            openReq.onerror = function() {
-                console.error('[Lexible] Failed to open database for import');
-                alert('数据导入失败：无法打开数据库');
-            };
-
-            openReq.onblocked = function() {
-                console.warn('[Lexible] Database open blocked during import');
-                // blocked on version change only happens when db version mismatch
-                // Since we use same version as the app, this shouldn't trigger
-                alert('数据导入失败：数据库被占用。请刷新页面后立即导入（在应用加载完之前操作）。');
-            };
+                var input = JSON.parse(jsonStr);
+                window.FocusLocalData.validate(input);
+                if (!confirm('导入将覆盖当前任务、专注记录和设置。\n导入前会生成完整备份；请确认保存下载文件。\n计时快照不会自动运行。是否继续？')) return;
+                await window.FocusLocalData.replace(input);
+                alert('数据导入成功，所有数据已提交。页面即将刷新。');
+                location.reload();
+            } catch (error) { alert('导入失败：' + error.message + '\n未报告导入成功。'); }
         }
 
         // ========== 处理文件选择 ==========
@@ -1030,62 +584,7 @@
         console.log('[Lexible] 数据导出/导入模块已加载');
     })();
 
-    // ========== 7. 删除确认弹窗 - 注入提示 ==========
-    (function() {
-        'use strict';
-
-        function injectWarning(modalRoot) {
-            var allPwd = modalRoot.querySelectorAll('input[type="password"]');
-            for (var i = 0; i < allPwd.length; i++) {
-                var inp = allPwd[i];
-                var container = inp.closest('[class*="modal"]') ||
-                                inp.closest('[class*="dialog"]') ||
-                                modalRoot;
-                if (!container) continue;
-
-                // 只处理单个密码框的弹窗（删除确认）
-                if (container.querySelectorAll('input[type="password"]').length !== 1) continue;
-                if (container._lexibleWarned) continue;
-                container._lexibleWarned = true;
-
-                // 注入警告提示
-                var warnId = 'lexible-delete-warning';
-                if (!container.querySelector('#' + warnId)) {
-                    var warn = document.createElement('div');
-                    warn.id = warnId;
-                    warn.style.cssText = 'color:#e74c3c;font-size:13px;margin-top:8px;text-align:center;font-weight:500;';
-                    warn.textContent = '⚠ 此操作将删除所有数据并重置为默认状态';
-                    var parent = inp.parentNode;
-                    if (parent) {
-                        parent.insertBefore(warn, inp.nextSibling);
-                    }
-                }
-            }
-        }
-
-        (function poll() {
-            var start = Date.now();
-            var timer = setInterval(function() {
-                var mr = document.getElementById('modal-root');
-                if (mr) injectWarning(mr);
-                if (Date.now() - start > 30000) clearInterval(timer);
-            }, 300);
-
-            var moStart = Date.now();
-            var moTimer = setInterval(function() {
-                var mr = document.getElementById('modal-root');
-                if (mr) {
-                    clearInterval(moTimer);
-                    new MutationObserver(function() {
-                        injectWarning(mr);
-                    }).observe(mr, { childList: true, subtree: true });
-                }
-                if (Date.now() - moStart > 10000) clearInterval(moTimer);
-            }, 200);
-        })();
-
-        console.log('[Lexible] 删除确认提示模块已加载');
-    })();
+    // Local data deletion uses FocusAppUI.confirmReset; no password-dialog polling.
 
     // ========== 9. 隐藏"功能开关"设置项 ==========
     (function() {
@@ -1133,87 +632,9 @@
         }
     })();
 
-    // ========== 8. 禁用评分弹窗（"喜欢专注清单吗"）==========
-    // main.js 中 showRateDialog() 检查 isSupportRating && shouldShowRateDialog
-    // 注：7 和 9 已存在，这里编号 8 以保持与之前一致
-    (function() {
-        // 直接写 localStorage，确保弹窗条件不满足
-        var _setItem = typeof _origSetItem !== 'undefined' ? _origSetItem : localStorage.setItem;
-        _setItem('HasRated', 'true');
-        _setItem('ShowRateDialog', 'false');
-
-        // 定期检查并维持值，防止应用内代码修改
-        setInterval(function() {
-            if (localStorage.getItem('HasRated') !== 'true') {
-                (_origSetItem || localStorage.setItem)('HasRated', 'true');
-            }
-            if (localStorage.getItem('ShowRateDialog') !== 'false') {
-                (_origSetItem || localStorage.setItem)('ShowRateDialog', 'false');
-            }
-        }, 500);
-
-        // 挂载到 DOM 后，找到 showRateDialog 方法，直接覆盖 isSupportRating
-        // 这样即使 React 组件重新创建，也不会弹出评分
-        function patchRateDialog() {
-            // 遍历 React 内部状态，找到 Timer 组件并禁用其 isSupportRating
-            var root = document.getElementById('root');
-            if (!root) return false;
-
-            // 查找所有 React 组件实例中可能包含 showRateDialog 的对象
-            // 方法：遍历 window 上 ReactDOM 管理的 fiber 树
-            try {
-                var rootFiber = root._reactRootContainer?._internalRoot?.current;
-                if (rootFiber) {
-                    traverseFiber(rootFiber);
-                }
-            } catch(e) {
-                // 不抛出错误
-            }
-            return true;
-        }
-
-        function traverseFiber(fiber) {
-            if (!fiber) return;
-            // 检查是否有 shared 对象包含 isSupportRating
-            var shared = fiber.stateNode?.shared;
-            if (shared && typeof shared.isSupportRating !== 'undefined') {
-                shared.isSupportRating = false;
-            }
-            // 递归子节点和兄弟节点
-            traverseFiber(fiber.child);
-            traverseFiber(fiber.sibling);
-        }
-
-        // 另一种方法：直接劫持 Object.defineProperty 来拦截 isSupportRating
-        // 但更稳妥的方式是直接覆盖 showRateDialog 方法
-        // 这里使用 MutationObserver 确保在 React 渲染后执行
-        if (document.body) {
-            var _obs = new MutationObserver(function() {
-                // 反复清除 localStorage 值
-                (_origSetItem || localStorage.setItem)('HasRated', 'true');
-                (_origSetItem || localStorage.setItem)('ShowRateDialog', 'false');
-                // 尝试 fiber 遍历
-                try {
-                    var _f = document.getElementById('root');
-                    if (_f) {
-                        var _root = _f._reactRootContainer?._internalRoot?.current;
-                        if (_root) {
-                            (function walk(n) {
-                                if (!n) return;
-                                var s = n.stateNode?.shared;
-                                if (s && typeof s.isSupportRating !== 'undefined') s.isSupportRating = false;
-                                walk(n.child);
-                                walk(n.sibling);
-                            })(_root);
-                        }
-                    }
-                } catch(e) {}
-            });
-            _obs.observe(document.body, { childList: true, subtree: true });
-        }
-
-        console.log('[Lexible] 评分弹窗已永久禁用 (HasRated=true, ShowRateDialog=false)');
-    })();
+    // Use the existing preference gate; no React-internal traversal or polling.
+    _origSetItem('HasRated', 'true');
+    _origSetItem('ShowRateDialog', 'false');
 
     // ========== 10. 自定义主题管理器（Bing每日壁纸 + 本地上传）==========
     (function() {
@@ -1228,9 +649,8 @@
 
         // ---- 工具函数 ----
         function _safeSet(k, v) {
-            try {
-                (typeof _origSetItem !== 'undefined' ? _origSetItem : localStorage.setItem.bind(localStorage))(k, v);
-            } catch(e) { console.warn('[Lexible Theme] setItem failed:', k, e.message); }
+            try { _origSetItem(k, v); }
+            catch (error) { throw new Error('保存失败，存储空间可能不足；请删除部分自定义主题后重试。' + error.message); }
         }
         function _safeRemove(k) {
             try {
@@ -1244,8 +664,9 @@
         }
 
         function saveCustomThemes(data) {
-            try { _safeSet(STORAGE_KEY, JSON.stringify(data)); }
-            catch(e) { alert('保存主题失败：存储空间不足。请删除一些自定义主题后重试。'); }
+            var json = JSON.stringify(data);
+            if (json.length > 2 * 1024 * 1024 && json.length >= (localStorage.getItem(STORAGE_KEY) || '').length) throw new Error('自定义主题总量已达到限制，请删除部分图片后重试。');
+            _safeSet(STORAGE_KEY, json);
         }
 
         function getActiveId() {
@@ -1693,7 +1114,7 @@
                         return downloadImageAsDataUrl(rawDataUrl).then(function(compressed) {
                             return { dataUrl: compressed, thumbnail: thumb };
                         }).catch(function() {
-                            return { dataUrl: rawDataUrl, thumbnail: thumb };
+                            throw new Error('图片压缩失败，未保存原始大图。请更换图片。');
                         });
                     }).then(function(result) {
                         var id = genId();

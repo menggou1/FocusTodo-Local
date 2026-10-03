@@ -1,0 +1,186 @@
+{
+  "version": "7.1.1-local.1.1.0",
+  "date": "2026-10-03",
+  "results": [
+    {
+      "name": "fresh app starts without external requests",
+      "passed": true,
+      "ms": 3059
+    },
+    {
+      "name": "production loopback server boots the app and serves seekable local M4A audio",
+      "passed": true,
+      "ms": 1389
+    },
+    {
+      "name": "About displays canonical versions and Git remote; rating and update notes are absent",
+      "passed": true,
+      "ms": 2146
+    },
+    {
+      "name": "notification bell contains update details and preserves task reminders",
+      "passed": true,
+      "ms": 2776
+    },
+    {
+      "name": "older update details close on Escape and do not mark the latest update as read",
+      "passed": true,
+      "ms": 1881
+    },
+    {
+      "name": "UI delete waits five seconds, needs no password, and cancel preserves data",
+      "passed": true,
+      "ms": 5847
+    },
+    {
+      "name": "UI delete downloads a full backup before clearing and reloads only after success",
+      "passed": true,
+      "ms": 7918
+    },
+    {
+      "name": "failed UI delete reports failure, keeps the dialog and rolls data back",
+      "passed": true,
+      "ms": 7647
+    },
+    {
+      "name": "task creation, switching intervals and completing the active task through legacy UI",
+      "passed": true,
+      "ms": 2701
+    },
+    {
+      "name": "countup stopped timer stays zero when task completion circle is clicked",
+      "passed": true,
+      "ms": 4491
+    },
+    {
+      "name": "countup task cancel cross clears selection and does not resurrect stopped time",
+      "passed": true,
+      "ms": 4398
+    },
+    {
+      "name": "countdown stopped timer stays zero when task completion circle is clicked",
+      "passed": true,
+      "ms": 3039
+    },
+    {
+      "name": "countdown task cancel cross clears selection and does not resurrect stopped time",
+      "passed": true,
+      "ms": 3099
+    },
+    {
+      "name": "active task cancel saves elapsed once; event start uses the current adapter",
+      "passed": true,
+      "ms": 2317
+    },
+    {
+      "name": "normal boundaries notify once; restored history and partial stops stay silent",
+      "passed": true,
+      "ms": 1478
+    },
+    {
+      "name": "legacy unmount disposes polling, all timer subscriptions and bridge callbacks",
+      "passed": true,
+      "ms": 2330
+    },
+    {
+      "name": "peer tab refreshes task progress and report events for newly committed records",
+      "passed": true,
+      "ms": 2481
+    },
+    {
+      "name": "background audio resumes after short reload and pagehide; only one tab owns playback",
+      "passed": true,
+      "ms": 2864
+    },
+    {
+      "name": "waiting rest and manual rest completion keep idle work time zero",
+      "passed": true,
+      "ms": 1524
+    },
+    {
+      "name": "subtask cancellation and completion clear both timing IDs without losing saved work",
+      "passed": true,
+      "ms": 2300
+    },
+    {
+      "name": "two tabs without Web Locks serialize timer records in IndexedDB",
+      "passed": true,
+      "ms": 2108
+    },
+    {
+      "name": "120-minute reload, confirmation, historical records and retry deduplication",
+      "passed": true,
+      "ms": 2649
+    },
+    {
+      "name": "145-minute recovery retains remainder; pending dialog survives another reload",
+      "passed": true,
+      "ms": 2735
+    },
+    {
+      "name": "reject recovery excludes interruption and pauses when requested",
+      "passed": true,
+      "ms": 1774
+    },
+    {
+      "name": "IndexedDB failure rolls records and cursor back; retry commits exactly once",
+      "passed": true,
+      "ms": 1656
+    },
+    {
+      "name": "two tabs resolving one session cannot create duplicate records",
+      "passed": true,
+      "ms": 2045
+    },
+    {
+      "name": "v2 database migrates without Version setting or lost records",
+      "passed": true,
+      "ms": 1152
+    },
+    {
+      "name": "complete backup validates; malformed imports leave all data intact",
+      "passed": true,
+      "ms": 1036
+    },
+    {
+      "name": "import is atomic on failure and legacy backup clears running sessions",
+      "passed": true,
+      "ms": 1292
+    },
+    {
+      "name": "settings failure during import rolls database and settings back",
+      "passed": true,
+      "ms": 1051
+    },
+    {
+      "name": "new backup preserves unfinished spans without automatically running on import",
+      "passed": true,
+      "ms": 1727
+    },
+    {
+      "name": "interrupted import journal completes safely on next app load",
+      "passed": true,
+      "ms": 1516
+    },
+    {
+      "name": "interrupted import with full settings storage rolls back and still boots",
+      "passed": true,
+      "ms": 1776
+    },
+    {
+      "name": "theme storage failure is visible and does not activate the failed theme",
+      "passed": true,
+      "ms": 2034
+    },
+    {
+      "name": "reset resolves after stores are cleared and preserves a full backup",
+      "passed": true,
+      "ms": 1173
+    },
+    {
+      "name": "Request and URL inputs cannot bypass exact network allowlist",
+      "passed": true,
+      "ms": 1066
+    }
+  ]
+}

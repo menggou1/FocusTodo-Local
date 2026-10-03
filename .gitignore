@@ -19,5 +19,8 @@ Thumbs.db
 package-lock.json
 _syntax_check.js
 
+# Partial acceptance runs are local diagnostics; retain full results/screenshots.
+docs/acceptance/results-filtered.json
+
 # OS junk
 desktop.ini

@@ -1,0 +1,297 @@
+.focus-local-notice {
+    position:fixed;
+    z-index:100000;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    max-width:min(680px,90vw);
+    padding:14px 18px;
+    background:#fff7df;
+    color:#403410;
+    border:1px solid #dfbd66;
+    border-radius:10px;
+    box-shadow:0 6px 30px #0002;
+    font:14px/1.6 sans-serif
+}
+
+.focus-local-notice button {
+    margin-left:16px;
+    cursor:pointer;
+    border:0;
+    background:transparent;
+    color:#744c00;
+    text-decoration:underline
+}
+
+.focus-recovery-backdrop {
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:#17202b99;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px
+}
+
+.focus-recovery-card {
+    box-sizing:border-box;
+    width:560px;
+    max-width:100%;
+    max-height:90vh;
+    overflow:auto;
+    background:#fff;
+    color:#26313e;
+    border-radius:16px;
+    padding:28px;
+    box-shadow:0 20px 80px #0004;
+    font:15px/1.7 sans-serif
+}
+
+.focus-recovery-card h2 {
+    font-size:22px;
+    margin:0 0 12px
+}
+
+.focus-recovery-card p {
+    margin:10px 0
+}
+
+.focus-recovery-card label {
+    display:block;
+    margin:14px 0
+}
+
+.focus-recovery-card input[type=datetime-local] {
+    display:block;
+    box-sizing:border-box;
+    width:100%;
+    padding:9px;
+    border:1px solid #c5ccd3;
+    border-radius:6px;
+    color:#26313e;
+    background:#fff
+}
+
+.focus-recovery-card input[type=checkbox] {
+    margin-right:8px
+}
+
+.focus-recovery-summary {
+    background:#eef6f4;
+    padding:12px;
+    border-radius:8px
+}
+
+.focus-recovery-error {
+    color:#aa2525
+}
+
+.focus-recovery-actions {
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:18px
+}
+
+.focus-recovery-actions button {
+    cursor:pointer;
+    border:1px solid #bfc8ca;
+    border-radius:7px;
+    background:#fff;
+    color:#26313e;
+    padding:10px 14px
+}
+
+.focus-recovery-actions button:first-child {
+    background:#d84c4c;
+    border-color:#d84c4c;
+    color:#fff
+}
+
+.focus-recovery-actions button:disabled {
+    opacity:.5;
+    cursor:wait
+}
+
+.focus-about-label {
+    vertical-align:top;
+    padding-top:8px
+}
+
+.focus-about-value {
+    line-height:1.8;
+    padding-left:8px
+}
+
+.focus-about-value a {
+    color:#d84c4c;
+    text-decoration:underline;
+    cursor:pointer
+}
+
+.focus-repository-link {
+    display:inline-flex;
+    align-items:center;
+    padding:4px;
+    border-radius:5px
+}
+
+.focus-repository-link img {
+    display:block
+}
+
+.focus-repository-link:hover {
+    background:#e9edf1
+}
+
+.focus-repository-link:focus-visible {
+    outline:3px solid #4295c4;
+    outline-offset:2px
+}
+
+.focus-notification-panel {
+    height:auto;
+    max-height:calc(100vh - 90px);
+    overflow:auto
+}
+
+.focus-release-list {
+    box-sizing:border-box;
+    padding:10px 12px;
+    border-bottom:1px solid #d8dce0;
+    color:#26313e;
+    width:100%
+}
+
+.focus-release-list h3 {
+    font-size:14px;
+    font-weight:600;
+    margin:0 0 8px
+}
+
+.focus-release-entry {
+    display:block;
+    box-sizing:border-box;
+    width:100%;
+    padding:10px;
+    text-align:left;
+    font-family:inherit;
+    font-size:13px;
+    line-height:1.6;
+    color:#26313e;
+    border:1px solid #e2e5e8;
+    border-radius:7px;
+    background:#f7f9fb;
+    cursor:pointer;
+    margin-bottom:8px
+}
+
+.focus-release-entry strong,.focus-release-entry span {
+    display:block
+}
+
+.focus-release-entry strong {
+    font-size:14px
+}
+
+.focus-release-entry span {
+    font-size:12px;
+    color:#687786
+}
+
+.focus-release-entry .focus-release-hint {
+    color:#c53b3b;
+    margin-top:3px
+}
+
+.focus-release-entry:hover {
+    background:#fff1ef;
+    border-color:#e8b6b1
+}
+
+.focus-app-backdrop {
+    position:fixed;
+    inset:0;
+    z-index:100001;
+    background:#17202b99;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px
+}
+
+.focus-app-dialog {
+    box-sizing:border-box;
+    width:600px;
+    max-width:100%;
+    max-height:90vh;
+    overflow:auto;
+    border-radius:14px;
+    background:#fff;
+    color:#26313e;
+    padding:26px;
+    box-shadow:0 20px 80px #0004;
+    font:15px/1.75 sans-serif
+}
+
+.focus-app-dialog h2 {
+    margin:0 0 12px;
+    font-size:22px
+}
+
+.focus-app-dialog p {
+    margin:10px 0
+}
+
+.focus-app-dialog ul {
+    padding-left:22px;
+    margin:14px 0
+}
+
+.focus-app-meta {
+    font-size:13px;
+    color:#657280
+}
+
+.focus-app-error {
+    color:#a12626;
+    white-space:pre-wrap
+}
+
+.focus-app-dialog li {
+    list-style:disc
+}
+
+.focus-app-actions {
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:22px
+}
+
+.focus-app-actions button {
+    border:1px solid #cbd2d8;
+    background:#fff;
+    border-radius:7px;
+    padding:9px 16px;
+    cursor:pointer;
+    color:#26313e;
+    font:14px/1.5 sans-serif
+}
+
+.focus-app-actions button.focus-app-danger {
+    background:#d84c4c;
+    border-color:#d84c4c;
+    color:#fff
+}
+
+.focus-app-actions button:disabled {
+    opacity:.5;
+    cursor:not-allowed
+}
+
+.focus-app-actions button:focus-visible,.focus-release-entry:focus-visible {
+    outline:3px solid #4295c4;
+    outline-offset:2px
+}
