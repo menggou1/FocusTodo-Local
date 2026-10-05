@@ -87,17 +87,17 @@ node tests/browser-acceptance.cjs
 node scripts/check-syntax.cjs
 ```
 
-Browser acceptance requires Playwright and Chromium/Edge. Current version: `7.1.1-local.1.1.0`, author Lexible; the official base stays 7.1.1. Updates appear in the top-right notification bell with a details dialog. About provides a GitHub icon hyperlink from the configured Git remote. Local data deletion requires no password and waits five seconds before confirmation, then requests a full backup download before reset.
+Browser acceptance requires Playwright and Chromium/Edge. Current version: `7.1.1-local.1.1.1`, author Lexible; the official base stays 7.1.1. Updates appear in the top-right notification bell with a details dialog. About provides a GitHub icon hyperlink from the configured Git remote. Local data deletion requires no password and waits five seconds before confirmation, then requests a full backup download before reset.
 
-User-facing update details contain brief release notes only; maintenance Markdown reports remain in the repository. For future changes, read the [maintenance guide (Chinese)](docs/MAINTENANCE.md) for module responsibilities, dependencies, browser test setup and commit checks. The supplied legacy React bundle is already patched and cannot be fully rebuilt by the historical upgrade scripts.
+Notifications, local dialogs and backup buttons follow the appearance theme. Focus shorter than 25 seconds is excluded from history; short pauses preserve active spans for resumed work. Reset restores the local user and default system lists, and startup repairs missing system lists. User-facing update details contain brief release notes only; maintenance Markdown reports remain in the repository. For future changes, read the [maintenance guide (Chinese)](docs/MAINTENANCE.md) for module responsibilities, dependencies, browser test setup and commit checks. The supplied legacy React bundle is already patched and cannot be fully rebuilt by the historical upgrade scripts.
 
-All 68 automated cases passed: 22 timer, 7 server, 3 release consistency and 36 browser cases. Theme image migration, maintenance concurrency without Web Locks, real sleep/long process termination, and full chart/reward regression remain pending. Edit `release.json` and run `npm run build:release` to sync release metadata, title and asset cache tags; this does not rebuild the legacy bundle.
+All 75 automated cases passed: 25 timer, 7 server, 3 release consistency and 40 browser cases. Theme image migration, maintenance concurrency without Web Locks, real sleep/long process termination, and full chart/reward regression remain pending. Edit `release.json` and run `npm run build:release` to sync release metadata, title and asset cache tags; this does not rebuild the legacy bundle.
 
 ## Documentation
 
 - [Architecture](./ARCHITECTURE.md) - Detailed technical architecture
 - [Maintenance guide (Chinese)](docs/MAINTENANCE.md)
-- [Current update and acceptance report (Chinese)](docs/UPDATE-7.1.1-local.1.1.0.md)
+- [Current update and acceptance report (Chinese)](docs/UPDATE-7.1.1-local.1.1.1.md)
 - [Versioning policy (Chinese)](docs/VERSIONING.md)
 - [Stage 2 progress and acceptance report (Chinese)](docs/PROGRESS-2026-10-03-stage-2.md)
 - [中文版](./README.md)

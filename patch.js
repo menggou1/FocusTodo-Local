@@ -471,52 +471,32 @@
         }
 
         function createExportButton() {
-            var btn = document.createElement('span');
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'focus-account-button';
             btn.textContent = '导出数据';
-            btn.style.cssText = [
-                'color:#4a90d9;',
-                'cursor:pointer;',
-                'margin-left:12px;',
-                'font-size:14px;',
-                'text-decoration:none;',
-                'user-select:none;'
-            ].join('');
+            btn.addEventListener('keydown', function(e) { e.stopPropagation(); });
+            btn.addEventListener('keyup', function(e) { e.stopPropagation(); });
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 exportAllData();
             });
-            btn.addEventListener('mouseenter', function() {
-                btn.style.textDecoration = 'underline';
-            });
-            btn.addEventListener('mouseleave', function() {
-                btn.style.textDecoration = 'none';
-            });
             return btn;
         }
 
         function createImportButton() {
-            var btn = document.createElement('span');
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'focus-account-button';
             btn.textContent = '导入数据';
-            btn.style.cssText = [
-                'color:#4a90d9;',
-                'cursor:pointer;',
-                'margin-left:12px;',
-                'font-size:14px;',
-                'text-decoration:none;',
-                'user-select:none;'
-            ].join('');
+            btn.addEventListener('keydown', function(e) { e.stopPropagation(); });
+            btn.addEventListener('keyup', function(e) { e.stopPropagation(); });
             btn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var input = getFileInput();
                 input.click();
-            });
-            btn.addEventListener('mouseenter', function() {
-                btn.style.textDecoration = 'underline';
-            });
-            btn.addEventListener('mouseleave', function() {
-                btn.style.textDecoration = 'none';
             });
             return btn;
         }

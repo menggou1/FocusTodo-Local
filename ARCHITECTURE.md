@@ -4,14 +4,14 @@
 
 FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后端服务进行数据同步，经由 **Lexible** 修改后将任务、专注记录与设置保存在浏览器本地。Bing 壁纸仍有明确允许的外部资源来源，不能把当前版本描述为不产生任何网络请求。
 
-当前版本 `7.1.1-local.1.1.0`。2026-10-03 当前阶段与剩余事项见 [更新报告](docs/UPDATE-7.1.1-local.1.1.0.md)，版本维护见 [版本规范](docs/VERSIONING.md)。本文件保留了部分原 bundle 的推测结构，不能替代可重建的组件源码。
+当前版本 `7.1.1-local.1.1.1`。2026-10-04 当前阶段与剩余事项见 [更新报告](docs/UPDATE-7.1.1-local.1.1.1.md)，版本维护见 [版本规范](docs/VERSIONING.md)。本文件保留了部分原 bundle 的推测结构，不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
 ## 当前计时与数据边界
 
-- `local-timer-core.js`：纯状态转换和实际时间片段结算；停止/模式切换/解除任务会清零会话显示，历史记录独立保留。完成事件与部分记录分开表达。
-- `local-data.js`：数据库 v3 升级、计时事务、完整备份、导入恢复日志；记录和会话在同一事务提交。跨标签页广播已提交记录以刷新各页统计。
+- `local-timer-core.js`：纯状态转换和实际时间片段结算；不足 25 秒的待结算专注不写入历史，短暂停保留有效区间供继续累计；停止/模式切换/解除任务会清零会话显示，历史记录独立保留。完成事件与部分记录分开表达。
+- `local-data.js`：数据库 v3 升级、计时事务、完整备份、导入恢复日志；记录和会话在同一事务提交。重置事务恢复默认系统清单；启动补回缺失系统清单并保留已有清单设置。跨标签页广播已提交记录以刷新各页统计。
 - `local-timer-ui.js`：连接旧 React 计时器，管理恢复确认、事件重绑定、卸载清理、完成提示和音频恢复。音频使用独立 Web Lock，后台页面暂停白噪音。
 - `local-release.js`：从 `release.json` 和 Git remote 生成版本及更新元信息。
 - `local-app-ui.js`：通知更新详情、关于页版本与 GitHub 图标、无需密码的 5 秒删除确认。
@@ -19,6 +19,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 - 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-timer-ui.js` → `local-app-ui.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志恢复。
 - `scripts/revise-timer-integration.cjs` 只更新明确的计时接入边界，可重复执行；旧 `upgrade-*.cjs` 仍是一次性改造记录，不能当作最终版本完整构建脚本。
 - `scripts/revise-app-integration.cjs` 维护关于、通知、删除及项目刷新保护；与计时脚本共用 `scripts/lib/bundle-editor.cjs` 的检查和写入流程。
+- 本地账号读取统一使用 localStorage，避免旧浏览器 Cookie 覆盖重置/导入后的用户名。`local-ui.css` 使用原应用主题变量，使通知、独立弹窗及导入/导出按钮跟随外观切换。
 - 本地服务优先采用 `scripts/server.cjs`，只绑定 loopback，支持 GET/HEAD 和单段音频范围请求。
 
 ### 修改路径与约束

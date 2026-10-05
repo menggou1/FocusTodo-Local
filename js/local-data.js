@@ -17,6 +17,44 @@
     const rawRemove = Storage.prototype.removeItem.bind(localStorage);
     const nativeTransaction = IDBDatabase.prototype.transaction;
     let dbPromise, tail = Promise.resolve(), maintenance = false;
+    // Same preset IDs/types/default visibility as the legacy ProjectManager.
+    // Keep navigation rows inside the reset transaction instead of relying on
+    // the settings Version flag to rerun a legacy migration after reload.
+    function defaultProjects(now = Date.now()) {
+        return [
+            ['id-task-search', 'PRJ_SEARCH', 7002, 0, -2100],
+            ['id-deadline-today', 'PRJ_TODAY', 4000, 0, -2090],
+            ['id-deadline-overdue', 'PRJ_DEADLINE_OVERDUE', 4006, 1, -2085, 1],
+            ['id-deadline-tomorrow', 'PRJ_TOMORROW', 4001, 0, -2080],
+            ['id-deadline-week', 'PRJ_DEADLINE_WEEK', 4007, 1, -2078],
+            ['id-deadline-last7days', 'PRJ_DEADLINE_LAST7DAYS', 4004, 1, -2076, 1],
+            ['id-priority-high', 'PRJ_PRIORITY_HIGH', 5003, 0, -2074, 1],
+            ['id-priority-medium', 'PRJ_PRIORITY_MEDIUM', 5002, 0, -2073, 1],
+            ['id-priority-low', 'PRJ_PRIORITY_LOW', 5001, 0, -2072, 1],
+            ['id-deadline-upcoming', 'PRJ_UPCOMING', 4002, 1, -2070],
+            ['id-task-all', 'PRJ_ALL', 7000, 0, -2065, 1],
+            ['id-deadline-someday', 'PRJ_SOMEDAY', 4003, 0, -2060, 1],
+            ['id-task-schedule', 'PRJ_SCHEDULE', 7001, 3, -1090],
+            ['id-task-history', 'PRJ_HISTORY', 7003, 3, -1080],
+            ['id-task-tasks', 'PRJ_TASKS', 7005, 3, -1000]
+        ].map(([id, name, type, orderingRule, order, state = 0]) => ({
+            id, name, type, orderingRule, order, state, objType: 'PROJECT', creationDate: now,
+            color: type === 7005 ? '4670F6' : 'AEBDC3', isDefault: false, parentId: '',
+            imageName: '', expanded: true, sync: 1
+        }));
+    }
+    async function ensureSystemProjects(db) {
+        await transaction(db, ['Project'], 'readwrite', tx => {
+            const store = tx.objectStore('Project'), request = store.getAll();
+            request.onsuccess = () => {
+                // Preserve custom lists and the user's existing visibility/order.
+                const rows = request.result;
+                defaultProjects().forEach(row => {
+                    if (!rows.some(existing => existing.id === row.id || existing.type === row.type)) store.add(row);
+                });
+            };
+        });
+    }
     function notify(text) { root.dispatchEvent(new CustomEvent('focus-local-notice', { detail: text })); }
     function open() {
         if (dbPromise) return dbPromise;
@@ -202,6 +240,7 @@
             catch (error) { if (!error.rolledBack) throw error; notify(error.message); }
         }
         await transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').delete('maintenance'));
+        await ensureSystemProjects(db);
     }
     async function replace(input, options) {
         const target = validate(input); options = options || {};
@@ -234,6 +273,7 @@
     async function reset() {
         const empty = { meta: { app: 'FocusTodo', exportVersion: 2, dbVersion: 3 }, indexedDB: {}, localStorage: {} };
         BASE.forEach(name => { empty.indexedDB[name] = []; });
+        empty.indexedDB.Project = defaultProjects();
         ['ServerAccessInfo', 'ServerUrls', 'app_language', 'PK1', 'OverseaServerUrl', 'RegionCode'].forEach(key => {
             const value = localStorage.getItem(key); if (value !== null) empty.localStorage[key] = value;
         });

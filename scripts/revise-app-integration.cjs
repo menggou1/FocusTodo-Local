@@ -19,6 +19,10 @@ assignment(1148, 'showDeleteDataAlert', 'function(){window.FocusAppUI.confirmRes
 assignment(1148, 'showDeleteDataPassowrdConfirmDialog', 'function(){window.FocusAppUI.confirmReset()}');
 assignment(1148, 'deleteData', 'function(){window.FocusAppUI.confirmReset()}');
 
+// Local storage is the account authority. Old browser cookies can survive a
+// reset/import and otherwise shadow the restored name and identity.
+method(55, 'getCookie', 'function(e){return localStorage.getItem("cookie."+e)||""}');
+
 // A queued project refresh can finish after reset has removed its project row.
 walk(modules[863], node => {
     if (node.type !== 'AssignmentExpression' || node.left.property?.name !== 'checkProject') return;

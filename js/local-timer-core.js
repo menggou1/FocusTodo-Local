@@ -10,6 +10,7 @@
     'use strict';
     const GAP_MS = 5 * 60 * 1000;
     const MAX_INTERVAL = 8 * 3600;
+    const MIN_FOCUS_SECONDS = 25;
     const running = s => s.state === 'work' || s.state === 'rest';
     const clone = value => JSON.parse(JSON.stringify(value));
     function duration(value, fallback) {
@@ -66,12 +67,15 @@
     }
     function settle(s, rows, flush, events) {
         let left = pendingSeconds(s);
-        while (left + 0.000001 >= s.config.interval) {
-            emit(s, s.config.interval, rows);
+        // A short pause keeps its spans pending, so resumed work can qualify together.
+        // A completed/abandoned session below the minimum never reaches history.
+        const blockSeconds = Math.max(s.config.interval, MIN_FOCUS_SECONDS);
+        while (left + 0.000001 >= blockSeconds) {
+            emit(s, blockSeconds, rows);
             if (events) events.push({ type: 'work', at: rows[rows.length - 1].endDate });
             left = pendingSeconds(s);
         }
-        if (flush && left >= 0.001) emit(s, left, rows);
+        if (flush && left >= MIN_FOCUS_SECONDS) emit(s, left, rows);
     }
     function restInterval(s) {
         return s.completed > 0 && s.completed % s.config.longEvery === 0 ? s.config.longBreak : s.config.shortBreak;
@@ -189,5 +193,5 @@
             interval: s.state === 'rest' || s.state === 'waitingForRest' ? restInterval(s) : s.config.interval,
             elapse: elapsed, startTime: now - elapsed * 1000, breakpoint: s.recordedSeconds };
     }
-    return { GAP_MS, MAX_INTERVAL, create, reduce, view, pendingSeconds, settings, running };
+    return { GAP_MS, MAX_INTERVAL, MIN_FOCUS_SECONDS, create, reduce, view, pendingSeconds, settings, running };
 });

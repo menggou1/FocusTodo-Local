@@ -6,9 +6,9 @@
     transform:translateX(-50%);
     max-width:min(680px,90vw);
     padding:14px 18px;
-    background:#fff7df;
-    color:#403410;
-    border:1px solid #dfbd66;
+    background:var(--bg-popup);
+    color:var(--text-title);
+    border:1px solid var(--border);
     border-radius:10px;
     box-shadow:0 6px 30px #0002;
     font:14px/1.6 sans-serif
@@ -19,7 +19,7 @@
     cursor:pointer;
     border:0;
     background:transparent;
-    color:#744c00;
+    color:var(--theme-red);
     text-decoration:underline
 }
 
@@ -40,8 +40,8 @@
     max-width:100%;
     max-height:90vh;
     overflow:auto;
-    background:#fff;
-    color:#26313e;
+    background:var(--bg-popup);
+    color:var(--text-title);
     border-radius:16px;
     padding:28px;
     box-shadow:0 20px 80px #0004;
@@ -67,10 +67,10 @@
     box-sizing:border-box;
     width:100%;
     padding:9px;
-    border:1px solid #c5ccd3;
+    border:1px solid var(--border-input);
     border-radius:6px;
-    color:#26313e;
-    background:#fff
+    color:var(--text-title);
+    background:var(--bg-input)
 }
 
 .focus-recovery-card input[type=checkbox] {
@@ -78,13 +78,13 @@
 }
 
 .focus-recovery-summary {
-    background:#eef6f4;
+    background:var(--bg-button);
     padding:12px;
     border-radius:8px
 }
 
 .focus-recovery-error {
-    color:#aa2525
+    color:var(--text-error)
 }
 
 .focus-recovery-actions {
@@ -96,16 +96,16 @@
 
 .focus-recovery-actions button {
     cursor:pointer;
-    border:1px solid #bfc8ca;
+    border:1px solid var(--border);
     border-radius:7px;
-    background:#fff;
-    color:#26313e;
+    background:var(--bg-popup);
+    color:var(--text-title);
     padding:10px 14px
 }
 
 .focus-recovery-actions button:first-child {
-    background:#d84c4c;
-    border-color:#d84c4c;
+    background:var(--theme-red);
+    border-color:var(--theme-red);
     color:#fff
 }
 
@@ -125,7 +125,7 @@
 }
 
 .focus-about-value a {
-    color:#d84c4c;
+    color:var(--theme-red);
     text-decoration:underline;
     cursor:pointer
 }
@@ -142,7 +142,7 @@
 }
 
 .focus-repository-link:hover {
-    background:#e9edf1
+    background:var(--bg-hover)
 }
 
 .focus-repository-link:focus-visible {
@@ -159,8 +159,8 @@
 .focus-release-list {
     box-sizing:border-box;
     padding:10px 12px;
-    border-bottom:1px solid #d8dce0;
-    color:#26313e;
+    border-bottom:1px solid var(--border);
+    color:var(--text-title);
     width:100%
 }
 
@@ -179,10 +179,10 @@
     font-family:inherit;
     font-size:13px;
     line-height:1.6;
-    color:#26313e;
-    border:1px solid #e2e5e8;
+    color:var(--text-title);
+    border:1px solid var(--border);
     border-radius:7px;
-    background:#f7f9fb;
+    background:var(--bg-button);
     cursor:pointer;
     margin-bottom:8px
 }
@@ -197,17 +197,17 @@
 
 .focus-release-entry span {
     font-size:12px;
-    color:#687786
+    color:var(--text-desc)
 }
 
 .focus-release-entry .focus-release-hint {
-    color:#c53b3b;
+    color:var(--theme-red);
     margin-top:3px
 }
 
 .focus-release-entry:hover {
-    background:#fff1ef;
-    border-color:#e8b6b1
+    background:var(--bg-hover);
+    border-color:var(--theme-red)
 }
 
 .focus-app-backdrop {
@@ -228,8 +228,8 @@
     max-height:90vh;
     overflow:auto;
     border-radius:14px;
-    background:#fff;
-    color:#26313e;
+    background:var(--bg-popup);
+    color:var(--text-title);
     padding:26px;
     box-shadow:0 20px 80px #0004;
     font:15px/1.75 sans-serif
@@ -251,11 +251,11 @@
 
 .focus-app-meta {
     font-size:13px;
-    color:#657280
+    color:var(--text-desc)
 }
 
 .focus-app-error {
-    color:#a12626;
+    color:var(--text-error);
     white-space:pre-wrap
 }
 
@@ -271,18 +271,18 @@
 }
 
 .focus-app-actions button {
-    border:1px solid #cbd2d8;
-    background:#fff;
+    border:1px solid var(--border);
+    background:var(--bg-popup);
     border-radius:7px;
     padding:9px 16px;
     cursor:pointer;
-    color:#26313e;
+    color:var(--text-title);
     font:14px/1.5 sans-serif
 }
 
 .focus-app-actions button.focus-app-danger {
-    background:#d84c4c;
-    border-color:#d84c4c;
+    background:var(--theme-red);
+    border-color:var(--theme-red);
     color:#fff
 }
 
@@ -294,4 +294,35 @@
 .focus-app-actions button:focus-visible,.focus-release-entry:focus-visible {
     outline:3px solid #4295c4;
     outline-offset:2px
+}
+
+.focus-account-button {
+    display:inline-block;
+    vertical-align:middle;
+    min-width:70px;
+    height:30px;
+    padding:0 16px;
+    margin-right:8px;
+    border:1px solid var(--border);
+    border-radius:6px;
+    background:var(--bg-popup);
+    color:var(--text-title);
+    font-size:12px;
+    line-height:28px;
+    font-family:inherit;
+    cursor:pointer;
+}
+
+#lexible-import-btn {
+    margin-left:8px;
+    margin-right:0;
+}
+
+.focus-account-button:hover,.focus-app-actions button:not(.focus-app-danger):hover {
+    background:var(--bg-hover);
+}
+
+.focus-account-button:focus-visible {
+    outline:2px solid var(--theme-red);
+    outline-offset:2px;
 }

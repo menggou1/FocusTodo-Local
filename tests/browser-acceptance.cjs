@@ -80,6 +80,115 @@ const server = http.createServer((request, response) => {
             assert.match(await page.locator('body').innerText(), /本地用户/); assert.deepEqual(external, []);
             await page.screenshot({ path: path.join(root, 'docs/acceptance/app.png'), fullPage: true });
         }));
+        await check('empty projects with an existing version recover system navigation on startup', () => app(async page => {
+            const after = await snapshot(page);
+            assert.equal(after.indexedDB.Project.length, 15);
+            assert.equal(after.indexedDB.Task.length, 0);
+            await page.getByPlaceholder(/添加一个任务/).fill('恢复后的新任务');
+            await page.getByPlaceholder(/添加一个任务/).press('Enter');
+            await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 1);
+            const existing = await page.evaluate(async () => {
+                const d = window.FocusLocalData, db = await d.open();
+                const today = (await d.snapshot()).indexedDB.Project.find(p => p.id === 'id-deadline-today');
+                today.order = -2200; today.color = 'F4B357';
+                const custom = { ...today, id: 'custom-preserved', name: '保留的清单', type: 1000 };
+                await d.transaction(db, ['Project'], 'readwrite', tx => {
+                    const store = tx.objectStore('Project');
+                    store.put(today); store.put(custom); store.delete('id-priority-low');
+                });
+                return { today, custom };
+            });
+            await page.reload();
+            await page.getByText('恢复后的新任务', { exact: true }).waitFor();
+            const repaired = (await snapshot(page)).indexedDB.Project;
+            assert.equal(repaired.length, 16);
+            assert.deepEqual(repaired.find(p => p.id === existing.today.id), existing.today);
+            assert.deepEqual(repaired.find(p => p.id === existing.custom.id), existing.custom);
+            assert(repaired.some(p => p.id === 'id-priority-low'));
+        }, async page => {
+            await page.evaluate(() => localStorage.setItem('Version', '6.5'));
+        }));
+        await check('focus below 25 seconds is excluded in both timer modes', () => app(async page => {
+            for (const mode of ['countup', 'countdown']) {
+                await page.evaluate(async mode => {
+                    const timer = window.__acceptanceTimer.localTimer;
+                    await timer.run('start', { mode, config: { interval: 1500 } });
+                }, mode);
+                await age(page, 10 / 60);
+                await page.evaluate(() => window.__acceptanceTimer.localTimer.run('pause'));
+                assert.equal((await snapshot(page)).indexedDB.Pomodoro.length, 0);
+                await page.evaluate(() => window.__acceptanceTimer.localTimer.run('stop'));
+                await page.reload();
+                await page.waitForFunction(() => window.__acceptanceTimer);
+                assert.equal((await snapshot(page)).indexedDB.Pomodoro.length, 0);
+            }
+        }));
+        await check('appearance controls theme notifications, local dialogs and account buttons', () => app(async page => {
+            for (const theme of ['深色', '浅色']) {
+                await page.mouse.click(1255, 25);
+                await page.getByText('外观', { exact: true }).click();
+                await page.locator('[class*="AppearanceSettings-darkMode"]').locator('[class$="-control"]').click();
+                await page.getByText(theme, { exact: true }).last().click();
+                await page.waitForFunction(dark => document.body.classList.contains('dark') === dark, theme === '深色');
+                await page.locator('[class^="Settings-close-"]').click();
+                await page.locator('[class^="Settings-root-"]').waitFor({ state: 'detached' });
+                const isDark = theme === '深色';
+                async function checkSurface(selector) {
+                    const style = await page.locator(selector).evaluate(el => {
+                        const css = getComputedStyle(el); return { background: css.backgroundColor, color: css.color, border: css.borderColor };
+                    });
+                    const channel = Number(style.background.match(/\d+/)[0]);
+                    assert(isDark ? channel < 100 : channel > 200, JSON.stringify(style));
+                    assert.notEqual(style.color, style.background);
+                    return style;
+                }
+                await page.getByRole('button', { name: '通知', exact: true }).click();
+                await checkSurface('.focus-release-entry:first-of-type');
+                await page.waitForTimeout(400);
+                await page.screenshot({ path: path.join(root, `docs/acceptance/notifications-${isDark ? 'dark' : 'light'}.png`), fullPage: true });
+                await page.locator('.focus-release-entry').first().click();
+                await checkSurface('.focus-app-dialog');
+                await page.getByRole('button', { name: '关闭', exact: true }).click();
+                // Dismiss the notification panel before opening the account tab.
+                const bell = page.getByRole('button', { name: '通知', exact: true });
+                if (await bell.getAttribute('aria-expanded') === 'true') await bell.click();
+                await page.mouse.click(1255, 25);
+                await page.getByText('账号', { exact: true }).click();
+                for (const id of ['#lexible-export-btn', '#lexible-import-btn']) {
+                    await page.locator(id).waitFor();
+                    assert.equal(await page.locator(id).evaluate(el => el.tagName), 'BUTTON');
+                    await checkSurface(id);
+                    const height = await page.locator(id).evaluate(el => getComputedStyle(el).height);
+                    assert.equal(height, '30px');
+                }
+                await page.waitForTimeout(400);
+                await page.screenshot({ path: path.join(root, `docs/acceptance/account-${isDark ? 'dark' : 'light'}.png`), fullPage: true });
+                await page.locator('[class*="AccountSettings-root"]').getByText('删除数据', { exact: true }).click();
+                await checkSurface('.focus-app-dialog');
+                await page.getByRole('button', { name: '取消', exact: true }).click();
+                await page.locator('[class^="Settings-close-"]').click();
+                await page.locator('[class^="Settings-root-"]').waitFor({ state: 'detached' });
+            }
+        }));
+        await check('account backup buttons support keyboard export and full import', () => app(async page => {
+            await page.getByPlaceholder(/添加一个任务/).fill('按钮备份验收');
+            await page.getByPlaceholder(/添加一个任务/).press('Enter');
+            await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 1);
+            await page.mouse.click(1255, 25); await page.getByText('账号', { exact: true }).click();
+            const exported = page.waitForEvent('download', { timeout: 15000 });
+            await page.getByRole('button', { name: '导出数据', exact: true }).focus(); await page.keyboard.press('Enter');
+            const download = await exported;
+            const buffer = fs.readFileSync(await download.path());
+            assert.equal(JSON.parse(buffer).indexedDB.Task.length, 1);
+            const chooser = page.waitForEvent('filechooser', { timeout: 15000 });
+            await page.getByRole('button', { name: '导入数据', exact: true }).click();
+            const reloaded = page.waitForEvent('load', { timeout: 15000 });
+            await (await chooser).setFiles({ name: 'backup.json', mimeType: 'application/json', buffer });
+            await reloaded;
+            await page.getByText('按钮备份验收', { exact: true }).waitFor();
+            await page.waitForFunction(() => window.__acceptanceTimer);
+            assert.equal((await snapshot(page)).indexedDB.Task.length, 1);
+        }));
         await check('production loopback server boots the app and serves seekable local M4A audio', async () => {
             const production = require('../scripts/server.cjs').createServer();
             await new Promise(resolve => production.listen(0, '127.0.0.1', resolve));
@@ -100,8 +209,8 @@ const server = http.createServer((request, response) => {
             await page.getByText('关于', { exact: true }).click();
             await page.locator('#lexible-about-info-row').waitFor();
             assert((await page.locator('[class*="AboutSettings-root"]').innerText()).includes(releaseVersion));
-            assert.match(await page.locator('#lexible-about-info-row').innerText(), /Lexible · 2026-10-03/);
-            assert.match(await page.locator('#lexible-about-info-row').innerText(), /官方 7\.1\.1 · 本地 1\.1\.0/);
+            assert((await page.locator('#lexible-about-info-row').innerText()).includes(release.author + ' · ' + release.date));
+            assert((await page.locator('#lexible-about-info-row').innerText()).includes('官方 ' + release.officialVersion + ' · 本地 ' + release.localVersion));
             const repository = page.locator('#lexible-about-info-row a');
             assert.equal(await repository.getAttribute('href'), 'https://github.com/menggou1/FocusTodo-Local');
             assert.equal(await repository.getAttribute('rel'), 'noopener noreferrer');
@@ -134,7 +243,7 @@ const server = http.createServer((request, response) => {
             assert(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()));
             await page.waitForTimeout(400);
             await page.screenshot({ path: path.join(root, 'docs/acceptance/notifications.png'), fullPage: true });
-            await page.getByRole('button', { name: /通知中心与本地数据管理更新/ }).click();
+            await page.locator('.focus-release-entry').filter({ hasText: release.updates[0].title }).click();
             await page.locator('#focus-update-dialog').waitFor();
             assert((await page.locator('#focus-update-dialog').innerText()).includes(releaseVersion));
             assert.match(await page.locator('#focus-update-dialog').innerText(), /等待 5 秒/);
@@ -155,7 +264,7 @@ const server = http.createServer((request, response) => {
             await page.keyboard.press('Escape');
             await page.locator('#focus-update-dialog').waitFor({ state: 'detached' });
             await page.getByRole('button', { name: '通知', exact: true }).click();
-            await page.getByRole('button', { name: /通知中心与本地数据管理更新/ }).click();
+            await page.locator('.focus-release-entry').filter({ hasText: release.updates[0].title }).click();
             await page.locator('#focus-update-dialog').waitFor();
             await page.keyboard.press('Shift+Tab');
             const focused = await page.evaluate(() => ({ tag: document.activeElement.tagName, inDialog: !!document.activeElement.closest('#focus-update-dialog') }));
@@ -190,6 +299,15 @@ const server = http.createServer((request, response) => {
             await createActiveTask(page, 'countup');
             await page.evaluate(() => window.__acceptanceTimer.zoomDown());
             await openReset(page);
+            // Rename uses the legacy account API, which also writes a browser cookie.
+            await page.getByRole('button', { name: '取消', exact: true }).click();
+            const account = page.locator('[class*="AccountSettings-root"]');
+            const username = account.locator('input[type=text]');
+            await username.fill('待删除的用户名'); await username.blur();
+            await page.waitForFunction(() => localStorage.getItem('cookie.NAME') !== btoa(unescape(encodeURIComponent('本地用户'))));
+            await page.reload(); await page.waitForFunction(() => window.__acceptanceTimer);
+            await page.getByText('待删除的用户名', { exact: true }).waitFor();
+            await openReset(page);
             const confirm = page.locator('#focus-reset-dialog .focus-app-danger');
             await page.waitForFunction(() => !document.querySelector('#focus-reset-dialog .focus-app-danger').disabled);
             const downloaded = page.waitForEvent('download');
@@ -201,6 +319,17 @@ const server = http.createServer((request, response) => {
             await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 0);
             const after = await snapshot(page);
             assert.equal(after.indexedDB.Pomodoro.length, 0); assert.equal(after.indexedDB.TimerSession.length, 0);
+            assert.equal(after.indexedDB.Project.length, 15);
+            assert(after.indexedDB.Project.some(p => p.id === 'id-deadline-today' && p.state === 0));
+            assert(after.indexedDB.Project.some(p => p.id === 'id-task-tasks' && p.state === 0));
+            await page.getByText('本地用户', { exact: true }).waitFor();
+            await page.getByPlaceholder(/添加一个任务/).fill('重置后仍可添加');
+            await page.getByPlaceholder(/添加一个任务/).press('Enter');
+            await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 1);
+            await page.reload(); await page.getByText('重置后仍可添加', { exact: true }).waitFor();
+            await page.mouse.click(1255, 25); await page.getByText('账号', { exact: true }).click();
+            await page.getByRole('button', { name: '导出数据', exact: true }).waitFor();
+            await page.getByRole('button', { name: '导入数据', exact: true }).waitFor();
             assert.equal(await page.locator('input[type=password]').count(), 0);
         }));
         await check('failed UI delete reports failure, keeps the dialog and rolls data back', () => app(async page => {
@@ -400,7 +529,16 @@ const server = http.createServer((request, response) => {
             await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
             assert.equal(await page.evaluate(() => window.__fakeAudio.filter(a => a.loop && !a.paused).length), 0);
             await page.evaluate(() => window.dispatchEvent(new Event('pageshow')));
-            await page.waitForFunction(() => window.__fakeAudio.some(a => a.loop && !a.paused));
+            // pagehide releases the shared audio lock; either visible tab may
+            // acquire it next. Verify resumed playback and exclusivity together.
+            let playing = 0;
+            for (let attempt = 0; attempt < 50; attempt++) {
+                playing = await page.evaluate(() => window.__fakeAudio.filter(a => a.loop && !a.paused).length)
+                    + await other.evaluate(() => window.__fakeAudio.filter(a => a.loop && !a.paused).length);
+                if (playing > 0) break;
+                await page.waitForTimeout(100);
+            }
+            assert.equal(playing, 1, 'One tab resumes playback after the audio lock is released');
             await page.evaluate(() => window.__acceptanceTimer.localTimer.run('pause'));
             await page.waitForFunction(() => window.__fakeAudio.every(a => !a.loop || a.paused));
             await other.waitForFunction(() => window.__acceptanceTimer.localTimer.session.state === 'pause');
@@ -649,14 +787,14 @@ const server = http.createServer((request, response) => {
             assert.deepEqual(after, before);
             await page.evaluate(() => { Object.keys(localStorage).filter(key => key.startsWith('quota-test-')).forEach(window.FocusLocalData.rawRemove); });
         }));
-        await check('reset resolves after stores are cleared and preserves a full backup', () => app(async page => {
+        await check('reset restores system lists and preserves a full backup', () => app(async page => {
             await begin(page);
             const result = await page.evaluate(async () => {
                 const d = window.FocusLocalData; const backup = await d.reset();
                 return { backup, after: await d.snapshot() };
             });
             assert(result.backup.indexedDB.Project.length > 0);
-            assert.equal(result.after.indexedDB.Project.length, 0);
+            assert.equal(result.after.indexedDB.Project.length, 15);
             assert.equal(result.after.indexedDB.TimerSession.length, 0);
         }));
         await check('Request and URL inputs cannot bypass exact network allowlist', () => app(async (page, context, errors, external) => {

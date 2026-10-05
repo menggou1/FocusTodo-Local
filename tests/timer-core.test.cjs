@@ -107,9 +107,43 @@ test('system clock rollback requests confirmation without negative duration', ()
     const fixed = core.reduce(r.session, { type: 'resolve' }, START - 60000);
     assert.equal(sum(fixed.records), 0); assert.equal(fixed.session.cursorAt, START - 60000);
 });
-test('stop keeps short work instead of silently losing it', () => {
+test('25 seconds is the inclusive minimum for a partial focus record', () => {
     const r = core.reduce(start(), { type: 'stop' }, START + 25000);
     assert.equal(sum(r.records), 25); assert.equal(r.session.state, 'initial');
+});
+
+test('accidental sessions below 25 seconds never produce history on ending actions', () => {
+    for (const mode of ['countup', 'countdown']) {
+        for (const seconds of [0, 1, 10, 24.999]) {
+            for (const type of ['stop', 'mode', 'detach', 'switchTask', 'rest', 'flush', 'pause']) {
+                const r = core.reduce(start({ mode }), { type, sessionId: 'next', taskId: 'b' }, START + seconds * 1000);
+                assert.equal(sum(r.records), 0, `${mode} ${type} after ${seconds}s`);
+                assert.equal(r.session.recordedSeconds, 0);
+            }
+        }
+    }
+});
+
+test('short pauses survive reload and qualify by active time, excluding paused time', () => {
+    let r = core.reduce(start(), { type: 'pause' }, START + 10000);
+    assert.equal(r.records.length, 0);
+    assert.equal(core.pendingSeconds(r.session), 10);
+    r = core.reduce(JSON.parse(JSON.stringify(r.session)), { type: 'resume' }, START + 100000);
+    r = core.reduce(r.session, { type: 'stop' }, START + 115000);
+    assert.equal(sum(r.records), 25);
+    assert.deepEqual(r.records.map(p => [p.endDate - p.interval * 1000, p.endDate]),
+        [[START, START + 10000], [START + 100000, START + 115000]]);
+    assert.equal(new Set(r.records.map(p => p.blockId)).size, 1);
+});
+
+test('discarded work cannot be restored by a flush, reload, detach or another task', () => {
+    let r = core.reduce(start(), { type: 'pause' }, START + 10000);
+    r = core.reduce(r.session, { type: 'stop' }, START + 20000);
+    for (const type of ['flush', 'detach', 'tick']) {
+        r = core.reduce(JSON.parse(JSON.stringify(r.session)), { type }, START + 30000);
+        assert.equal(r.records.length, 0);
+        assert.equal(core.pendingSeconds(r.session), 0);
+    }
 });
 test('mode switch settles existing work first', () => {
     const r = core.reduce(start(), { type: 'mode', mode: 'countdown', gapMs: 1e9 }, minute(20));
