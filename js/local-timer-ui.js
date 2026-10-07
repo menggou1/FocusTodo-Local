@@ -3,6 +3,16 @@
     'use strict';
     const core = root.FocusTimerCore, data = root.FocusLocalData;
     const RELEASE = root.FocusRelease;
+    // Legacy completion/refresh events can supply records before the list's
+    // asynchronous hydration replaces them with numeric progress fractions.
+    function pomodoroValues(records) {
+        if (!Array.isArray(records)) return [];
+        return records.map(record => {
+            const value = record && typeof record === 'object'
+                ? Number(record.interval) / Number(record.pomodoroInterval) : Number(record);
+            return Number.isFinite(value) ? Math.max(0, Math.min(value, 1)) : 0;
+        });
+    }
     function notice(message) {
         let box = document.getElementById('focus-local-notice');
         if (!box) {
@@ -18,7 +28,7 @@
         return d.toISOString().slice(0, 19);
     }
     function attachTimer(timer, options) {
-        let current = null, queue = Promise.resolve(), disposed = false, halted = false, dialog = null, poll, mounted = false;
+        let current = null, queue = Promise.resolve(), disposed = false, halted = false, dialog = null, poll, mounted = false, completingTask = false;
         const listeners = [];
         const listen = (target, event, callback) => { target.addEventListener(event, callback); listeners.push(() => target.removeEventListener(event, callback)); };
         function config(task) {
@@ -175,13 +185,15 @@
         timer.cancel = async () => { try { await run('stop'); timer.hideConfirmDialog(); } catch (_) {} };
         timer.deleteTaskOrSubtask = () => fire('detach', { config: config(null) });
         timer.completeTask = async () => {
-            if (!timer.props.task) return;
+            if (!timer.props.task || completingTask) return;
+            completingTask = true;
             const expectedSession = current && current.sessionId;
             try {
                 // Freeze first so the legacy completion callback cannot start another work segment.
                 await run('pause'); await originalCompleteTask();
                 await run('detach', { config: config(null), expectedSession });
             } catch (error) { notice(error.message); }
+            finally { completingTask = false; }
         };
         timer.taskOrSubtaskDidComplete = async () => {
             try { await run('detach', { config: config(null) }); } catch (error) { notice(error.message); }
@@ -311,5 +323,5 @@
             notification.onclick = () => { root.focus(); notification.close(); };
         } else if (legacy) legacy();
     }
-    root.FocusLocal = { attachTimer, attachAudio, RELEASE, notice, notifyCompletion };
+    root.FocusLocal = { attachTimer, attachAudio, RELEASE, notice, notifyCompletion, pomodoroValues };
 })(window);

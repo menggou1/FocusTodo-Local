@@ -3,11 +3,21 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.1.1",
+    "localVersion": "1.1.2",
     "author": "Lexible",
-    "date": "2026-10-04",
+    "date": "2026-10-07",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.1.2",
+            "date": "2026-10-07",
+            "title": "完成任务白屏修复",
+            "items": [
+                "修复完成任务或刷新番茄记录时可能出现的白屏与数字格式化报错。",
+                "快速重复点击完成按钮只处理一次，避免重复完成任务。"
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.1.2.md"
+        },
         {
             "version": "7.1.1-local.1.1.1",
             "date": "2026-10-04",
@@ -47,7 +57,7 @@
             "report": "docs/PROGRESS-2026-10-03-stage-2.md"
         }
     ],
-    "version": "7.1.1-local.1.1.1",
+    "version": "7.1.1-local.1.1.2",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

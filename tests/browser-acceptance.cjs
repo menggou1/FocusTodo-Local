@@ -246,7 +246,7 @@ const server = http.createServer((request, response) => {
             await page.locator('.focus-release-entry').filter({ hasText: release.updates[0].title }).click();
             await page.locator('#focus-update-dialog').waitFor();
             assert((await page.locator('#focus-update-dialog').innerText()).includes(releaseVersion));
-            assert.match(await page.locator('#focus-update-dialog').innerText(), /等待 5 秒/);
+            for (const item of release.updates[0].items) assert((await page.locator('#focus-update-dialog').innerText()).includes(item));
             assert.equal(await page.locator('#focus-update-dialog a').count(), 0, 'User-facing updates do not expose maintenance reports');
             assert.doesNotMatch(await page.locator('#focus-update-dialog').innerText(), /Markdown|验收报告/);
             assert.equal(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()), false);
@@ -400,6 +400,49 @@ const server = http.createServer((request, response) => {
             await page.getByText('停止', { exact: true }).last().click();
             await page.waitForFunction(() => window.__acceptanceTimer.localTimer.session.state === 'initial' && window.__acceptanceTimer.state.timerInfo.elapse === 0);
         }
+        for (const surface of ['list', 'timer']) {
+            await check(surface + ' rapid task completion with six focus records keeps app rendered', () => app(async page => {
+                const id = await createActiveTask(page, 'countup'); await stopThroughUI(page);
+                await page.evaluate(async id => {
+                    const data = window.FocusLocalData, db = await data.open();
+                    const record = (await data.snapshot()).indexedDB.Pomodoro[0];
+                    await data.transaction(db, ['Pomodoro'], 'readwrite', tx => {
+                        tx.objectStore('Pomodoro').clear();
+                        for (let i = 0; i < 6; i++) tx.objectStore('Pomodoro').put({ ...record, id: 'completion-' + i, blockId: 'completion-' + i, taskId: id, interval: 750, pomodoroInterval: 1500 });
+                    });
+                }, id);
+                await page.reload();
+                await page.waitForFunction(() => window.__acceptanceTimer && window.__acceptanceTimer.props.task);
+                if (surface === 'timer') await page.evaluate(() => window.__acceptanceTimer.zoomUp());
+                const before = (await snapshot(page)).indexedDB.Pomodoro;
+                const selector = surface === 'timer' ? '[class*="FullscreenTimer-complete-"]' : '[class*="TaskItem-complete-"]';
+                await page.locator(selector).first().evaluate(node => { for (let i = 0; i < 10; i++) node.click(); });
+                await page.waitForFunction(async id => (await window.FocusLocalData.snapshot()).indexedDB.Task.find(t => t.id === id).isFinished, id);
+                await page.waitForTimeout(800);
+                assert(await page.locator('#root').innerText(), 'App remains rendered after completion');
+                assert.equal(await page.locator('#focus-local-notice').count(), 0);
+                assert.deepEqual((await snapshot(page)).indexedDB.Pomodoro, before);
+                await page.reload();
+                await page.waitForFunction(() => window.__acceptanceTimer && document.querySelector('#root').innerText.length > 0);
+                assert((await snapshot(page)).indexedDB.Task.find(t => t.id === id).isFinished);
+            }));
+        }
+        await check('raw focus record refresh renders numeric task progress without toMaxFixed crash', () => app(async page => {
+            await createActiveTask(page, 'countup'); await stopThroughUI(page);
+            await page.evaluate(async () => {
+                const task = (await window.FocusLocalData.snapshot()).indexedDB.Task[0];
+                // Reproduce the event payload during legacy completion/hydration.
+                task.pomodoros = Array.from({ length: 6 }, () => ({ interval: 750, pomodoroInterval: 1500 }));
+                window.__acceptanceTimer.props.dispatch({ type: 'UPDATE_TASK', task });
+            });
+            await page.waitForTimeout(300);
+            assert(await page.locator('#root').innerText(), 'Record refresh must not unmount the app');
+            assert.equal(await page.locator('[class*="TaskItem-morePomodoros"]').first().innerText(), '3');
+            await page.evaluate(() => window.__acceptanceTimer.zoomDown());
+            await page.getByText('停止回归任务', { exact: true }).first().click();
+            await page.waitForTimeout(300);
+            assert.equal(await page.locator('#focus-local-notice').count(), 0);
+        }));
         for (const mode of ['countup', 'countdown']) {
             await check(mode + ' stopped timer stays zero when task completion circle is clicked', () => app(async page => {
                 const id = await createActiveTask(page, mode); await stopThroughUI(page);

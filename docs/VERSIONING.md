@@ -1,6 +1,6 @@
 # 本地版本规范
 
-官方基础版本固定为 **7.1.1**。作者为 **Lexible**。当前完整版本为 **7.1.1-local.1.1.1**。
+官方基础版本固定为 **7.1.1**。作者为 **Lexible**。当前完整版本为 **7.1.1-local.1.1.2**。
 
 ## 格式与递增规则
 
@@ -8,8 +8,8 @@
 
 | 情况 | 示例 | 规则 |
 |---|---|---|
-| 当前版本 | `7.1.1-local.1.1.1` | 深色通知、短时专注过滤与删除后恢复 |
-| 后续兼容修复 | `7.1.1-local.1.1.2` | 最后一位递增 |
+| 当前版本 | `7.1.1-local.1.1.2` | 完成任务白屏与重复点击修复 |
+| 后续兼容修复 | `7.1.1-local.1.1.3` | 最后一位递增 |
 | 后续兼容功能 | `7.1.1-local.1.2.0` | 中间一位递增，修复位归零 |
 | 本地不兼容改动 | `7.1.1-local.2.0.0` | 本地主版本递增，其余归零；须单独说明迁移与回退 |
 
@@ -35,11 +35,12 @@ git diff --check
 
 GitHub 地址读取本地 Git 配置 `remote.Focustodo-local.url`，本次为 `https://github.com/menggou1/FocusTodo-Local.git`。展示时去掉 `.git`，支持常见 GitHub SSH 地址转为 HTTPS。构建时需要该 remote；日常浏览器运行无需 Git，也不会为了显示图标连接 GitHub。用户点击图标时在新标签页打开仓库。
 
-`build:release` 只生成发布元信息，不能重建完整旧 bundle。需要变更旧界面接入时使用两个明确范围的脚本：
+`build:release` 只生成发布元信息，不能重建完整旧 bundle。需要变更旧界面接入时使用三个明确范围的脚本：
 
 ```powershell
 node scripts/revise-timer-integration.cjs
 node scripts/revise-app-integration.cjs
+node scripts/revise-pomodoro-rendering.cjs
 ```
 
 上述脚本用于当前项目根目录，按已知 AST 边界定位，结构变化需人工检查；不是通用 React 构建工具。旧 `upgrade-*.cjs` 是历史一次性改造，不应全部重跑。
