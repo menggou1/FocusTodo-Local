@@ -48,7 +48,9 @@ test('launcher serves the app from an unrelated working directory and fails on a
 test('Windows wrapper forwards absolute paths, options and the child exit code', { skip: process.platform !== 'win32' }, () => {
     const quoted = path.join(root, 'start.ps1').replace(/'/g, "''");
     const script = `function node { Write-Output ('PROBE:' + ($args -join '|')); $global:LASTEXITCODE=7 }; & '${quoted}' -NoBrowser -Port 5511; exit $LASTEXITCODE`;
-    const result = spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], { cwd: path.parse(root).root, encoding: 'utf8', timeout: 10000 });
+    // Hosted Windows runners can spend over 10 seconds cold-starting PowerShell.
+    const result = spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], { cwd: path.parse(root).root, encoding: 'utf8', timeout: 30000 });
+    assert.ifError(result.error);
     assert.equal(result.status, 7, result.stderr);
     assert(result.stdout.includes('PROBE:' + path.join(root, 'scripts/start.cjs') + '|--port|5511|--no-browser'), result.stdout);
 });
