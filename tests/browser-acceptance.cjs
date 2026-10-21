@@ -22,7 +22,7 @@ const server = http.createServer((request, response) => {
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const url = `http://127.0.0.1:${server.address().port}`;
-    const executablePath = process.env.FOCUS_TEST_BROWSER || ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync);
+    const executablePath = process.env.FOCUS_TEST_BROWSER || (!process.env.FOCUS_TEST_BUNDLED_BROWSER && ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
     const browser = await playwright().chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
     const failures = [], results = [];
     fs.mkdirSync(path.join(root, 'docs/acceptance'), { recursive: true });

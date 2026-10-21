@@ -1,0 +1,5 @@
+# Shell scripts must remain executable POSIX text even with Windows autocrlf.
+*.sh text eol=lf
+*.cjs text eol=lf
+*.py text eol=lf
+*.yml text eol=lf

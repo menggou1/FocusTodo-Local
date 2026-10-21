@@ -11,6 +11,9 @@ test('published metadata, package and page all use the same official/local relea
     const version = config.officialVersion + '-local.' + config.localVersion;
     assert.equal(config.officialVersion, '7.1.1');
     assert.equal(pkg.version, version); assert.equal(pkg.author, config.author);
+    const lock = JSON.parse(read('package-lock.json'));
+    assert.equal(lock.version, version); assert.equal(lock.packages[''].version, version);
+    assert.deepEqual(lock.packages[''].devDependencies, pkg.devDependencies);
     assert.deepEqual(release, { ...config, version, repository: release.repository });
     assert(read('index.html').includes('<title>专注清单 · ' + version + ' · ' + config.author + '</title>'));
     assert.equal(release.updates[0].version, version); assert.equal(release.updates[0].date, config.date);

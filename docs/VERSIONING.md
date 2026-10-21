@@ -1,6 +1,6 @@
 # 本地版本规范
 
-官方基础版本固定为 **7.1.1**。作者为 **Lexible**。当前完整版本为 **7.1.1-local.1.1.2**。
+官方基础版本固定为 **7.1.1**。作者为 **Lexible**。当前完整版本为 **7.1.1-local.1.2.0**，Git Tag 使用本地版本 **1.2.0**。
 
 ## 格式与递增规则
 
@@ -8,9 +8,9 @@
 
 | 情况 | 示例 | 规则 |
 |---|---|---|
-| 当前版本 | `7.1.1-local.1.1.2` | 完成任务白屏与重复点击修复 |
-| 后续兼容修复 | `7.1.1-local.1.1.3` | 最后一位递增 |
-| 后续兼容功能 | `7.1.1-local.1.2.0` | 中间一位递增，修复位归零 |
+| 当前版本 | `7.1.1-local.1.2.0` | 多平台启动与自动发布 |
+| 后续兼容修复 | `7.1.1-local.1.2.1` | 最后一位递增 |
+| 后续兼容功能 | `7.1.1-local.1.3.0` | 中间一位递增，修复位归零 |
 | 本地不兼容改动 | `7.1.1-local.2.0.0` | 本地主版本递增，其余归零；须单独说明迁移与回退 |
 
 历史 `7.1.1-patch.1` 对应规范建立前的本地基础阶段，可视为本地 `1.0.0` 的历史名称。历史报告保留原名，没有额外发布一个 `7.1.1-local.1.0.0`。
@@ -33,7 +33,9 @@ git diff --check
 
 生成器同步 `js/local-release.js`、`package.json` 的版本和作者、`index.html` 的标题与资源缓存参数。关于页、通知详情、计时恢复说明和备份元信息读取 `window.FocusRelease`；本地服务器读取包版本。勿单独修改生成文件中的版本。
 
-GitHub 地址读取本地 Git 配置 `remote.Focustodo-local.url`，本次为 `https://github.com/menggou1/FocusTodo-Local.git`。展示时去掉 `.git`，支持常见 GitHub SSH 地址转为 HTTPS。构建时需要该 remote；日常浏览器运行无需 Git，也不会为了显示图标连接 GitHub。用户点击图标时在新标签页打开仓库。
+GitHub 地址优先读取本地 Git 配置 `remote.Focustodo-local.url`，缺失时读取 `remote.origin.url`，本仓库为 `https://github.com/menggou1/FocusTodo-Local.git`。展示时去掉 `.git`，支持常见 GitHub SSH 地址转为 HTTPS。构建时需要有效 remote；日常浏览器运行无需 Git，也不会为了显示图标连接 GitHub。用户点击图标时在新标签页打开仓库。
+
+发布使用带注释的本地版本号 Tag，例如 `git tag -a 1.2.0 -m "Release 1.2.0"`。验证并合入 main 后推送 main 和 Tag。Actions 要求 Tag 等于 `release.json.localVersion` 且提交在 main 历史中；六组 Node.js/系统检查全部通过才创建 GitHub Release，附运行便携包和 SHA256 校验。完整应用版本仍显示 `7.1.1-local.1.2.0`。
 
 `build:release` 只生成发布元信息，不能重建完整旧 bundle。需要变更旧界面接入时使用三个明确范围的脚本：
 

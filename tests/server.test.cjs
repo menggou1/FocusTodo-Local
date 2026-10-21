@@ -59,12 +59,3 @@ test('a busy port reports failure and exits instead of claiming startup succeede
     const code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });
     assert.equal(code, 1); assert.match(output, /EADDRINUSE/); assert.doesNotMatch(output, /http:\/\//);
 });
-test('Windows launcher changes directory and honors the port without opening a browser', { skip: process.platform !== 'win32' }, async () => {
-    const quoted = path.join(root, 'start.ps1').replace(/'/g, "''");
-    const script = `$script:BrowserAttempted=$false; function Start-Job { $script:BrowserAttempted=$true; throw 'Browser launch is forbidden in this test' }; function node { param([string]$ServerScript) Write-Output ('STARTUP_PROBE:' + (Get-Location).Path + ':' + $env:FOCUS_PORT + ':' + $ServerScript) }; . '${quoted}' -NoBrowser -Port 5511; Write-Output ('BROWSER_ATTEMPT:' + $script:BrowserAttempted)`;
-    const child = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script], { cwd: path.parse(root).root, windowsHide: true });
-    let output = ''; child.stdout.on('data', chunk => { output += chunk; }); child.stderr.on('data', chunk => { output += chunk; });
-    const code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });
-    assert.equal(code, 0); assert(output.includes('STARTUP_PROBE:' + root + ':5511:scripts/server.cjs'), output);
-    assert(output.includes('BROWSER_ATTEMPT:False'), output);
-});

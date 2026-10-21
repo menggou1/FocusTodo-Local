@@ -1,6 +1,6 @@
 # 后续维护指南
 
-本指南适用于官方基础 7.1.1、本地 `7.1.1-local.1.1.2`。入口为 [README](../README.md)，组件边界见 [前端架构](../ARCHITECTURE.md)，版本发布规则见 [VERSIONING](VERSIONING.md)。历史报告记录当时状态，当前行为以代码和本指南为准。
+本指南适用于官方基础 7.1.1、本地 `7.1.1-local.1.2.0`。入口为 [README](../README.md)，组件边界见 [前端架构](../ARCHITECTURE.md)，版本发布规则见 [VERSIONING](VERSIONING.md)。历史报告记录当时状态，当前行为以代码和本指南为准。
 
 ## 1. 开始修改前
 
@@ -8,27 +8,26 @@
 2. 备份实际浏览器数据；开发/自动测试使用临时端口和独立上下文，避免在日常数据库上清空、导入或试验迁移。
 3. 阅读对应模块及历史报告，确认是计时规则、持久化、旧组件接入还是界面问题。
 
-业务运行直接使用 `node scripts/server.cjs` 或 Windows 启动脚本。默认地址为 `http://127.0.0.1:5500/index.html`，不同主机名/端口隔离浏览器数据。没有热更新或完整 React 源码构建流程，修改静态文件后刷新页面。
+业务运行直接使用 `node scripts/start.cjs`、`npm start`、macOS/Linux 的 `sh start.sh` 或 Windows 启动脚本。默认地址为 `http://127.0.0.1:5500/index.html`，不同主机名/端口隔离浏览器数据。没有热更新或完整 React 源码构建流程，修改静态文件后刷新页面。
 
 ## 2. 开发与测试依赖
 
 ```powershell
-npm install
+npm ci
 npm test
 npm run check
 ```
 
-`package.json` 中 Acorn 用于 AST 接入脚本和语法检查；浏览器运行无需它。当前 `package-lock.json` 被仓库 `.gitignore` 忽略，依赖未锁定；若准备升级依赖或引入锁文件，应作为单独改动验收，不与业务修复混做。
+使用 Node.js 22+；CI 检查 Node.js 22/24。Acorn 与 Playwright 仅为开发依赖，运行应用不需要安装。`package-lock.json` 已提交，通过 `npm ci` 固定依赖；升级依赖时同时更新锁文件并运行全量验收。
 
 浏览器验收需 Playwright 与 Chromium/Edge。本机有 Codex 捆绑运行时可被测试脚本自动找到；其他机器可临时安装：
 
 ```powershell
-npm install --no-save playwright
 npx playwright install chromium
 npm run test:browser
 ```
 
-验收脚本优先使用 Windows 默认路径的 Edge/Chrome，否则使用 Playwright 浏览器。可通过 `$env:FOCUS_TEST_BROWSER` 指定浏览器可执行文件。`$env:FOCUS_TEST_FILTER` 用于临时按用例名筛选；运行完整验收前移除该变量：
+验收脚本优先使用 Windows 默认路径的 Edge/Chrome，否则使用 Playwright 浏览器。CI 设置 `FOCUS_TEST_BUNDLED_BROWSER=1` 统一使用 Playwright Chromium。可通过 `$env:FOCUS_TEST_BROWSER` 指定浏览器可执行文件。`$env:FOCUS_TEST_FILTER` 用于临时按用例名筛选；运行完整验收前移除该变量：
 
 ```powershell
 Remove-Item Env:FOCUS_TEST_FILTER -ErrorAction SilentlyContinue
@@ -65,9 +64,9 @@ node scripts/revise-pomodoro-rendering.cjs
 
 官方 7.1.1 固定，后续本地版本按三段数字递增，详见版本规范。修改 `release.json` 的版本、日期、更新条目，创建维护报告，再执行 `npm run build:release`。生成器同步 `js/local-release.js`、包版本/作者、页面标题及缓存参数。
 
-通知详情只展示用户能够理解的变化，不添加内部模块、验收技术或 Markdown 下载入口。仓库保留详细报告便于维护；用户无需从产品界面读报告。本次移除报告按钮属于同一未提交版本的交付整理，版本仍为 `7.1.1-local.1.1.1`。
+通知详情只展示用户能够理解的变化，不添加内部模块、验收技术或 Markdown 下载入口。仓库保留详细报告便于维护；用户无需从产品界面读报告。
 
-生成器要求 Git remote 名 `Focustodo-local`。新克隆默认 remote 通常为 `origin`，先核对 URL，必要时重命名为 `Focustodo-local`，或在 `release.json` 设置实际 remote 名。不要为了构建添加不属于本项目的仓库地址。日常应用使用已生成地址，无需 Git。
+生成器优先使用 `release.json` 指定的 `Focustodo-local`，缺失时使用新克隆默认的 `origin`。始终核对仓库 URL；日常应用使用已生成地址，无需 Git。
 
 ## 5. 验收与提交
 
@@ -81,7 +80,9 @@ git diff --stat
 git status --short
 ```
 
-当前全量基线：25 项核心、7 项服务、3 项发布信息、43 项浏览器，共 78 项。新增功能可增加用例数量，报告以实际结果为准。25 秒门槛、深浅主题、重置恢复、停止/叉号/圆圈、快速完成与原始番茄记录渲染、120/145 分钟恢复、事务回滚、导入日志和删除确认是本地版关键回归。
+当前全量包含计时核心、服务、发布信息、启动器和 43 项浏览器用例。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。报告以实际结果为准。25 秒门槛、深浅主题、重置恢复、停止/叉号/圆圈、快速完成与原始番茄记录渲染、120/145 分钟恢复、事务回滚、导入日志和删除确认是本地版关键回归。
+
+`.github/workflows/ci.yml` 在 push/PR 上运行三系统测试；Node.js 24 运行完整 Chromium 和便携包验收。合入 main 后打与 `localVersion` 完全相同的 Tag 并推送；Tag 的全部检查通过后自动发布 ZIP、tar.gz、SHA256。不要覆盖旧 Tag；发布失败时查看 Actions 日志，修复后使用新版本或在尚未创建 Release 时重跑失败任务。
 
 提交前检查生成文件、文档链接、已读状态和截图，确认没有用户备份、真实数据库、账号凭证或临时输出。选择相关文件提交，推送前核对 remote 和远程分支；远端新增提交时先处理分歧，不强推覆盖。
 

@@ -16,7 +16,7 @@ node_modules/
 Thumbs.db
 
 # Build / local config
-package-lock.json
+dist/
 _syntax_check.js
 
 # Partial acceptance runs are local diagnostics; retain full results/screenshots.

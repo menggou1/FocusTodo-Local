@@ -3,11 +3,22 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.1.2",
+    "localVersion": "1.2.0",
     "author": "Lexible",
-    "date": "2026-10-07",
+    "date": "2026-10-21",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.2.0",
+            "date": "2026-10-21",
+            "title": "多平台启动与便携发布",
+            "items": [
+                "Windows、macOS 和 Linux 现在可以使用统一的启动方式，支持自动打开浏览器、自定义端口及无浏览器模式。",
+                "提供 ZIP 和 tar.gz 便携包，解压并安装 Node.js 后即可运行，无需安装应用依赖。",
+                "默认访问地址保持不变；升级时使用原有浏览器、主机名和端口即可继续使用本地数据。"
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.2.0.md"
+        },
         {
             "version": "7.1.1-local.1.1.2",
             "date": "2026-10-07",
@@ -57,7 +68,7 @@
             "report": "docs/PROGRESS-2026-10-03-stage-2.md"
         }
     ],
-    "version": "7.1.1-local.1.1.2",
+    "version": "7.1.1-local.1.2.0",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

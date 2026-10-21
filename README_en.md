@@ -11,17 +11,21 @@ This project is a local development version of [FocusTodo](https://focustodo.cn)
 ## Requirements
 
 ### Option 1: Node.js (Recommended)
-- Node.js 18+; validated with Node.js 24
-- Run `node scripts/server.cjs`; no global npm/http-server installation required
+- Node.js 22+; CI covers Node.js 22/24 on Windows, macOS and Linux
+- Run `node scripts/start.cjs` or `npm start`; no npm dependency installation required
 - Binds to `127.0.0.1:5500`, disables caching, and supports audio byte ranges
 
 ### Option 2: Python
-- Python 3.6+
+- Python 3.7+ (manual fallback)
 - No dependencies required
 
 Use a local HTTP server and keep your existing hostname and port. Browser data is scoped to the origin; direct file access is outside the validated workflow.
 
 ## Quick Start
+
+Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
+
+All systems: `node scripts/start.cjs` or `npm start`. The default browser opens after the server starts. Use `node scripts/start.cjs --no-browser --port 5511` for headless use or a different port; with npm, use `npm start -- --no-browser --port 5511`.
 
 ### Windows
 Double-click `启动.bat` or run PowerShell `.\start.ps1`
@@ -30,7 +34,8 @@ Open `http://127.0.0.1:5500/index.html`. Use `-NoBrowser` to suppress automatic 
 
 ### macOS / Linux
 ```bash
-node scripts/server.cjs
+sh start.sh
+# Optional: sh start.sh --no-browser --port 5511
 # or
 python3 -m http.server 5500 --bind 127.0.0.1
 ```
@@ -87,17 +92,17 @@ node tests/browser-acceptance.cjs
 node scripts/check-syntax.cjs
 ```
 
-Browser acceptance requires Playwright and Chromium/Edge. Current version: `7.1.1-local.1.1.2`, author Lexible; the official base stays 7.1.1. This release fixes the blank page during task completion and guards repeated clicks. Updates appear in the top-right notification bell with a details dialog. About provides a GitHub icon hyperlink from the configured Git remote. Local data deletion requires no password and waits five seconds before confirmation, then requests a full backup download before reset.
+For development, run `npm ci` and `npx playwright install chromium` before the checks above. Browser acceptance requires Playwright and Chromium/Edge. Current version: `7.1.1-local.1.2.0`, author Lexible; the official base stays 7.1.1. This release adds a shared cross-platform launcher, CI and portable archives. Updates appear in the top-right notification bell with a details dialog. About provides a GitHub icon hyperlink from the configured Git remote. Local data deletion requires no password and waits five seconds before confirmation, then requests a full backup download before reset.
 
 Notifications, local dialogs and backup buttons follow the appearance theme. Focus shorter than 25 seconds is excluded from history; short pauses preserve active spans for resumed work. Reset restores the local user and default system lists, and startup repairs missing system lists. User-facing update details contain brief release notes only; maintenance Markdown reports remain in the repository. For future changes, read the [maintenance guide (Chinese)](docs/MAINTENANCE.md) for module responsibilities, dependencies, browser test setup and commit checks. The supplied legacy React bundle is already patched and cannot be fully rebuilt by the historical upgrade scripts.
 
-All 75 automated cases passed: 25 timer, 7 server, 3 release consistency and 40 browser cases. Theme image migration, maintenance concurrency without Web Locks, real sleep/long process termination, and full chart/reward regression remain pending. Edit `release.json` and run `npm run build:release` to sync release metadata, title and asset cache tags; this does not rebuild the legacy bundle.
+GitHub Actions runs timer, server, launcher and release checks on Node.js 22/24 across three operating systems. Node.js 24 also runs all 43 Chromium browser cases and tests both extracted archives without npm or Git. Version tags publish a Release only after all checks pass. Visible system-browser windows, actual notifications/audio, theme image migration, maintenance concurrency without Web Locks, real sleep/long process termination, and full chart/reward regression remain pending. Edit `release.json` and run `npm run build:release` to sync release metadata, title and asset cache tags; this does not rebuild the legacy bundle.
 
 ## Documentation
 
 - [Architecture](./ARCHITECTURE.md) - Detailed technical architecture
 - [Maintenance guide (Chinese)](docs/MAINTENANCE.md)
-- [Current update and acceptance report (Chinese)](docs/UPDATE-7.1.1-local.1.1.2.md)
+- [Current update and acceptance report (Chinese)](docs/UPDATE-7.1.1-local.1.2.0.md)
 - [Versioning policy (Chinese)](docs/VERSIONING.md)
 - [Stage 2 progress and acceptance report (Chinese)](docs/PROGRESS-2026-10-03-stage-2.md)
 - [中文版](./README.md)
