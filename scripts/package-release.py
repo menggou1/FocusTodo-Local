@@ -32,7 +32,9 @@ def build(output, tag=None):
     for directory in ('js', 'audio', 'font', 'i18n', 'img'):
         files.extend(p for p in (ROOT / directory).rglob('*') if p.is_file())
     files.extend(ROOT / update['report'] for update in config['updates'])
-    files.extend(ROOT / name for name in ('docs/MAINTENANCE.md', 'docs/VERSIONING.md', 'ARCHITECTURE.md'))
+    # Include linked historical Markdown too; omit acceptance data/screenshots.
+    files.extend((ROOT / 'docs').glob('*.md'))
+    files.append(ROOT / 'ARCHITECTURE.md')
     files = sorted(set(files))
     output.mkdir(parents=True, exist_ok=True)
     stem = 'FocusTodo-' + version

@@ -1,5 +1,7 @@
 # FocusTodo 本地版本更新与验收报告
 
+> 历史报告：以下通过数量、剩余事项和截图说明只记录当时状态。返回[更新记录](../CHANGELOG.md)查看后续版本；当前开发与待修复清单见[维护指南](MAINTENANCE.md)。
+
 - 日期：2026-10-03（Asia/Shanghai）
 - 官方基础版本：7.1.1
 - 当前完整版本：7.1.1-local.1.1.0
@@ -54,7 +56,7 @@
 
 `release.json` 集中维护官方版本、本地版本、作者、日期、remote 名及更新内容。`scripts/build-release.cjs` 生成浏览器元信息并同步包版本、页面标题和缓存参数。版本详情、关于页、备份和服务器输出保持一致，减少多处手改遗漏。
 
-完整规范见 [VERSIONING.md](VERSIONING.md)：官方前缀固定为 7.1.1；本地修复递增最后一位，兼容功能递增中间一位，不兼容本地改变递增第一位。当前 1.1.0 承接历史 patch.1 阶段；历史报告原名保留。数据库版本仍为 v3，旧设置 `Version='6.5'` 保留其兼容用途。
+完整规范见[维护指南中的版本与发布](MAINTENANCE.md#4-版本与发布)：官方前缀固定为 7.1.1；本地修复递增最后一位，兼容功能递增中间一位，不兼容本地改变递增第一位。当时 1.1.0 承接历史 patch.1 阶段；历史报告原名保留。数据库版本仍为 v3，旧设置 `Version='6.5'` 保留其兼容用途。
 
 本次低风险整理：
 
@@ -111,12 +113,12 @@ git diff --check
 
 测试运行于独立无头 Edge/Chromium 上下文和临时 loopback 端口，使用测试数据，没有清空用户实际数据库。长时间通过回写测试锚点后真实刷新与确认验证；没有实际等待两小时。系统通知与 Audio 控制使用替身，不等于真实权限/声音测试。
 
-机器结果见 [acceptance/results.json](acceptance/results.json)。界面截图已核对：
+机器结果见 [acceptance/results.json](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/results.json)。界面截图已核对：
 
-- [关于页与 GitHub 图标](acceptance/about.png)
-- [铃铛更新和任务提醒](acceptance/notifications.png)
-- [更新详情](acceptance/update-details.png)
-- [删除冷却确认](acceptance/reset-confirm.png)
+- [关于页与 GitHub 图标](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/about.png)
+- [铃铛更新和任务提醒](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/notifications.png)
+- [更新详情](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/update-details.png)
+- [删除冷却确认](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/reset-confirm.png)
 
 建议在日常相同访问地址复核：铃铛打开最新详情后刷新；关于页点击 GitHub 图标；删除窗口等待及取消。真实删除会重置数据，如需自行验证，应先保存独立备份。
 

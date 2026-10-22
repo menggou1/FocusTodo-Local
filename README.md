@@ -2,7 +2,7 @@
 
 FocusTodo 专注清单 - 浏览器本地版
 
-官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.2.0** · 作者 **Lexible**
+官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.2.0** · 作者 **Lexible** · [English](README_en.md)
 
 ## 项目说明
 
@@ -57,35 +57,6 @@ python3 -m http.server 5500 --bind 127.0.0.1
 - 🌲 专注森林（阳光奖励）
 - 🌐 原应用包含 32 种语言；新增本地界面目前为中文
 
-## 技术栈
-
-- React 16.14.0 + Redux
-- jQuery + Moment.js + Bootstrap Datepicker
-- IndexedDB (PomodoroDB6) + localStorage
-- 纯静态文件，无需后端
-
-## 文件结构
-
-```
-FocusTodo/
-├── index.html                # 按顺序加载本地模块和旧应用
-├── release.json              # 版本、作者、日期、更新内容、Git remote 名
-├── patch.js                  # 旧本地兼容、网络、凭证、主题等补丁
-├── main.css / local-ui.css   # 原应用样式 / 本地模块样式
-├── js/
-│   ├── main.js               # 已集成修改的旧 React 压缩包
-│   ├── local-release.js      # 生成文件，勿单独手改版本
-│   ├── local-timer-core.js   # 纯计时状态和片段结算
-│   ├── local-data.js         # 数据库事务、备份、导入、重置
-│   ├── local-timer-ui.js     # 计时器接入、恢复确认、音频
-│   └── local-app-ui.js       # 关于、更新详情、删除冷却窗口
-├── scripts/                  # 本地服务器、元信息生成、AST 接入和语法检查
-├── tests/                    # 核心、服务器、发布与浏览器验收
-├── docs/                     # 维护指南、版本规范、历史报告和验收截图
-├── i18n/ / img/ / audio/ / font/  # 本地资源
-└── start.sh / start.ps1 / 启动.bat # 多平台启动入口
-```
-
 ## 数据存储
 
 - **IndexedDB**: 任务、番茄记录、日程等
@@ -97,46 +68,17 @@ FocusTodo/
 
 右上角铃铛展示面向用户的日期、版本和简短更新详情，并保留原任务提醒。维护报告仅在仓库文档中提供，不在更新窗口展示 Markdown 入口。
 
-## 后续维护入口
+## 文档导航
 
-先阅读 [维护指南](docs/MAINTENANCE.md)，再按问题定位到 [前端架构](ARCHITECTURE.md) 和 [版本规范](docs/VERSIONING.md)。日常运行无需安装 npm 依赖；修改/检查代码从仓库根目录执行 `npm ci` 安装锁定的 Acorn 和 Playwright，浏览器安装见维护指南。
-
-| 修改内容 | 首选位置 |
+| 你想做什么 | 从这里开始 |
 |---|---|
-| 计时规则、历史片段和停止归零 | `js/local-timer-core.js`，补充核心和浏览器行为验收 |
-| 持久化、备份、导入和删除 | `js/local-data.js`，验证事务失败、恢复日志和旧数据兼容 |
-| 旧计时器事件/任务关联/声音 | `js/local-timer-ui.js` 与计时 AST 接入脚本 |
-| 关于页、更新详情、删除窗口 | `js/local-app-ui.js` 与 `local-ui.css`，必要时修改应用 AST 接入脚本 |
-| 版本、作者、日期、简短更新 | `release.json`，随后运行 `npm run build:release` |
-| HTTP 服务或多平台启动 | `scripts/server.cjs`、`scripts/start.cjs`、`start.sh`、`start.ps1` |
+| 看版本变化、发布验收或历史报告 | [更新记录](CHANGELOG.md) |
+| 开发、测试、定位待修复问题或发布新版本 | [开发维护指南](docs/MAINTENANCE.md) |
+| 理解模块、数据库、计时与旧主包之间的关系 | [架构说明](ARCHITECTURE.md) |
 
-不要批量重跑 `scripts/upgrade-*.cjs`；它们是历史一次性改造。不要用删除数据库解决兼容问题，也不要全局替换压缩包字符串。详细边界和提交步骤见维护指南。
+更新记录按版本链接详细报告；维护指南已包含版本规范和发布步骤。日常使用只需按本页启动，无需逐篇阅读历史报告。开发先运行 `npm ci`，其余准备和检查命令集中在维护指南。
 
-## 检查与当前完成范围
-
-```powershell
-npm test
-node tests/browser-acceptance.cjs
-node scripts/check-syntax.cjs
-```
-
-浏览器验收需要 Playwright 和 Chromium/Edge；当前测试可使用本机 Codex 自带的 Playwright。业务运行不需要 Playwright 或 Acorn。
-
-当前版本为 `7.1.1-local.1.2.0`、作者 Lexible，官方基础版本固定为 7.1.1。本轮增加多平台统一启动、CI 与便携发布，保留已完成的任务白屏和重复点击修复。更新内容在右上角小铃铛，点击查看详情；关于页提供 GitHub 图标仓库链接。设置中删除数据无需密码，等待 5 秒后可确认，删除前发起完整备份。
-
-自动验收包含计时核心、HTTP 服务、发布一致性、启动器、便携包及 43 项浏览器用例。GitHub Actions 覆盖三系统和 Node.js 22/24；版本 Tag 的全部检查通过后自动创建 Release。桌面默认浏览器窗口、真实通知/声音、主题图片迁移、无 Web Locks 并发维护、真实休眠/长时间杀进程及全部报表奖励回归仍需进一步验收，具体边界见最新报告。
-
-版本和更新条目统一编辑 `release.json`，运行 `npm run build:release` 同步元信息、标题与缓存参数；这不是完整旧 bundle 构建。后续版本规则和维护命令见版本规范。
-
-## 文档
-
-- [前端架构文档](./ARCHITECTURE.md) - 详细的技术架构说明
-- [维护指南](docs/MAINTENANCE.md) - 开发准备、修改位置、验收与提交步骤
-- [当前详细更新与验收报告](docs/UPDATE-7.1.1-local.1.2.0.md) - 本次修改、验证及未完成清单
-- [版本规范](docs/VERSIONING.md)
-- [简短更新](CHANGELOG.md)
-- [第二阶段历史报告](docs/PROGRESS-2026-10-03-stage-2.md)
-- [English](./README_en.md)
+已发布版本通过三系统验收，但 main 曾出现 macOS 跨标签页用例偶发超时，仍待后续修补；真实桌面通知、声音和长时间休眠等边界也在维护指南中统一记录。
 
 ## 许可证
 

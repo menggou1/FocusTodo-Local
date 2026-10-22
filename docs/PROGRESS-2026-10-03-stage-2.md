@@ -1,5 +1,7 @@
 # FocusTodo 第二阶段修改与验收报告
 
+> 历史报告：以下通过数量、剩余事项和截图说明只记录当时状态。返回[更新记录](../CHANGELOG.md)查看后续版本；当前开发与待修复清单见[维护指南](MAINTENANCE.md)。
+
 - 日期：2026-10-03（Asia/Shanghai）
 - 作者：Lexible
 - 系统版本：7.1.1
@@ -145,7 +147,7 @@ git diff --check
 
 第一阶段 120/145 分钟恢复、重载去重、写入故障回滚、旧库升级、完整导入校验、设置失败回滚、恢复日志、主题失败反馈、重置及网络边界也全部重新通过。
 
-最新机器结果：[acceptance/results.json](acceptance/results.json)。该文件现为 31 项，第一阶段报告的 18 项描述当时历史状态。
+最新机器结果：[acceptance/results.json](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/results.json)。该文件现为 31 项，第一阶段报告的 18 项描述当时历史状态。
 
 测试使用无头 Edge/Chromium、新浏览器上下文和临时端口。长时间场景回写测试时间锚点，再真实执行重载、确认及事务，没有实际等待两小时。通知和 Audio 使用替身验证控制逻辑，不能当成实际系统权限与声音验收。
 

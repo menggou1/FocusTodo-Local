@@ -1,5 +1,7 @@
 # FocusTodo 修改与阶段验收报告
 
+> 历史报告：以下通过数量、剩余事项和截图说明只记录当时状态。返回[更新记录](../CHANGELOG.md)查看后续版本；当前开发与待修复清单见[维护指南](MAINTENANCE.md)。
+
 > 本文为第一阶段历史记录。2026-10-03 已继续修复并验收，最新情况见 [第二阶段报告](PROGRESS-2026-10-03-stage-2.md)。下文未完成清单及 18 项结果为当时状态，机器结果文件已更新。
 
 - 报告日期：2026-10-03（Asia/Shanghai）
@@ -207,7 +209,7 @@ git diff --check
 | 17 | 重置返回时表已清空，返回的备份包含原业务数据 | 通过 |
 | 18 | URL、Request 和伪装 Bing 域名不能绕过 fetch 白名单 | 通过 |
 
-机器可读结果：[acceptance/results.json](acceptance/results.json)。
+机器可读结果：[acceptance/results.json](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/results.json)。
 
 ### 5.4 语法与视觉检查
 
@@ -215,9 +217,9 @@ git diff --check
 
 查看过主界面、关于页和恢复确认框截图：
 
-- [主界面](acceptance/app.png)
-- [关于页](acceptance/about.png)
-- [恢复确认框](acceptance/recovery.png)
+- [主界面](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/app.png)
+- [关于页](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/about.png)
+- [恢复确认框](https://github.com/menggou1/FocusTodo-Local/blob/259a639859334ffd8202276307865345c4eb8b77/docs/acceptance/recovery.png)
 
 ## 6. 未完成事项及明确限制
 

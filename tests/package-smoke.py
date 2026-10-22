@@ -2,6 +2,7 @@
 import hashlib
 import json
 from pathlib import Path
+import re
 import shutil
 import socket
 import subprocess
@@ -10,6 +11,7 @@ import tarfile
 import tempfile
 import time
 import urllib.request
+from urllib.parse import unquote, urlsplit
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -41,6 +43,14 @@ for suffix in ('.zip', '.tar.gz'):
         site = target / stem
         assert not (site / '.git').exists() and not (site / 'node_modules').exists()
         assert b'\r' not in (site / 'start.sh').read_bytes()
+        for document in site.rglob('*.md'):
+            body = re.sub(r'```.*?```', '', document.read_text(encoding='utf-8'), flags=re.S)
+            for raw in re.findall(r'\[[^\]]*\]\(([^)\n]+)\)', body):
+                link = urlsplit(raw.strip('<>'))
+                if link.scheme or link.netloc or not link.path:
+                    continue
+                destination = (document.parent / unquote(link.path)).resolve()
+                assert destination.is_file(), f'Broken packaged document link: {document.name} -> {raw}'
         with socket.socket() as reservation:
             reservation.bind(('127.0.0.1', 0))
             port = reservation.getsockname()[1]
