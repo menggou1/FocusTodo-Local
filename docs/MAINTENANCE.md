@@ -150,8 +150,28 @@ python scripts/deploy-pages.py --push
 
 ## 6. 待修复与验收边界
 
-此前 macOS 跨标签页用例暴露的初始化事件丢失已在 `1.2.1` 修复：计时器先订阅广播，再等待首次初始化，收到的刷新排在现有队列中。新增受控初始化用例同时检查全部记录 ID 与任务进度，避免只观察事件回调就提前判定成功。复现、修补和验收见 [1.2.1 报告](UPDATE-7.1.1-local.1.2.3.md)。
+此前 macOS 跨标签页用例暴露的初始化事件丢失已在 `1.2.1` 修复：计时器先订阅广播，再等待首次初始化，收到的刷新排在现有队列中。新增受控初始化用例同时检查全部记录 ID 与任务进度，避免只观察事件回调就提前判定成功。复现、修补和验收见 [1.2.1 报告](UPDATE-7.1.1-local.1.2.1.md)。
 
 优先处理无 Web Locks 时并发导入/删除维护归属、主题图片迁移及多设置原子更新。随后验证真实长时间进程结束/休眠、其他浏览器、大数据库、所有图表/跨日分配/奖励、真实通知和声音。当前长时间自动验收通过测试锚点模拟，不代表已实测两小时休眠。
 
 历史报告入口统一放在[更新记录](../CHANGELOG.md)，其中的旧通过数量和待办只代表当时状态，不替代本文的当前清单。
+
+## 7. 源码来源与原版归档
+
+| 分支 | 用途 |
+| --- | --- |
+| `main` | 当前本地版源码、维护文档与版本发布 |
+| `gh-pages` | 从已提交版本生成的静态网站 |
+| `upstream/7.1.1` | 原始上游 7.1.1 代码及其完整历史，固定归档 |
+
+2026-10-22 从 [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 核对并归档上游提交 [fe15a1d9201c6298f1c28c16dcb0b58c481f9999](https://github.com/menggou1/FocusTodo-Local/commit/fe15a1d9201c6298f1c28c16dcb0b58c481f9999)，提交说明为 `feat: update to v7.1.1`，时间为 2025-12-15 23:32:46 UTC。远程 [upstream/7.1.1](https://github.com/menggou1/FocusTodo-Local/tree/upstream/7.1.1) 直接指向该提交，Git tree 为 `b163dc146decc50e5cc5f64ed2b046e73098c750`；没有加入本地版补丁、重写原文件或只复制工作目录。该分支及祖先的可达 Git 对象由本仓库的归档引用保留，不依赖上游分支以后是否移动。
+
+原版分支长期保留，不继续开发、不用于 Pages 或本地版 Release，也不反向合入 main。保留原作者信息、LICENSE 和包括原 CNAME 在内的原始文件；本地版继续在 main 维护，正式网站仍只从 gh-pages 部署。读取归档可执行：
+
+```bash
+git fetch Focustodo-local upstream/7.1.1
+git log Focustodo-local/upstream/7.1.1
+git archive --format=zip --output upstream-7.1.1.zip Focustodo-local/upstream/7.1.1
+```
+
+分支归档与 GitHub 的 fork 关系是两回事。2026-10-22 用户已在 GitHub 完成 Leave fork network；随后通过实时 REST API 确认本仓库 `fork=false`，`parent` 和 `source` 均为空，仓库 ID 仍为 `1308433974`。原版分支保留 4 个原始提交，main、gh-pages、版本标签、Release 及其附件继续保留；Pages 仍从 gh-pages 根目录发布。脱离前已在本机 `dist/repository-before-detach-2026-10-22.bundle` 保存并验证完整 Git 历史，旁边的同名 JSON 保存仓库、分支、标签、Release 和 Pages 设置快照；这些恢复辅助文件不提交、不发布，也不替代远程归档分支。

@@ -4,7 +4,7 @@ FocusTodo - Local Development Version · [中文版](README.md)
 
 ## About
 
-This project is a local development version of [FocusTodo](https://focustodo.cn), modified from [lamngockhuong/FocusTodo](https://github.com/lamngockhuong/FocusTodo) for easier local development and debugging.
+This local version of [FocusTodo](https://focustodo.cn) is maintained from [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) version 7.1.1 as a standalone repository. The untouched upstream version is preserved on `upstream/7.1.1`; see the [maintenance guide](docs/MAINTENANCE.md#7-源码来源与原版归档) for provenance and branch roles.
 
 > **Disclaimer**: This project is for personal learning and research purposes only. Please support the official [FocusTodo](https://focustodo.cn) software.
 

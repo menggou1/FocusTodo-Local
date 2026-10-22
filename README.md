@@ -6,7 +6,7 @@ FocusTodo 专注清单 - 浏览器本地版
 
 ## 项目说明
 
-本项目基于 [lamngockhuong/FocusTodo](https://github.com/lamngockhuong/FocusTodo) 修改，为方便开发调试而设计的本地版本。
+本项目基于 [lamngockhuong/FocusTodo](https://github.com/lamngockhuong/focustodo) 的 7.1.1 版本持续维护，现为独立仓库。上游原版单独保存在 `upstream/7.1.1` 分支，来源、校验和分支用途见[维护指南](docs/MAINTENANCE.md#7-源码来源与原版归档)。
 
 任务、专注记录和设置保存在浏览器中，运行时无需账号服务器。Bing 壁纸会访问允许的外部来源；关于页的 GitHub 图标在点击后打开[本地版仓库](https://github.com/menggou1/FocusTodo-Local)。本仓库保留原压缩 React 主包，并使用独立本地模块接入，不是已经恢复完整源码的 React 工程。
 
