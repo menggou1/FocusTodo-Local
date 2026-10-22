@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import tempfile
 
@@ -18,8 +19,9 @@ RUNTIME_PATHS = (
 
 
 def git(*args, data=None, env=None):
-    return subprocess.run(['git', *args], cwd=ROOT, input=data, capture_output=True,
-                          check=True, env=env).stdout
+    return subprocess.run(['git', '-c', 'http.version=HTTP/1.1', '-c', 'http.lowSpeedLimit=1024',
+                           '-c', 'http.lowSpeedTime=30', *args], cwd=ROOT, input=data,
+                          capture_output=True, check=True, env=env, timeout=120).stdout
 
 
 def deploy(ref='main', remote='Focustodo-local', output=None, push=False):
@@ -70,8 +72,8 @@ def deploy(ref='main', remote='Focustodo-local', output=None, push=False):
         print('Preview only; use --push to update the remote gh-pages branch.')
         return
     branch = 'refs/heads/gh-pages'
-    existing = subprocess.run(['git', 'ls-remote', '--exit-code', remote, branch],
-                              cwd=ROOT, capture_output=True)
+    existing = subprocess.run(['git', '-c', 'http.version=HTTP/1.1', 'ls-remote', '--exit-code', remote, branch],
+                              cwd=ROOT, capture_output=True, timeout=45)
     parent = None
     if existing.returncode == 0:
         git('fetch', '--no-tags', remote, branch)
@@ -98,4 +100,10 @@ if __name__ == '__main__':
     parser.add_argument('--output', type=Path, help='Optional new directory for a local static preview')
     parser.add_argument('--push', action='store_true', help='Publish to the remote gh-pages branch')
     args = parser.parse_args()
-    deploy(args.ref, args.remote, args.output, args.push)
+    try:
+        deploy(args.ref, args.remote, args.output, args.push)
+    except subprocess.CalledProcessError as error:
+        print(error.stderr.decode('utf-8', errors='replace'), file=sys.stderr)
+        sys.exit(error.returncode)
+    except subprocess.TimeoutExpired:
+        sys.exit('Git connection timed out; retry after checking connectivity.')
