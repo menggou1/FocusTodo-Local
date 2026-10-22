@@ -548,7 +548,12 @@ const server = http.createServer((request, response) => {
             });
             await age(page, 60);
             await page.evaluate(() => window.__acceptanceTimer.localTimer.run('tick', { gapMs: 1e9 }));
-            await other.waitForFunction(() => window.__peerRows.length >= 2 && window.__acceptanceTimer.props.task.pomodoros.reduce((n, v) => n + v, 0) > 1.999999);
+            try {
+                await other.waitForFunction(() => window.__peerRows.length >= 2 && window.__acceptanceTimer.props.task.pomodoros.reduce((n, v) => n + v, 0) > 1.999999);
+            } catch (error) {
+                console.error('Cross-tab refresh diagnostic:', JSON.stringify(await other.evaluate(() => ({ rows: window.__peerRows, session: window.__acceptanceTimer.localTimer.session, task: window.__acceptanceTimer.props.task }))));
+                throw error;
+            }
             const peer = await other.evaluate(() => ({ rows: window.__peerRows, task: window.__acceptanceTimer.props.task, session: window.__acceptanceTimer.localTimer.session }));
             assert(peer.rows.every(row => row.taskId === id));
             assert(Math.abs(peer.rows.reduce((n, row) => n + row.interval, 0) - 3000) < 0.001);
@@ -556,6 +561,50 @@ const server = http.createServer((request, response) => {
             assert.equal(new Set(peer.rows.map(row => row.id)).size, peer.rows.length);
             assert(peer.session.totalSeconds >= 3600);
             assert.deepEqual(peerErrors, []);
+        }));
+        await check('peer tab receives records committed while timer initialization is pending', () => app(async (page, context) => {
+            const id = await createActiveTask(page, 'countup');
+            const other = await context.newPage();
+            await other.addInitScript(() => {
+                window.__receivedRecords = [];
+                window.addEventListener('focus-local-timer-changed', event => window.__receivedRecords.push(...(event.detail.records || [])));
+                let service;
+                Object.defineProperty(window, 'FocusLocalData', { configurable: true, get: () => service, set(value) {
+                    service = value;
+                    const action = value.timerAction;
+                    let firstTick = true;
+                    value.timerAction = async function(input, now) {
+                        const result = await action(input, now);
+                        if (input.type === 'tick' && firstTick) {
+                            firstTick = false;
+                            window.__mountTickHeld = true;
+                            await new Promise(resolve => { window.__releaseMountTick = resolve; });
+                        }
+                        return result;
+                    };
+                } });
+            });
+            await other.goto(url);
+            await other.waitForFunction(() => window.__mountTickHeld);
+            await other.evaluate(() => {
+                window.__peerRows = [];
+                window.__acceptanceOptions.events.on('pomodoro_new', row => window.__peerRows.push(row));
+            });
+            await age(page, 60);
+            const committed = await page.evaluate(() => window.__acceptanceTimer.localTimer.run('tick', { gapMs: 1e9 }));
+            assert.equal(committed.session.state, 'work');
+            assert.equal(new Set(committed.records.map(row => row.blockId)).size, 2);
+            await other.waitForFunction(expected => window.__receivedRecords.length === expected, committed.records.length);
+            await other.evaluate(() => window.__releaseMountTick());
+            try { await other.waitForFunction(expected => window.__peerRows.length === expected, committed.records.length); }
+            catch (error) {
+                console.error('Cross-tab initialization diagnostic:', JSON.stringify(await other.evaluate(() => ({ received: window.__receivedRecords.length, rendered: window.__peerRows.length, session: window.__acceptanceTimer.localTimer.session }))));
+                throw error;
+            }
+            const peer = await other.evaluate(() => ({ rows: window.__peerRows, task: window.__acceptanceTimer.props.task }));
+            assert(peer.rows.every(row => row.taskId === id));
+            assert.deepEqual(peer.rows.map(row => row.id).sort(), committed.records.map(row => row.id).sort());
+            assert(peer.task.pomodoros.reduce((sum, value) => sum + value, 0) > 1.999999);
         }));
         await check('background audio resumes after short reload and pagehide; only one tab owns playback', () => app(async (page, context) => {
             await page.evaluate(() => {

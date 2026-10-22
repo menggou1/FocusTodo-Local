@@ -213,6 +213,16 @@
         timer.localTimer = {
             async mount() {
                 if (mounted || disposed) return; mounted = true;
+                // A peer can commit while the initial tick/render is awaiting.
+                // Subscribe first so its records are queued behind that tick.
+                listen(root, 'focus-local-timer-changed', event => {
+                    queue = queue.then(async () => {
+                        await root.FocusLocalReady;
+                        if (disposed || halted) return;
+                        const saved = await data.session();
+                        if (saved) await renderSession(saved, event.detail && event.detail.records || []);
+                    }).catch(error => notice(error.message));
+                });
                 await root.FocusLocalReady;
                 if (disposed) return;
                 const saved = await data.session();
@@ -223,13 +233,6 @@
                 const resume = () => { if (!document.hidden) fire('tick'); };
                 listen(document, 'visibilitychange', () => { if (current) fire('tick'); });
                 listen(document, 'resume', resume); listen(root, 'pageshow', resume); listen(root, 'focus', resume);
-                listen(root, 'focus-local-timer-changed', event => {
-                    queue = queue.then(async () => {
-                        if (disposed || halted) return;
-                        const saved = await data.session();
-                        if (saved) await renderSession(saved, event.detail && event.detail.records || []);
-                    }).catch(error => notice(error.message));
-                });
                 listen(root, 'focus-local-maintenance', () => { halted = true; clearInterval(poll); closeDialog(); });
                 listen(root, 'focus-local-maintenance-end', event => {
                     if (!event.detail.succeeded) {
