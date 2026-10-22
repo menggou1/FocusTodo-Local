@@ -2,7 +2,7 @@ name: Test and release
 
 on:
   push:
-    branches: [main, 'codex/macos-sync-1.2.1']
+    branches: [main]
     tags: ['[0-9]*.[0-9]*.[0-9]*']
     paths-ignore:
       - '**/*.md'
@@ -29,8 +29,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest]
-        node: ['24']
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: ['22', '24']
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -54,16 +54,6 @@ jobs:
         if: matrix.node == '24'
         run: npm run test:browser
         env:
-          FOCUS_TEST_BUNDLED_BROWSER: '1'
-      - name: Repeat cross-tab initialization regression
-        shell: bash
-        run: |
-          for attempt in 1 2 3 4 5; do
-            echo "Cross-tab regression pass $attempt/5"
-            npm run test:browser
-          done
-        env:
-          FOCUS_TEST_FILTER: 'peer tab'
           FOCUS_TEST_BUNDLED_BROWSER: '1'
       - name: Package runtime
         if: matrix.node == '24'

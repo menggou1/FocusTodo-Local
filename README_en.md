@@ -94,9 +94,9 @@ The detailed maintenance documents are in Chinese.
 | Development, tests, known issues and version/release procedure | [Maintenance guide](docs/MAINTENANCE.md) |
 | Module, database and legacy bundle boundaries | [Architecture](ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.2.0`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.2.1`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
-The published release passed three-platform acceptance. A later main run had an intermittent macOS cross-tab test timeout that remains unresolved; known issues and desktop notification/audio/sleep verification limits are recorded in the maintenance guide and linked release report.
+Version 1.2.1 fixes a cross-tab initialization race exposed by intermittent macOS acceptance failures. Remaining desktop notification/audio/sleep verification limits are recorded in the maintenance guide and linked release reports.
 
 ## License
 

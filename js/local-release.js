@@ -3,11 +3,22 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.2.0",
+    "localVersion": "1.2.1",
     "author": "Lexible",
-    "date": "2026-10-21",
+    "date": "2026-10-22",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.2.1",
+            "date": "2026-10-22",
+            "title": "多标签页初始化同步修复",
+            "items": [
+                "修复多个标签页同时打开时，部分页面的任务进度和专注统计未及时刷新的问题。",
+                "便携包补齐维护与历史文档，统一文档入口并修正内部链接。",
+                "现有任务、专注记录和设置继续保留，默认访问地址不变。"
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.2.1.md"
+        },
         {
             "version": "7.1.1-local.1.2.0",
             "date": "2026-10-21",
@@ -68,7 +79,7 @@
             "report": "docs/PROGRESS-2026-10-03-stage-2.md"
         }
     ],
-    "version": "7.1.1-local.1.2.0",
+    "version": "7.1.1-local.1.2.1",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

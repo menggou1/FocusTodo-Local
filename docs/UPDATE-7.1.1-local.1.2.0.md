@@ -46,6 +46,8 @@ Release 提供同一套跨平台运行文件的 ZIP、tar.gz 及 SHA256SUMS.txt�
 
 ### 尚未修正的 macOS 跨标签页偶发失败
 
+> 本节保留 1.2.0 当时的调查状态。后续已稳定复现初始化事件丢失并在 1.2.1 修复，原因和验证见 [1.2.1 报告](UPDATE-7.1.1-local.1.2.1.md)。
+
 同一后续提交在开发分支全量通过，而 main 的 macOS / Node.js 24 在 `peer tab refreshes task progress and report events for newly committed records` 等待另一页的记录和任务进度时超过 30 秒。失败位置为当时的 `tests/browser-acceptance.cjs:551`，其余五组检查成功。
 
 已阅读用例和计时适配器。待验证假设是：用例先把共享数据库时间锚点回拨一小时，再手动 tick，两页自动轮询或初始化可能在这些步骤之间运行，改变结算/恢复及事件观察顺序。尚未采集失败时两页会话与事件状态，不能认定为测试竞态或应用缺陷。
