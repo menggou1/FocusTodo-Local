@@ -10,6 +10,8 @@ import tarfile
 import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
+os.environ.setdefault('GIT_TERMINAL_PROMPT', '0')
+os.environ.setdefault('GCM_INTERACTIVE', 'never')
 RUNTIME_PATHS = (
     'index.html', 'patch.js', 'main.css', 'local-ui.css', 'purchase.html',
     'purchase.css', 'reset-password.html', 'resetpassword.css', 'favicon.ico',
