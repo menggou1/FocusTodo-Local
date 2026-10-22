@@ -129,6 +129,25 @@ git push Focustodo-local refs/tags/1.2.2
 
 提交前检查生成文件、文档链接、已读状态和截图，确认没有用户备份、真实数据库、账号凭证或临时输出。选择相关文件提交，推送前核对 remote 和远程分支；远端新增提交时先处理分歧，不强推覆盖。
 
+### GitHub Pages 专用部署分支
+
+线上地址为 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。源码与开发继续使用 `main`，Pages 发布源固定为 `gh-pages` 分支的根目录 `/`。`gh-pages` 是长期保留的部署分支，不属于完成后删除的临时测试分支，也不要反向合入 main。
+
+从完整仓库使用 Python 3.12+ 更新部署：
+
+```bash
+# 可选：生成本地预览，输出目录必须是新目录
+python scripts/deploy-pages.py --output dist/pages-preview
+# 从已提交的 main 发布；也可用 --ref 1.2.1 指定已合入 main 的版本
+python scripts/deploy-pages.py --push
+```
+
+脚本只读取已提交的 main 或其祖先版本，发布浏览器运行资产、`.nojekyll` 和记录来源版本/提交的 `deployment.json`。不发布工作区未提交内容、开发脚本、测试、文档或上游遗留 `CNAME`；保留当前 GitHub 默认域名，不擅自关联其他域名。脚本使用独立临时索引，不切换当前工作区、改动当前索引或强推，后续部署沿 gh-pages 现有历史追加；相同来源重复执行不会重复提交。
+
+仓库 Pages 设置为 Deploy from a branch → `gh-pages` → `/`，使用本机已有 GitHub 认证推送后由 GitHub 构建。普通 `GITHUB_TOKEN` 在工作流里推送分支不会自动触发 Pages 构建；若以后改为完全自动部署，应另行设计 Pages 官方部署工作流，不在仓库中保存个人令牌。
+
+线上地址与本机 loopback 使用不同浏览器存储，数据迁移依赖应用备份导出/导入。部署不会读取或上传本地浏览器数据库。部署后核对 `deployment.json` 的来源提交、Pages 构建状态和项目子路径下的真实页面启动。
+
 ## 6. 待修复与验收边界
 
 此前 macOS 跨标签页用例暴露的初始化事件丢失已在 `1.2.1` 修复：计时器先订阅广播，再等待首次初始化，收到的刷新排在现有队列中。新增受控初始化用例同时检查全部记录 ID 与任务进度，避免只观察事件回调就提前判定成功。复现、修补和验收见 [1.2.1 报告](UPDATE-7.1.1-local.1.2.1.md)。

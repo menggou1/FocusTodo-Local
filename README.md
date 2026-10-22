@@ -27,6 +27,8 @@ FocusTodo 专注清单 - 浏览器本地版
 
 ## 快速开始
 
+在线使用：[GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。线上站点与本地 `127.0.0.1` 地址使用不同的浏览器存储，迁移数据请先导出备份再导入。
+
 从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载 ZIP 或 tar.gz 并解压，安装 Node.js 22+。三个系统使用同一份便携包，无需运行 `npm install`。发布附带 `SHA256SUMS.txt`，运行时需自行安装，不包含在压缩包中。
 
 三个系统通用：`node scripts/start.cjs` 或 `npm start`。成功启动后自动打开浏览器；无桌面环境可用 `node scripts/start.cjs --no-browser`，指定端口用 `--port 5511`（npm 方式为 `npm start -- --no-browser --port 5511`）。
