@@ -32,7 +32,7 @@ walk(modules[863], node => {
     replace(node.right, original.replace('case 0:t.type', 'case 0:if(!t||window.FocusLocalData.maintenance)return e.abrupt("return");t.type'));
 });
 
-method(862, 'render', 'function(){return l.default.createElement("div",{className:d.default.root+" focus-notification-panel"},l.default.createElement("div",{className:d.default.title+" larger1-font"},e.i18n.prop("tsk_notification")),window.FocusAppUI.renderUpdates(l.default),l.default.createElement(c.default,{classNames:[d.default.items],isUl:true},this.getItems()))}');
+method(862, 'render', 'function(){return l.default.createElement("div",{className:d.default.root+" focus-notification-panel"},l.default.createElement("div",{className:d.default.title+" larger1-font"},e.i18n.prop("tsk_notification")),l.default.createElement("div",{className:"focus-notification-content"},window.FocusAppUI.renderUpdates(l.default),l.default.createElement("ul",{className:"focus-task-reminders"},this.getItems())))}');
 const header = method(821, 'render');
 walk(header.value, node => {
     if (node.type === 'LogicalExpression' && node.operator === '&&' && source.slice(node.left.start, node.left.end).includes('this.state.notification.highlight') && source.slice(node.right.start, node.right.end).startsWith('e.backgroundImage=')) {

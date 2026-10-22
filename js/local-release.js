@@ -3,11 +3,22 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.2.1",
+    "localVersion": "1.2.2",
     "author": "Lexible",
     "date": "2026-10-22",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.2.2",
+            "date": "2026-10-22",
+            "title": "通知面板布局修复",
+            "items": [
+                "通知面板改为统一滚动，移除空提醒区域的固定占位，更新内容和任务提醒均可完整查看。",
+                "保留固定标题，适配较小窗口及页面缩放，通知详情继续支持鼠标和键盘打开。",
+                "合并早期 patch.1 的两阶段报告，统一历史文档入口。"
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.2.2.md"
+        },
         {
             "version": "7.1.1-local.1.2.1",
             "date": "2026-10-22",
@@ -76,10 +87,10 @@
                 "修复停止后旧时长恢复、叉号无法取消任务及任务切换问题。",
                 "完整备份、导入校验与中断恢复，补齐通知、音频和订阅清理。"
             ],
-            "report": "docs/PROGRESS-2026-10-03-stage-2.md"
+            "report": "docs/UPDATE-7.1.1-patch.1.md"
         }
     ],
-    "version": "7.1.1-local.1.2.1",
+    "version": "7.1.1-local.1.2.2",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

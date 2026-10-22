@@ -151,17 +151,37 @@
 }
 
 .focus-notification-panel {
+    display:flex;
+    flex-direction:column;
     height:auto;
-    max-height:calc(100vh - 90px);
-    overflow:auto
+    max-height:min(620px,calc(100vh - 90px));
+    max-width:calc(100vw - 16px);
+    overflow:hidden
+}
+
+.focus-notification-panel > :first-child {
+    flex:none
+}
+
+.focus-notification-content {
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain
+}
+
+.focus-task-reminders {
+    margin:0;
+    padding:0;
+    list-style:none
+}
+
+.focus-task-reminders:not(:empty) {
+    border-top:1px solid var(--border)
 }
 
 .focus-release-list {
     box-sizing:border-box;
-    max-height:40vh;
-    overflow-y:auto;
     padding:10px 12px;
-    border-bottom:1px solid var(--border);
     color:var(--text-title);
     width:100%
 }

@@ -237,8 +237,10 @@ const server = http.createServer((request, response) => {
             await page.locator('#notification-popover').waitFor();
             assert.match(await page.locator('#notification-popover').innerText(), /原任务提醒保留/);
             const panel = await page.locator('.focus-notification-panel').boundingBox();
-            const reminders = await page.locator('[class*="NotificationDialog-items"]').boundingBox();
-            assert(panel && reminders && reminders.y + reminders.height <= panel.y + panel.height + 1, 'Reminders remain inside the resized notification panel');
+            const remindersList = page.locator('.focus-task-reminders');
+            await remindersList.scrollIntoViewIfNeeded();
+            const reminders = await remindersList.boundingBox();
+            assert(panel && reminders && reminders.y + reminders.height <= panel.y + panel.height + 1, 'Reminders are reachable in the shared scroll area');
             assert.equal(await page.locator('.focus-release-entry').count(), release.updates.length);
             assert(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()));
             await page.waitForTimeout(400);
@@ -255,6 +257,37 @@ const server = http.createServer((request, response) => {
             await page.locator('#focus-update-dialog').waitFor({ state: 'detached' });
             await page.reload(); await page.waitForFunction(() => window.FocusAppUI && window.__acceptanceTimer);
             assert.equal(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()), false);
+        }));
+        await check('notification panel scrolls all updates without an empty reminder spacer at small sizes and zoom', () => app(async page => {
+            for (const [width, height, zoom] of [[1280, 900, 1], [1024, 600, 1.25], [800, 450, 1]]) {
+                // Browser page zoom reduces the CSS viewport; CSS `zoom` does not
+                // change viewport units and is not equivalent to browser zoom.
+                await page.setViewportSize({ width: Math.floor(width / zoom), height: Math.floor(height / zoom) });
+                await page.getByRole('button', { name: '通知', exact: true }).click();
+                const scroll = page.locator('.focus-notification-content');
+                await scroll.waitFor();
+                const geometry = await scroll.evaluate(el => {
+                    const panel = el.parentElement, title = panel.firstElementChild;
+                    return { bottom: panel.getBoundingClientRect().bottom, viewport: innerHeight,
+                        empty: panel.querySelector('.focus-task-reminders').getBoundingClientRect().height,
+                        height: el.clientHeight, total: el.scrollHeight, title: title.getBoundingClientRect().top };
+                });
+                assert(geometry.bottom <= geometry.viewport, JSON.stringify(geometry));
+                assert.equal(geometry.empty, 0, 'No blank reminder area when there are no reminders');
+                assert(geometry.total > geometry.height, 'Long history scrolls within available space');
+                const last = page.locator('.focus-release-entry').last();
+                await last.scrollIntoViewIfNeeded();
+                const hint = last.locator('.focus-release-hint');
+                const point = await hint.evaluate(el => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+                assert(await hint.evaluate((el, point) => el.contains(document.elementFromPoint(point.x, point.y)), point), 'Last update link is unobscured');
+                assert.equal(await page.locator('.focus-notification-panel > :first-child').evaluate(el => el.getBoundingClientRect().top), geometry.title, 'Title stays fixed while scrolling');
+                await page.screenshot({ path: path.join(root, `docs/acceptance/notifications-${width}-${zoom}.png`) });
+                await last.click();
+                assert((await page.locator('#focus-update-dialog').innerText()).includes(release.updates.at(-1).version));
+                await page.getByRole('button', { name: '关闭', exact: true }).click();
+                const bell = page.getByRole('button', { name: '通知', exact: true });
+                if (await bell.getAttribute('aria-expanded') === 'true') await bell.click();
+            }
         }));
         await check('older update details close on Escape and do not mark the latest update as read', () => app(async page => {
             await page.getByRole('button', { name: '通知', exact: true }).click();
