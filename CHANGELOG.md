@@ -2,18 +2,19 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.2.2** · Git Tag **1.2.2** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.2.3** · Git Tag **1.2.3** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。当前开发、发布步骤与待修复清单见维护指南；历史测试数量、截图和待办仅代表当时状态。
 
-## 7.1.1-local.1.2.2 · 2026-10-22
+## 7.1.1-local.1.2.3 · 2026-10-22
 
 - 通知标题固定，版本更新与任务提醒共用滚动区；取消空提醒固定占位，较小窗口也能访问完整列表。
+- 普通浏览器缩放时不再访问不存在的扩展存储，保留布局刷新；候选 1.2.2 被云端门禁拦截，最终以 1.2.3 发布。
 - 增加长更新列表末项点击、空提醒布局和较小视口回归；保留深浅主题与任务提醒验证。
 - 早期 patch.1 的第一、第二阶段合并为同一版本报告，保留阶段内容并统一元数据和链接。
 - 同步 Windows、macOS、Linux 便携包与 GitHub Pages。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.2) · [完整修复、验收与发布报告](docs/UPDATE-7.1.1-local.1.2.2.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.3) · [完整修复、验收与发布报告](docs/UPDATE-7.1.1-local.1.2.3.md)。
 
 ## 7.1.1-local.1.2.1 · 2026-10-22
 

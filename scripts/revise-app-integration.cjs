@@ -33,6 +33,13 @@ walk(modules[863], node => {
 });
 
 method(862, 'render', 'function(){return l.default.createElement("div",{className:d.default.root+" focus-notification-panel"},l.default.createElement("div",{className:d.default.title+" larger1-font"},e.i18n.prop("tsk_notification")),l.default.createElement("div",{className:"focus-notification-content"},window.FocusAppUI.renderUpdates(l.default),l.default.createElement("ul",{className:"focus-task-reminders"},this.getItems())))}');
+// Guard the legacy extension-only resize persistence in ordinary browsers.
+walk(modules[254], node => {
+    if (node.type !== 'AssignmentExpression' || node.left.type !== 'MemberExpression' || node.left.object.name !== 'window' || node.left.property.name !== 'onresize') return;
+    const original = source.slice(node.right.start, node.right.end);
+    const old = 'var e=l.default.shared.isChromium?window.chrome.storage:window.browser.storage;e&&e.sync.set';
+    if (original.includes(old)) replace(node.right, original.replace(old, 'var e=window.chrome&&window.chrome.runtime&&window.chrome.runtime.id?window.chrome.storage:window.browser&&window.browser.runtime&&window.browser.runtime.id?window.browser.storage:null;e&&e.sync&&typeof e.sync.set==="function"&&e.sync.set'));
+});
 const header = method(821, 'render');
 walk(header.value, node => {
     if (node.type === 'LogicalExpression' && node.operator === '&&' && source.slice(node.left.start, node.left.end).includes('this.state.notification.highlight') && source.slice(node.right.start, node.right.end).startsWith('e.backgroundImage=')) {
