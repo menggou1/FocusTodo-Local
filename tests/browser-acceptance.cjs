@@ -596,7 +596,11 @@ const server = http.createServer((request, response) => {
             assert.equal(new Set(committed.records.map(row => row.blockId)).size, 2);
             await other.waitForFunction(expected => window.__receivedRecords.length === expected, committed.records.length);
             await other.evaluate(() => window.__releaseMountTick());
-            try { await other.waitForFunction(expected => window.__peerRows.length === expected, committed.records.length); }
+            try {
+                await other.waitForFunction(expected => window.__peerRows.length === expected
+                    && window.__acceptanceTimer.props.task
+                    && window.__acceptanceTimer.props.task.pomodoros.reduce((sum, value) => sum + value, 0) > 1.999999, committed.records.length);
+            }
             catch (error) {
                 console.error('Cross-tab initialization diagnostic:', JSON.stringify(await other.evaluate(() => ({ received: window.__receivedRecords.length, rendered: window.__peerRows.length, session: window.__acceptanceTimer.localTimer.session }))));
                 throw error;
