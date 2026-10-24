@@ -2,7 +2,7 @@
 
 [返回首页](../README.md) · [更新记录与版本报告](../CHANGELOG.md) · [架构说明](../ARCHITECTURE.md)
 
-本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.3.0`。历史报告只记录当时事实，当前步骤和待修复问题以本文为准。
+本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.3.1`。历史报告只记录当时事实，当前步骤和待修复问题以本文为准。
 
 ## 1. 开始修改前
 
@@ -69,7 +69,7 @@ node scripts/revise-pomodoro-rendering.cjs
 
 | 情况 | 完整版本示例 | Tag |
 |---|---|---|
-| 当前发布 | `7.1.1-local.1.3.0` | `1.3.0` |
+| 当前发布 | `7.1.1-local.1.3.1` | `1.3.1` |
 | 兼容修复 | `7.1.1-local.1.2.3` | `1.2.3` |
 | 兼容功能 | `7.1.1-local.1.3.0` | `1.3.0` |
 | 本地不兼容改变 | `7.1.1-local.2.0.0` | `2.0.0`，另附迁移和回退方案 |
@@ -96,7 +96,7 @@ git diff --stat
 git status --short
 ```
 
-当前全量包含计时核心、服务、发布信息、启动器、备份编码，47 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
+当前全量包含计时核心、服务、发布信息、启动器、备份编码，50 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 

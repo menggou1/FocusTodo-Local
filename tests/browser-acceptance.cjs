@@ -74,7 +74,80 @@ const server = http.createServer((request, response) => {
         }, minutes);
     }
     const snapshot = page => page.evaluate(() => window.FocusLocalData.snapshot());
+    async function themeFixture(page, bing = false) {
+        await page.evaluate(bing => {
+            const canvas = document.createElement('canvas'); canvas.width = canvas.height = 2;
+            const themes = {};
+            for (const [id, color] of [['custom_a', '#ff0000'], ['custom_b', '#0000ff'], ['__bing_daily__', '#00ff00']]) {
+                canvas.getContext('2d').fillStyle = color; canvas.getContext('2d').fillRect(0, 0, 2, 2);
+                const dataUrl = canvas.toDataURL(); themes[id] = { name: id, dataUrl, thumbnail: dataUrl, createdAt: 1, updatedAt: 1 };
+            }
+            localStorage.setItem('lexible-custom-themes', JSON.stringify(themes));
+            localStorage.setItem('Theme', bing ? '__bing_daily__' : 'Leaf');
+            if (bing) localStorage.setItem('lexible-active-custom-theme', '__bing_daily__');
+        }, bing);
+    }
+    async function appearance(page) {
+        await page.mouse.click(1255, 25); await page.getByText('外观', { exact: true }).click();
+        await page.locator('[data-theme-id="custom_a"]').waitFor();
+    }
+    async function delayedBing(page) {
+        let release, requested;
+        const gate = new Promise(resolve => { release = resolve; });
+        const started = new Promise(resolve => { requested = resolve; });
+        await page.route('https://bing.biturl.top/**', async route => {
+            requested(); await gate;
+            await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ url: 'https://www.bing.com/theme-acceptance.png' }) });
+        });
+        await page.route('https://www.bing.com/theme-acceptance.png', route => route.fulfill({ contentType: 'image/png', headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aL1sAAAAASUVORK5CYII=', 'base64') }));
+        return { started, release };
+    }
     try {
+        await check('theme switching preserves the later classic choice after Bing downloads', () => app(async page => {
+            const bing = await delayedBing(page); await appearance(page);
+            await page.locator('[data-theme-id="__bing_daily__"]').click(); await bing.started;
+            await page.getByText('下载中...', { exact: true }).waitFor();
+            await page.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();
+            bing.release();
+            await page.waitForFunction(() => JSON.parse(localStorage.getItem('lexible-custom-themes')).__bing_daily__.updatedAt > 1);
+            await page.getByText('Bing 每日', { exact: true }).waitFor();
+            assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'Ocean');
+            assert.equal(await page.evaluate(() => localStorage.getItem('lexible-active-custom-theme')), null);
+            assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /timer-bg-ocean\.jpg/);
+        }, page => themeFixture(page)));
+        await check('theme switching restores the same classic and all indicators in one frame', () => app(async page => {
+            await appearance(page);
+            for (const [classic, custom] of [['Leaf', 'custom_a'], ['Ocean', 'custom_b'], ['Leaf', 'custom_a']]) {
+                const image = `img/timer-bg-${classic.toLowerCase()}-shortcut.jpg`;
+                await page.locator(`img[src="${image}"]`).click();
+                await page.locator(`[data-theme-id="${custom}"]`).click();
+                assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /data:image/);
+                const result = await page.evaluate(async image => {
+                    document.querySelector(`img[src="${image}"]`).click();
+                    await new Promise(requestAnimationFrame);
+                    const td = document.querySelector(`img[src="${image}"]`).closest('td');
+                    return { active: localStorage.getItem('lexible-active-custom-theme'), background: document.querySelector('[class*="Timer-bgi"]').style.backgroundImage,
+                        border: getComputedStyle(td.querySelector('[class*="imgWrapper"]')).borderTopColor,
+                        checked: [...td.querySelectorAll('[class*="chkImg"]')].some(el => getComputedStyle(el).display !== 'none') };
+                }, image);
+                assert.equal(result.active, null); assert.match(result.background, new RegExp('timer-bg-' + classic.toLowerCase() + '\\.jpg'));
+                assert.notEqual(result.border, 'rgba(0, 0, 0, 0)'); assert(result.checked);
+            }
+            await page.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();
+            await page.locator('[data-theme-id="custom_b"]').click();
+            await page.locator('[data-theme-id="custom_b"] [title="删除此主题"]').click();
+            assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'Leaf');
+            assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /timer-bg-leaf\.jpg/);
+        }, page => themeFixture(page)));
+        await check('theme switching ignores an obsolete automatic Bing refresh', () => app(async page => {
+            const bing = await delayedBing(page); await appearance(page); await bing.started;
+            await page.locator('[data-theme-id="custom_b"]').click(); bing.release();
+            await page.waitForFunction(() => JSON.parse(localStorage.getItem('lexible-custom-themes')).__bing_daily__.updatedAt > 1);
+            await page.getByText('Bing 每日', { exact: true }).waitFor();
+            assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'custom_b');
+            const image = await page.evaluate(() => JSON.parse(localStorage.getItem('lexible-custom-themes')).custom_b.dataUrl);
+            assert((await page.locator('[class*="Timer-bgi"]').getAttribute('style')).includes(image));
+        }, page => themeFixture(page, true)));
         await check('fresh app starts without external requests', () => app(async (page, context, errors, external) => {
             await page.waitForTimeout(1200);
             assert.match(await page.locator('body').innerText(), /本地用户/); assert.deepEqual(external, []);

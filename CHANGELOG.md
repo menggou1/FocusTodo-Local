@@ -2,9 +2,17 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.3.0** · Git Tag **1.3.0** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.3.1** · Git Tag **1.3.1** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。当前开发、发布步骤与待修复清单见维护指南；历史测试数量、截图和待办仅代表当时状态。
+
+## 7.1.1-local.1.3.1 · 2026-10-24
+
+- Bing 下载、过期刷新和本地上传遵循最新主题选择，旧异步结果不再抢回壁纸。
+- 经典背景、红勾与粉框立即同步，支持经典/本地主题反复往返；删除当前本地主题后正确恢复 Leaf。
+- 删除 1.3.0 计划文档，将未完成工程并入详细报告；保留 Actions，继续排除网站与便携包中的开发目录。
+
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.1) · [详细修复报告](docs/UPDATE-7.1.1-local.1.3.1.md)。
 
 ## 7.1.1-local.1.3.0 · 2026-10-24
 
@@ -13,7 +21,7 @@
 - 加强无 Web Locks 的多页维护归属、并发导入/删除与中断恢复，自动安全备份始终完整。
 - 数据库仍为 v3；Blob 图片迁移、独立资源包与真实长时间运行等项目按报告结转。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.0) · [实现、容量测量与发布验收](docs/UPDATE-7.1.1-local.1.3.0.md) · [原计划](docs/PLAN-7.1.1-local.1.3.0.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.0) · [实现、容量测量与发布验收](docs/UPDATE-7.1.1-local.1.3.0.md)。
 
 ## 7.1.1-local.1.2.3 · 2026-10-22
 
