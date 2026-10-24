@@ -704,6 +704,7 @@
         var BING_ID = '__bing_daily__';
         var CUSTOM_PREFIX = 'custom_';
         var BING_EXPIRY_MS = 12 * 60 * 60 * 1000; // 12小时
+        var selectionRevision = 0;
 
         // ---- 工具函数 ----
         function _safeSet(k, v) {
@@ -779,13 +780,9 @@
         function clearCustomBackground(expectedThemeId) {
             // 仅当切回的是保存时的同一经典主题才需要恢复
             //（不同主题时 React 已自行重渲染，不应覆盖）
-            if (expectedThemeId !== undefined && expectedThemeId !== _savedClassicThemeId) {
-                _savedClassicBg = null;
-                _savedClassicThemeId = null;
-                return;
-            }
+            var restore = expectedThemeId === undefined || expectedThemeId === _savedClassicThemeId;
             findBgiElements().forEach(function(el) {
-                if (_savedClassicBg) {
+                if (restore && _savedClassicBg) {
                     el.style.backgroundImage = _savedClassicBg;
                 } else {
                     el.style.removeProperty('background-image');
@@ -796,6 +793,16 @@
             _savedClassicBg = null;
             _savedClassicThemeId = null;
         }
+
+        function selectClassic(id) {
+            selectionRevision++;
+            var wasCustom = getActiveId() || _savedClassicBg;
+            setActiveId(null);
+            if (wasCustom) clearCustomBackground(id);
+            _lastObservedTheme = id;
+            doRefreshUI();
+        }
+        window.FocusThemes = { selectClassic: selectClassic, refresh: refreshThemeUI };
 
         // ---- 防重入标志（防止 refreshThemeUI 修改 DOM 后触发自身）----
         var _isRefreshing = false;
@@ -929,12 +936,12 @@
 
         // ---- 用户手动点击获取Bing壁纸 ----
         var _bingLoading = false;
-        function fetchAndApplyBing(labelEl) {
-            if (_bingLoading) return;
+        var _bingRequest = null;
+        function loadBingWallpaper() {
+            if (_bingRequest) return _bingRequest;
             _bingLoading = true;
-            if (labelEl) labelEl.textContent = '下载中...';
-
-            fetchBingWallpaper().then(function(result) {
+            refreshThemeUI();
+            _bingRequest = fetchBingWallpaper().then(function(result) {
                 return downloadImageAsDataUrl(result.url).then(function(dataUrl) {
                     return createThumbnail(dataUrl).then(function(thumb) {
                         return { dataUrl: dataUrl, thumbnail: thumb, copyright: result.copyright };
@@ -948,18 +955,31 @@
                     updatedAt: Date.now(), copyright: data.copyright || ''
                 };
                 saveCustomThemes(themes);
-                setActiveId(BING_ID);
-                var _prevBing = localStorage.getItem('Theme');
-                _safeSet('Theme', BING_ID);
-                applyCustomBackground(data.dataUrl, _prevBing);
-                refreshThemeUI();
-                console.log('[Lexible] Bing wallpaper applied');
-            }).catch(function(err) {
-                console.warn('[Lexible] Bing fetch failed:', err.message || err);
-                alert('获取 Bing 每日壁纸失败。\n\n' + ((err && err.message) || '网络错误，请检查网络连接后重试。'));
+                return data;
             }).finally(function() {
                 _bingLoading = false;
-                if (labelEl) labelEl.textContent = 'Bing 每日';
+                _bingRequest = null;
+                refreshThemeUI();
+            });
+            return _bingRequest;
+        }
+
+        function activateCustomTheme(id, theme) {
+            var prevTheme = localStorage.getItem('Theme');
+            setActiveId(id);
+            _safeSet('Theme', id);
+            _lastObservedTheme = id;
+            applyCustomBackground(theme.dataUrl, prevTheme);
+            refreshThemeUI();
+        }
+
+        function fetchAndApplyBing() {
+            var revision = ++selectionRevision;
+            loadBingWallpaper().then(function(data) {
+                if (revision === selectionRevision) activateCustomTheme(BING_ID, data);
+            }).catch(function(err) {
+                console.warn('[Lexible] Bing fetch failed:', err.message || err);
+                if (revision === selectionRevision) alert('获取 Bing 每日壁纸失败。\n\n' + ((err && err.message) || '网络错误，请检查网络连接后重试。'));
             });
         }
 
@@ -973,22 +993,11 @@
             if (Date.now() - (bing.updatedAt || 0) < BING_EXPIRY_MS) return;
 
             console.log('[Lexible] Bing wallpaper expired, auto-refreshing...');
-            fetchBingWallpaper().then(function(result) {
-                return downloadImageAsDataUrl(result.url).then(function(dataUrl) {
-                    return createThumbnail(dataUrl).then(function(thumb) {
-                        return { dataUrl: dataUrl, thumbnail: thumb, copyright: result.copyright };
-                    });
-                });
-            }).then(function(data) {
-                var themes = getCustomThemes();
-                themes[BING_ID] = {
-                    name: 'Bing每日壁纸', dataUrl: data.dataUrl,
-                    thumbnail: data.thumbnail, type: 'bing',
-                    updatedAt: Date.now(), copyright: data.copyright || ''
-                };
-                saveCustomThemes(themes);
-                applyCustomBackground(data.dataUrl);
-                console.log('[Lexible] Bing wallpaper auto-refreshed');
+            var revision = selectionRevision;
+            loadBingWallpaper().then(function(data) {
+                if (revision === selectionRevision && getActiveId() === BING_ID) {
+                    applyCustomBackground(data.dataUrl);
+                }
             }).catch(function(err) {
                 console.warn('[Lexible] Bing auto-refresh failed:', err.message || err);
             });
@@ -998,11 +1007,8 @@
         function selectCustomTheme(id) {
             var themes = getCustomThemes();
             if (!themes[id]) return;
-            var prevTheme = localStorage.getItem('Theme');
-            setActiveId(id);
-            _safeSet('Theme', id);
-            applyCustomBackground(themes[id].dataUrl, prevTheme);
-            refreshThemeUI();
+            selectionRevision++;
+            activateCustomTheme(id, themes[id]);
         }
 
         // ---- 删除自定义主题 ----
@@ -1012,9 +1018,17 @@
             delete themes[id];
             saveCustomThemes(themes);
             if (getActiveId() === id) {
-                setActiveId(null);
-                _safeSet('Theme', 'Leaf');
-                clearCustomBackground();
+                selectionRevision++;
+                var table = findThemeTable();
+                var leaf = table && table.querySelector('img[src="img/timer-bg-leaf-shortcut.jpg"]');
+                // Use the legacy selection event as well as storage, so its
+                // cached classic theme and timer background also return to Leaf.
+                if (leaf) leaf.click();
+                else {
+                    setActiveId(null);
+                    _safeSet('Theme', 'Leaf');
+                    clearCustomBackground('Leaf');
+                }
             }
             refreshThemeUI();
         }
@@ -1164,6 +1178,7 @@
                     e.target.value = '';
                     return;
                 }
+                var revision = ++selectionRevision;
                 var reader = new FileReader();
                 reader.onload = function(evt) {
                     var rawDataUrl = evt.target.result;
@@ -1183,10 +1198,7 @@
                             createdAt: Date.now(), originalName: file.name
                         };
                         saveCustomThemes(themes);
-                        setActiveId(id);
-                        var _prevUp = localStorage.getItem('Theme');
-                        _safeSet('Theme', id);
-                        applyCustomBackground(result.dataUrl, _prevUp);
+                        if (revision === selectionRevision) activateCustomTheme(id, result);
                         refreshThemeUI();
                     }).catch(function(err) {
                         console.error('[Lexible] Upload failed:', err);
@@ -1256,6 +1268,7 @@
             var bingData = themes[BING_ID];
             var isBingActive = activeId === BING_ID;
             var bingTd = document.createElement('td');
+            bingTd.setAttribute('data-theme-id', BING_ID);
             if (cls.tdClass) bingTd.className = cls.tdClass;
             bingTd.style.cssText = 'position:relative;padding-bottom:12px;padding-right:8px;cursor:pointer;';
 
@@ -1273,7 +1286,7 @@
 
             var bingLabel = document.createElement('div');
             bingLabel.style.cssText = 'position:absolute;bottom:14px;left:4px;background:rgba(0,0,0,0.6);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:5;';
-            bingLabel.textContent = 'Bing 每日';
+            bingLabel.textContent = _bingLoading ? '下载中...' : 'Bing 每日';
             bingTd.appendChild(bingLabel);
 
             if (isBingActive) {
