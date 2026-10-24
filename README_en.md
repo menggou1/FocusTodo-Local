@@ -54,7 +54,7 @@ http://127.0.0.1:5500/index.html
 - 📅 Calendar view
 - 📊 Focus time reports
 - 🎨 Custom themes (Bing daily wallpaper + local upload)
-- 💾 Data export/import backup
+- 💾 Lossless Gzip / JSON backups, legacy imports, size analysis and optional wallpapers
 - 🌲 Focus forest (sunlight rewards)
 - 🌐 32 languages supported
 
@@ -86,6 +86,8 @@ FocusTodo/
 
 Timer sessions use the `TimerSession` store in `PomodoroDB6` v3. Long interruptions require confirmation. Stopping saves valid work and resets elapsed time; removing a timing task preserves the task in the list.
 
+Settings → Account exports a complete `.json.gz` backup by default, with plain JSON and wallpaper omission available. Imports identify JSON/Gzip by content, retain v1/v2 compatibility, and show the backup scope before replacement. Omitting wallpapers restores the built-in Leaf theme. Automatic pre-import/reset JSON backups always include all data. Without compression support, exports fall back to JSON; Gzip imports require decompression support. Encoded and decoded backups are limited to 128 MB. Older app versions cannot directly import Gzip. Images still use localStorage and remain subject to browser quota. Starting a download does not prove the file was permanently saved.
+
 ## Documentation
 
 The detailed maintenance documents are in Chinese.
@@ -96,7 +98,7 @@ The detailed maintenance documents are in Chinese.
 | Development, tests, known issues and version/release procedure | [Maintenance guide](docs/MAINTENANCE.md) |
 | Module, database and legacy bundle boundaries | [Architecture](ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.2.3`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.3.0`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 Version 1.2.1 fixes a cross-tab initialization race exposed by intermittent macOS acceptance failures. Remaining desktop notification/audio/sleep verification limits are recorded in the maintenance guide and linked release reports.
 

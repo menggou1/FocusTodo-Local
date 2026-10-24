@@ -1,231 +1,241 @@
 {
-  "version": "7.1.1-local.1.2.3",
-  "date": "2026-10-22",
+  "version": "7.1.1-local.1.3.0",
+  "date": "2026-10-24",
   "results": [
     {
       "name": "fresh app starts without external requests",
       "passed": true,
-      "ms": 2777
+      "ms": 2581
     },
     {
       "name": "empty projects with an existing version recover system navigation on startup",
       "passed": true,
-      "ms": 2988
+      "ms": 2393
     },
     {
       "name": "focus below 25 seconds is excluded in both timer modes",
       "passed": true,
-      "ms": 3719
+      "ms": 2159
     },
     {
       "name": "appearance controls theme notifications, local dialogs and account buttons",
       "passed": true,
-      "ms": 7584
+      "ms": 5852
     },
     {
       "name": "account backup buttons support keyboard export and full import",
       "passed": true,
-      "ms": 3742
+      "ms": 2952
+    },
+    {
+      "name": "wallpaper scope restores Leaf and automatic safety backup remains complete",
+      "passed": true,
+      "ms": 2830
+    },
+    {
+      "name": "missing compression API exports JSON and backup dialog fits narrow dark viewport",
+      "passed": true,
+      "ms": 1821
     },
     {
       "name": "production loopback server boots the app and serves seekable local M4A audio",
       "passed": true,
-      "ms": 1222
+      "ms": 1197
     },
     {
       "name": "About displays canonical versions and Git remote; rating and update notes are absent",
       "passed": true,
-      "ms": 2112
+      "ms": 1820
     },
     {
       "name": "notification bell contains update details and preserves task reminders",
       "passed": true,
-      "ms": 3360
+      "ms": 2427
     },
     {
       "name": "notification panel scrolls all updates without an empty reminder spacer at small sizes and zoom",
       "passed": true,
-      "ms": 3280
+      "ms": 2041
     },
     {
       "name": "older update details close on Escape and do not mark the latest update as read",
       "passed": true,
-      "ms": 2091
+      "ms": 1224
     },
     {
       "name": "UI delete waits five seconds, needs no password, and cancel preserves data",
       "passed": true,
-      "ms": 7055
+      "ms": 5644
     },
     {
       "name": "UI delete downloads a full backup before clearing and reloads only after success",
       "passed": true,
-      "ms": 11541
+      "ms": 10612
     },
     {
       "name": "failed UI delete reports failure, keeps the dialog and rolls data back",
       "passed": true,
-      "ms": 7187
+      "ms": 7733
     },
     {
       "name": "task creation, switching intervals and completing the active task through legacy UI",
       "passed": true,
-      "ms": 2237
+      "ms": 2632
     },
     {
       "name": "list rapid task completion with six focus records keeps app rendered",
       "passed": true,
-      "ms": 4631
+      "ms": 7029
     },
     {
       "name": "timer rapid task completion with six focus records keeps app rendered",
       "passed": true,
-      "ms": 4831
+      "ms": 4949
     },
     {
       "name": "raw focus record refresh renders numeric task progress without toMaxFixed crash",
       "passed": true,
-      "ms": 2997
+      "ms": 2535
     },
     {
       "name": "countup stopped timer stays zero when task completion circle is clicked",
       "passed": true,
-      "ms": 3036
+      "ms": 2294
     },
     {
       "name": "countup task cancel cross clears selection and does not resurrect stopped time",
       "passed": true,
-      "ms": 2924
+      "ms": 2286
     },
     {
       "name": "countdown stopped timer stays zero when task completion circle is clicked",
       "passed": true,
-      "ms": 3373
+      "ms": 2996
     },
     {
       "name": "countdown task cancel cross clears selection and does not resurrect stopped time",
       "passed": true,
-      "ms": 3313
+      "ms": 3061
     },
     {
       "name": "active task cancel saves elapsed once; event start uses the current adapter",
       "passed": true,
-      "ms": 1994
+      "ms": 1852
     },
     {
       "name": "normal boundaries notify once; restored history and partial stops stay silent",
       "passed": true,
-      "ms": 1534
+      "ms": 1225
     },
     {
       "name": "legacy unmount disposes polling, all timer subscriptions and bridge callbacks",
       "passed": true,
-      "ms": 2391
+      "ms": 2065
     },
     {
       "name": "peer tab refreshes task progress and report events for newly committed records",
       "passed": true,
-      "ms": 3178
+      "ms": 2649
     },
     {
       "name": "peer tab receives records committed while timer initialization is pending",
       "passed": true,
-      "ms": 2806
+      "ms": 2390
     },
     {
       "name": "background audio resumes after short reload and pagehide; only one tab owns playback",
       "passed": true,
-      "ms": 3882
+      "ms": 2540
     },
     {
       "name": "waiting rest and manual rest completion keep idle work time zero",
       "passed": true,
-      "ms": 2126
+      "ms": 1470
     },
     {
       "name": "subtask cancellation and completion clear both timing IDs without losing saved work",
       "passed": true,
-      "ms": 2580
+      "ms": 2140
     },
     {
       "name": "two tabs without Web Locks serialize timer records in IndexedDB",
       "passed": true,
-      "ms": 2448
+      "ms": 1933
     },
     {
       "name": "120-minute reload, confirmation, historical records and retry deduplication",
       "passed": true,
-      "ms": 3492
+      "ms": 2699
     },
     {
       "name": "145-minute recovery retains remainder; pending dialog survives another reload",
       "passed": true,
-      "ms": 3613
+      "ms": 2706
     },
     {
       "name": "reject recovery excludes interruption and pauses when requested",
       "passed": true,
-      "ms": 2300
+      "ms": 2083
     },
     {
       "name": "IndexedDB failure rolls records and cursor back; retry commits exactly once",
       "passed": true,
-      "ms": 2302
+      "ms": 1675
     },
     {
       "name": "two tabs resolving one session cannot create duplicate records",
       "passed": true,
-      "ms": 2708
+      "ms": 2231
     },
     {
       "name": "v2 database migrates without Version setting or lost records",
       "passed": true,
-      "ms": 1905
+      "ms": 1299
     },
     {
       "name": "complete backup validates; malformed imports leave all data intact",
       "passed": true,
-      "ms": 1932
+      "ms": 1121
     },
     {
       "name": "import is atomic on failure and legacy backup clears running sessions",
       "passed": true,
-      "ms": 1848
+      "ms": 1164
     },
     {
       "name": "settings failure during import rolls database and settings back",
       "passed": true,
-      "ms": 1523
+      "ms": 1163
     },
     {
       "name": "new backup preserves unfinished spans without automatically running on import",
       "passed": true,
-      "ms": 2312
+      "ms": 1902
     },
     {
       "name": "interrupted import journal completes safely on next app load",
       "passed": true,
-      "ms": 2104
+      "ms": 1795
     },
     {
       "name": "interrupted import with full settings storage rolls back and still boots",
       "passed": true,
-      "ms": 2118
+      "ms": 2090
     },
     {
       "name": "theme storage failure is visible and does not activate the failed theme",
       "passed": true,
-      "ms": 2699
+      "ms": 2341
     },
     {
       "name": "reset restores system lists and preserves a full backup",
       "passed": true,
-      "ms": 1731
+      "ms": 1288
     },
     {
       "name": "Request and URL inputs cannot bypass exact network allowlist",
       "passed": true,
-      "ms": 1143
+      "ms": 906
     }
   ]
 }

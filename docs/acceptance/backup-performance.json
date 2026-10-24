@@ -1,0 +1,782 @@
+{
+  "createdAt": "2026-10-24T14:37:56.262Z",
+  "version": "7.1.1-local.1.3.0",
+  "environment": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "architecture": "x64",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-11260H @ 2.60GHz",
+    "logicalCpus": 12,
+    "systemMemoryBytes": 16893382656,
+    "node": "v24.16.0",
+    "browser": "155.0.4283.62"
+  },
+  "method": {
+    "units": "decimal MB (1 MB = 1,000,000 UTF-8 bytes)",
+    "input": "Deterministic generated linked tasks/subtasks/focus records, or a valid PNG of deterministic random RGB pixels plus a small linked history. No private fixtures.",
+    "timings": "Milliseconds in an isolated storage fixture running production APIs; gzip encode includes scope preparation/JSON/UTF-8/compression, decode includes decompression/JSON/scope validation. Business validation is timed separately. Restore uses backup:false to omit download initiation; the durable rollback journal remains enabled.",
+    "responsiveness": "20 ms interval on the same browser main thread. maxIntervalGapMs is observed elapsed time; maxIntervalDelayMs subtracts the intended 20 ms. This measures storage/codec main-thread stalls, not rendered React application throughput.",
+    "memory": "Chromium performance.memory sampled at stage boundaries and every 20 ms with --enable-precise-memory-info. sampledPeakUsedJSHeapBytes excludes browser process/native image/Blob memory and cannot catch every allocation peak during blocked JavaScript; it is not process peak RSS.",
+    "scope": "One run per size/profile, no fixed speed guarantees. Image data remains in localStorage in 1.3.0; oversized image restore must fail and preserve the original state. Generation time is excluded from operation timings.",
+    "verification": "Benchmark compares all table counts, sorted first/last task IDs, summed focus duration, and every setting value. Full per-record field/relationship and rendered-theme acceptance belongs to the browser regression suite. Compression ratios describe these generated inputs only."
+  },
+  "results": [
+    {
+      "profile": "task-history",
+      "targetBytes": 1000000,
+      "sourceBytes": 998512,
+      "sourceToTargetRatio": 0.998512,
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "hardwareConcurrency": 12,
+        "deviceMemoryGB": 16,
+        "compressionSupported": true
+      },
+      "counts": {
+        "Group": 0,
+        "GroupUser": 0,
+        "Message": 0,
+        "Pomodoro": 1132,
+        "Project": 16,
+        "Schedule": 0,
+        "Subtask": 566,
+        "Task": 566,
+        "TimerSession": 0
+      },
+      "totalFocusSeconds": 1698000,
+      "stages": {
+        "seedRestoreMs": 190.4,
+        "exportSnapshotMs": 39.3,
+        "encodeGzipMs": 24,
+        "decodeGzipMs": 5.3,
+        "validateBusinessMs": 2.7,
+        "restoreMs": 213.6,
+        "verifySnapshotMs": 26.2
+      },
+      "exportMeasuredFromDatabase": true,
+      "compressedBytes": 82531,
+      "encodedRawBytes": 998600,
+      "reductionPercent": 91.7,
+      "seeded": true,
+      "restored": true,
+      "fidelityVerified": true,
+      "expectedLocalStorageQuotaFailure": false,
+      "response": {
+        "intervalMs": 20,
+        "maxIntervalGapMs": 85.7,
+        "maxIntervalDelayMs": 65.7
+      },
+      "memory": {
+        "sampledPeakUsedJSHeapBytes": 23002333,
+        "jsHeapSizeLimit": 4395630592,
+        "observations": [
+          {
+            "stage": "seedRestoreMs:before",
+            "usedJSHeapBytes": 6067091,
+            "totalJSHeapBytes": 10236727
+          },
+          {
+            "stage": "seedRestoreMs:after",
+            "usedJSHeapBytes": 6873129,
+            "totalJSHeapBytes": 13382661
+          },
+          {
+            "stage": "exportSnapshotMs:before",
+            "usedJSHeapBytes": 6873853,
+            "totalJSHeapBytes": 13382661
+          },
+          {
+            "stage": "exportSnapshotMs:after",
+            "usedJSHeapBytes": 8179215,
+            "totalJSHeapBytes": 13907007
+          },
+          {
+            "stage": "encodeGzipMs:before",
+            "usedJSHeapBytes": 8181051,
+            "totalJSHeapBytes": 13907007
+          },
+          {
+            "stage": "encodeGzipMs:after",
+            "usedJSHeapBytes": 12084649,
+            "totalJSHeapBytes": 19165873
+          },
+          {
+            "stage": "decodeGzipMs:before",
+            "usedJSHeapBytes": 12091013,
+            "totalJSHeapBytes": 19165873
+          },
+          {
+            "stage": "decodeGzipMs:after",
+            "usedJSHeapBytes": 16179085,
+            "totalJSHeapBytes": 22244209
+          },
+          {
+            "stage": "validateBusinessMs:before",
+            "usedJSHeapBytes": 16185417,
+            "totalJSHeapBytes": 22244209
+          },
+          {
+            "stage": "validateBusinessMs:after",
+            "usedJSHeapBytes": 18280777,
+            "totalJSHeapBytes": 23767921
+          },
+          {
+            "stage": "restoreMs:before",
+            "usedJSHeapBytes": 18281433,
+            "totalJSHeapBytes": 23767921
+          },
+          {
+            "stage": "restoreMs:after",
+            "usedJSHeapBytes": 21413409,
+            "totalJSHeapBytes": 31681429
+          },
+          {
+            "stage": "verifySnapshotMs:before",
+            "usedJSHeapBytes": 21413909,
+            "totalJSHeapBytes": 31681429
+          },
+          {
+            "stage": "verifySnapshotMs:after",
+            "usedJSHeapBytes": 20308269,
+            "totalJSHeapBytes": 34877133
+          }
+        ]
+      },
+      "passed": true,
+      "elapsedMs": 958
+    },
+    {
+      "profile": "task-history",
+      "targetBytes": 10000000,
+      "sourceBytes": 9984230,
+      "sourceToTargetRatio": 0.998423,
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "hardwareConcurrency": 12,
+        "deviceMemoryGB": 16,
+        "compressionSupported": true
+      },
+      "counts": {
+        "Group": 0,
+        "GroupUser": 0,
+        "Message": 0,
+        "Pomodoro": 11296,
+        "Project": 16,
+        "Schedule": 0,
+        "Subtask": 5648,
+        "Task": 5648,
+        "TimerSession": 0
+      },
+      "totalFocusSeconds": 16944000,
+      "stages": {
+        "seedRestoreMs": 2560,
+        "exportSnapshotMs": 309.6,
+        "encodeGzipMs": 223.9,
+        "decodeGzipMs": 44.1,
+        "validateBusinessMs": 52.8,
+        "restoreMs": 2503.9,
+        "verifySnapshotMs": 263.8
+      },
+      "exportMeasuredFromDatabase": true,
+      "compressedBytes": 798741,
+      "encodedRawBytes": 9984318,
+      "reductionPercent": 92,
+      "seeded": true,
+      "restored": true,
+      "fidelityVerified": true,
+      "expectedLocalStorageQuotaFailure": false,
+      "response": {
+        "intervalMs": 20,
+        "maxIntervalGapMs": 781.2,
+        "maxIntervalDelayMs": 761.2
+      },
+      "memory": {
+        "sampledPeakUsedJSHeapBytes": 134341034,
+        "jsHeapSizeLimit": 4395630592,
+        "observations": [
+          {
+            "stage": "seedRestoreMs:before",
+            "usedJSHeapBytes": 42722161,
+            "totalJSHeapBytes": 51969965
+          },
+          {
+            "stage": "seedRestoreMs:after",
+            "usedJSHeapBytes": 30819318,
+            "totalJSHeapBytes": 65409058
+          },
+          {
+            "stage": "exportSnapshotMs:before",
+            "usedJSHeapBytes": 30819954,
+            "totalJSHeapBytes": 65409058
+          },
+          {
+            "stage": "exportSnapshotMs:after",
+            "usedJSHeapBytes": 43741884,
+            "totalJSHeapBytes": 65409116
+          },
+          {
+            "stage": "encodeGzipMs:before",
+            "usedJSHeapBytes": 43742388,
+            "totalJSHeapBytes": 65409116
+          },
+          {
+            "stage": "encodeGzipMs:after",
+            "usedJSHeapBytes": 85135136,
+            "totalJSHeapBytes": 102992440
+          },
+          {
+            "stage": "decodeGzipMs:before",
+            "usedJSHeapBytes": 85141552,
+            "totalJSHeapBytes": 102992440
+          },
+          {
+            "stage": "decodeGzipMs:after",
+            "usedJSHeapBytes": 125753856,
+            "totalJSHeapBytes": 143705612
+          },
+          {
+            "stage": "validateBusinessMs:before",
+            "usedJSHeapBytes": 125760240,
+            "totalJSHeapBytes": 143705612
+          },
+          {
+            "stage": "validateBusinessMs:after",
+            "usedJSHeapBytes": 113704818,
+            "totalJSHeapBytes": 173972686
+          },
+          {
+            "stage": "restoreMs:before",
+            "usedJSHeapBytes": 113705422,
+            "totalJSHeapBytes": 173972686
+          },
+          {
+            "stage": "restoreMs:after",
+            "usedJSHeapBytes": 81260844,
+            "totalJSHeapBytes": 141420516
+          },
+          {
+            "stage": "verifySnapshotMs:before",
+            "usedJSHeapBytes": 81261344,
+            "totalJSHeapBytes": 141420516
+          },
+          {
+            "stage": "verifySnapshotMs:after",
+            "usedJSHeapBytes": 94128536,
+            "totalJSHeapBytes": 141420516
+          }
+        ]
+      },
+      "passed": true,
+      "elapsedMs": 6394
+    },
+    {
+      "profile": "task-history",
+      "targetBytes": 50000000,
+      "sourceBytes": 49916619,
+      "sourceToTargetRatio": 0.99833238,
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "hardwareConcurrency": 12,
+        "deviceMemoryGB": 16,
+        "compressionSupported": true
+      },
+      "counts": {
+        "Group": 0,
+        "GroupUser": 0,
+        "Message": 0,
+        "Pomodoro": 56238,
+        "Project": 16,
+        "Schedule": 0,
+        "Subtask": 28119,
+        "Task": 28119,
+        "TimerSession": 0
+      },
+      "totalFocusSeconds": 84357000,
+      "stages": {
+        "seedRestoreMs": 10528.4,
+        "exportSnapshotMs": 1353.5,
+        "encodeGzipMs": 1045.9,
+        "decodeGzipMs": 219.8,
+        "validateBusinessMs": 299.1,
+        "restoreMs": 14672.5,
+        "verifySnapshotMs": 1345.5
+      },
+      "exportMeasuredFromDatabase": true,
+      "compressedBytes": 3957494,
+      "encodedRawBytes": 49916707,
+      "reductionPercent": 92.1,
+      "seeded": true,
+      "restored": true,
+      "fidelityVerified": true,
+      "expectedLocalStorageQuotaFailure": false,
+      "response": {
+        "intervalMs": 20,
+        "maxIntervalGapMs": 3238.4,
+        "maxIntervalDelayMs": 3218.4
+      },
+      "memory": {
+        "sampledPeakUsedJSHeapBytes": 610938428,
+        "jsHeapSizeLimit": 4395630592,
+        "observations": [
+          {
+            "stage": "seedRestoreMs:before",
+            "usedJSHeapBytes": 198037242,
+            "totalJSHeapBytes": 233222518
+          },
+          {
+            "stage": "seedRestoreMs:after",
+            "usedJSHeapBytes": 289809287,
+            "totalJSHeapBytes": 358908503
+          },
+          {
+            "stage": "exportSnapshotMs:before",
+            "usedJSHeapBytes": 289809923,
+            "totalJSHeapBytes": 358908503
+          },
+          {
+            "stage": "exportSnapshotMs:after",
+            "usedJSHeapBytes": 205487731,
+            "totalJSHeapBytes": 262742591
+          },
+          {
+            "stage": "encodeGzipMs:before",
+            "usedJSHeapBytes": 205488235,
+            "totalJSHeapBytes": 262742591
+          },
+          {
+            "stage": "encodeGzipMs:after",
+            "usedJSHeapBytes": 302867168,
+            "totalJSHeapBytes": 346530668
+          },
+          {
+            "stage": "decodeGzipMs:before",
+            "usedJSHeapBytes": 302867792,
+            "totalJSHeapBytes": 346530668
+          },
+          {
+            "stage": "decodeGzipMs:after",
+            "usedJSHeapBytes": 505238240,
+            "totalJSHeapBytes": 562591696
+          },
+          {
+            "stage": "validateBusinessMs:before",
+            "usedJSHeapBytes": 505244624,
+            "totalJSHeapBytes": 562591696
+          },
+          {
+            "stage": "validateBusinessMs:after",
+            "usedJSHeapBytes": 610937924,
+            "totalJSHeapBytes": 647661520
+          },
+          {
+            "stage": "restoreMs:before",
+            "usedJSHeapBytes": 610938528,
+            "totalJSHeapBytes": 647661520
+          },
+          {
+            "stage": "restoreMs:after",
+            "usedJSHeapBytes": 450816399,
+            "totalJSHeapBytes": 504937075
+          },
+          {
+            "stage": "verifySnapshotMs:before",
+            "usedJSHeapBytes": 450816899,
+            "totalJSHeapBytes": 504937075
+          },
+          {
+            "stage": "verifySnapshotMs:after",
+            "usedJSHeapBytes": 394328971,
+            "totalJSHeapBytes": 447502963
+          }
+        ]
+      },
+      "passed": true,
+      "elapsedMs": 30261
+    },
+    {
+      "profile": "image-heavy",
+      "targetBytes": 1000000,
+      "sourceBytes": 1006899,
+      "sourceToTargetRatio": 1.006899,
+      "image": {
+        "width": 457,
+        "height": 457,
+        "dataUrlBytes": 959066,
+        "decodedSuccessfully": true
+      },
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "hardwareConcurrency": 12,
+        "deviceMemoryGB": 16,
+        "compressionSupported": true
+      },
+      "counts": {
+        "Group": 0,
+        "GroupUser": 0,
+        "Message": 0,
+        "Pomodoro": 50,
+        "Project": 16,
+        "Schedule": 0,
+        "Subtask": 25,
+        "Task": 25,
+        "TimerSession": 0
+      },
+      "totalFocusSeconds": 75000,
+      "stages": {
+        "seedRestoreMs": 48,
+        "exportSnapshotMs": 5.6,
+        "encodeGzipMs": 41.6,
+        "decodeGzipMs": 13.7,
+        "validateBusinessMs": 4.8,
+        "restoreMs": 52.2,
+        "verifySnapshotMs": 6.8
+      },
+      "exportMeasuredFromDatabase": true,
+      "compressedBytes": 726350,
+      "encodedRawBytes": 1006987,
+      "reductionPercent": 27.9,
+      "seeded": true,
+      "restored": true,
+      "fidelityVerified": true,
+      "expectedLocalStorageQuotaFailure": false,
+      "response": {
+        "intervalMs": 20,
+        "maxIntervalGapMs": 25.9,
+        "maxIntervalDelayMs": 5.9
+      },
+      "memory": {
+        "sampledPeakUsedJSHeapBytes": 33049365,
+        "jsHeapSizeLimit": 4395630592,
+        "observations": [
+          {
+            "stage": "seedRestoreMs:before",
+            "usedJSHeapBytes": 8706857,
+            "totalJSHeapBytes": 12051881
+          },
+          {
+            "stage": "seedRestoreMs:after",
+            "usedJSHeapBytes": 13697163,
+            "totalJSHeapBytes": 16909987
+          },
+          {
+            "stage": "exportSnapshotMs:before",
+            "usedJSHeapBytes": 13697799,
+            "totalJSHeapBytes": 16909987
+          },
+          {
+            "stage": "exportSnapshotMs:after",
+            "usedJSHeapBytes": 14732163,
+            "totalJSHeapBytes": 17869259
+          },
+          {
+            "stage": "encodeGzipMs:before",
+            "usedJSHeapBytes": 14732655,
+            "totalJSHeapBytes": 17869259
+          },
+          {
+            "stage": "encodeGzipMs:after",
+            "usedJSHeapBytes": 20180529,
+            "totalJSHeapBytes": 23306137
+          },
+          {
+            "stage": "decodeGzipMs:before",
+            "usedJSHeapBytes": 20187177,
+            "totalJSHeapBytes": 23306137
+          },
+          {
+            "stage": "decodeGzipMs:after",
+            "usedJSHeapBytes": 23891133,
+            "totalJSHeapBytes": 27315597
+          },
+          {
+            "stage": "validateBusinessMs:before",
+            "usedJSHeapBytes": 23897465,
+            "totalJSHeapBytes": 27315597
+          },
+          {
+            "stage": "validateBusinessMs:after",
+            "usedJSHeapBytes": 25902117,
+            "totalJSHeapBytes": 29285773
+          },
+          {
+            "stage": "restoreMs:before",
+            "usedJSHeapBytes": 25902721,
+            "totalJSHeapBytes": 29285773
+          },
+          {
+            "stage": "restoreMs:after",
+            "usedJSHeapBytes": 32981833,
+            "totalJSHeapBytes": 36068785
+          },
+          {
+            "stage": "verifySnapshotMs:before",
+            "usedJSHeapBytes": 32982345,
+            "totalJSHeapBytes": 36068785
+          },
+          {
+            "stage": "verifySnapshotMs:after",
+            "usedJSHeapBytes": 33049413,
+            "totalJSHeapBytes": 36068785
+          }
+        ]
+      },
+      "passed": true,
+      "elapsedMs": 476
+    },
+    {
+      "profile": "image-heavy",
+      "targetBytes": 10000000,
+      "sourceBytes": 10043079,
+      "sourceToTargetRatio": 1.0043079,
+      "image": {
+        "width": 1476,
+        "height": 1476,
+        "dataUrlBytes": 9995246,
+        "decodedSuccessfully": true
+      },
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "hardwareConcurrency": 12,
+        "deviceMemoryGB": 16,
+        "compressionSupported": true
+      },
+      "counts": {
+        "Group": 0,
+        "GroupUser": 0,
+        "Message": 0,
+        "Pomodoro": 50,
+        "Project": 16,
+        "Schedule": 0,
+        "Subtask": 25,
+        "Task": 25,
+        "TimerSession": 0
+      },
+      "totalFocusSeconds": 75000,
+      "stages": {
+        "seedRestoreMs": 306.6,
+        "encodeGzipMs": 346.8,
+        "decodeGzipMs": 119.9,
+        "validateBusinessMs": 34.7,
+        "restoreMs": 247.3,
+        "verifySnapshotMs": 1.9
+      },
+      "exportMeasuredFromDatabase": false,
+      "compressedBytes": 7521579,
+      "encodedRawBytes": 10043094,
+      "reductionPercent": 25.1,
+      "seeded": false,
+      "seedError": {
+        "name": "Error",
+        "message": "设置恢复失败，数据库与设置已回滚：Failed to execute 'setItem' on 'Storage': Setting the value of 'lexible-custom-themes' exceeded the quota."
+      },
+      "restored": false,
+      "restoreError": {
+        "name": "Error",
+        "message": "设置恢复失败，数据库与设置已回滚：Failed to execute 'setItem' on 'Storage': Setting the value of 'lexible-custom-themes' exceeded the quota."
+      },
+      "fidelityVerified": true,
+      "expectedLocalStorageQuotaFailure": true,
+      "response": {
+        "intervalMs": 20,
+        "maxIntervalGapMs": 273.3,
+        "maxIntervalDelayMs": 253.3
+      },
+      "memory": {
+        "sampledPeakUsedJSHeapBytes": 243492444,
+        "jsHeapSizeLimit": 4395630592,
+        "observations": [
+          {
+            "stage": "seedRestoreMs:before",
+            "usedJSHeapBytes": 80878185,
+            "totalJSHeapBytes": 84189645
+          },
+          {
+            "stage": "seedRestoreMs:after",
+            "usedJSHeapBytes": 100373704,
+            "totalJSHeapBytes": 103879332
+          },
+          {
+            "stage": "encodeGzipMs:before",
+            "usedJSHeapBytes": 100374512,
+            "totalJSHeapBytes": 103879332
+          },
+          {
+            "stage": "encodeGzipMs:after",
+            "usedJSHeapBytes": 155775107,
+            "totalJSHeapBytes": 159050747
+          },
+          {
+            "stage": "decodeGzipMs:before",
+            "usedJSHeapBytes": 155781391,
+            "totalJSHeapBytes": 159050747
+          },
+          {
+            "stage": "decodeGzipMs:after",
+            "usedJSHeapBytes": 213542297,
+            "totalJSHeapBytes": 216698285
+          },
+          {
+            "stage": "validateBusinessMs:before",
+            "usedJSHeapBytes": 213548701,
+            "totalJSHeapBytes": 216698285
+          },
+          {
+            "stage": "validateBusinessMs:after",
+            "usedJSHeapBytes": 223511401,
+            "totalJSHeapBytes": 226696621
+          },
+          {
+            "stage": "restoreMs:before",
+            "usedJSHeapBytes": 223512017,
+            "totalJSHeapBytes": 226696621
+          },
+          {
+            "stage": "restoreMs:after",
+            "usedJSHeapBytes": 243481816,
+            "totalJSHeapBytes": 246648672
+          },
+          {
+            "stage": "verifySnapshotMs:before",
+            "usedJSHeapBytes": 243482460,
+            "totalJSHeapBytes": 246648672
+          },
+          {
+            "stage": "verifySnapshotMs:after",
+            "usedJSHeapBytes": 243492492,
+            "totalJSHeapBytes": 246648672
+          }
+        ]
+      },
+      "passed": true,
+      "elapsedMs": 1749
+    },
+    {
+      "profile": "image-heavy",
+      "targetBytes": 50000000,
+      "sourceBytes": 50183279,
+      "sourceToTargetRatio": 1.00366558,
+      "image": {
+        "width": 3306,
+        "height": 3306,
+        "dataUrlBytes": 50135446,
+        "decodedSuccessfully": true
+      },
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "hardwareConcurrency": 12,
+        "deviceMemoryGB": 16,
+        "compressionSupported": true
+      },
+      "counts": {
+        "Group": 0,
+        "GroupUser": 0,
+        "Message": 0,
+        "Pomodoro": 50,
+        "Project": 16,
+        "Schedule": 0,
+        "Subtask": 25,
+        "Task": 25,
+        "TimerSession": 0
+      },
+      "totalFocusSeconds": 75000,
+      "stages": {
+        "seedRestoreMs": 2463.2,
+        "encodeGzipMs": 2183.7,
+        "decodeGzipMs": 398.9,
+        "validateBusinessMs": 124.5,
+        "restoreMs": 973.9,
+        "verifySnapshotMs": 1.5
+      },
+      "exportMeasuredFromDatabase": false,
+      "compressedBytes": 37705986,
+      "encodedRawBytes": 50183294,
+      "reductionPercent": 24.9,
+      "seeded": false,
+      "seedError": {
+        "name": "Error",
+        "message": "设置恢复失败，数据库与设置已回滚：Failed to execute 'setItem' on 'Storage': Setting the value of 'lexible-custom-themes' exceeded the quota."
+      },
+      "restored": false,
+      "restoreError": {
+        "name": "Error",
+        "message": "设置恢复失败，数据库与设置已回滚：Failed to execute 'setItem' on 'Storage': Setting the value of 'lexible-custom-themes' exceeded the quota."
+      },
+      "fidelityVerified": true,
+      "expectedLocalStorageQuotaFailure": true,
+      "response": {
+        "intervalMs": 20,
+        "maxIntervalGapMs": 1406.4,
+        "maxIntervalDelayMs": 1386.4
+      },
+      "memory": {
+        "sampledPeakUsedJSHeapBytes": 1040393643,
+        "jsHeapSizeLimit": 4395630592,
+        "observations": [
+          {
+            "stage": "seedRestoreMs:before",
+            "usedJSHeapBytes": 446618745,
+            "totalJSHeapBytes": 450055249
+          },
+          {
+            "stage": "seedRestoreMs:after",
+            "usedJSHeapBytes": 396358824,
+            "totalJSHeapBytes": 400088880
+          },
+          {
+            "stage": "encodeGzipMs:before",
+            "usedJSHeapBytes": 396359632,
+            "totalJSHeapBytes": 400088880
+          },
+          {
+            "stage": "encodeGzipMs:after",
+            "usedJSHeapBytes": 723174873,
+            "totalJSHeapBytes": 726330845
+          },
+          {
+            "stage": "decodeGzipMs:before",
+            "usedJSHeapBytes": 723181145,
+            "totalJSHeapBytes": 726330845
+          },
+          {
+            "stage": "decodeGzipMs:after",
+            "usedJSHeapBytes": 760501780,
+            "totalJSHeapBytes": 765127228
+          },
+          {
+            "stage": "validateBusinessMs:before",
+            "usedJSHeapBytes": 760508184,
+            "totalJSHeapBytes": 765127228
+          },
+          {
+            "stage": "validateBusinessMs:after",
+            "usedJSHeapBytes": 739416134,
+            "totalJSHeapBytes": 743962686
+          },
+          {
+            "stage": "restoreMs:before",
+            "usedJSHeapBytes": 739416750,
+            "totalJSHeapBytes": 743962686
+          },
+          {
+            "stage": "restoreMs:after",
+            "usedJSHeapBytes": 1040382983,
+            "totalJSHeapBytes": 1044839111
+          },
+          {
+            "stage": "verifySnapshotMs:before",
+            "usedJSHeapBytes": 1040383627,
+            "totalJSHeapBytes": 1044839111
+          },
+          {
+            "stage": "verifySnapshotMs:after",
+            "usedJSHeapBytes": 1040393691,
+            "totalJSHeapBytes": 1044839111
+          }
+        ]
+      },
+      "passed": true,
+      "elapsedMs": 9079
+    }
+  ],
+  "passed": true
+}

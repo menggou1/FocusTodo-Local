@@ -43,7 +43,7 @@ def deploy(ref='main', remote='Focustodo-local', output=None, push=False):
             raise ValueError('Only regular static files may be published')
         names.append(name.decode('utf-8'))
     for required in ('index.html', 'js/main.js', 'js/local-release.js', 'js/local-data.js',
-                     'js/local-timer-core.js', 'js/local-timer-ui.js', 'js/local-app-ui.js'):
+                     'js/local-timer-core.js', 'js/local-timer-ui.js', 'js/local-app-ui.js', 'js/local-backup.js'):
         if required not in names:
             raise ValueError('Missing runtime asset: ' + required)
     manifest = (json.dumps({'version': version, 'sourceCommit': source, 'sourceRef': ref},

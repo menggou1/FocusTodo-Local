@@ -1,10 +1,21 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.2.3",
+  "localVersion": "1.3.0",
   "author": "Lexible",
-  "date": "2026-10-22",
+  "date": "2026-10-24",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.3.0",
+      "date": "2026-10-24",
+      "title": "压缩备份与多标签页恢复保护",
+      "items": [
+        "默认生成无损 Gzip 备份，保留普通 JSON 导出并兼容旧版 JSON 导入。",
+        "导出前查看各类数据体积和记录数，可选择是否包含壁纸；导入前明确备份范围。",
+        "加强多标签页并发导入、删除和中断恢复保护，自动安全备份始终保留完整内容。"
+      ],
+      "report": "docs/UPDATE-7.1.1-local.1.3.0.md"
+    },
     {
       "version": "7.1.1-local.1.2.3",
       "date": "2026-10-22",

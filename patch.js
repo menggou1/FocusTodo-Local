@@ -357,79 +357,157 @@
     (function() {
         'use strict';
 
-        var DB_NAME = 'PomodoroDB6';
-        var DB_VERSION = 3;
-        var STORES = window.FocusLocalData.DATA;
-        var EXPORT_VERSION = 2;
-
-        // localStorage keys that should always be exported
-        var LOCAL_STORAGE_KEYS = [
-            // Settings / Preferences
-            'ExpiredDate', 'Theme', 'Version', 'LstRlsVer', 'UpdAltCnt',
-            'WorkInterval', 'ShortBreakInterval', 'LongBreakInterval', 'LongBreakPomodoros',
-            'AutoWork', 'AutoBreak', 'TskCmpSnd', 'NewTskOnTop', 'BanBreak',
-            'WorkAlarm', 'BreakAlarm', 'BgMusic', 'DefaultDeadline',
-            'Countdown', 'DarkMode', 'ShowFinishedTasksInToday',
-            'RtnVol', 'WNVol', 'ProjectRegionWidth',
-            // Feature toggles
-            'Forest', 'Group', 'RnkLst',
-            // Widgets
-            'WidgetExpanded', 'Widgets', 'AllWidgets',
-            // Timer state
-            'timingTaskId', 'timingSubtaskId',
-            // Group
-            'SelectedGroupId', 'GroupIntervalIncrement',
-            // User profile
-            'Portrait', 'Receipt',
-            // Purchase / Subscription
-            'Price', 'PriceUSD', 'PriceInfo', 'HasRated', 'ShowRateDialog',
-            'InstallationDate', 'UpdAltDate', 'UploadExpiredDate',
-            // Ranking / Forest
-            'PrevRank30', 'PrevRankAll', 'PrevRankForest', 'Sunlight',
-            'LastSyncFocusTimeAll', 'LastSyncSunlight',
-            // Rewards
-            'LaunchReward', 'DailyTaskReward', 'PomodoroReward', 'TaskReward',
-            // Config / Sync
-            'ConfigTimestamp', 'AvatarTimestamp', 'ServerTimestamp', 'SyncTimestamp',
-            'ServerAccessInfo', 'ServerUrls', 'PK1', 'OverseaServerUrl', 'RegionCode',
-            'UpdateV64Data', 'UpdateTasksData',
-            // Goals
-            'Goals',
-            // Reminder
-            'LastReminderDate',
-            // Cookies (user credentials)
-            'cookie.ACCT', 'cookie.NAME', 'cookie.PID', 'cookie.UID', 'cookie.JSESSIONID'
-        ];
-
+        var activeDataDialog = null;
+        function backupNode(tag, className, text) {
+            var element = document.createElement(tag);
+            if (className) element.className = className;
+            if (text !== undefined) element.textContent = text;
+            return element;
+        }
+        function dataDialog(title, id) {
+            if (activeDataDialog) { activeDataDialog.card.focus(); return null; }
+            var opener = document.activeElement;
+            var backdrop = backupNode('div', 'focus-app-backdrop'); backdrop.id = id;
+            var card = backupNode('section', 'focus-app-dialog focus-backup-dialog'); card.tabIndex = -1;
+            card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true');
+            var heading = backupNode('h2', '', title); heading.id = id + '-title';
+            card.setAttribute('aria-labelledby', heading.id); card.appendChild(heading);
+            var body = backupNode('div', 'focus-app-dialog-body'), actions = backupNode('div', 'focus-app-actions');
+            card.append(body, actions); backdrop.appendChild(card); document.body.appendChild(backdrop);
+            var dialog = { card: card, body: body, actions: actions, busy: false, close: close };
+            function close() {
+                if (dialog.busy) return;
+                document.removeEventListener('keydown', keydown, true);
+                document.removeEventListener('keyup', keyup, true);
+                backdrop.remove(); activeDataDialog = null;
+                if (opener && opener.isConnected) opener.focus();
+            }
+            function keyup(event) { if (card.contains(event.target)) event.stopPropagation(); }
+            function keydown(event) {
+                if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); close(); return; }
+                if (!card.contains(event.target)) { event.preventDefault(); event.stopImmediatePropagation(); card.focus(); return; }
+                event.stopPropagation();
+                if (event.key !== 'Tab') return;
+                var nodes = Array.from(card.querySelectorAll('button:not(:disabled),input:not(:disabled),a[href]'));
+                if (!nodes.length) { event.preventDefault(); card.focus(); return; }
+                if (event.shiftKey && (document.activeElement === nodes[0] || document.activeElement === card)) {
+                    event.preventDefault(); nodes[nodes.length - 1].focus();
+                } else if (!event.shiftKey && document.activeElement === nodes[nodes.length - 1]) {
+                    event.preventDefault(); nodes[0].focus();
+                }
+            }
+            document.addEventListener('keydown', keydown, true); document.addEventListener('keyup', keyup, true);
+            activeDataDialog = dialog; card.focus(); return dialog;
+        }
+        function formatBytes(value) {
+            return value >= 1000000 ? (value / 1000000).toFixed(2) + ' MB' : (value / 1000).toFixed(1) + ' KB';
+        }
+        function showAnalysis(element, snapshot) {
+            var analysis = window.FocusLocalBackup.analyze(snapshot);
+            element.replaceChildren();
+            var table = backupNode('table', 'focus-backup-analysis');
+            var caption = backupNode('caption', '', '紧凑 JSON 体积分析'); table.appendChild(caption);
+            var rows = [
+                ['任务及子任务', analysis.tasks.count + ' 条', analysis.tasks.bytes],
+                ['专注记录', analysis.focus.count + ' 条', analysis.focus.bytes],
+                ['其他数据', analysis.other.count + ' 条记录 / ' + analysis.other.settings + ' 项设置', analysis.other.bytes],
+                ['壁纸图片', analysis.wallpapers.count + ' 个主题 / ' + analysis.wallpapers.resources + ' 张原图及缩略图', analysis.wallpapers.bytes]
+            ];
+            var tbody = backupNode('tbody');
+            rows.forEach(function(row) {
+                var tr = backupNode('tr'), th = backupNode('th', '', row[0]); th.scope = 'row';
+                tr.append(th, backupNode('td', '', row[1]), backupNode('td', '', formatBytes(row[2]))); tbody.appendChild(tr);
+            });
+            table.appendChild(tbody); element.appendChild(table);
+            element.appendChild(backupNode('p', 'focus-app-meta', '紧凑 JSON 合计 ' + formatBytes(analysis.totalBytes) + '。分项按字段序列化估算，图片为 data URL 编码体积，含缩略图；不含容器开销，分项不直接相加。'));
+        }
         async function exportAllData() {
+            var dialog = dataDialog('导出数据备份', 'focus-backup-dialog');
+            if (!dialog) return;
+            var codec = window.FocusLocalBackup, snapshot;
+            var scopeLabel = backupNode('label', 'focus-backup-option');
+            var include = backupNode('input'); include.type = 'checkbox'; include.checked = true;
+            scopeLabel.append(include, document.createTextNode('包含壁纸图片（完整备份，默认）'));
+            var fieldset = backupNode('fieldset', 'focus-backup-formats'); fieldset.appendChild(backupNode('legend', '', '文件格式'));
+            function formatChoice(value, text, checked) {
+                var label = backupNode('label', 'focus-backup-option'), input = backupNode('input');
+                input.type = 'radio'; input.name = 'focus-backup-format'; input.value = value; input.checked = checked;
+                label.append(input, document.createTextNode(text)); fieldset.appendChild(label); return input;
+            }
+            var supported = codec.compressionSupported();
+            var gzip = formatChoice('gzip', 'Gzip 压缩（.json.gz，推荐）', supported);
+            var plain = formatChoice('json', '普通紧凑 JSON（.json，兼容旧版）', !supported);
+            gzip.disabled = !supported;
+            var scopeHint = backupNode('p', 'focus-app-meta');
+            var analysis = backupNode('div'); analysis.setAttribute('aria-live', 'polite');
+            var status = backupNode('p', 'focus-app-meta', '正在读取一致数据快照…'); status.setAttribute('role', 'status');
+            var error = backupNode('p', 'focus-app-error'); error.setAttribute('role', 'alert');
+            dialog.body.append(scopeLabel, scopeHint, fieldset,
+                backupNode('p', 'focus-app-meta', supported ? '新版可读取旧 JSON；旧版需先解压 .json.gz，或使用普通 JSON。' : '当前浏览器不支持压缩 API，将导出普通 JSON。'), analysis, status, error);
+            var close = backupNode('button', '', '关闭'), generate = backupNode('button', 'focus-app-danger', '生成并下载');
+            close.type = generate.type = 'button'; generate.disabled = true; close.onclick = dialog.close;
+            dialog.actions.append(close, generate);
+            function refreshAnalysis() {
+                scopeHint.textContent = include.checked ? '保留全部任务、历史、设置和壁纸。' : '不含壁纸：任务和专注明细保留；导入后使用默认 Leaf 主题。导入前和删除前自动备份始终包含全部壁纸。';
+                if (snapshot) showAnalysis(analysis, codec.prepare(snapshot, { includeWallpapers: include.checked }));
+            }
+            include.onchange = refreshAnalysis; refreshAnalysis();
+            generate.onclick = async function() {
+                if (!snapshot || dialog.busy) return;
+                dialog.busy = true; generate.disabled = close.disabled = include.disabled = plain.disabled = gzip.disabled = true;
+                error.textContent = ''; status.textContent = '正在生成备份…';
+                // Let the busy state paint before serialization/compression begins.
+                await new Promise(function(resolve) { setTimeout(resolve, 0); });
+                try {
+                    var encoded = await codec.encode(snapshot, { includeWallpapers: include.checked, format: plain.checked ? 'json' : 'gzip' });
+                    var result = codec.download(encoded);
+                    status.textContent = '已发起' + (encoded.format === 'gzip' ? ' Gzip 压缩' : '普通 JSON') + '下载：' + result.name + '，实际文件 ' + formatBytes(result.size) + '。请在浏览器下载列表确认文件已保存。' + (encoded.fallback ? '压缩 API 不可用，已回退为 JSON。' : '');
+                } catch (failure) { status.textContent = ''; error.textContent = '导出失败：' + failure.message; }
+                finally {
+                    dialog.busy = false; generate.disabled = close.disabled = include.disabled = plain.disabled = false;
+                    gzip.disabled = !supported;
+                }
+            };
             try {
-                var snapshot = await window.FocusLocalData.snapshot();
-                window.FocusLocalData.download(snapshot, 'FocusTodo-backup');
-                alert('完整备份已生成，请确认浏览器已保存下载文件。');
-            } catch (error) { alert('导出失败：' + error.message); }
+                await window.FocusLocalReady;
+                snapshot = await window.FocusLocalData.snapshot();
+                if (!dialog.card.isConnected) return;
+                refreshAnalysis(); status.textContent = '数据快照已准备，可选择范围和格式后生成文件。'; generate.disabled = false;
+            } catch (failure) { if (dialog.card.isConnected) { status.textContent = ''; error.textContent = '读取备份失败：' + failure.message; } }
         }
-        async function importAllData(jsonStr) {
-            try {
-                var input = JSON.parse(jsonStr);
-                window.FocusLocalData.validate(input);
-                if (!confirm('导入将覆盖当前任务、专注记录和设置。\n导入前会生成完整备份；请确认保存下载文件。\n计时快照不会自动运行。是否继续？')) return;
-                await window.FocusLocalData.replace(input);
-                alert('数据导入成功，所有数据已提交。页面即将刷新。');
-                location.reload();
-            } catch (error) { alert('导入失败：' + error.message + '\n未报告导入成功。'); }
-        }
-
-        // ========== 处理文件选择 ==========
-        function handleFileSelect(file) {
+        async function handleFileSelect(file) {
             if (!file) return;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                importAllData(e.target.result);
-            };
-            reader.onerror = function() {
-                alert('读取文件失败，请重试。');
-            };
-            reader.readAsText(file);
+            var dialog = dataDialog('导入数据备份', 'focus-import-dialog');
+            if (!dialog) return;
+            var status = backupNode('p', 'focus-app-meta', '正在识别、解压和校验文件…'); status.setAttribute('role', 'status');
+            var details = backupNode('div'), error = backupNode('p', 'focus-app-error'); error.setAttribute('role', 'alert');
+            dialog.body.append(status, details, error);
+            var cancel = backupNode('button', '', '取消'), confirmImport = backupNode('button', 'focus-app-danger', '确认覆盖并导入');
+            cancel.type = confirmImport.type = 'button'; confirmImport.disabled = true;
+            cancel.onclick = dialog.close; dialog.actions.append(cancel, confirmImport);
+            try {
+                var decoded = await window.FocusLocalBackup.decode(file);
+                await window.FocusLocalReady;
+                window.FocusLocalData.validate(decoded.data);
+                if (!dialog.card.isConnected) return;
+                status.textContent = (decoded.format === 'gzip' ? 'Gzip 压缩文件' : 'JSON 文件') + '，解码后 ' + formatBytes(decoded.decodedBytes) + '。范围：' + (decoded.scope === 'full' ? '完整备份（含壁纸）' : '不含壁纸（恢复后使用默认 Leaf 主题）') + '。';
+                showAnalysis(details, decoded.data);
+                details.appendChild(backupNode('p', '', '将覆盖当前任务、专注记录和设置。导入前会发起完整安全备份下载，请确认下载文件已保存。计时快照不会自动运行。'));
+                confirmImport.disabled = false;
+                confirmImport.onclick = async function() {
+                    if (dialog.busy) return;
+                    dialog.busy = true; cancel.disabled = confirmImport.disabled = true;
+                    status.textContent = '正在生成完整安全备份并恢复数据…'; error.textContent = '';
+                    try {
+                        await window.FocusLocalData.replace(decoded.data);
+                        status.textContent = '数据已提交，页面即将刷新。'; location.reload();
+                    } catch (failure) {
+                        dialog.busy = false; cancel.disabled = confirmImport.disabled = false;
+                        status.textContent = ''; error.textContent = '导入未完成：' + failure.message + '。未报告导入成功。';
+                    }
+                };
+                cancel.focus();
+            } catch (failure) { if (dialog.card.isConnected) { status.textContent = ''; error.textContent = '导入失败：' + failure.message + '。当前数据未被覆盖。'; } }
         }
 
         // ========== 创建隐藏的文件选择器 ==========
@@ -438,7 +516,7 @@
             if (!fileInput) {
                 fileInput = document.createElement('input');
                 fileInput.type = 'file';
-                fileInput.accept = '.json';
+                fileInput.accept = '.json,.gz,.json.gz,application/json,application/gzip';
                 fileInput.style.display = 'none';
                 fileInput.addEventListener('change', function(e) {
                     if (e.target.files && e.target.files.length > 0) {

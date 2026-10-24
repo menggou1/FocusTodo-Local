@@ -2,6 +2,7 @@
 (function (root) {
     'use strict';
     const DB_NAME = 'PomodoroDB6', DB_VERSION = 3;
+    const LOCK_DB_NAME = DB_NAME + '-maintenance-lock';
     const BASE = ['Project', 'Task', 'Subtask', 'Pomodoro', 'Schedule', 'Group', 'GroupUser', 'Message'];
     const DATA = BASE.concat('TimerSession');
     const ALL = DATA.concat('LocalMeta');
@@ -16,7 +17,9 @@
     const rawSet = Storage.prototype.setItem.bind(localStorage);
     const rawRemove = Storage.prototype.removeItem.bind(localStorage);
     const nativeTransaction = IDBDatabase.prototype.transaction;
-    let dbPromise, tail = Promise.resolve(), maintenance = false;
+    let dbPromise, lockPromise, tail = Promise.resolve(), maintenance = false;
+    let localOperation = null, remoteOperation = null, invalidated = false, initializing = true;
+    const ownerId = crypto.randomUUID();
     // Same preset IDs/types/default visibility as the legacy ProjectManager.
     // Keep navigation rows inside the reset transaction instead of relying on
     // the settings Version flag to rerun a legacy migration after reload.
@@ -77,8 +80,11 @@
                     const scope = typeof names === 'string' ? [names] : Array.from(names);
                     if (!scope.includes('LocalMeta')) scope.push('LocalMeta');
                     const tx = nativeTransaction.call(db, scope, mode, options);
-                    const check = tx.objectStore('LocalMeta').get('maintenance');
-                    check.onsuccess = () => { if (check.result) { tx.abort(); notify('数据正在另一标签页维护，写入已取消，请刷新。'); } };
+                    const meta = tx.objectStore('LocalMeta');
+                    ['maintenance', 'settings-journal'].forEach(id => {
+                        const check = meta.get(id);
+                        check.onsuccess = () => { if (check.result) { try { tx.abort(); } catch (_) {} notify('数据正在另一标签页维护，写入已取消，请刷新。'); } };
+                    });
                     return tx;
                 };
                 db.onversionchange = () => { db.close(); dbPromise = null; maintenance = true; notify('数据库已更新，请刷新本标签页后继续。'); };
@@ -107,6 +113,71 @@
             } catch (error) { if (tx) { try { tx.abort(); } catch (_) {} } reject(error); }
         });
     }
+    // A live readwrite transaction is the fallback ownership primitive. It is in
+    // a separate database so its lifetime can cover the main database journal
+    // and synchronous localStorage updates. Closing/crashing the owner releases
+    // it automatically; a suspended owner keeps it. No heartbeat timeout can
+    // authorize stealing an active operation.
+    function openMaintenanceLock() {
+        if (!lockPromise) lockPromise = new Promise((resolve, reject) => {
+            const request = indexedDB.open(LOCK_DB_NAME, 1);
+            request.onupgradeneeded = () => request.result.createObjectStore('ownership');
+            request.onsuccess = () => {
+                const db = request.result;
+                db.onversionchange = () => { db.close(); lockPromise = null; };
+                resolve(db);
+            };
+            request.onerror = () => { lockPromise = null; reject(request.error); };
+        });
+        return lockPromise;
+    }
+    async function maintenanceLock(body) {
+        const db = await openMaintenanceLock();
+        return new Promise((resolve, reject) => {
+            const tx = nativeTransaction.call(db, ['ownership'], 'readwrite');
+            let active = true, started = false, released = false, result, failure;
+            const lease = { assert() { if (!active) throw new Error('数据维护事务锁已失效，请刷新后恢复。'); } };
+            tx.onabort = () => { active = false; reject(tx.error || new Error('数据维护事务锁已取消。')); };
+            tx.onerror = () => {};
+            tx.oncomplete = () => {
+                active = false;
+                if (!released) reject(new Error('数据维护事务锁意外结束，请刷新后恢复。'));
+                else if (failure) reject(failure);
+                else resolve(result);
+            };
+            function hold() {
+                const request = tx.objectStore('ownership').get('active');
+                request.onsuccess = () => {
+                    if (!released) hold();
+                    if (!started) {
+                        started = true;
+                        Promise.resolve().then(() => body(lease)).then(value => { result = value; released = true; }, error => { failure = error; released = true; });
+                    }
+                };
+            }
+            hold();
+        });
+    }
+    function sameOperation(marker, operation) {
+        return marker && marker.operationId === operation.operationId && marker.ownerId === operation.ownerId;
+    }
+    function ownedTransaction(db, operation, names, body) {
+        operation.lease.assert();
+        const scope = Array.from(new Set(names.concat('LocalMeta')));
+        return transaction(db, scope, 'readwrite', (tx, done, fail) => {
+            const request = tx.objectStore('LocalMeta').get('maintenance');
+            request.onsuccess = () => {
+                try {
+                    operation.lease.assert();
+                    if (!sameOperation(request.result, operation)) throw new Error('数据维护归属已变化，请刷新后恢复。');
+                    body(tx, done, fail, request.result);
+                } catch (error) { fail(error); }
+            };
+        });
+    }
+    function journalOwned(journal, operation) {
+        if (!sameOperation(journal, operation)) throw new Error('数据恢复日志与维护归属不一致，请保留当前数据库。');
+    }
     function storageSnapshot() {
         const result = Object.create(null);
         for (let i = 0; i < localStorage.length; i++) {
@@ -117,18 +188,27 @@
     }
     function applySettings(data) {
         const old = storageSnapshot();
-        Object.keys(old).forEach(rawRemove);
-        try { Object.keys(data).forEach(key => rawSet(key, data[key])); }
-        catch (error) {
-            Object.keys(storageSnapshot()).forEach(rawRemove);
-            Object.keys(old).forEach(key => rawSet(key, old[key]));
+        try {
+            Object.keys(old).forEach(rawRemove);
+            Object.keys(data).forEach(key => rawSet(key, data[key]));
+        } catch (error) {
+            try {
+                Object.keys(storageSnapshot()).forEach(rawRemove);
+                Object.keys(old).forEach(key => rawSet(key, old[key]));
+            } catch (rollbackError) {
+                throw new Error(error.message + '；设置回滚待重试：' + rollbackError.message);
+            }
             throw error;
         }
     }
-    async function snapshotUnlocked() {
+    async function snapshotUnlocked(operation) {
         const db = await open();
-        const indexedDBData = await transaction(db, DATA, 'readonly', (tx, done) => {
+        const indexedDBData = await transaction(db, DATA.concat('LocalMeta'), 'readonly', (tx, done, fail) => {
             const result = {}; let remaining = DATA.length;
+            ['maintenance', 'settings-journal'].forEach(id => {
+                const check = tx.objectStore('LocalMeta').get(id);
+                check.onsuccess = () => { if (check.result && (!operation || !sameOperation(check.result, operation))) fail(new Error('存在进行中或待恢复的数据维护，请等待或刷新。')); };
+            });
             DATA.forEach(name => {
                 const request = tx.objectStore(name).getAll();
                 request.onsuccess = () => { result[name] = request.result; if (!--remaining) done(result); };
@@ -140,7 +220,7 @@
         };
     }
     function download(data, prefix) {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
         const url = URL.createObjectURL(blob), a = document.createElement('a');
         a.href = url; a.download = prefix + '-' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
         a.addEventListener('click', event => event.stopPropagation());
@@ -152,6 +232,8 @@
             ![1, 2].includes(input.meta.exportVersion) || !input.indexedDB || !input.localStorage || Array.isArray(input.localStorage)) {
             throw new Error('不是受支持的 FocusTodo 完整备份。仅设置备份不能覆盖数据库。');
         }
+        if (input.meta.scope !== undefined && !['full', 'without-wallpapers'].includes(input.meta.scope)) throw new Error('备份范围标记不受支持。');
+        if (root.FocusLocalBackup) root.FocusLocalBackup.validateScope(input);
         if (Number(input.meta.dbVersion) > DB_VERSION) throw new Error('备份来自较新的数据库版本，请先更新程序。');
         const data = JSON.parse(JSON.stringify(input));
         BASE.forEach(name => {
@@ -207,68 +289,141 @@
         }
         return data;
     }
-    async function replaceRows(db, dataset, journal) {
-        return transaction(db, ALL, 'readwrite', (tx, done) => {
+    async function replaceRows(db, dataset, journal, operation, phase) {
+        journalOwned(journal, operation);
+        return ownedTransaction(db, operation, ALL, (tx, done, fail, marker) => {
             DATA.forEach(name => {
                 const store = tx.objectStore(name); store.clear();
                 (dataset.indexedDB[name] || []).forEach(row => store.add(row));
             });
-            tx.objectStore('LocalMeta').clear();
-            if (journal) tx.objectStore('LocalMeta').put(journal);
-            if (maintenance) tx.objectStore('LocalMeta').put({ id: 'maintenance', startedAt: Date.now() });
-            done();
+            // Do not clear unrelated metadata or overwrite another operation's log.
+            const meta = tx.objectStore('LocalMeta'), request = meta.get('settings-journal');
+            request.onsuccess = () => {
+                try {
+                    if (request.result) journalOwned(request.result, operation);
+                    meta.put({ ...journal, phase });
+                    meta.put({ ...marker, phase });
+                    done();
+                } catch (error) { fail(error); }
+            };
         });
     }
-    async function finishJournal(db, journal) {
+    async function clearOperation(db, operation, allowJournal) {
+        return ownedTransaction(db, operation, ['LocalMeta'], (tx, done, fail) => {
+            const meta = tx.objectStore('LocalMeta'), request = meta.get('settings-journal');
+            request.onsuccess = () => {
+                try {
+                    if (request.result) {
+                        journalOwned(request.result, operation);
+                        if (!allowJournal) { done(false); return; }
+                        meta.delete('settings-journal');
+                    }
+                    meta.delete('maintenance'); done(true);
+                } catch (error) { fail(error); }
+            };
+        });
+    }
+    async function finishJournal(db, journal, operation) {
+        journalOwned(journal, operation);
+        operation.lease.assert();
+        if (journal.phase === 'rollback') {
+            applySettings(journal.backup.localStorage);
+            await clearOperation(db, operation, true);
+            return;
+        }
         try { applySettings(journal.target); }
         catch (error) {
-            await replaceRows(db, journal.backup, null);
-            applySettings(journal.backup.localStorage);
+            // Persist the rollback decision with the original rows. A crash or a
+            // second settings failure must resume rollback, never replay target.
+            await replaceRows(db, journal.backup, journal, operation, 'rollback');
+            operation.lease.assert();
+            try { applySettings(journal.backup.localStorage); }
+            catch (rollbackError) { throw new Error('设置恢复与回滚未完成，请刷新重试；恢复日志已保留：' + rollbackError.message); }
+            await clearOperation(db, operation, true);
             const failure = new Error('设置恢复失败，数据库与设置已回滚：' + error.message);
             failure.rolledBack = true;
             throw failure;
         }
-        await transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').delete('settings-journal'));
+        await clearOperation(db, operation, true);
     }
-    async function recoverJournal() {
-        const db = await open();
-        const journal = await transaction(db, ['LocalMeta'], 'readonly', (tx, done) => {
-            const req = tx.objectStore('LocalMeta').get('settings-journal'); req.onsuccess = () => done(req.result);
+    async function recoverLocked(db, lease) {
+        // Reaching this transaction proves that the previous lock transaction
+        // ended. A marker here is orphaned, even if its timestamp is recent.
+        const recovered = await transaction(db, ['LocalMeta'], 'readwrite', (tx, done, fail) => {
+            const meta = tx.objectStore('LocalMeta'), markerRequest = meta.get('maintenance'), journalRequest = meta.get('settings-journal');
+            let remaining = 2;
+            function inspect() {
+                if (--remaining) return;
+                try {
+                    lease.assert();
+                    const marker = markerRequest.result, journal = journalRequest.result;
+                    if (!marker && !journal) { done(null); return; }
+                    if (!journal) { meta.delete('maintenance'); done(null); return; }
+                    if (journal.operationId && (!marker || !sameOperation(marker, journal))) throw new Error('数据恢复日志归属冲突，请保留当前数据库。');
+                    const operation = { operationId: journal.operationId || crypto.randomUUID(), ownerId, lease };
+                    const phase = journal.phase === 'rollback' ? 'rollback' : 'settings';
+                    const adopted = { ...journal, operationId: operation.operationId, ownerId, phase };
+                    meta.put({ id: 'maintenance', operationId: operation.operationId, ownerId, phase, startedAt: marker && marker.startedAt || Date.now(), recoveredAt: Date.now() });
+                    meta.put(adopted);
+                    done({ operation, journal: adopted });
+                } catch (error) { fail(error); }
+            }
+            markerRequest.onsuccess = journalRequest.onsuccess = inspect;
         });
-        if (journal) {
-            try { await finishJournal(db, journal); }
+        if (recovered) {
+            try { await finishJournal(db, recovered.journal, recovered.operation); }
             catch (error) { if (!error.rolledBack) throw error; notify(error.message); }
         }
-        await transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').delete('maintenance'));
-        await ensureSystemProjects(db);
+    }
+    async function recoverJournal() {
+        return maintenanceLock(async lease => {
+            const db = await open();
+            await recoverLocked(db, lease);
+            await ensureSystemProjects(db);
+            maintenance = false; remoteOperation = null; invalidated = false; initializing = false;
+        });
     }
     async function replace(input, options) {
         const target = validate(input); options = options || {};
-        return exclusive(async () => {
-            if (maintenance) throw new Error('数据维护正在进行，请稍后重试。');
-            maintenance = true;
+        return exclusive(() => maintenanceLock(async lease => {
+            if (localOperation || invalidated) throw new Error('本页数据已变化，请刷新后重试。');
+            const db = await open();
+            await recoverLocked(db, lease);
+            const operation = { operationId: crypto.randomUUID(), ownerId, lease };
+            await transaction(db, ['LocalMeta'], 'readwrite', (tx, done, fail) => {
+                const meta = tx.objectStore('LocalMeta'), request = meta.getAll();
+                request.onsuccess = () => {
+                    if (request.result.some(row => ['maintenance', 'settings-journal'].includes(row.id))) { fail(new Error('存在待恢复的数据维护，请刷新。')); return; }
+                    meta.put({ id: 'maintenance', operationId: operation.operationId, ownerId, phase: 'snapshot', startedAt: Date.now() });
+                };
+            });
+            localOperation = operation; maintenance = true;
             root.dispatchEvent(new Event('focus-local-maintenance'));
-            broadcast('maintenance');
-            let succeeded = false;
+            broadcast('maintenance', null, operation);
+            let succeeded = false, settled = false;
             try {
-                const db = await open();
-                await transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').put({ id: 'maintenance', startedAt: Date.now() }));
-                const backup = await snapshotUnlocked();
-                if (options.backup !== false) download(backup, 'FocusTodo-pre-import-backup');
-                const journal = { id: 'settings-journal', target: target.localStorage, backup };
-                await replaceRows(db, target, journal);
-                await finishJournal(db, journal);
-                succeeded = true;
-                broadcast('replaced');
+                const backup = await snapshotUnlocked(operation);
+                if (options.backup !== false) await download(backup, 'FocusTodo-pre-import-backup');
+                const journal = { id: 'settings-journal', operationId: operation.operationId, ownerId, phase: 'settings', target: target.localStorage, backup };
+                await replaceRows(db, target, journal, operation, 'settings');
+                await finishJournal(db, journal, operation);
+                succeeded = settled = true;
+                broadcast('replaced', null, operation);
                 return backup;
+            } catch (error) {
+                if (error.rolledBack) settled = true;
+                throw error;
             } finally {
-                const db = await open();
-                await transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').delete('maintenance'));
-                maintenance = false;
-                root.dispatchEvent(new CustomEvent('focus-local-maintenance-end', { detail: { succeeded } }));
-                if (!succeeded) broadcast('maintenance-failed');
+                // Only clear our own marker when no recovery log exists. If
+                // settings/rollback failed the durable journal remains blocked
+                // until a new owner acquires the transaction lock and recovers.
+                if (!settled) settled = await clearOperation(db, operation, false);
+                localOperation = null;
+                maintenance = !settled || invalidated || !!remoteOperation;
+                root.dispatchEvent(new CustomEvent('focus-local-maintenance-end', { detail: { succeeded, recoveryRequired: !settled } }));
+                if (!succeeded && settled) broadcast('maintenance-failed', null, operation);
             }
-        });
+        }));
     }
     async function reset() {
         const empty = { meta: { app: 'FocusTodo', exportVersion: 2, dbVersion: 3 }, indexedDB: {}, localStorage: {} };
@@ -289,9 +444,10 @@
             if (maintenance) throw new Error('数据维护中，计时操作尚未保存。');
             const db = await open();
             const result = await transaction(db, ['TimerSession', 'Pomodoro', 'LocalMeta'], 'readwrite', (tx, done, fail) => {
+                const marker = tx.objectStore('LocalMeta').get('maintenance');
                 const journal = tx.objectStore('LocalMeta').get('settings-journal');
                 journal.onsuccess = () => {
-                    if (journal.result) { fail(new Error('存在待恢复的数据导入，请刷新页面。')); return; }
+                    if (marker.result || journal.result) { fail(new Error('存在进行中或待恢复的数据导入，请刷新页面。')); return; }
                     const request = tx.objectStore('TimerSession').get('active');
                     request.onsuccess = () => {
                         try {
@@ -315,19 +471,33 @@
         return exclusive(async () => {
             if (maintenance) throw new Error('数据维护中，无法保存专注记录。');
             const db = await open();
-            return transaction(db, ['Pomodoro'], 'readwrite', (tx, done) => { tx.objectStore('Pomodoro').put(record); done(record); });
+            return transaction(db, ['Pomodoro', 'LocalMeta'], 'readwrite', (tx, done, fail) => {
+                const marker = tx.objectStore('LocalMeta').get('maintenance'), journal = tx.objectStore('LocalMeta').get('settings-journal');
+                journal.onsuccess = () => {
+                    if (marker.result || journal.result) { fail(new Error('存在进行中或待恢复的数据导入，请刷新页面。')); return; }
+                    tx.objectStore('Pomodoro').put(record); done(record);
+                };
+            });
         });
     }
     let channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('focustodo-local') : null;
-    function broadcast(type, records) { if (channel) channel.postMessage({ type, records: records || [] }); }
+    function broadcast(type, records, operation) { if (channel) channel.postMessage({ type, records: records || [], operationId: operation && operation.operationId }); }
     if (channel) channel.onmessage = event => {
-        if (event.data.type === 'maintenance') { maintenance = true; root.dispatchEvent(new Event('focus-local-maintenance')); }
-        else if (event.data.type === 'maintenance-failed') { maintenance = false; root.dispatchEvent(new CustomEvent('focus-local-maintenance-end', { detail: { succeeded: false } })); }
-        else if (event.data.type === 'replaced') { maintenance = true; root.dispatchEvent(new Event('focus-local-maintenance')); notify('数据已在另一个标签页更新，请刷新本页。'); }
-        else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: event.data.records || [] } }));
+        const message = event.data;
+        if (message.type === 'maintenance') {
+            remoteOperation = message.operationId || 'legacy'; maintenance = true;
+            root.dispatchEvent(new Event('focus-local-maintenance'));
+        } else if (message.type === 'maintenance-failed') {
+            if (remoteOperation && remoteOperation !== (message.operationId || 'legacy')) return;
+            remoteOperation = null; maintenance = !!localOperation || invalidated;
+            if (!maintenance) root.dispatchEvent(new CustomEvent('focus-local-maintenance-end', { detail: { succeeded: false } }));
+        } else if (message.type === 'replaced') {
+            remoteOperation = null; maintenance = true; invalidated = !initializing;
+            root.dispatchEvent(new Event('focus-local-maintenance')); notify('数据已在另一个标签页更新，请刷新本页。');
+        } else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
     root.FocusLocalData = { DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
-        snapshot: () => exclusive(snapshotUnlocked), download, validate, replace, reset, putPomodoro,
+        snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
         storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify,
         get maintenance() { return maintenance; } };
     root.FocusLocalReady = exclusive(recoverJournal);

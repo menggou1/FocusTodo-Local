@@ -348,3 +348,83 @@
     outline:2px solid var(--theme-red);
     outline-offset:2px;
 }
+
+.focus-backup-dialog {
+    overflow-wrap:anywhere;
+}
+
+.focus-backup-option {
+    display:flex;
+    align-items:flex-start;
+    gap:9px;
+    margin:10px 0;
+    cursor:pointer;
+}
+
+.focus-backup-option input {
+    flex:none;
+    margin:7px 0 0;
+    accent-color:var(--theme-red);
+}
+
+.focus-backup-formats {
+    min-width:0;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:6px 14px;
+    margin:16px 0;
+}
+
+.focus-backup-formats legend {
+    padding:0 6px;
+    color:var(--text-title);
+    font-size:14px;
+}
+
+.focus-backup-analysis {
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    margin-top:16px;
+}
+
+.focus-backup-analysis caption {
+    text-align:left;
+    font-weight:600;
+    font-size:15px;
+    padding-bottom:7px;
+}
+
+.focus-backup-analysis th,.focus-backup-analysis td {
+    text-align:left;
+    vertical-align:top;
+    border-bottom:1px solid var(--border);
+    padding:7px 5px;
+}
+
+.focus-backup-analysis th {
+    width:24%;
+    font-weight:500;
+}
+
+.focus-backup-analysis td:last-child {
+    text-align:right;
+    white-space:nowrap;
+}
+
+.focus-backup-dialog .focus-app-actions {
+    flex-wrap:wrap;
+}
+
+@media (max-width:480px) {
+    .focus-app-backdrop:has(.focus-backup-dialog) {
+        padding:12px;
+    }
+    .focus-backup-dialog {
+        padding:18px;
+        max-height:calc(100dvh - 24px);
+    }
+    .focus-backup-analysis th,.focus-backup-analysis td {
+        padding:6px 3px;
+    }
+}
