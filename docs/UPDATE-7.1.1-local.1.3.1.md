@@ -14,10 +14,12 @@
 
 ## 验证与发布
 
-本地只运行相关主题浏览器场景、现有主题存储失败/壁纸备份回归、语法与版本检查；没有重复容量测量或扩大真实环境验收。三个主题场景覆盖延迟下载、同一帧恢复与反复往返、过期自动刷新；Bing 使用受控响应定位竞争，不据此宣称真实联网已验收。
+本地只运行相关主题浏览器场景、现有外观/主题存储失败回归、语法与版本检查；没有重复容量测量或扩大真实环境验收。三个主题场景覆盖延迟下载、同一帧恢复与反复往返、过期自动刷新；Bing 使用受控响应定位竞争，不据此宣称真实联网已验收。
 
 本地结果：3 个新增主题场景及 2 个现有外观/存储失败场景通过；8 个脚本语法检查通过，Node 检查 47 通过、1 项 POSIX 用例按平台跳过。ZIP/tar.gz 解压启动、包内链接和版本匹配检查通过。接入脚本再次执行后 bundle 哈希不变。
 
 组件接入同时保存 `scripts/revise-app-integration.cjs` 和修改后的旧 bundle，可重复生成。数据库、备份格式与用户图片不迁移；1.3.0 的大包和存储配额边界继续有效。
 
 发布使用新注释 Tag `1.3.1`，保留 1.3.0 历史 Release；三平台发布门禁由现有 Actions 执行，Pages 从已提交 main 生成。实际产物和运行状态可查看 [Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.1) 与线上 `deployment.json`。
+
+发布结果：main [六平台检查](https://github.com/menggou1/FocusTodo-Local/actions/runs/40106592534)与 [Tag 检查及发布](https://github.com/menggou1/FocusTodo-Local/actions/runs/40106592186)均成功；三个系统的 Node 24 运行 50 项应用浏览器用例、7 项维护场景及便携包验收。1.3.1 Release 已正式发布，旧 1.3.0 Release 保留。
