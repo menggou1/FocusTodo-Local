@@ -5,7 +5,7 @@
 - 作者：Lexible
 - 发布日期：2026-10-24（Asia/Shanghai）
 - 目标完整版本：`7.1.1-local.1.3.0`，Git Tag：`1.3.0`
-- 状态：实现、本地全量验收和容量测量完成；云端发布结果见末节。
+- 状态：1.3.0 已正式发布；本地验收与云端六平台发布门禁通过，Pages 部署来源可通过线上 deployment.json 核对。
 
 ## 实现范围
 
@@ -53,4 +53,10 @@
 
 首次 Tag 检查的 macOS/Node 24 暴露新测试的初始化竞争：空数据库的首次计时轮询恰在导出窗口打开期间创建空闲会话，导致两个时点的快照不同。任务和图片没有差异；main 已在测试中先建立空闲会话，再比较导出内容，针对性用例通过。产品文件未变，原 Tag 保留，尚无 Release 时按维护流程重跑失败任务。
 
-待验证 main、注释 Tag、六项云端矩阵、Release 三份附件和 gh-pages 的部署来源与实际启动。
+- 发布提交：`db40037f194a08273da48823a5c4554b8f6e1f70`，带注释 Tag `1.3.0`。
+- [标签发布流水线](https://github.com/menggou1/FocusTodo-Local/actions/runs/40103625482) 第二次执行已完成：Windows/macOS/Linux × Node 22/24 六项全部通过，Publish version tag 成功；第一次的测试竞争及修正已保留说明，不覆盖旧 Tag。
+- [正式 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.0) 于 2026-10-24 22:51（Asia/Shanghai）发布，非草稿、非预发布，提供 ZIP、tar.gz 和 SHA256SUMS.txt。
+- 测试修正提交 `2bbed79` 只改测试和报告，应用运行文件与 Tag 完全一致；[修正后的 main 检查](https://github.com/menggou1/FocusTodo-Local/actions/runs/40104023345) 可查看平台结果。
+- gh-pages 使用维护脚本从最终已提交 main 生成，保留部署历史和默认 GitHub 域名；[线上 deployment.json](https://menggou1.github.io/FocusTodo-Local/deployment.json) 记录实际版本和来源提交。
+- 已实际下载三份 Release 附件，ZIP/tar.gz 的字节数、SHA256SUMS.txt 与 GitHub asset digest 一致：ZIP `7287cb5f999fb02075cf6d0e0417b422084fb8881267c35edba76ac5a4d192ea`；tar.gz `05698dae27e321fc109332a154769de6c02f7c1aa0487d633ee4e5c5aea9c8ee`。
+- Pages 的最终核对依据为部署工作流、线上 manifest 的来源提交，以及隔离浏览器中页面挂载、版本和备份 API 的真实启动结果；不通过 HTTP 连接成功代替页面启动。
