@@ -200,6 +200,9 @@ const server = http.createServer((request, response) => {
             await page.getByPlaceholder(/添加一个任务/).press('Enter');
             await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 1);
             await page.waitForFunction(() => document.querySelector('[class*="Timer-bgi"]').style.backgroundImage.includes('data:image/'));
+            // Establish an idle session before comparing snapshots; the first
+            // timer poll may otherwise initialize it while the dialog opens.
+            await page.evaluate(() => window.__acceptanceTimer.localTimer.run('stop'));
             const before = await snapshot(page);
             await page.mouse.click(1255, 25); await page.getByText('账号', { exact: true }).click();
             await page.getByRole('button', { name: '导出数据', exact: true }).click();
