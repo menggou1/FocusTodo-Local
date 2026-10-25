@@ -20,6 +20,10 @@ Bing 浏览器用例使用受控网络响应定位状态和请求行为。另在
 
 本地相关浏览器和导入场景通过；Node 检查 55 通过、1 项 POSIX 用例按平台跳过，9 个脚本语法检查与 ZIP/tar.gz 解压运行、包内链接检查通过。实际实现范围与集中维护规则见[统一清单](BACKLOG.md)。
 
+2026-10-25 用户确认原 V01“真实长时间运行与恢复”已完成人工验收，已从统一清单删除；此项依据为用户人工验收确认。
+
 ## 发布
 
 使用注释 Tag `1.3.2`，通过现有三系统 Node 22/24 门禁生成 [Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.2)，Pages 从已提交 main 生成。历史 Release 保留。
+
+发布提交 `d5398c1` 的 [main 检查](https://github.com/menggou1/FocusTodo-Local/actions/runs/40169256711)和 [Tag 检查与发布](https://github.com/menggou1/FocusTodo-Local/actions/runs/40169256821)均成功：六个平台组合通过，Node 24 完成全部浏览器、维护及便携包验收，正式 Release 三份附件已生成。
