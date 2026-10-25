@@ -22,3 +22,5 @@
 本地重点检查三个语言流程：中文切 English 与显式通知授权、未知系统语言回退英文且不暴露键、法语区域系统语言保留可用控件。检查英文备份布局、中文现有界面与生成元信息；不重复大数据库性能或人工长时间验收。
 
 发布使用新注释 Tag `1.4.0`，由现有三系统 Node 22/24 工作流生成 [Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.0)，Pages 从已提交 main 生成。
+
+发布提交 `063277e` 的 [main 流水线](https://github.com/menggou1/FocusTodo-Local/actions/runs/40206805810)与 [Tag 流水线](https://github.com/menggou1/FocusTodo-Local/actions/runs/40206805763)均成功，六个平台组合全部通过，Node 24 完成 56 项应用浏览器与 7 项维护场景及便携包检查，正式 Release 三份附件已生成。

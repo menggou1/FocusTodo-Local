@@ -17,5 +17,7 @@ General settings expose Follow system, Simplified Chinese and English. Partial e
 ## Evidence
 
 - [Public evidence 1](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.0)
+- [Public evidence 2](https://github.com/menggou1/FocusTodo-Local/actions/runs/40206805810)
+- [Public evidence 3](https://github.com/menggou1/FocusTodo-Local/actions/runs/40206805763)
 
 [Original Chinese report](../UPDATE-7.1.1-local.1.4.0.md). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.
