@@ -4,7 +4,7 @@
 
 FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后端服务进行数据同步，经由 **Lexible** 修改后将任务、专注记录与设置保存在浏览器本地。Bing 壁纸仍有明确允许的外部资源来源，不能把当前版本描述为不产生任何网络请求。
 
-当前应用版本 `7.1.1-local.1.3.1`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发、发布和当前待修复问题统一见[维护指南](docs/MAINTENANCE.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
+当前应用版本 `7.1.1-local.1.3.2`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
@@ -17,8 +17,9 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 - `local-release.js`：从 `release.json` 和 Git remote 生成版本及更新元信息。
 - `local-backup.js`：紧凑 JSON/Gzip 编码、内容识别、128 MB 解压边界、备份范围和体积分析；业务表和计时快照校验仍由数据层负责。主题图片仍保留 data URL，不引入数据库升级。
 - `local-app-ui.js`：通知更新详情、关于页版本与 GitHub 图标、无需密码的 5 秒删除确认。
+- `local-theme-storage.js`：协调主题 JSON、激活 ID 和 Theme 三键，用不含图片副本的小日志恢复对应元信息。`patch.js` 在导入日志恢复后完成主题恢复，再启动主题服务；内部日志不进入备份。
 - 用户更新与维护报告分开：详情只显示标题、日期、版本、作者和简短条目，不展示 Markdown 按钮；报告在仓库 docs 中提供，`release.json` 的 report 字段仅供维护和一致性检查。
-- 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-timer-ui.js` → `local-app-ui.js` → `local-backup.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志恢复。
+- 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-timer-ui.js` → `local-app-ui.js` → `local-backup.js` → `local-theme-storage.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志与主题恢复。
 - `scripts/revise-timer-integration.cjs` 只更新明确的计时接入边界，可重复执行；旧 `upgrade-*.cjs` 仍是一次性改造记录，不能当作最终版本完整构建脚本。
 - `scripts/revise-app-integration.cjs` 维护关于、通知、删除及项目刷新保护；与计时脚本共用 `scripts/lib/bundle-editor.cjs` 的检查和写入流程。
 - 本地账号读取统一使用 localStorage，避免旧浏览器 Cookie 覆盖重置/导入后的用户名。`local-ui.css` 使用原应用主题变量，使通知、独立弹窗及导入/导出按钮跟随外观切换。
@@ -31,7 +32,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 显示版本统一来自 `release.json` 的生成结果；数据库 v3 和旧设置 Version 不是产品版本，不应同步改名。涉及旧组件接入的变更需要同时保存脚本和改后的 `js/main.js`，两者不能当作完整源码/构建产物的关系处理。
 
-Web Locks 提供跨页写入和音频互斥；无锁环境的计时记录去重已验收，但导入/重置的完整维护归属仍待专项处理。不要把“计时事务测试通过”外推为全部跨页维护安全。数据库迁移、主题迁移或拆包应先制定回滚与旧备份兼容方案，见维护指南及更新报告。
+Web Locks 提供跨页写入和音频互斥；无 Web Locks 的计时记录去重及导入/重置维护归属已分别实现并验收，维护由独立 IndexedDB 事务锁保护。任何数据库结构变更须保留旧备份兼容与回退设计，具体维护规则见[维护指南](docs/MAINTENANCE.md)。
 
 ## 技术栈
 

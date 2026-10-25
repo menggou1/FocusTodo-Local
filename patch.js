@@ -705,27 +705,44 @@
         var CUSTOM_PREFIX = 'custom_';
         var BING_EXPIRY_MS = 12 * 60 * 60 * 1000; // 12小时
         var selectionRevision = 0;
+        var themeDataRevision = 0;
+        var themeStore = window.FocusThemeStorage.create({
+            get: function(key) { return localStorage.getItem(key); },
+            set: _origSetItem, remove: _origRemoveItem,
+            assertWritable: function() {
+                if (window.FocusLocalData.maintenance) throw new Error('本地数据维护中，请完成后刷新再修改主题。');
+            }
+        });
+        window.FocusThemeStore = themeStore;
+        window.FocusLocalReady = Promise.resolve(window.FocusLocalReady).then(function() { themeStore.recover(); });
+        window.FocusLocalReady.catch(function(error) { window.FocusLocal.notice('主题设置恢复未完成，请刷新重试：' + error.message); });
+        window.addEventListener('focus-local-maintenance', function() { selectionRevision++; themeDataRevision++; });
+
+        function writeThemeState(update) {
+            try {
+                if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) throw new Error('存在待恢复的主题设置，请刷新后重试。');
+                return themeStore.commit(update);
+            }
+            catch (error) {
+                var failure = new Error('主题保存失败，请检查存储空间或刷新后重试：' + error.message);
+                failure.recoveryRequired = error.recoveryRequired;
+                throw failure;
+            }
+        }
 
         // ---- 工具函数 ----
-        function _safeSet(k, v) {
-            try { _origSetItem(k, v); }
-            catch (error) { throw new Error('保存失败，存储空间可能不足；请删除部分自定义主题后重试。' + error.message); }
-        }
-        function _safeRemove(k) {
-            try {
-                (typeof _origRemoveItem !== 'undefined' ? _origRemoveItem : localStorage.removeItem.bind(localStorage))(k);
-            } catch(e) {}
-        }
-
         function getCustomThemes() {
             try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
             catch(e) { return {}; }
         }
 
-        function saveCustomThemes(data) {
+        function customThemesJSON(data) {
             var json = JSON.stringify(data);
             if (json.length > 2 * 1024 * 1024 && json.length >= (localStorage.getItem(STORAGE_KEY) || '').length) throw new Error('自定义主题总量已达到限制，请删除部分图片后重试。');
-            _safeSet(STORAGE_KEY, json);
+            return json;
+        }
+        function saveCustomThemes(data) {
+            writeThemeState({ themes: customThemesJSON(data) });
         }
 
         function getActiveId() {
@@ -733,8 +750,7 @@
         }
 
         function setActiveId(id) {
-            if (id) { _safeSet(ACTIVE_KEY, id); }
-            else { _safeRemove(ACTIVE_KEY); }
+            writeThemeState({ active: id || null });
         }
 
         function genId() {
@@ -795,12 +811,14 @@
         }
 
         function selectClassic(id) {
+            try { writeThemeState({ active: null, theme: id }); }
+            catch (error) { window.FocusLocal.notice(error.message); return false; }
             selectionRevision++;
-            var wasCustom = getActiveId() || _savedClassicBg;
-            setActiveId(null);
+            var wasCustom = _savedClassicBg || findBgiElements().some(function(el) { return el.style.backgroundImage.indexOf('data:image/') >= 0; });
             if (wasCustom) clearCustomBackground(id);
             _lastObservedTheme = id;
             doRefreshUI();
+            return true;
         }
         window.FocusThemes = { selectClassic: selectClassic, refresh: refreshThemeUI };
 
@@ -814,6 +832,7 @@
             if (_bgWatcherId) return;
             _lastObservedTheme = localStorage.getItem('Theme');
             _bgWatcherId = setInterval(function() {
+                if (window.FocusLocalData.maintenance || localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) return;
                 // 检测 Theme 是否被 React UI 修改（用户点击了内置主题按钮）
                 var currentTheme = localStorage.getItem('Theme');
                 if (currentTheme !== _lastObservedTheme) {
@@ -915,13 +934,10 @@
                                 copyright = data.copyright || '';
                             } else if (data && data.images && data.images.length > 0) {
                                 var urlbase = data.images[0].urlbase || '';
-                                imageUrl = 'https://www.bing.com' + urlbase + '_UHD.jpg';
+                                imageUrl = 'https://www.bing.com' + urlbase + '_1920x1080.jpg';
                                 copyright = data.images[0].copyright || '';
                             }
                             if (imageUrl) {
-                                if (imageUrl.indexOf('_UHD') < 0) {
-                                    imageUrl = imageUrl.replace(/_1920x1080\.jpg/g, '_UHD.jpg');
-                                }
                                 resolve({ url: imageUrl, copyright: copyright });
                             } else { tryApi(idx + 1); }
                         } catch(e) { tryApi(idx + 1); }
@@ -940,6 +956,7 @@
         function loadBingWallpaper() {
             if (_bingRequest) return _bingRequest;
             _bingLoading = true;
+            var dataRevision = themeDataRevision;
             refreshThemeUI();
             _bingRequest = fetchBingWallpaper().then(function(result) {
                 return downloadImageAsDataUrl(result.url).then(function(dataUrl) {
@@ -948,6 +965,7 @@
                     });
                 });
             }).then(function(data) {
+                if (dataRevision !== themeDataRevision) return null;
                 var themes = getCustomThemes();
                 themes[BING_ID] = {
                     name: 'Bing每日壁纸', dataUrl: data.dataUrl,
@@ -964,10 +982,11 @@
             return _bingRequest;
         }
 
-        function activateCustomTheme(id, theme) {
+        function activateCustomTheme(id, theme, themes) {
             var prevTheme = localStorage.getItem('Theme');
-            setActiveId(id);
-            _safeSet('Theme', id);
+            var update = { active: id, theme: id };
+            if (themes) update.themes = customThemesJSON(themes);
+            writeThemeState(update);
             _lastObservedTheme = id;
             applyCustomBackground(theme.dataUrl, prevTheme);
             refreshThemeUI();
@@ -975,16 +994,22 @@
 
         function fetchAndApplyBing() {
             var revision = ++selectionRevision;
+            var cached = getCustomThemes()[BING_ID];
+            if (cached && cached.dataUrl) {
+                activateCustomTheme(BING_ID, cached);
+                if (Date.now() - (cached.updatedAt || 0) < BING_EXPIRY_MS) return;
+            }
             loadBingWallpaper().then(function(data) {
-                if (revision === selectionRevision) activateCustomTheme(BING_ID, data);
+                if (data && revision === selectionRevision) activateCustomTheme(BING_ID, data);
             }).catch(function(err) {
                 console.warn('[Lexible] Bing fetch failed:', err.message || err);
-                if (revision === selectionRevision) alert('获取 Bing 每日壁纸失败。\n\n' + ((err && err.message) || '网络错误，请检查网络连接后重试。'));
+                if (revision === selectionRevision && !(cached && cached.dataUrl)) alert('获取 Bing 每日壁纸失败。\n\n' + ((err && err.message) || '网络错误，请检查网络连接后重试。'));
             });
         }
 
         // ---- Bing 过期自动刷新（12小时）----
         function checkBingExpiry() {
+            if (window.FocusLocalData.maintenance) return;
             var activeId = getActiveId();
             if (activeId !== BING_ID) return;
             var themes = getCustomThemes();
@@ -995,7 +1020,7 @@
             console.log('[Lexible] Bing wallpaper expired, auto-refreshing...');
             var revision = selectionRevision;
             loadBingWallpaper().then(function(data) {
-                if (revision === selectionRevision && getActiveId() === BING_ID) {
+                if (data && revision === selectionRevision && getActiveId() === BING_ID) {
                     applyCustomBackground(data.dataUrl);
                 }
             }).catch(function(err) {
@@ -1016,8 +1041,8 @@
             if (!confirm('确定要删除此自定义主题吗？')) return;
             var themes = getCustomThemes();
             delete themes[id];
-            saveCustomThemes(themes);
             if (getActiveId() === id) {
+                writeThemeState({ themes: customThemesJSON(themes), active: null, theme: 'Leaf' });
                 selectionRevision++;
                 var table = findThemeTable();
                 var leaf = table && table.querySelector('img[src="img/timer-bg-leaf-shortcut.jpg"]');
@@ -1025,11 +1050,10 @@
                 // cached classic theme and timer background also return to Leaf.
                 if (leaf) leaf.click();
                 else {
-                    setActiveId(null);
-                    _safeSet('Theme', 'Leaf');
+                    writeThemeState({ active: null, theme: 'Leaf' });
                     clearCustomBackground('Leaf');
                 }
-            }
+            } else saveCustomThemes(themes);
             refreshThemeUI();
         }
 
@@ -1197,8 +1221,8 @@
                             thumbnail: result.thumbnail, type: 'custom',
                             createdAt: Date.now(), originalName: file.name
                         };
-                        saveCustomThemes(themes);
-                        if (revision === selectionRevision) activateCustomTheme(id, result);
+                        if (revision === selectionRevision) activateCustomTheme(id, result, themes);
+                        else saveCustomThemes(themes);
                         refreshThemeUI();
                     }).catch(function(err) {
                         console.error('[Lexible] Upload failed:', err);
@@ -1219,6 +1243,7 @@
 
         function doRefreshUI() {
             if (_isRefreshing) return;
+            if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) return;
             _isRefreshing = true;
             try {
 
@@ -1441,8 +1466,10 @@
             console.log('[Lexible] 自定义主题模块已加载 (Bing每日壁纸 + 本地上传)');
         }
 
-        if (document.body) { start(); }
-        else { document.addEventListener('DOMContentLoaded', start); }
+        window.FocusLocalReady.then(function() {
+            if (document.body) start();
+            else document.addEventListener('DOMContentLoaded', start);
+        }).catch(function() {});
     })();
 
     // ========== 11. 调试工具：手动修改用户名 ==========

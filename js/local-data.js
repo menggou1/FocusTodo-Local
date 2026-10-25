@@ -182,13 +182,14 @@
         const result = Object.create(null);
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
-            if (key && key !== 'setItem' && key !== 'removeItem') result[key] = localStorage.getItem(key);
+            if (key && key !== 'setItem' && key !== 'removeItem' && key !== 'FocusTodo.themeJournal') result[key] = localStorage.getItem(key);
         }
         return result;
     }
     function applySettings(data) {
         const old = storageSnapshot();
         try {
+            rawRemove('FocusTodo.themeJournal');
             Object.keys(old).forEach(rawRemove);
             Object.keys(data).forEach(key => rawSet(key, data[key]));
         } catch (error) {
@@ -202,6 +203,7 @@
         }
     }
     async function snapshotUnlocked(operation) {
+        if (root.FocusThemeStore) root.FocusThemeStore.recover();
         const db = await open();
         const indexedDBData = await transaction(db, DATA.concat('LocalMeta'), 'readonly', (tx, done, fail) => {
             const result = {}; let remaining = DATA.length;
@@ -236,6 +238,7 @@
         if (root.FocusLocalBackup) root.FocusLocalBackup.validateScope(input);
         if (Number(input.meta.dbVersion) > DB_VERSION) throw new Error('备份来自较新的数据库版本，请先更新程序。');
         const data = JSON.parse(JSON.stringify(input));
+        delete data.localStorage['FocusTodo.themeJournal'];
         BASE.forEach(name => {
             const records = data.indexedDB[name];
             if (!Array.isArray(records)) throw new Error('备份缺少数据表：' + name);

@@ -21,7 +21,7 @@ assignment(1148, 'deleteData', 'function(){window.FocusAppUI.confirmReset()}');
 
 // Clear custom overlays during the actual classic-theme selection, including
 // reselecting the classic theme retained by the legacy PureComponent.
-assignment(1154, 'selectTheme', 'function(e){if(m.default.premiumItems.includes(e)&&!i.hasPermission())return;window.FocusThemes.selectClassic(e);m.default.shared.name=e;i.setState({theme:e},window.FocusThemes.refresh);v.default.shared.emit(v.default.Event.THEME_CHANGED)}');
+assignment(1154, 'selectTheme', 'function(e){if(m.default.premiumItems.includes(e)&&!i.hasPermission())return;if(!window.FocusThemes.selectClassic(e))return;m.default.shared.name=e;i.setState({theme:e},window.FocusThemes.refresh);v.default.shared.emit(v.default.Event.THEME_CHANGED)}');
 
 // Local storage is the account authority. Old browser cookies can survive a
 // reset/import and otherwise shadow the restored name and identity.

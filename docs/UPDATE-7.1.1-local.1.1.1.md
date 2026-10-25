@@ -1,6 +1,6 @@
 # FocusTodo 本地版本修复报告
 
-> 历史报告：以下通过数量、剩余事项和截图说明只记录当时状态。返回[更新记录](../CHANGELOG.md)查看后续版本；当前开发与待修复清单见[维护指南](MAINTENANCE.md)。
+> 历史报告：以下通过数量和截图说明只记录当时状态。返回[更新记录](../CHANGELOG.md)查看版本变化；当前未完成工作只见[统一待办与验收](BACKLOG.md)。
 
 - 日期：2026-10-04（Asia/Shanghai）
 - 官方基础版本：7.1.1
@@ -68,7 +68,7 @@ git diff --check
 - [深色账号按钮](https://github.com/menggou1/FocusTodo-Local/blob/eb0ce5d45a335d179cce03e0649a29dd02e9bb46/docs/acceptance/account-dark.png)、[浅色账号按钮](https://github.com/menggou1/FocusTodo-Local/blob/eb0ce5d45a335d179cce03e0649a29dd02e9bb46/docs/acceptance/account-light.png)
 - [完整验收结果](https://github.com/menggou1/FocusTodo-Local/blob/eb0ce5d45a335d179cce03e0649a29dd02e9bb46/docs/acceptance/results.json)
 
-本次不包括真实系统休眠/杀进程、无 Web Locks 的并发维护、主题图片迁移及全部图表奖励专项验收。
+当前工作与验收入口：[统一待办与验收](BACKLOG.md)。
 
 ## 交付
 

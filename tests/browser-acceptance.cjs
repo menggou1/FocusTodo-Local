@@ -103,6 +103,61 @@ const server = http.createServer((request, response) => {
         return { started, release };
     }
     try {
+        await check('theme journal recovers before rendering and is excluded from backups', () => app(async page => {
+            assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'Ocean');
+            assert.equal(await page.evaluate(() => localStorage.getItem('FocusTodo.themeJournal')), null);
+            assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /timer-bg-ocean\.jpg/);
+            const result = await page.evaluate(async () => {
+                const d = window.FocusLocalData, backup = await d.snapshot();
+                backup.localStorage['FocusTodo.themeJournal'] = '{"not":"an imported journal"}';
+                return { validated: d.validate(backup), keys: Object.keys(await d.snapshot()) };
+            });
+            assert.equal(result.validated.localStorage['FocusTodo.themeJournal'], undefined);
+        }, async page => {
+            await themeFixture(page);
+            await page.addScriptTag({ url: '/js/local-theme-storage.js' });
+            await page.evaluate(() => {
+                let prepared;
+                const api = window.FocusThemeStorage;
+                api.create({ get: key => localStorage.getItem(key), remove: key => localStorage.removeItem(key), set(key, value) {
+                    if (key === api.JOURNAL_KEY) prepared = value;
+                    localStorage.setItem(key, value);
+                } }).commit({ active: null, theme: 'Ocean' });
+                // Durable boundary after the small intent log but before the
+                // metadata pair: startup must finish Ocean before React boots.
+                localStorage.setItem('Theme', 'Leaf'); localStorage.setItem(api.JOURNAL_KEY, prepared);
+            });
+        }));
+        await check('Bing cache switches immediately without downloading again', () => app(async page => {
+            let requests = 0;
+            await page.route('https://bing.biturl.top/**', route => { requests++; return route.abort(); });
+            await appearance(page);
+            await page.locator('[data-theme-id="__bing_daily__"]').click();
+            await page.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();
+            await page.locator('[data-theme-id="__bing_daily__"]').click();
+            assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), '__bing_daily__');
+            assert.equal(requests, 0);
+            assert.equal(await page.getByText('下载中...', { exact: true }).count(), 0);
+        }, async page => {
+            await themeFixture(page);
+            await page.evaluate(() => { const themes = JSON.parse(localStorage.getItem('lexible-custom-themes')); themes.__bing_daily__.updatedAt = Date.now(); localStorage.setItem('lexible-custom-themes', JSON.stringify(themes)); });
+        }));
+        await check('Bing selection survives closing settings during its first download', () => app(async page => {
+            const bing = await delayedBing(page); await appearance(page);
+            await page.locator('[data-theme-id="__bing_daily__"]').click(); await bing.started;
+            await page.locator('[class^="Settings-close-"]').click();
+            await page.locator('[class^="Settings-root-"]').waitFor({ state: 'detached' });
+            await appearance(page);
+            await page.getByText('下载中...', { exact: true }).waitFor();
+            await page.locator('[class^="Settings-close-"]').click();
+            await page.locator('[class^="Settings-root-"]').waitFor({ state: 'detached' });
+            bing.release();
+            await page.waitForFunction(() => localStorage.getItem('lexible-active-custom-theme') === '__bing_daily__');
+            assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /data:image/);
+        }, async page => {
+            await themeFixture(page);
+            await page.evaluate(() => { const themes = JSON.parse(localStorage.getItem('lexible-custom-themes')); delete themes.__bing_daily__; localStorage.setItem('lexible-custom-themes', JSON.stringify(themes)); });
+        }));
         await check('theme switching preserves the later classic choice after Bing downloads', () => app(async page => {
             const bing = await delayedBing(page); await appearance(page);
             await page.locator('[data-theme-id="__bing_daily__"]').click(); await bing.started;

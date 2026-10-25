@@ -18,7 +18,7 @@
 
 ## 文档整理
 
-历史 `7.1.1-patch.1` 的第一、第二阶段合并为 [UPDATE-7.1.1-patch.1.md](UPDATE-7.1.1-patch.1.md)，保留两阶段原始范围、测试结果和当时未完成事项。移除独立第二阶段文件，更新 CHANGELOG、发布元数据和报告内链接。便携包继续包含合并后的文档，不改变历史 Release。
+历史 `7.1.1-patch.1` 的第一、第二阶段合并为 [UPDATE-7.1.1-patch.1.md](UPDATE-7.1.1-patch.1.md)，保留两阶段原始范围和测试结果。移除独立第二阶段文件，更新 CHANGELOG、发布元数据和报告内链接。便携包继续包含合并后的文档，不改变历史 Release。
 
 ## 验收与交付
 
@@ -26,7 +26,7 @@
 
 本机验收使用临时服务器与独立浏览器上下文，不操作用户数据库。三系统 Node.js 22/24 检查和便携包由版本 Tag 的 Actions 门禁执行；通过后发布 Release。源码先合入 main 再推送，`gh-pages` 专门承载同版本静态内容。云端结果以对应 [Actions](https://github.com/menggou1/FocusTodo-Local/actions) 和 [Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.3) 为准。
 
-当前边界：未新增真实系统休眠、长期运行或所有浏览器引擎验证；已有数据维护并发、主题迁移等待办见[维护指南](MAINTENANCE.md)。
+当前工作与验收入口：[统一待办与验收](BACKLOG.md)。
 
 ## 最终交付确认
 

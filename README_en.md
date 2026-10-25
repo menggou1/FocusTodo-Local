@@ -95,12 +95,13 @@ The detailed maintenance documents are in Chinese.
 | Goal | Start here |
 |---|---|
 | Changes, release evidence and historical reports | [Changelog](CHANGELOG.md) |
-| Development, tests, known issues and version/release procedure | [Maintenance guide](docs/MAINTENANCE.md) |
+| Development, tests and version/release procedure | [Maintenance guide](docs/MAINTENANCE.md) |
+| Open engineering, verification and future plans | [Backlog](docs/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.3.1`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.3.2`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
-Version 1.2.1 fixes a cross-tab initialization race exposed by intermittent macOS acceptance failures. Remaining desktop notification/audio/sleep verification limits are recorded in the maintenance guide and linked release reports.
+Version 1.2.1 fixes a cross-tab initialization race exposed by intermittent macOS acceptance failures. All open engineering, verification and future plans are maintained only in [BACKLOG.md](docs/BACKLOG.md).
 
 ## License
 
