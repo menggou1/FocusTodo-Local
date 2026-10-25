@@ -46,7 +46,7 @@
     function pendingSeconds(s) { return s.spans.reduce((n, p) => n + (p.end - p.start) / 1000, 0); }
     function emit(s, amount, rows) {
         if (amount < 0.001) return;
-        if (rows.length >= 20000) throw new Error('恢复记录过多，请缩短截止时间后分批处理。');
+        if (rows.length >= 20000) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('恢复记录过多，请缩短截止时间后分批处理。'):'恢复记录过多，请缩短截止时间后分批处理。'));
         const blockId = s.sessionId + ':block:' + (++s.blockSequence);
         let remaining = amount;
         while (remaining > 0.000001 && s.spans.length) {
@@ -89,7 +89,7 @@
     function advance(s, until, rows, events) {
         let iterations = 0;
         while (running(s) && until > s.cursorAt) {
-            if (++iterations > 20000) throw new Error('恢复区间过长，请缩短专注截止时间后重试。');
+            if (++iterations > 20000) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('恢复区间过长，请缩短专注截止时间后重试。'):'恢复区间过长，请缩短专注截止时间后重试。'));
             if (s.state === 'work' && s.mode === 'countup') {
                 const delta = (until - s.cursorAt) / 1000;
                 append(s, s.cursorAt, until);
@@ -115,12 +115,12 @@
         }
     }
     function reduce(previous, action, now) {
-        if (!Number.isFinite(now)) throw new Error('无效的计时时间。');
+        if (!Number.isFinite(now)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效的计时时间。'):'无效的计时时间。'));
         let s = previous ? clone(previous) : create(action, now);
         const rows = [], events = [];
-        if (action.expectedSession && s.sessionId !== action.expectedSession) throw new Error('计时会话已在其他标签页更改，请重试。');
+        if (action.expectedSession && s.sessionId !== action.expectedSession) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话已在其他标签页更改，请重试。'):'计时会话已在其他标签页更改，请重试。'));
         if (s.state === 'recovery' && action.type !== 'resolve' && action.type !== 'tick') {
-            throw new Error('请先处理待确认的中断时间。');
+            throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('请先处理待确认的中断时间。'):'请先处理待确认的中断时间。'));
         }
         if (running(s) && action.type !== 'resolve') {
             const gap = now - s.observedAt;
@@ -171,7 +171,7 @@
             if (s.state !== 'recovery' || !s.pendingRecovery) break;
             const p = s.pendingRecovery;
             const cutoff = action.cutoff === undefined ? p.to : Number(action.cutoff);
-            if (!Number.isFinite(cutoff) || cutoff < p.from || cutoff > p.to) throw new Error('截止时间必须在中断区间内。');
+            if (!Number.isFinite(cutoff) || cutoff < p.from || cutoff > p.to) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('截止时间必须在中断区间内。'):'截止时间必须在中断区间内。'));
             s.state = p.priorState; s.pendingRecovery = null;
             advance(s, cutoff, rows, events);
             // Keep unfinished spans; confirmation time and excluded time are never counted.
@@ -180,7 +180,7 @@
             break;
         }
         case 'tick': break;
-        default: throw new Error('未知计时操作：' + action.type);
+        default: throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('未知计时操作：'):'未知计时操作：') + action.type);
         }
         s.observedAt = now;
         s.revision = (previous ? previous.revision : 0) + 1;

@@ -20,7 +20,7 @@
             document.body.appendChild(box);
         }
         box.replaceChildren(document.createTextNode(message));
-        const close = document.createElement('button'); close.textContent = '关闭提示'; close.onclick = () => box.remove(); box.appendChild(close);
+        const close = document.createElement('button'); close.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('关闭提示'):'关闭提示'); close.onclick = () => box.remove(); box.appendChild(close);
     }
     root.addEventListener('focus-local-notice', event => notice(event.detail));
     function localDate(value) {
@@ -51,16 +51,16 @@
             dialog = document.createElement('div'); dialog.className = 'focus-recovery-backdrop'; dialog.id = 'focus-recovery';
             const card = document.createElement('section'); card.className = 'focus-recovery-card';
             card.setAttribute('role', 'dialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-labelledby', 'focus-recovery-title');
-            const title = document.createElement('h2'); title.id = 'focus-recovery-title'; title.textContent = '确认中断期间的专注时间';
+            const title = document.createElement('h2'); title.id = 'focus-recovery-title'; title.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确认中断期间的专注时间'):'确认中断期间的专注时间');
             const description = document.createElement('p');
-            description.textContent = (pending.clockChanged ? '检测到系统时间回退。' : '检测到页面长时间未执行。') + '等待确认期间暂停新增计时；已有记录保留。';
-            const range = document.createElement('p'); range.textContent = new Date(pending.from).toLocaleString() + ' — ' + new Date(pending.to).toLocaleString();
-            const label = document.createElement('label'); label.textContent = '专注截止时间';
+            description.textContent = (pending.clockChanged ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('检测到系统时间回退。'):'检测到系统时间回退。') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('检测到页面长时间未执行。'):'检测到页面长时间未执行。')) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('等待确认期间暂停新增计时；已有记录保留。'):'等待确认期间暂停新增计时；已有记录保留。');
+            const range = document.createElement('p'); range.textContent = new Date(pending.from).toLocaleString(globalThis.FocusI18n && globalThis.FocusI18n.locale) + ' — ' + new Date(pending.to).toLocaleString(globalThis.FocusI18n && globalThis.FocusI18n.locale);
+            const label = document.createElement('label'); label.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('专注截止时间'):'专注截止时间');
             const cutoff = document.createElement('input'); cutoff.type = 'datetime-local'; cutoff.step = '1';
             cutoff.min = localDate(pending.from); cutoff.max = localDate(pending.to); cutoff.value = localDate(pending.to); label.appendChild(cutoff);
             const summary = document.createElement('p'); summary.className = 'focus-recovery-summary';
             const continuing = document.createElement('label'), check = document.createElement('input'); check.type = 'checkbox'; check.checked = pending.source !== 'import';
-            continuing.append(check, document.createTextNode('确认后继续计时（等待确认的时间不计入）'));
+            continuing.append(check, document.createTextNode((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确认后继续计时（等待确认的时间不计入）'):'确认后继续计时（等待确认的时间不计入）')));
             const actions = document.createElement('div'); actions.className = 'focus-recovery-actions';
             const error = document.createElement('p'); error.setAttribute('role', 'alert'); error.className = 'focus-recovery-error';
             let cutoffEdited = false;
@@ -70,7 +70,7 @@
                     const result = core.reduce(current, { type: 'resolve', cutoff: end, continue: check.checked }, Date.now());
                     const minutes = result.records.reduce((sum, record) => sum + record.interval, 0) / 60;
                     const blocks = new Set(result.records.map(record => record.blockId)).size;
-                    summary.textContent = '将补记 ' + blocks + ' 段，共 ' + Number(minutes.toFixed(2)) + ' 分钟；未满番茄的部分继续保留。';
+                    summary.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('将补记 '):'将补记 ') + blocks + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 段，共 '):' 段，共 ') + Number(minutes.toFixed(2)) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 分钟；未满番茄的部分继续保留。'):' 分钟；未满番茄的部分继续保留。');
                     error.textContent = '';
                 } catch (e) { error.textContent = e.message; }
             }
@@ -79,8 +79,8 @@
                 try { await run('resolve', { cutoff: end, continue: check.checked }); }
                 catch (e) { error.textContent = e.message; buttons.forEach(button => { button.disabled = false; }); }
             }
-            [['全部计入', () => choose(pending.to)], ['按截止时间计入', () => choose(new Date(cutoff.value).getTime())],
-                ['不计入中断部分', () => choose(pending.from)]].forEach(([text, handler]) => {
+            [[(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('全部计入'):'全部计入'), () => choose(pending.to)], [(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('按截止时间计入'):'按截止时间计入'), () => choose(new Date(cutoff.value).getTime())],
+                [(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('不计入中断部分'):'不计入中断部分'), () => choose(pending.from)]].forEach(([text, handler]) => {
                     const button = document.createElement('button'); button.textContent = text; button.onclick = handler; actions.appendChild(button);
                 });
             cutoff.oninput = () => { cutoffEdited = true; preview(); }; check.onchange = preview;
@@ -116,7 +116,7 @@
         }
         function run(type, extra) {
             const execute = async () => {
-                if (disposed || halted || data.maintenance) throw new Error('本页已暂停数据操作，请刷新后继续。');
+                if (disposed || halted || data.maintenance) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本页已暂停数据操作，请刷新后继续。'):'本页已暂停数据操作，请刷新后继续。'));
                 const action = input(type, extra);
                 const result = await data.timerAction(action, Date.now());
                 if (disposed) return result;
@@ -132,13 +132,13 @@
                             if (options.notifyWork) options.notifyWork(result.session);
                         }
                         if (rest) { timer.playBreakAlarm(); if (options.notifyBreak) options.notifyBreak(); }
-                    } catch (error) { notice('计时已保存，完成提示未能播放：' + error.message); }
+                    } catch (error) { notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时已保存，完成提示未能播放：'):'计时已保存，完成提示未能播放：') + error.message); }
                 }
-                if (result.recovered) notice('中断时间已处理：补记 ' + Number((result.records.reduce((n, r) => n + r.interval, 0) / 60).toFixed(2)) + ' 分钟。');
+                if (result.recovered) notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('中断时间已处理：补记 '):'中断时间已处理：补记 ') + Number((result.records.reduce((n, r) => n + r.interval, 0) / 60).toFixed(2)) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 分钟。'):' 分钟。'));
                 return result;
             };
             const result = queue.then(execute, execute);
-            queue = result.catch(error => { notice('操作未完成：' + error.message); });
+            queue = result.catch(error => { notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('操作未完成：'):'操作未完成：') + error.message); });
             return result;
         }
         function fire(type, extra) { return run(type, extra).catch(() => {}); }

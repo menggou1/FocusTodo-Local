@@ -26,8 +26,8 @@ const server = http.createServer((request, response) => {
     const browser = await playwright().chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
     const failures = [], results = [];
     fs.mkdirSync(path.join(root, 'docs/acceptance'), { recursive: true });
-    async function app(testBody, beforeLoad, baseUrl = url) {
-        const context = await browser.newContext({ locale: 'zh-CN', timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
+    async function app(testBody, beforeLoad, baseUrl = url, locale = 'zh-CN') {
+        const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
         const errors = [], external = [];
         await context.addInitScript(() => {
             let api;
@@ -103,6 +103,47 @@ const server = http.createServer((request, response) => {
         return { started, release };
     }
     try {
+        await check('language settings switch to complete English and notifications are opt-in', () => app(async page => {
+            await page.mouse.click(1255,25); await page.getByText('通用',{exact:true}).click();
+            assert.deepEqual(await page.locator('#focus-language option').evaluateAll(nodes=>nodes.map(x=>x.value)),['auto','zh-CN','en']);
+            const loaded=page.waitForEvent('load');await page.locator('#focus-language').selectOption('en');await loaded;
+            await page.waitForFunction(()=>window.__acceptanceTimer);
+            await page.mouse.click(1255,25);await page.getByText('General',{exact:true}).click();
+            assert.equal(await page.locator('#focus-language').inputValue(),'en');
+            assert.equal(await page.evaluate(()=>window.__permissionRequests),0);
+            await page.getByRole('button',{name:'Enable notifications',exact:true}).click();
+            assert.equal(await page.evaluate(()=>window.__permissionRequests),1);
+            await page.getByRole('button',{name:'Send a test notification',exact:true}).click();
+            assert.equal(await page.evaluate(()=>window.__testNotifications),1);
+            await page.getByText('Account',{exact:true}).click();await page.getByRole('button',{name:'Export data',exact:true}).click();
+            await page.getByRole('button',{name:'Create and download',exact:true}).waitFor();
+            assert(!/[\u3400-\u9fff]/.test(await page.locator('#focus-backup-dialog').innerText()));
+            await page.screenshot({path:path.join(root,'docs/acceptance/english-backup.png')});
+            await page.getByRole('button',{name:'Close',exact:true}).click();
+            await page.locator('[class^="Settings-close-"]').click();
+            await page.getByRole('button',{name:'Notifications',exact:true}).click();
+            await page.locator('.focus-release-entry').first().click();
+            assert(!/[\u3400-\u9fff]/.test(await page.locator('#focus-update-dialog').innerText()));
+        },page=>page.addInitScript(()=>{
+            window.__permissionRequests=0;window.__testNotifications=0;
+            function Notification(){window.__testNotifications++;this.close=()=>{};}
+            Notification.permission='default';Notification.requestPermission=async()=>{window.__permissionRequests++;Notification.permission='granted';return 'granted';};window.Notification=Notification;
+        })));
+        await check('language unsupported system locale falls back to English without key names', () => app(async page=>{
+            assert.equal(await page.evaluate(()=>window.FocusI18n.locale),'en');
+            const strings=await page.evaluate(()=>[FocusI18n.legacyText('cmm_cancel'),FocusI18n.legacyText('missing_internal_example_key')]);
+            assert.deepEqual(strings,['Cancel','Text unavailable']);
+            await page.mouse.click(1255,25);await page.getByText('Appearance',{exact:true}).click();
+            await page.getByText('Bing daily',{exact:true}).waitFor();
+            assert.equal(await page.getByText('Upload image',{exact:true}).count(),1);
+        },null,url,'ar-SA'));
+        await check('language regional partial translation is system-only with usable local controls', () => app(async page=>{
+            assert.equal(await page.evaluate(()=>window.FocusI18n.locale),'fr');
+            await page.mouse.click(1255,25);
+            await page.locator('[class*="Settings-menuName"]').filter({hasText:/Général|General/}).click();
+            assert.equal(await page.locator('#focus-language').inputValue(),'auto');
+            assert.equal(await page.locator('#focus-language option[value="fr"]').count(),0);
+        },null,url,'fr-CA'));
         await check('theme journal recovers before rendering and is excluded from backups', () => app(async page => {
             assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'Ocean');
             assert.equal(await page.evaluate(() => localStorage.getItem('FocusTodo.themeJournal')), null);

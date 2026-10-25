@@ -57,7 +57,7 @@
     // 注意：应用使用 Base64.decode() 读取 ACCT 和 NAME
     // 所以需要存入 Base64 编码后的值
     var localAccount = 'local@local';
-    var localName = '\u672c\u5730\u7528\u6237'; // "本地用户"
+    var localName = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('\u672c\u5730\u7528\u6237'):'\u672c\u5730\u7528\u6237'); // "本地用户"
 
     // UTF-8 Base64 编码辅助函数
     function utf8Base64Encode(str) {
@@ -253,7 +253,7 @@
             try { url = new URL(input instanceof Request ? input.url : String(input), location.href); }
             catch (error) { return Promise.reject(error); }
             if (url.origin === location.origin || _isWhitelisted(url.href)) return origFetch.apply(this, arguments);
-            return Promise.reject(new TypeError('本地版已阻止外部请求：' + url.hostname));
+            return Promise.reject(new TypeError((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地版已阻止外部请求：'):'本地版已阻止外部请求：') + url.hostname));
         };
     }
 
@@ -336,7 +336,7 @@
                         if (options.success) options.success(response);
                         deferred.resolve(response);
                     }).catch(function(error) {
-                        window.FocusLocal.notice('操作失败，未报告成功：' + error.message);
+                        window.FocusLocal.notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('操作失败，未报告成功：'):'操作失败，未报告成功：') + error.message);
                         if (options.error) options.error({ statusText: error.message }, 'error', error);
                         deferred.reject(error);
                     });
@@ -406,12 +406,12 @@
             var analysis = window.FocusLocalBackup.analyze(snapshot);
             element.replaceChildren();
             var table = backupNode('table', 'focus-backup-analysis');
-            var caption = backupNode('caption', '', '紧凑 JSON 体积分析'); table.appendChild(caption);
+            var caption = backupNode('caption', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('紧凑 JSON 体积分析'):'紧凑 JSON 体积分析')); table.appendChild(caption);
             var rows = [
-                ['任务及子任务', analysis.tasks.count + ' 条', analysis.tasks.bytes],
-                ['专注记录', analysis.focus.count + ' 条', analysis.focus.bytes],
-                ['其他数据', analysis.other.count + ' 条记录 / ' + analysis.other.settings + ' 项设置', analysis.other.bytes],
-                ['壁纸图片', analysis.wallpapers.count + ' 个主题 / ' + analysis.wallpapers.resources + ' 张原图及缩略图', analysis.wallpapers.bytes]
+                [(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('任务及子任务'):'任务及子任务'), analysis.tasks.count + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 条'):' 条'), analysis.tasks.bytes],
+                [(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('专注记录'):'专注记录'), analysis.focus.count + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 条'):' 条'), analysis.focus.bytes],
+                [(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('其他数据'):'其他数据'), analysis.other.count + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 条记录 / '):' 条记录 / ') + analysis.other.settings + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 项设置'):' 项设置'), analysis.other.bytes],
+                [(typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('壁纸图片'):'壁纸图片'), analysis.wallpapers.count + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 个主题 / '):' 个主题 / ') + analysis.wallpapers.resources + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 张原图及缩略图'):' 张原图及缩略图'), analysis.wallpapers.bytes]
             ];
             var tbody = backupNode('tbody');
             rows.forEach(function(row) {
@@ -419,50 +419,50 @@
                 tr.append(th, backupNode('td', '', row[1]), backupNode('td', '', formatBytes(row[2]))); tbody.appendChild(tr);
             });
             table.appendChild(tbody); element.appendChild(table);
-            element.appendChild(backupNode('p', 'focus-app-meta', '紧凑 JSON 合计 ' + formatBytes(analysis.totalBytes) + '。分项按字段序列化估算，图片为 data URL 编码体积，含缩略图；不含容器开销，分项不直接相加。'));
+            element.appendChild(backupNode('p', 'focus-app-meta', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('紧凑 JSON 合计 '):'紧凑 JSON 合计 ') + formatBytes(analysis.totalBytes) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('。分项按字段序列化估算，图片为 data URL 编码体积，含缩略图；不含容器开销，分项不直接相加。'):'。分项按字段序列化估算，图片为 data URL 编码体积，含缩略图；不含容器开销，分项不直接相加。')));
         }
         async function exportAllData() {
-            var dialog = dataDialog('导出数据备份', 'focus-backup-dialog');
+            var dialog = dataDialog((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导出数据备份'):'导出数据备份'), 'focus-backup-dialog');
             if (!dialog) return;
             var codec = window.FocusLocalBackup, snapshot;
             var scopeLabel = backupNode('label', 'focus-backup-option');
             var include = backupNode('input'); include.type = 'checkbox'; include.checked = true;
-            scopeLabel.append(include, document.createTextNode('包含壁纸图片（完整备份，默认）'));
-            var fieldset = backupNode('fieldset', 'focus-backup-formats'); fieldset.appendChild(backupNode('legend', '', '文件格式'));
+            scopeLabel.append(include, document.createTextNode((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('包含壁纸图片（完整备份，默认）'):'包含壁纸图片（完整备份，默认）')));
+            var fieldset = backupNode('fieldset', 'focus-backup-formats'); fieldset.appendChild(backupNode('legend', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('文件格式'):'文件格式')));
             function formatChoice(value, text, checked) {
                 var label = backupNode('label', 'focus-backup-option'), input = backupNode('input');
                 input.type = 'radio'; input.name = 'focus-backup-format'; input.value = value; input.checked = checked;
                 label.append(input, document.createTextNode(text)); fieldset.appendChild(label); return input;
             }
             var supported = codec.compressionSupported();
-            var gzip = formatChoice('gzip', 'Gzip 压缩（.json.gz，推荐）', supported);
-            var plain = formatChoice('json', '普通紧凑 JSON（.json，兼容旧版）', !supported);
+            var gzip = formatChoice('gzip', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('Gzip 压缩（.json.gz，推荐）'):'Gzip 压缩（.json.gz，推荐）'), supported);
+            var plain = formatChoice('json', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('普通紧凑 JSON（.json，兼容旧版）'):'普通紧凑 JSON（.json，兼容旧版）'), !supported);
             gzip.disabled = !supported;
             var scopeHint = backupNode('p', 'focus-app-meta');
             var analysis = backupNode('div'); analysis.setAttribute('aria-live', 'polite');
-            var status = backupNode('p', 'focus-app-meta', '正在读取一致数据快照…'); status.setAttribute('role', 'status');
+            var status = backupNode('p', 'focus-app-meta', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('正在读取一致数据快照…'):'正在读取一致数据快照…')); status.setAttribute('role', 'status');
             var error = backupNode('p', 'focus-app-error'); error.setAttribute('role', 'alert');
             dialog.body.append(scopeLabel, scopeHint, fieldset,
-                backupNode('p', 'focus-app-meta', supported ? '新版可读取旧 JSON；旧版需先解压 .json.gz，或使用普通 JSON。' : '当前浏览器不支持压缩 API，将导出普通 JSON。'), analysis, status, error);
-            var close = backupNode('button', '', '关闭'), generate = backupNode('button', 'focus-app-danger', '生成并下载');
+                backupNode('p', 'focus-app-meta', supported ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('新版可读取旧 JSON；旧版需先解压 .json.gz，或使用普通 JSON。'):'新版可读取旧 JSON；旧版需先解压 .json.gz，或使用普通 JSON。') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('当前浏览器不支持压缩 API，将导出普通 JSON。'):'当前浏览器不支持压缩 API，将导出普通 JSON。')), analysis, status, error);
+            var close = backupNode('button', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('关闭'):'关闭')), generate = backupNode('button', 'focus-app-danger', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('生成并下载'):'生成并下载'));
             close.type = generate.type = 'button'; generate.disabled = true; close.onclick = dialog.close;
             dialog.actions.append(close, generate);
             function refreshAnalysis() {
-                scopeHint.textContent = include.checked ? '保留全部任务、历史、设置和壁纸。' : '不含壁纸：任务和专注明细保留；导入后使用默认 Leaf 主题。导入前和删除前自动备份始终包含全部壁纸。';
+                scopeHint.textContent = include.checked ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('保留全部任务、历史、设置和壁纸。'):'保留全部任务、历史、设置和壁纸。') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('不含壁纸：任务和专注明细保留；导入后使用默认 Leaf 主题。导入前和删除前自动备份始终包含全部壁纸。'):'不含壁纸：任务和专注明细保留；导入后使用默认 Leaf 主题。导入前和删除前自动备份始终包含全部壁纸。');
                 if (snapshot) showAnalysis(analysis, codec.prepare(snapshot, { includeWallpapers: include.checked }));
             }
             include.onchange = refreshAnalysis; refreshAnalysis();
             generate.onclick = async function() {
                 if (!snapshot || dialog.busy) return;
                 dialog.busy = true; generate.disabled = close.disabled = include.disabled = plain.disabled = gzip.disabled = true;
-                error.textContent = ''; status.textContent = '正在生成备份…';
+                error.textContent = ''; status.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('正在生成备份…'):'正在生成备份…');
                 // Let the busy state paint before serialization/compression begins.
                 await new Promise(function(resolve) { setTimeout(resolve, 0); });
                 try {
                     var encoded = await codec.encode(snapshot, { includeWallpapers: include.checked, format: plain.checked ? 'json' : 'gzip' });
                     var result = codec.download(encoded);
-                    status.textContent = '已发起' + (encoded.format === 'gzip' ? ' Gzip 压缩' : '普通 JSON') + '下载：' + result.name + '，实际文件 ' + formatBytes(result.size) + '。请在浏览器下载列表确认文件已保存。' + (encoded.fallback ? '压缩 API 不可用，已回退为 JSON。' : '');
-                } catch (failure) { status.textContent = ''; error.textContent = '导出失败：' + failure.message; }
+                    status.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('已发起'):'已发起') + (encoded.format === 'gzip' ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' Gzip 压缩'):' Gzip 压缩') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('普通 JSON'):'普通 JSON')) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('下载：'):'下载：') + result.name + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('，实际文件 '):'，实际文件 ') + formatBytes(result.size) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('。请在浏览器下载列表确认文件已保存。'):'。请在浏览器下载列表确认文件已保存。') + (encoded.fallback ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('压缩 API 不可用，已回退为 JSON。'):'压缩 API 不可用，已回退为 JSON。') : '');
+                } catch (failure) { status.textContent = ''; error.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导出失败：'):'导出失败：') + failure.message; }
                 finally {
                     dialog.busy = false; generate.disabled = close.disabled = include.disabled = plain.disabled = false;
                     gzip.disabled = !supported;
@@ -472,17 +472,17 @@
                 await window.FocusLocalReady;
                 snapshot = await window.FocusLocalData.snapshot();
                 if (!dialog.card.isConnected) return;
-                refreshAnalysis(); status.textContent = '数据快照已准备，可选择范围和格式后生成文件。'; generate.disabled = false;
-            } catch (failure) { if (dialog.card.isConnected) { status.textContent = ''; error.textContent = '读取备份失败：' + failure.message; } }
+                refreshAnalysis(); status.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据快照已准备，可选择范围和格式后生成文件。'):'数据快照已准备，可选择范围和格式后生成文件。'); generate.disabled = false;
+            } catch (failure) { if (dialog.card.isConnected) { status.textContent = ''; error.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('读取备份失败：'):'读取备份失败：') + failure.message; } }
         }
         async function handleFileSelect(file) {
             if (!file) return;
-            var dialog = dataDialog('导入数据备份', 'focus-import-dialog');
+            var dialog = dataDialog((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导入数据备份'):'导入数据备份'), 'focus-import-dialog');
             if (!dialog) return;
-            var status = backupNode('p', 'focus-app-meta', '正在识别、解压和校验文件…'); status.setAttribute('role', 'status');
+            var status = backupNode('p', 'focus-app-meta', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('正在识别、解压和校验文件…'):'正在识别、解压和校验文件…')); status.setAttribute('role', 'status');
             var details = backupNode('div'), error = backupNode('p', 'focus-app-error'); error.setAttribute('role', 'alert');
             dialog.body.append(status, details, error);
-            var cancel = backupNode('button', '', '取消'), confirmImport = backupNode('button', 'focus-app-danger', '确认覆盖并导入');
+            var cancel = backupNode('button', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('取消'):'取消')), confirmImport = backupNode('button', 'focus-app-danger', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确认覆盖并导入'):'确认覆盖并导入'));
             cancel.type = confirmImport.type = 'button'; confirmImport.disabled = true;
             cancel.onclick = dialog.close; dialog.actions.append(cancel, confirmImport);
             try {
@@ -490,24 +490,24 @@
                 await window.FocusLocalReady;
                 window.FocusLocalData.validate(decoded.data);
                 if (!dialog.card.isConnected) return;
-                status.textContent = (decoded.format === 'gzip' ? 'Gzip 压缩文件' : 'JSON 文件') + '，解码后 ' + formatBytes(decoded.decodedBytes) + '。范围：' + (decoded.scope === 'full' ? '完整备份（含壁纸）' : '不含壁纸（恢复后使用默认 Leaf 主题）') + '。';
+                status.textContent = (decoded.format === 'gzip' ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('Gzip 压缩文件'):'Gzip 压缩文件') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('JSON 文件'):'JSON 文件')) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('，解码后 '):'，解码后 ') + formatBytes(decoded.decodedBytes) + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('。范围：'):'。范围：') + (decoded.scope === 'full' ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('完整备份（含壁纸）'):'完整备份（含壁纸）') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('不含壁纸（恢复后使用默认 Leaf 主题）'):'不含壁纸（恢复后使用默认 Leaf 主题）')) + '。';
                 showAnalysis(details, decoded.data);
-                details.appendChild(backupNode('p', '', '将覆盖当前任务、专注记录和设置。导入前会发起完整安全备份下载，请确认下载文件已保存。计时快照不会自动运行。'));
+                details.appendChild(backupNode('p', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('将覆盖当前任务、专注记录和设置。导入前会发起完整安全备份下载，请确认下载文件已保存。计时快照不会自动运行。'):'将覆盖当前任务、专注记录和设置。导入前会发起完整安全备份下载，请确认下载文件已保存。计时快照不会自动运行。')));
                 confirmImport.disabled = false;
                 confirmImport.onclick = async function() {
                     if (dialog.busy) return;
                     dialog.busy = true; cancel.disabled = confirmImport.disabled = true;
-                    status.textContent = '正在生成完整安全备份并恢复数据…'; error.textContent = '';
+                    status.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('正在生成完整安全备份并恢复数据…'):'正在生成完整安全备份并恢复数据…'); error.textContent = '';
                     try {
                         await window.FocusLocalData.replace(decoded.data);
-                        status.textContent = '数据已提交，页面即将刷新。'; location.reload();
+                        status.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已提交，页面即将刷新。'):'数据已提交，页面即将刷新。'); location.reload();
                     } catch (failure) {
                         dialog.busy = false; cancel.disabled = confirmImport.disabled = false;
-                        status.textContent = ''; error.textContent = '导入未完成：' + failure.message + '。未报告导入成功。';
+                        status.textContent = ''; error.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导入未完成：'):'导入未完成：') + failure.message + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('。未报告导入成功。'):'。未报告导入成功。');
                     }
                 };
                 cancel.focus();
-            } catch (failure) { if (dialog.card.isConnected) { status.textContent = ''; error.textContent = '导入失败：' + failure.message + '。当前数据未被覆盖。'; } }
+            } catch (failure) { if (dialog.card.isConnected) { status.textContent = ''; error.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导入失败：'):'导入失败：') + failure.message + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('。当前数据未被覆盖。'):'。当前数据未被覆盖。'); } }
         }
 
         // ========== 创建隐藏的文件选择器 ==========
@@ -536,8 +536,8 @@
             // Look for the red button span that has "删除数据" text
             var redButtons = container.querySelectorAll('[class*="redButton"]');
             for (var i = 0; i < redButtons.length; i++) {
-                if (redButtons[i].textContent.indexOf('删除数据') >= 0 ||
-                    redButtons[i].textContent.indexOf('数据') >= 0) {
+                if (redButtons[i].textContent.indexOf((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('删除数据'):'删除数据')) >= 0 ||
+                    redButtons[i].textContent.indexOf((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据'):'数据')) >= 0) {
                     return redButtons[i];
                 }
             }
@@ -552,7 +552,7 @@
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'focus-account-button';
-            btn.textContent = '导出数据';
+            btn.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导出数据'):'导出数据');
             btn.addEventListener('keydown', function(e) { e.stopPropagation(); });
             btn.addEventListener('keyup', function(e) { e.stopPropagation(); });
             btn.addEventListener('click', function(e) {
@@ -567,7 +567,7 @@
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'focus-account-button';
-            btn.textContent = '导入数据';
+            btn.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('导入数据'):'导入数据');
             btn.addEventListener('keydown', function(e) { e.stopPropagation(); });
             btn.addEventListener('keyup', function(e) { e.stopPropagation(); });
             btn.addEventListener('click', function(e) {
@@ -710,21 +710,21 @@
             get: function(key) { return localStorage.getItem(key); },
             set: _origSetItem, remove: _origRemoveItem,
             assertWritable: function() {
-                if (window.FocusLocalData.maintenance) throw new Error('本地数据维护中，请完成后刷新再修改主题。');
+                if (window.FocusLocalData.maintenance) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据维护中，请完成后刷新再修改主题。'):'本地数据维护中，请完成后刷新再修改主题。'));
             }
         });
         window.FocusThemeStore = themeStore;
         window.FocusLocalReady = Promise.resolve(window.FocusLocalReady).then(function() { themeStore.recover(); });
-        window.FocusLocalReady.catch(function(error) { window.FocusLocal.notice('主题设置恢复未完成，请刷新重试：' + error.message); });
+        window.FocusLocalReady.catch(function(error) { window.FocusLocal.notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题设置恢复未完成，请刷新重试：'):'主题设置恢复未完成，请刷新重试：') + error.message); });
         window.addEventListener('focus-local-maintenance', function() { selectionRevision++; themeDataRevision++; });
 
         function writeThemeState(update) {
             try {
-                if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) throw new Error('存在待恢复的主题设置，请刷新后重试。');
+                if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在待恢复的主题设置，请刷新后重试。'):'存在待恢复的主题设置，请刷新后重试。'));
                 return themeStore.commit(update);
             }
             catch (error) {
-                var failure = new Error('主题保存失败，请检查存储空间或刷新后重试：' + error.message);
+                var failure = new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题保存失败，请检查存储空间或刷新后重试：'):'主题保存失败，请检查存储空间或刷新后重试：') + error.message);
                 failure.recoveryRequired = error.recoveryRequired;
                 throw failure;
             }
@@ -738,7 +738,7 @@
 
         function customThemesJSON(data) {
             var json = JSON.stringify(data);
-            if (json.length > 2 * 1024 * 1024 && json.length >= (localStorage.getItem(STORAGE_KEY) || '').length) throw new Error('自定义主题总量已达到限制，请删除部分图片后重试。');
+            if (json.length > 2 * 1024 * 1024 && json.length >= (localStorage.getItem(STORAGE_KEY) || '').length) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('自定义主题总量已达到限制，请删除部分图片后重试。'):'自定义主题总量已达到限制，请删除部分图片后重试。'));
             return json;
         }
         function saveCustomThemes(data) {
@@ -871,7 +871,7 @@
             return new Promise(function(resolve, reject) {
                 var img = new Image();
                 img.crossOrigin = 'anonymous';
-                var timer = setTimeout(function() { reject(new Error('图片加载超时')); }, 20000);
+                var timer = setTimeout(function() { reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('图片加载超时'):'图片加载超时'))); }, 20000);
                 img.onload = function() {
                     clearTimeout(timer);
                     try {
@@ -888,11 +888,11 @@
                         var ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, w, h);
                         resolve(canvas.toDataURL('image/jpeg', 0.85));
-                    } catch(e) { reject(new Error('Canvas处理失败: ' + e.message)); }
+                    } catch(e) { reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('Canvas处理失败: '):'Canvas处理失败: ') + e.message)); }
                 };
                 img.onerror = function() {
                     clearTimeout(timer);
-                    reject(new Error('图片加载失败，可能存在跨域限制'));
+                    reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('图片加载失败，可能存在跨域限制'):'图片加载失败，可能存在跨域限制')));
                 };
                 img.src = imageUrl;
             });
@@ -921,7 +921,7 @@
                     'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN'
                 ];
                 function tryApi(idx) {
-                    if (idx >= apis.length) { reject(new Error('所有API端点均不可用')); return; }
+                    if (idx >= apis.length) { reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('所有API端点均不可用'):'所有API端点均不可用'))); return; }
                     var xhr = new XMLHttpRequest();
                     xhr.open('GET', apis[idx], true);
                     xhr.timeout = 10000;
@@ -968,7 +968,7 @@
                 if (dataRevision !== themeDataRevision) return null;
                 var themes = getCustomThemes();
                 themes[BING_ID] = {
-                    name: 'Bing每日壁纸', dataUrl: data.dataUrl,
+                    name: (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('Bing每日壁纸'):'Bing每日壁纸'), dataUrl: data.dataUrl,
                     thumbnail: data.thumbnail, type: 'bing',
                     updatedAt: Date.now(), copyright: data.copyright || ''
                 };
@@ -1003,7 +1003,7 @@
                 if (data && revision === selectionRevision) activateCustomTheme(BING_ID, data);
             }).catch(function(err) {
                 console.warn('[Lexible] Bing fetch failed:', err.message || err);
-                if (revision === selectionRevision && !(cached && cached.dataUrl)) alert('获取 Bing 每日壁纸失败。\n\n' + ((err && err.message) || '网络错误，请检查网络连接后重试。'));
+                if (revision === selectionRevision && !(cached && cached.dataUrl)) alert((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('获取 Bing 每日壁纸失败。\n\n'):'获取 Bing 每日壁纸失败。\n\n') + ((err && err.message) || (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('网络错误，请检查网络连接后重试。'):'网络错误，请检查网络连接后重试。')));
             });
         }
 
@@ -1038,7 +1038,7 @@
 
         // ---- 删除自定义主题 ----
         function deleteCustomTheme(id) {
-            if (!confirm('确定要删除此自定义主题吗？')) return;
+            if (!confirm((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确定要删除此自定义主题吗？'):'确定要删除此自定义主题吗？'))) return;
             var themes = getCustomThemes();
             delete themes[id];
             if (getActiveId() === id) {
@@ -1083,18 +1083,10 @@
             if (!settingsRoot) return null;
 
             // 在容器内查找包含"主题"/"Theme"字样的标题 div
-            var titleDivs = settingsRoot.querySelectorAll('[class*="AppearanceSettings-title"]');
-            for (var i = 0; i < titleDivs.length; i++) {
-                var text = (titleDivs[i].textContent || '').trim();
-                if (text === '主题' || text === 'Theme') {
-                    var tbl = titleDivs[i].nextElementSibling;
-                    while (tbl && tbl.tagName !== 'TABLE') {
-                        tbl = tbl.nextElementSibling;
-                    }
-                    return tbl || null;
-                }
-            }
-            return null;
+            var title = settingsRoot.querySelector('[class*="AppearanceSettings-title"][class*="AppearanceSettings-theme"]');
+            var table = title && title.nextElementSibling;
+            while (table && table.tagName !== 'TABLE') table = table.nextElementSibling;
+            return table || null;
         }
 
         // ---- 创建主题按钮 ----
@@ -1128,12 +1120,12 @@
             if (isCustom) {
                 var label = document.createElement('div');
                 label.style.cssText = 'position:absolute;bottom:14px;left:4px;background:rgba(0,0,0,0.6);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:5;';
-                label.textContent = (name && name.length > 10) ? name.substring(0, 8) + '...' : (name || '自定义');
+                label.textContent = (name && name.length > 10) ? name.substring(0, 8) + '...' : (name || (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('自定义'):'自定义'));
                 td.appendChild(label);
 
                 var delBtn = document.createElement('span');
                 delBtn.textContent = '×';
-                delBtn.title = '删除此主题';
+                delBtn.title = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('删除此主题'):'删除此主题');
                 delBtn.style.cssText = 'position:absolute;top:2px;right:10px;width:22px;height:22px;line-height:20px;text-align:center;background:rgba(0,0,0,0.5);color:#fff;border-radius:50%;cursor:pointer;font-size:16px;font-weight:bold;z-index:10;user-select:none;';
                 delBtn.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); deleteCustomTheme(id); });
                 td.appendChild(delBtn);
@@ -1198,7 +1190,7 @@
                 if (!e.target.files || e.target.files.length === 0) return;
                 var file = e.target.files[0];
                 if (file.size > 10 * 1024 * 1024) {
-                    alert('图片文件过大，请选择小于 10MB 的图片。');
+                    alert((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('图片文件过大，请选择小于 10MB 的图片。'):'图片文件过大，请选择小于 10MB 的图片。'));
                     e.target.value = '';
                     return;
                 }
@@ -1211,7 +1203,7 @@
                         return downloadImageAsDataUrl(rawDataUrl).then(function(compressed) {
                             return { dataUrl: compressed, thumbnail: thumb };
                         }).catch(function() {
-                            throw new Error('图片压缩失败，未保存原始大图。请更换图片。');
+                            throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('图片压缩失败，未保存原始大图。请更换图片。'):'图片压缩失败，未保存原始大图。请更换图片。'));
                         });
                     }).then(function(result) {
                         var id = genId();
@@ -1226,11 +1218,11 @@
                         refreshThemeUI();
                     }).catch(function(err) {
                         console.error('[Lexible] Upload failed:', err);
-                        alert('上传失败: ' + (err.message || '未知错误'));
+                        alert((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('上传失败: '):'上传失败: ') + (err.message || (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('未知错误'):'未知错误')));
                     });
                 };
                 reader.onerror = function() {
-                    alert('文件读取失败，请重试。');
+                    alert((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('文件读取失败，请重试。'):'文件读取失败，请重试。'));
                 };
                 reader.readAsDataURL(file);
                 e.target.value = '';
@@ -1311,7 +1303,7 @@
 
             var bingLabel = document.createElement('div');
             bingLabel.style.cssText = 'position:absolute;bottom:14px;left:4px;background:rgba(0,0,0,0.6);color:#fff;padding:2px 8px;border-radius:4px;font-size:12px;pointer-events:none;z-index:5;';
-            bingLabel.textContent = _bingLoading ? '下载中...' : 'Bing 每日';
+            bingLabel.textContent = _bingLoading ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('下载中...'):'下载中...') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('Bing 每日'):'Bing 每日');
             bingTd.appendChild(bingLabel);
 
             if (isBingActive) {
@@ -1340,7 +1332,7 @@
             ico.style.cssText = 'font-size:36px;line-height:1;margin-bottom:6px;';
             placeholder.appendChild(ico);
             var txt = document.createElement('span');
-            txt.textContent = '本地上传';
+            txt.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地上传'):'本地上传');
             txt.style.cssText = 'color:var(--text-title, #666);font-size:14px;';
             placeholder.appendChild(txt);
             uploadWrapper.appendChild(placeholder);

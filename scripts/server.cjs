@@ -37,6 +37,6 @@ function createServer() { return http.createServer((req, res) => {
 module.exports = { createServer };
 if (require.main === module) {
     const server = createServer();
-    server.on('error', error => { console.error('本地服务器启动失败：' + error.message); process.exitCode = 1; });
+    server.on('error', error => { console.error('Local server startup failed: ' + error.message); process.exitCode = 1; });
     server.listen(port, '127.0.0.1', () => console.log(`FocusTodo ${require('../package.json').version}: http://127.0.0.1:${server.address().port}/index.html`));
 }

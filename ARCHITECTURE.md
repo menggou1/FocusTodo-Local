@@ -4,7 +4,9 @@
 
 FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后端服务进行数据同步，经由 **Lexible** 修改后将任务、专注记录与设置保存在浏览器本地。Bing 壁纸仍有明确允许的外部资源来源，不能把当前版本描述为不产生任何网络请求。
 
-当前应用版本 `7.1.1-local.1.3.2`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
+当前本地版排除小组、在线排名和旧森林入口，也停用隐藏森林的后台奖励初始化。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
+
+当前应用版本 `7.1.1-local.1.4.0`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
@@ -18,6 +20,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 - `local-backup.js`：紧凑 JSON/Gzip 编码、内容识别、128 MB 解压边界、备份范围和体积分析；业务表和计时快照校验仍由数据层负责。主题图片仍保留 data URL，不引入数据库升级。
 - `local-app-ui.js`：通知更新详情、关于页版本与 GitHub 图标、无需密码的 5 秒删除确认。
 - `local-theme-storage.js`：协调主题 JSON、激活 ID 和 Theme 三键，用不含图片副本的小日志恢复对应元信息。`patch.js` 在导入日志恢复后完成主题恢复，再启动主题服务；内部日志不进入备份。
+- `local-i18n.js` / `local-settings-ui.js`：同步决定界面语言，提供原界面和本地补丁的回退；通用设置只显式提供完整中文/英语，其他既有翻译由系统选择，缺项不显示键名。用户数据不经过 DOM 翻译。
 - 用户更新与维护报告分开：详情只显示标题、日期、版本、作者和简短条目，不展示 Markdown 按钮；报告在仓库 docs 中提供，`release.json` 的 report 字段仅供维护和一致性检查。
 - 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-timer-ui.js` → `local-app-ui.js` → `local-backup.js` → `local-theme-storage.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志与主题恢复。
 - `scripts/revise-timer-integration.cjs` 只更新明确的计时接入边界，可重复执行；旧 `upgrade-*.cjs` 仍是一次性改造记录，不能当作最终版本完整构建脚本。

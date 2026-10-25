@@ -1,6 +1,8 @@
 // Generate release metadata from one source and the configured Git remote.
 const fs = require('node:fs'), path = require('node:path'), { execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
+require('./build-i18n.cjs');
+require('./build-english-reports.cjs');
 const config = JSON.parse(fs.readFileSync(path.join(root, 'release.json'), 'utf8'));
 if (config.officialVersion !== '7.1.1' || !/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(config.localVersion)) throw new Error('Invalid official/local version.');
 const version = config.officialVersion + '-local.' + config.localVersion;

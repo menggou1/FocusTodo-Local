@@ -1,10 +1,10 @@
 # FocusTodo
 
-FocusTodo - Local Development Version · [中文版](README.md)
+FocusTodo — browser-local edition · [中文版](README.md)
 
 ## About
 
-This local version of [FocusTodo](https://focustodo.cn) is maintained from [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) version 7.1.1 as a standalone repository. The untouched upstream version is preserved on `upstream/7.1.1`; see the [maintenance guide](docs/MAINTENANCE.md#7-源码来源与原版归档) for provenance and branch roles.
+This local version of [FocusTodo](https://focustodo.cn) is maintained from [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) version 7.1.1 as a standalone repository. The untouched upstream version is preserved on `upstream/7.1.1`; see the [English maintenance guide](docs/en/MAINTENANCE.md#provenance) for provenance and branch roles.
 
 > **Disclaimer**: This project is for personal learning and research purposes only. Please support the official [FocusTodo](https://focustodo.cn) software.
 
@@ -55,8 +55,16 @@ http://127.0.0.1:5500/index.html
 - 📊 Focus time reports
 - 🎨 Custom themes (Bing daily wallpaper + local upload)
 - 💾 Lossless Gzip / JSON backups, legacy imports, size analysis and optional wallpapers
-- 🌲 Focus forest (sunlight rewards)
-- 🌐 32 languages supported
+- 🌐 Complete Simplified Chinese and English local UI, with system-selected existing partial translations and readable English fallbacks
+- 🔔 Explicit desktop notification permission and test controls
+
+Groups, online rankings and the old forest are excluded. The [offline feature proposal](docs/en/BACKLOG.md#offline-feature-design-proposal) recommends an optional Personal growth view derived from local focus records; that view is not implemented by this release.
+
+## Language and notifications
+
+Open **Settings → General → Language** and choose **Follow system**, **简体中文** or **English**. Only fully adapted languages are explicit choices. Other existing translations are used by Follow system, resolving an available base language and then English. Missing messages show readable fallback text, never internal translation keys. Changing language reloads the page without moving or deleting browser data; your own task text, notes and image filenames are preserved.
+
+The same General section can request desktop notification permission or send a test notification. Permission is never requested at startup. If denied, change the browser's site permission; operating-system notification rules still apply.
 
 ## Tech Stack
 
@@ -90,18 +98,18 @@ Settings → Account exports a complete `.json.gz` backup by default, with plain
 
 ## Documentation
 
-The detailed maintenance documents are in Chinese.
+The application guide, maintenance, architecture, backlog and release documentation are available in English. [English documentation index](docs/en/README.md).
 
 | Goal | Start here |
 |---|---|
-| Changes, release evidence and historical reports | [Changelog](CHANGELOG.md) |
-| Development, tests and version/release procedure | [Maintenance guide](docs/MAINTENANCE.md) |
-| Open engineering, verification and future plans | [Backlog](docs/BACKLOG.md) |
-| Module, database and legacy bundle boundaries | [Architecture](ARCHITECTURE.md) |
+| Changes, release evidence and historical reports | [Changelog](docs/en/CHANGELOG.md) |
+| Development, tests and version/release procedure | [Maintenance guide](docs/en/MAINTENANCE.md) |
+| Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
+| Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.3.2`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.4.0`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
-Version 1.2.1 fixes a cross-tab initialization race exposed by intermittent macOS acceptance failures. All open engineering, verification and future plans are maintained only in [BACKLOG.md](docs/BACKLOG.md).
+Version 1.2.1 fixed a cross-tab initialization race exposed by intermittent macOS acceptance failures. The [English backlog](docs/en/BACKLOG.md) mirrors the canonical open-work list with the same item IDs.
 
 ## License
 

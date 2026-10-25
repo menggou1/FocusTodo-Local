@@ -2,9 +2,17 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.3.2** · Git Tag **1.3.2** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.4.0** · Git Tag **1.4.0** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
+
+## 7.1.1-local.1.4.0 · 2026-10-25
+
+- 通用设置新增跟随系统、简体中文、English 和主动通知授权/测试入口。
+- 完成本地界面、错误、历史更新与文档英文适配；其他语言按系统选择，缺失文案回退可读语言而非键名。
+- 明确离线版小组/排名/旧森林排除范围，个人成长方案统一收录在待办文档。
+
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.0) · [中文报告](docs/UPDATE-7.1.1-local.1.4.0.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.0.md)。
 
 ## 7.1.1-local.1.3.2 · 2026-10-25
 

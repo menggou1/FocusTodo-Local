@@ -33,7 +33,7 @@ def build(output, tag=None):
         files.extend(p for p in (ROOT / directory).rglob('*') if p.is_file())
     files.extend(ROOT / update['report'] for update in config['updates'])
     # Include linked historical Markdown too; omit acceptance data/screenshots.
-    files.extend((ROOT / 'docs').glob('*.md'))
+    files.extend((ROOT / 'docs').rglob('*.md'))
     files.append(ROOT / 'ARCHITECTURE.md')
     files = sorted(set(files))
     output.mkdir(parents=True, exist_ok=True)
@@ -56,7 +56,8 @@ def build(output, tag=None):
                 archive.addfile(info, content)
     checksums = ''.join(hashlib.sha256(file.read_bytes()).hexdigest() + '  ' + file.name + '\n' for file in archives)
     (output / 'SHA256SUMS.txt').write_text(checksums, encoding='utf-8')
-    notes = '\n'.join('- ' + item for item in config['updates'][0]['items'])
+    latest = config['updates'][0]
+    notes = '\n'.join('- ' + item for item in latest['items']) + '\n\n' + '\n'.join('- ' + item for item in latest.get('itemsEn', []))
     (output / 'release-notes.md').write_text(
         f'# FocusTodo {full_version}\n\n{notes}\n\n'
         'Windows / macOS / Linux: download and extract either archive. Node.js 22+ is required; '

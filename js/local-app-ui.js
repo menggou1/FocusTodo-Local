@@ -51,26 +51,27 @@
     }
 
     function showUpdate(update) {
+        update = root.FocusI18n.update(update);
         const dialog = modal(update.title, 'focus-update-dialog');
         if (!dialog) return;
         dialog.body.appendChild(node('p', 'focus-app-meta', update.date + ' · ' + update.version + ' · ' + release.author));
         const list = node('ul'); update.items.forEach(item => list.appendChild(node('li', '', item))); dialog.body.appendChild(list);
-        const close = node('button', '', '关闭'); close.type = 'button'; close.onclick = dialog.close; dialog.actions.appendChild(close); close.focus();
+        const close = node('button', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('关闭'):'关闭')); close.type = 'button'; close.onclick = dialog.close; dialog.actions.appendChild(close); close.focus();
         if (update.version === release.version) {
             try { localStorage.setItem(READ_KEY, release.version); }
-            catch (_) { root.FocusLocal.notice('更新详情已打开，已读状态未能保存。'); }
+            catch (_) { root.FocusLocal.notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('更新详情已打开，已读状态未能保存。'):'更新详情已打开，已读状态未能保存。')); }
             root.dispatchEvent(new Event('focus-local-release-read'));
         }
     }
 
     function renderUpdates(React) {
         const h = React.createElement;
-        return h('section', { className: 'focus-release-list', 'aria-label': '版本更新' },
-            h('h3', null, '版本更新'),
-            release.updates.map(update => h('button', { type: 'button', className: 'focus-release-entry', key: update.version, onClick: () => showUpdate(update) },
+        return h('section', { className: 'focus-release-list', 'aria-label': (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('版本更新'):'版本更新') },
+            h('h3', null, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('版本更新'):'版本更新')),
+            release.updates.map(original => { const update = root.FocusI18n.update(original); return h('button', { type: 'button', className: 'focus-release-entry', key: update.version, onClick: () => showUpdate(original) },
                 h('strong', null, update.title),
                 h('span', null, update.date + ' · ' + update.version),
-                h('span', { className: 'focus-release-hint' }, '点击查看详情'))));
+                h('span', { className: 'focus-release-hint' }, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('点击查看详情'):'点击查看详情'))); }));
     }
 
     function attachHeader(header) {
@@ -82,27 +83,27 @@
 
     function renderAbout(React) {
         const h = React.createElement;
-        return h('tr', { id: 'lexible-about-info-row' }, h('td', { className: 'focus-about-label' }, '本地版本'),
-            h('td', { className: 'focus-about-value' }, h('div', null, '官方 ' + release.officialVersion + ' · 本地 ' + release.localVersion),
+        return h('tr', { id: 'lexible-about-info-row' }, h('td', { className: 'focus-about-label' }, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地版本'):'本地版本')),
+            h('td', { className: 'focus-about-value' }, h('div', null, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('官方 '):'官方 ') + release.officialVersion + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' · 本地 '):' · 本地 ') + release.localVersion),
                 h('div', null, release.author + ' · ' + release.date),
-                h('a', { className: 'focus-repository-link', href: release.repository, title: release.repository, 'aria-label': 'GitHub 仓库：' + new URL(release.repository).pathname.slice(1), target: '_blank', rel: 'noopener noreferrer', onClick: event => event.stopPropagation() },
+                h('a', { className: 'focus-repository-link', href: release.repository, title: release.repository, 'aria-label': (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('GitHub 仓库：'):'GitHub 仓库：') + new URL(release.repository).pathname.slice(1), target: '_blank', rel: 'noopener noreferrer', onClick: event => event.stopPropagation() },
                     h('img', { src: 'img/github.svg', alt: 'GitHub', width: 24, height: 24 }))));
     }
 
     function confirmReset() {
-        const dialog = modal('删除本地数据', 'focus-reset-dialog');
+        const dialog = modal((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('删除本地数据'):'删除本地数据'), 'focus-reset-dialog');
         if (!dialog) return;
-        dialog.body.appendChild(node('p', '', '将删除所有任务、专注记录和设置，并重置为默认状态。'));
-        dialog.body.appendChild(node('p', '', '删除前会生成完整备份，请检查浏览器下载文件。此操作无需密码。'));
+        dialog.body.appendChild(node('p', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('将删除所有任务、专注记录和设置，并重置为默认状态。'):'将删除所有任务、专注记录和设置，并重置为默认状态。')));
+        dialog.body.appendChild(node('p', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('删除前会生成完整备份，请检查浏览器下载文件。此操作无需密码。'):'删除前会生成完整备份，请检查浏览器下载文件。此操作无需密码。')));
         const error = node('p', 'focus-app-error'); error.setAttribute('role', 'alert'); dialog.body.appendChild(error);
-        const cancel = node('button', '', '取消'), confirm = node('button', 'focus-app-danger');
+        const cancel = node('button', '', (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('取消'):'取消')), confirm = node('button', 'focus-app-danger');
         cancel.type = confirm.type = 'button'; dialog.actions.append(cancel, confirm);
         cancel.onclick = dialog.close;
         const unlockAt = performance.now() + 5000;
         function update() {
             const seconds = Math.max(0, Math.ceil((unlockAt - performance.now()) / 1000));
             confirm.disabled = dialog.busy || seconds > 0;
-            confirm.textContent = dialog.busy ? '正在备份并删除…' : seconds ? '确认删除（' + seconds + ' 秒）' : '确认删除';
+            confirm.textContent = dialog.busy ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('正在备份并删除…'):'正在备份并删除…') : seconds ? (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确认删除（'):'确认删除（') + seconds + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 秒）'):' 秒）') : (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确认删除'):'确认删除');
         }
         const interval = setInterval(update, 100); dialog.onClose = () => clearInterval(interval);
         confirm.onclick = async () => {
@@ -112,7 +113,7 @@
                 await root.FocusLocalReady;
                 await root.FocusLocalData.reset();
             } catch (failure) {
-                dialog.busy = false; cancel.disabled = false; error.textContent = '删除未完成，请重试：' + failure.message; update(); return;
+                dialog.busy = false; cancel.disabled = false; error.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('删除未完成，请重试：'):'删除未完成，请重试：') + failure.message; update(); return;
             }
             clearInterval(interval); root.location.reload();
         };

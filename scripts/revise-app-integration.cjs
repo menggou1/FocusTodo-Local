@@ -2,6 +2,30 @@
 const { load, walk } = require('./lib/bundle-editor.cjs');
 const bundle = load();
 const { source, modules, replace, method, assignment } = bundle;
+// Keep the legacy formatter, but resolve missing text through complete fallback
+// catalogs instead of exposing an internal translation key.
+walk(modules[91], node => {
+    if(node.type !== 'AssignmentExpression' || node.left.type !== 'MemberExpression') return;
+    if(node.left.property.name === 'normaliseLanguageCode') replace(node.right, '(window.FocusI18n.attachLegacy(e.i18n),function(){return window.FocusI18n.legacyLanguage})');
+    if(node.left.property.name === 'prop') {
+        const text = source.slice(node.right.start,node.right.end);
+        const old = 'r=e.i18n.map[t]';
+        if(text.includes(old)) replace(node.right,text.replace(old,'r=window.FocusI18n.lookupLegacy(t,e.i18n.map[t])'));
+    }
+});
+walk(modules[692], node => {
+    if(node.type==='CallExpression' && source.slice(node.callee.start,node.callee.end).includes('normalizeLanguageCode') && source.slice(node.start,node.end).includes('navigator.language')) replace(node.arguments[0],'window.FocusI18n.locale');
+});
+// Cloud groups/rankings and the old server-backed forest stay out of the local
+// product, including after importing an old preference that enabled them.
+walk(modules[13],node=>{
+    if(node.type!=='ObjectExpression')return;
+    const key=node.properties.find(p=>p.key?.name==='key');
+    if(!key||!['groupEnabled','forestEnabled','rankingListEnabled'].includes(key.value.value))return;
+    const getter=node.properties.find(p=>p.key?.name==='get');
+    if(getter)replace(getter.value,'function(){return false}');
+});
+assignment(821,'onWindowsFocused','function(){}');
 const about = method(1147, 'render');
 let versionRow, versionText, rating;
 walk(about.value, node => {
@@ -25,7 +49,7 @@ assignment(1154, 'selectTheme', 'function(e){if(m.default.premiumItems.includes(
 
 // Local storage is the account authority. Old browser cookies can survive a
 // reset/import and otherwise shadow the restored name and identity.
-method(55, 'getCookie', 'function(e){return localStorage.getItem("cookie."+e)||""}');
+method(55, 'getCookie', 'function(e){return window.FocusI18n.accountCookie(e,localStorage.getItem("cookie."+e)||"")}');
 
 // A queued project refresh can finish after reset has removed its project row.
 walk(modules[863], node => {
@@ -52,11 +76,11 @@ walk(header.value, node => {
         replace({ start, end }, '(this.state.notification.highlight||window.FocusAppUI.hasUnreadUpdates())');
     }
     if (node.type === 'ObjectExpression' && node.properties.some(p => p.key.name === 'ref' && source.slice(p.value.start, p.value.end) === 'this.notificationAnchor')) {
-        replace(node, '{ref:this.notificationAnchor,onClick:this.showNotification,style:e,role:"button",tabIndex:0,"aria-label":"通知","aria-expanded":this.state.notification.show,onKeyDown:function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();event.currentTarget.click()}}}');
+        replace(node, '{ref:this.notificationAnchor,onClick:this.showNotification,style:e,role:"button",tabIndex:0,"aria-label":window.FocusI18n.text("通知"),"aria-expanded":this.state.notification.show,onKeyDown:function(event){if(event.key==="Enter"||event.key===" "){event.preventDefault();event.currentTarget.click()}}}');
     }
 });
 const mount = method(821, 'componentDidMount');
-if (!source.slice(mount.value.start, mount.value.end).includes('FocusAppUI.attachHeader')) bundle.edits.push({ start: mount.value.end - 1, end: mount.value.end - 1, code: ';this.localReleaseDispose=window.FocusAppUI.attachHeader(this)' });
+replace(mount.value,'function(){this.initNotification();this.localReleaseDispose=window.FocusAppUI.attachHeader(this)}');
 const headerModuleText = source.slice(modules[821].start, modules[821].end);
 if (headerModuleText.includes('key:"componentWillUnmount"')) {
     const unmount = method(821, 'componentWillUnmount');

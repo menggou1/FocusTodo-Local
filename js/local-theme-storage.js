@@ -33,7 +33,7 @@
             ['active', 'theme'].every(name => value[name] === null || typeof value[name] === 'string');
     }
     function recoveryFailure(message, cause) {
-        const error = new Error(message + '；主题恢复日志已保留，请刷新后重试。');
+        const error = new Error(message + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('；主题恢复日志已保留，请刷新后重试。'):'；主题恢复日志已保留，请刷新后重试。'));
         error.recoveryRequired = true; error.cause = cause; return error;
     }
     function create(ops) {
@@ -42,14 +42,14 @@
         const put = (name, value) => value === null ? ops.remove(KEYS[name]) : ops.set(KEYS[name], value);
         function parseJournal(raw) {
             let log;
-            try { log = JSON.parse(raw); } catch (error) { throw recoveryFailure('主题恢复日志损坏', error); }
+            try { log = JSON.parse(raw); } catch (error) { throw recoveryFailure((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题恢复日志损坏'):'主题恢复日志损坏'), error); }
             if (!log || log.version !== 1 || typeof log.id !== 'string' || !['apply', 'rollback'].includes(log.phase) ||
-                !validDescription(log.before) || !validDescription(log.target)) throw recoveryFailure('主题恢复日志格式不受支持');
+                !validDescription(log.before) || !validDescription(log.target)) throw recoveryFailure((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题恢复日志格式不受支持'):'主题恢复日志格式不受支持'));
             return log;
         }
         function assertOwned(log) {
             const raw = ops.get(JOURNAL_KEY);
-            if (!raw || parseJournal(raw).id !== log.id) throw recoveryFailure('主题恢复日志归属已变化');
+            if (!raw || parseJournal(raw).id !== log.id) throw recoveryFailure((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题恢复日志归属已变化'):'主题恢复日志归属已变化'));
         }
         function write(log, values, names) {
             names.forEach(name => {
@@ -64,13 +64,13 @@
             const log = parseJournal(raw), current = describe(read());
             const oldJSON = current.fingerprint === log.before.fingerprint;
             const newJSON = current.fingerprint === log.target.fingerprint;
-            if (!oldJSON && !newJSON) throw recoveryFailure('主题图片设置与恢复日志不匹配');
+            if (!oldJSON && !newJSON) throw recoveryFailure((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题图片设置与恢复日志不匹配'):'主题图片设置与恢复日志不匹配'));
             // A theme JSON write is atomic. Its current contents decide which
             // metadata pair is available, even after an interrupted rollback.
             const target = oldJSON && newJSON ? (log.phase === 'rollback' ? log.before : log.target)
                 : newJSON ? log.target : log.before;
             try { write(log, target, ['active', 'theme']); finish(log); }
-            catch (error) { if (error.recoveryRequired) throw error; throw recoveryFailure('主题设置恢复未完成', error); }
+            catch (error) { if (error.recoveryRequired) throw error; throw recoveryFailure((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题设置恢复未完成'):'主题设置恢复未完成'), error); }
             return true;
         }
         function commit(changes) {
@@ -88,7 +88,7 @@
             // Preparing this small log can fail without changing any theme key.
             try { ops.set(JOURNAL_KEY, JSON.stringify(log)); }
             catch (error) {
-                const failure = new Error('主题设置未保存：' + error.message); failure.rolledBack = true; failure.cause = error; throw failure;
+                const failure = new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题设置未保存：'):'主题设置未保存：') + error.message); failure.rolledBack = true; failure.cause = error; throw failure;
             }
             try {
                 write(log, target, fields); finish(log); return target;
@@ -100,8 +100,8 @@
                     // the old and new theme JSON fingerprints are identical.
                     try { ops.set(JOURNAL_KEY, JSON.stringify(log)); } catch (_) { /* Still attempt the in-memory rollback. */ }
                     write(log, before, fields); finish(log);
-                } catch (rollbackError) { throw recoveryFailure('主题保存与回滚未完成：' + error.message, rollbackError); }
-                const failure = new Error('主题设置保存失败，已恢复原设置：' + error.message);
+                } catch (rollbackError) { throw recoveryFailure((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题保存与回滚未完成：'):'主题保存与回滚未完成：') + error.message, rollbackError); }
+                const failure = new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题设置保存失败，已恢复原设置：'):'主题设置保存失败，已恢复原设置：') + error.message);
                 failure.rolledBack = true; failure.cause = error; throw failure;
             }
         }

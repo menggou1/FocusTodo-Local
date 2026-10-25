@@ -76,22 +76,22 @@
                 // marker in every legacy write so import/reset also excludes those writers.
                 db.transaction = function(names, mode, options) {
                     if (mode !== 'readwrite') return nativeTransaction.call(db, names, mode, options);
-                    if (maintenance) throw new Error('本地数据维护中，请等待完成后刷新。');
+                    if (maintenance) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据维护中，请等待完成后刷新。'):'本地数据维护中，请等待完成后刷新。'));
                     const scope = typeof names === 'string' ? [names] : Array.from(names);
                     if (!scope.includes('LocalMeta')) scope.push('LocalMeta');
                     const tx = nativeTransaction.call(db, scope, mode, options);
                     const meta = tx.objectStore('LocalMeta');
                     ['maintenance', 'settings-journal'].forEach(id => {
                         const check = meta.get(id);
-                        check.onsuccess = () => { if (check.result) { try { tx.abort(); } catch (_) {} notify('数据正在另一标签页维护，写入已取消，请刷新。'); } };
+                        check.onsuccess = () => { if (check.result) { try { tx.abort(); } catch (_) {} notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据正在另一标签页维护，写入已取消，请刷新。'):'数据正在另一标签页维护，写入已取消，请刷新。')); } };
                     });
                     return tx;
                 };
-                db.onversionchange = () => { db.close(); dbPromise = null; maintenance = true; notify('数据库已更新，请刷新本标签页后继续。'); };
+                db.onversionchange = () => { db.close(); dbPromise = null; maintenance = true; notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据库已更新，请刷新本标签页后继续。'):'数据库已更新，请刷新本标签页后继续。')); };
                 resolve(db);
             };
             request.onerror = () => { dbPromise = null; reject(request.error); };
-            request.onblocked = () => notify('数据库升级等待中：请关闭其他旧版本专注清单标签页。数据会保留。');
+            request.onblocked = () => notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据库升级等待中：请关闭其他旧版本专注清单标签页。数据会保留。'):'数据库升级等待中：请关闭其他旧版本专注清单标签页。数据会保留。'));
         });
         return dbPromise;
     }
@@ -107,7 +107,7 @@
             try {
                 tx = nativeTransaction.call(db, names, mode);
                 tx.oncomplete = () => resolve(result);
-                tx.onabort = () => reject(failure || tx.error || new Error('数据库事务已取消。'));
+                tx.onabort = () => reject(failure || tx.error || new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据库事务已取消。'):'数据库事务已取消。')));
                 tx.onerror = () => { failure = tx.error || failure; };
                 body(tx, value => { result = value; }, error => { failure = error; tx.abort(); });
             } catch (error) { if (tx) { try { tx.abort(); } catch (_) {} } reject(error); }
@@ -136,12 +136,12 @@
         return new Promise((resolve, reject) => {
             const tx = nativeTransaction.call(db, ['ownership'], 'readwrite');
             let active = true, started = false, released = false, result, failure;
-            const lease = { assert() { if (!active) throw new Error('数据维护事务锁已失效，请刷新后恢复。'); } };
-            tx.onabort = () => { active = false; reject(tx.error || new Error('数据维护事务锁已取消。')); };
+            const lease = { assert() { if (!active) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护事务锁已失效，请刷新后恢复。'):'数据维护事务锁已失效，请刷新后恢复。')); } };
+            tx.onabort = () => { active = false; reject(tx.error || new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护事务锁已取消。'):'数据维护事务锁已取消。'))); };
             tx.onerror = () => {};
             tx.oncomplete = () => {
                 active = false;
-                if (!released) reject(new Error('数据维护事务锁意外结束，请刷新后恢复。'));
+                if (!released) reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护事务锁意外结束，请刷新后恢复。'):'数据维护事务锁意外结束，请刷新后恢复。')));
                 else if (failure) reject(failure);
                 else resolve(result);
             };
@@ -169,14 +169,14 @@
             request.onsuccess = () => {
                 try {
                     operation.lease.assert();
-                    if (!sameOperation(request.result, operation)) throw new Error('数据维护归属已变化，请刷新后恢复。');
+                    if (!sameOperation(request.result, operation)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护归属已变化，请刷新后恢复。'):'数据维护归属已变化，请刷新后恢复。'));
                     body(tx, done, fail, request.result);
                 } catch (error) { fail(error); }
             };
         });
     }
     function journalOwned(journal, operation) {
-        if (!sameOperation(journal, operation)) throw new Error('数据恢复日志与维护归属不一致，请保留当前数据库。');
+        if (!sameOperation(journal, operation)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据恢复日志与维护归属不一致，请保留当前数据库。'):'数据恢复日志与维护归属不一致，请保留当前数据库。'));
     }
     function storageSnapshot() {
         const result = Object.create(null);
@@ -197,7 +197,7 @@
                 Object.keys(storageSnapshot()).forEach(rawRemove);
                 Object.keys(old).forEach(key => rawSet(key, old[key]));
             } catch (rollbackError) {
-                throw new Error(error.message + '；设置回滚待重试：' + rollbackError.message);
+                throw new Error(error.message + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('；设置回滚待重试：'):'；设置回滚待重试：') + rollbackError.message);
             }
             throw error;
         }
@@ -209,7 +209,7 @@
             const result = {}; let remaining = DATA.length;
             ['maintenance', 'settings-journal'].forEach(id => {
                 const check = tx.objectStore('LocalMeta').get(id);
-                check.onsuccess = () => { if (check.result && (!operation || !sameOperation(check.result, operation))) fail(new Error('存在进行中或待恢复的数据维护，请等待或刷新。')); };
+                check.onsuccess = () => { if (check.result && (!operation || !sameOperation(check.result, operation))) fail(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在进行中或待恢复的数据维护，请等待或刷新。'):'存在进行中或待恢复的数据维护，请等待或刷新。'))); };
             });
             DATA.forEach(name => {
                 const request = tx.objectStore(name).getAll();
@@ -232,53 +232,53 @@
     function validate(input) {
         if (!input || typeof input !== 'object' || !input.meta || input.meta.app !== 'FocusTodo' ||
             ![1, 2].includes(input.meta.exportVersion) || !input.indexedDB || !input.localStorage || Array.isArray(input.localStorage)) {
-            throw new Error('不是受支持的 FocusTodo 完整备份。仅设置备份不能覆盖数据库。');
+            throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('不是受支持的 FocusTodo 完整备份。仅设置备份不能覆盖数据库。'):'不是受支持的 FocusTodo 完整备份。仅设置备份不能覆盖数据库。'));
         }
-        if (input.meta.scope !== undefined && !['full', 'without-wallpapers'].includes(input.meta.scope)) throw new Error('备份范围标记不受支持。');
+        if (input.meta.scope !== undefined && !['full', 'without-wallpapers'].includes(input.meta.scope)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('备份范围标记不受支持。'):'备份范围标记不受支持。'));
         if (root.FocusLocalBackup) root.FocusLocalBackup.validateScope(input);
-        if (Number(input.meta.dbVersion) > DB_VERSION) throw new Error('备份来自较新的数据库版本，请先更新程序。');
+        if (Number(input.meta.dbVersion) > DB_VERSION) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('备份来自较新的数据库版本，请先更新程序。'):'备份来自较新的数据库版本，请先更新程序。'));
         const data = JSON.parse(JSON.stringify(input));
         delete data.localStorage['FocusTodo.themeJournal'];
         BASE.forEach(name => {
             const records = data.indexedDB[name];
-            if (!Array.isArray(records)) throw new Error('备份缺少数据表：' + name);
+            if (!Array.isArray(records)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('备份缺少数据表：'):'备份缺少数据表：') + name);
             const seen = new Set(), key = keys[name] || 'id';
             records.forEach(record => {
-                if (!record || typeof record[key] !== 'string' || !record[key] || seen.has(record[key])) throw new Error(name + ' 存在无效或重复 ID。');
+                if (!record || typeof record[key] !== 'string' || !record[key] || seen.has(record[key])) throw new Error(name + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 存在无效或重复 ID。'):' 存在无效或重复 ID。'));
                 seen.add(record[key]);
                 if (name === 'Pomodoro' && (!Number.isFinite(record.endDate) || !Number.isFinite(record.interval) ||
                     record.interval <= 0 || record.interval > 28800 || !Number.isFinite(record.pomodoroInterval) || record.pomodoroInterval <= 0 || record.pomodoroInterval > 28800)) {
-                    throw new Error('专注记录包含无效时长或日期：' + record[key]);
+                    throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('专注记录包含无效时长或日期：'):'专注记录包含无效时长或日期：') + record[key]);
                 }
             });
         });
         Object.keys(data.localStorage).forEach(key => {
-            if (['__proto__', 'constructor', 'prototype', 'setItem', 'removeItem'].includes(key) || typeof data.localStorage[key] !== 'string') throw new Error('备份包含无效设置：' + key);
+            if (['__proto__', 'constructor', 'prototype', 'setItem', 'removeItem'].includes(key) || typeof data.localStorage[key] !== 'string') throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('备份包含无效设置：'):'备份包含无效设置：') + key);
         });
         // Preserve unfinished work without counting time after the backup was taken.
         const sessions = data.indexedDB.TimerSession || [];
-        if (!Array.isArray(sessions) || sessions.length > 1) throw new Error('无效计时会话备份。');
+        if (!Array.isArray(sessions) || sessions.length > 1) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效计时会话备份。'):'无效计时会话备份。'));
         sessions.forEach(s => {
             if (!s || s.id !== 'active' || typeof s.sessionId !== 'string' || !s.sessionId ||
                 !['initial', 'work', 'pause', 'rest', 'waitingForRest', 'recovery'].includes(s.state) ||
                 !['countup', 'countdown'].includes(s.mode) || !s.config ||
                 root.FocusTimerCore.settings(s.config).interval !== s.config.interval || !Array.isArray(s.spans) ||
                 !['cursorAt', 'observedAt', 'phaseElapsed', 'totalSeconds', 'recordedSeconds', 'revision', 'sequence', 'blockSequence', 'completed'].every(key => Number.isFinite(s[key]) && s[key] >= 0)) {
-                throw new Error('计时会话字段无效。');
+                throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             }
             let end = 0;
             s.spans.forEach(span => {
-                if (!Number.isFinite(span.start) || !Number.isFinite(span.end) || span.start < end || span.end < span.start) throw new Error('计时会话包含无效专注区间。');
+                if (!Number.isFinite(span.start) || !Number.isFinite(span.end) || span.start < end || span.end < span.start) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话包含无效专注区间。'):'计时会话包含无效专注区间。'));
                 end = span.end;
             });
             if (s.state === 'work' || s.state === 'rest') {
                 const exportAt = Date.parse(data.meta.exportDate);
-                if (!Number.isFinite(exportAt) || exportAt < s.cursorAt) throw new Error('计时快照与导出日期不一致。');
+                if (!Number.isFinite(exportAt) || exportAt < s.cursorAt) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时快照与导出日期不一致。'):'计时快照与导出日期不一致。'));
                 s.pendingRecovery = { from: s.cursorAt, to: exportAt, priorState: s.state, detectedAt: exportAt, source: 'import' };
                 s.state = 'recovery';
             } else if (s.state === 'recovery') {
                 const p = s.pendingRecovery;
-                if (!p || !Number.isFinite(p.from) || !Number.isFinite(p.to) || p.to < p.from || !['work', 'rest'].includes(p.priorState)) throw new Error('无效的待确认区间。');
+                if (!p || !Number.isFinite(p.from) || !Number.isFinite(p.to) || p.to < p.from || !['work', 'rest'].includes(p.priorState)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效的待确认区间。'):'无效的待确认区间。'));
                 p.source = 'import';
             }
         });
@@ -288,7 +288,7 @@
         data.localStorage.timingTaskId = '';
         data.localStorage.timingSubtaskId = '';
         for (const key of ['WorkInterval', 'ShortBreakInterval', 'LongBreakInterval']) {
-            if (key in data.localStorage && (!Number.isFinite(Number(data.localStorage[key])) || Number(data.localStorage[key]) < 1 || Number(data.localStorage[key]) > 28800)) throw new Error('无效计时设置：' + key);
+            if (key in data.localStorage && (!Number.isFinite(Number(data.localStorage[key])) || Number(data.localStorage[key]) < 1 || Number(data.localStorage[key]) > 28800)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效计时设置：'):'无效计时设置：') + key);
         }
         return data;
     }
@@ -341,9 +341,9 @@
             await replaceRows(db, journal.backup, journal, operation, 'rollback');
             operation.lease.assert();
             try { applySettings(journal.backup.localStorage); }
-            catch (rollbackError) { throw new Error('设置恢复与回滚未完成，请刷新重试；恢复日志已保留：' + rollbackError.message); }
+            catch (rollbackError) { throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('设置恢复与回滚未完成，请刷新重试；恢复日志已保留：'):'设置恢复与回滚未完成，请刷新重试；恢复日志已保留：') + rollbackError.message); }
             await clearOperation(db, operation, true);
-            const failure = new Error('设置恢复失败，数据库与设置已回滚：' + error.message);
+            const failure = new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('设置恢复失败，数据库与设置已回滚：'):'设置恢复失败，数据库与设置已回滚：') + error.message);
             failure.rolledBack = true;
             throw failure;
         }
@@ -362,7 +362,7 @@
                     const marker = markerRequest.result, journal = journalRequest.result;
                     if (!marker && !journal) { done(null); return; }
                     if (!journal) { meta.delete('maintenance'); done(null); return; }
-                    if (journal.operationId && (!marker || !sameOperation(marker, journal))) throw new Error('数据恢复日志归属冲突，请保留当前数据库。');
+                    if (journal.operationId && (!marker || !sameOperation(marker, journal))) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据恢复日志归属冲突，请保留当前数据库。'):'数据恢复日志归属冲突，请保留当前数据库。'));
                     const operation = { operationId: journal.operationId || crypto.randomUUID(), ownerId, lease };
                     const phase = journal.phase === 'rollback' ? 'rollback' : 'settings';
                     const adopted = { ...journal, operationId: operation.operationId, ownerId, phase };
@@ -389,14 +389,14 @@
     async function replace(input, options) {
         const target = validate(input); options = options || {};
         return exclusive(() => maintenanceLock(async lease => {
-            if (localOperation || invalidated) throw new Error('本页数据已变化，请刷新后重试。');
+            if (localOperation || invalidated) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本页数据已变化，请刷新后重试。'):'本页数据已变化，请刷新后重试。'));
             const db = await open();
             await recoverLocked(db, lease);
             const operation = { operationId: crypto.randomUUID(), ownerId, lease };
             await transaction(db, ['LocalMeta'], 'readwrite', (tx, done, fail) => {
                 const meta = tx.objectStore('LocalMeta'), request = meta.getAll();
                 request.onsuccess = () => {
-                    if (request.result.some(row => ['maintenance', 'settings-journal'].includes(row.id))) { fail(new Error('存在待恢复的数据维护，请刷新。')); return; }
+                    if (request.result.some(row => ['maintenance', 'settings-journal'].includes(row.id))) { fail(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在待恢复的数据维护，请刷新。'):'存在待恢复的数据维护，请刷新。'))); return; }
                     meta.put({ id: 'maintenance', operationId: operation.operationId, ownerId, phase: 'snapshot', startedAt: Date.now() });
                 };
             });
@@ -432,11 +432,11 @@
         const empty = { meta: { app: 'FocusTodo', exportVersion: 2, dbVersion: 3 }, indexedDB: {}, localStorage: {} };
         BASE.forEach(name => { empty.indexedDB[name] = []; });
         empty.indexedDB.Project = defaultProjects();
-        ['ServerAccessInfo', 'ServerUrls', 'app_language', 'PK1', 'OverseaServerUrl', 'RegionCode'].forEach(key => {
+        ['ServerAccessInfo', 'ServerUrls', 'app_language', 'FocusTodo.language', 'PK1', 'OverseaServerUrl', 'RegionCode'].forEach(key => {
             const value = localStorage.getItem(key); if (value !== null) empty.localStorage[key] = value;
         });
         empty.localStorage['cookie.ACCT'] = btoa('local@local');
-        empty.localStorage['cookie.NAME'] = btoa(unescape(encodeURIComponent('本地用户')));
+        empty.localStorage['cookie.NAME'] = btoa(unescape(encodeURIComponent((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地用户'):'本地用户'))));
         empty.localStorage['cookie.PID'] = 'local-' + crypto.randomUUID();
         empty.localStorage['cookie.UID'] = 'local-' + crypto.randomUUID();
         empty.localStorage.Portrait = 'img/header-portrait.png';
@@ -444,13 +444,13 @@
     }
     async function timerAction(action, now) {
         return exclusive(async () => {
-            if (maintenance) throw new Error('数据维护中，计时操作尚未保存。');
+            if (maintenance) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护中，计时操作尚未保存。'):'数据维护中，计时操作尚未保存。'));
             const db = await open();
             const result = await transaction(db, ['TimerSession', 'Pomodoro', 'LocalMeta'], 'readwrite', (tx, done, fail) => {
                 const marker = tx.objectStore('LocalMeta').get('maintenance');
                 const journal = tx.objectStore('LocalMeta').get('settings-journal');
                 journal.onsuccess = () => {
-                    if (marker.result || journal.result) { fail(new Error('存在进行中或待恢复的数据导入，请刷新页面。')); return; }
+                    if (marker.result || journal.result) { fail(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在进行中或待恢复的数据导入，请刷新页面。'):'存在进行中或待恢复的数据导入，请刷新页面。'))); return; }
                     const request = tx.objectStore('TimerSession').get('active');
                     request.onsuccess = () => {
                         try {
@@ -472,12 +472,12 @@
     }
     async function putPomodoro(record) {
         return exclusive(async () => {
-            if (maintenance) throw new Error('数据维护中，无法保存专注记录。');
+            if (maintenance) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护中，无法保存专注记录。'):'数据维护中，无法保存专注记录。'));
             const db = await open();
             return transaction(db, ['Pomodoro', 'LocalMeta'], 'readwrite', (tx, done, fail) => {
                 const marker = tx.objectStore('LocalMeta').get('maintenance'), journal = tx.objectStore('LocalMeta').get('settings-journal');
                 journal.onsuccess = () => {
-                    if (marker.result || journal.result) { fail(new Error('存在进行中或待恢复的数据导入，请刷新页面。')); return; }
+                    if (marker.result || journal.result) { fail(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在进行中或待恢复的数据导入，请刷新页面。'):'存在进行中或待恢复的数据导入，请刷新页面。'))); return; }
                     tx.objectStore('Pomodoro').put(record); done(record);
                 };
             });
@@ -496,7 +496,7 @@
             if (!maintenance) root.dispatchEvent(new CustomEvent('focus-local-maintenance-end', { detail: { succeeded: false } }));
         } else if (message.type === 'replaced') {
             remoteOperation = null; maintenance = true; invalidated = !initializing;
-            root.dispatchEvent(new Event('focus-local-maintenance')); notify('数据已在另一个标签页更新，请刷新本页。');
+            root.dispatchEvent(new Event('focus-local-maintenance')); notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'):'数据已在另一个标签页更新，请刷新本页。'));
         } else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
     root.FocusLocalData = { DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
@@ -504,5 +504,5 @@
         storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify,
         get maintenance() { return maintenance; } };
     root.FocusLocalReady = exclusive(recoverJournal);
-    root.FocusLocalReady.catch(error => { notify('本地数据初始化失败：' + error.message); console.error(error); });
+    root.FocusLocalReady.catch(error => { notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据初始化失败：'):'本地数据初始化失败：') + error.message); console.error(error); });
 })(window);

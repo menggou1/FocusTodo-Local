@@ -2,7 +2,7 @@
 
 [返回首页](../README.md) · [更新记录与版本报告](../CHANGELOG.md) · [架构说明](../ARCHITECTURE.md)
 
-本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.3.2`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
+本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.4.0`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
 
 ## 1. 开始修改前
 
@@ -48,6 +48,7 @@ npm run test:browser
 | `local-app-ui.js` | 面向用户的更新、关于、删除确认；更新详情不包含维护 Markdown 按钮；错误反馈与关闭清理保持一致 |
 | `local-backup.js` | 紧凑 JSON/Gzip 编码、按内容识别、128 MB 上限、范围与图片引用校验及体积分析；完整业务校验保留在数据层 |
 | `local-theme-storage.js` | 单次主题设置提交与恢复日志；内部日志不复制图片、不写入备份，初始化必须等待数据库导入日志恢复 |
+| `local-i18n.js` / `local-settings-ui.js` | 语言解析、回退、通用设置中的语言与通知授权；不翻译用户任务/备注。显式选项只包含完整适配语言 |
 | `release.json` | 唯一人工编辑的发布元信息；`report` 字段保留供仓库维护和一致性检查，不作为 UI 入口 |
 | `patch.js` | 仍有网络、凭证、主题和 DOM 兼容层；抽离前检查初始化顺序，不全局转换变量或删未知调用分支 |
 | `js/main.js` | 已修改的压缩旧包，非可丢弃构建产物；不要替换成原版后假定脚本能重建所有修改 |
@@ -70,7 +71,7 @@ node scripts/revise-pomodoro-rendering.cjs
 
 | 情况 | 完整版本示例 | Tag |
 |---|---|---|
-| 当前发布 | `7.1.1-local.1.3.2` | `1.3.2` |
+| 当前发布 | `7.1.1-local.1.4.0` | `1.4.0` |
 | 兼容修复 | `7.1.1-local.1.2.3` | `1.2.3` |
 | 兼容功能 | `7.1.1-local.1.3.0` | `1.3.0` |
 | 本地不兼容改变 | `7.1.1-local.2.0.0` | `2.0.0`，另附迁移和回退方案 |
@@ -80,6 +81,8 @@ node scripts/revise-pomodoro-rendering.cjs
 `release.json` 是版本、作者、日期、remote 名及更新条目的唯一人工编辑入口，日期按本地发布日 `YYYY-MM-DD`。新版本在 `updates` 首部新增条目及对应报告，保留历史条目。`items` 只写面向用户的简短变化，`report` 供仓库维护和一致性检查，不在产品界面提供报告下载入口。
 
 运行 `npm run build:release` 同步 `js/local-release.js`、包版本/作者、锁文件版本、页面标题及缓存参数；勿单独编辑生成文件。这不能重建旧主包，组件接入使用上一节指定的 AST 脚本。
+
+生成时同时读取 `i18n/local-en.json` 和原语言文件，生成同步回退词库，并从 `release.json` 的 `titleEn/itemsEn` 生成英文历史报告与更新记录。新增本地文案须同时提供英文；当前使用、维护、架构与统一清单的英文文档位于 `docs/en/`，与中文版本按同一范围同步。英文历史报告是技术摘要，保留原中文报告与公开证据。
 
 生成器优先使用 `release.json` 指定的 `Focustodo-local`，缺失时使用新克隆默认的 `origin`，校验 GitHub HTTPS/SSH 地址后生成仓库链接。始终核对 URL；日常应用使用已生成地址，无需 Git，只有用户点击图标才打开仓库。
 
@@ -97,7 +100,7 @@ git diff --stat
 git status --short
 ```
 
-当前全量包含计时核心、服务、发布信息、启动器、备份编码，53 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
+当前全量包含计时核心、服务、发布信息、启动器、备份编码，56 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 

@@ -349,6 +349,12 @@
     outline-offset:2px;
 }
 
+.focus-local-general { margin:0 0 24px; padding:16px; border:1px solid var(--border); border-radius:8px; color:var(--text-title); background:var(--bg-popup); }
+.focus-local-general h3 { margin:0 0 16px; font-size:16px; }
+.focus-local-general h4 { margin:20px 0 6px; font-size:14px; }
+.focus-local-general p { color:var(--text-desc); font-size:13px; line-height:1.6; margin:8px 0; }
+.focus-local-general select { margin-left:18px; padding:6px 12px; color:var(--text-title); background:var(--bg-popup); border:1px solid var(--border); border-radius:6px; max-width:100%; }
+
 .focus-backup-dialog {
     overflow-wrap:anywhere;
 }

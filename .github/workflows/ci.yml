@@ -44,7 +44,7 @@ jobs:
       - run: npm ci
       - run: npm run build:release
       - name: Verify generated files are committed
-        run: git diff --exit-code -- package.json package-lock.json index.html js/local-release.js
+        run: git diff --exit-code -- package.json package-lock.json index.html js/local-release.js js/local-i18n-catalog.js
       - run: npm run check
       - run: npm test
       - name: Install browser
