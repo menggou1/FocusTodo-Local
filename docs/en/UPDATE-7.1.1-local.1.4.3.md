@@ -21,5 +21,9 @@ This release consolidates the font and feature-ownership changes from failed 1.4
 - [Public evidence 2](https://github.com/menggou1/FocusTodo-Local/actions/runs/40317145757)
 - [Public evidence 3](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.3)
 - [Public evidence 4](https://menggou1.github.io/FocusTodo-Local/)
+- [Public evidence 5](https://github.com/menggou1/FocusTodo-Local/commit/16c6575e45dca863f8114ed2f0a77df24bca0ab0)
+- [Public evidence 6](https://github.com/menggou1/FocusTodo-Local/actions/runs/40320120438)
+- [Public evidence 7](https://github.com/menggou1/FocusTodo-Local/actions/runs/40320138793)
+- [Public evidence 8](https://github.com/menggou1/FocusTodo-Local/actions/runs/40320120726)
 
 [Original Chinese report](../UPDATE-7.1.1-local.1.4.3.md). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.

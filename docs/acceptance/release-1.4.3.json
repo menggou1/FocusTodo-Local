@@ -1,0 +1,62 @@
+{
+  "release": {
+    "id": 424216593,
+    "tag": "1.4.3",
+    "name": "FocusTodo 1.4.3",
+    "draft": false,
+    "prerelease": false,
+    "url": "https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.3",
+    "assets": [
+      {
+        "id": 678085218,
+        "name": "FocusTodo-1.4.3.tar.gz",
+        "size": 46342445,
+        "digest": "sha256:d39151c38de817555060c32bc27725147571dca14c37bff48072c441fcae07b3",
+        "url": "https://github.com/menggou1/FocusTodo-Local/releases/download/1.4.3/FocusTodo-1.4.3.tar.gz"
+      },
+      {
+        "id": 678085217,
+        "name": "FocusTodo-1.4.3.zip",
+        "size": 46571384,
+        "digest": "sha256:3686a4dce6ba6ed9bcc6b9628dc6be0db9a78385d4905720d924d4b2d82a142f",
+        "url": "https://github.com/menggou1/FocusTodo-Local/releases/download/1.4.3/FocusTodo-1.4.3.zip"
+      },
+      {
+        "id": 678085229,
+        "name": "SHA256SUMS.txt",
+        "size": 175,
+        "digest": "sha256:29505d45d835ace805cf5f3f4d0221e1ed1665f60f2accd640b74febf71c9f0e",
+        "url": "https://github.com/menggou1/FocusTodo-Local/releases/download/1.4.3/SHA256SUMS.txt"
+      }
+    ]
+  },
+  "verifiedAt": "2026-10-26T12:23:10.314Z",
+  "results": [
+    {
+      "name": "SHA256SUMS.txt",
+      "size": 175,
+      "sha256": "29505d45d835ace805cf5f3f4d0221e1ed1665f60f2accd640b74febf71c9f0e"
+    },
+    {
+      "name": "FocusTodo-1.4.3.zip",
+      "size": 46571384,
+      "sha256": "3686a4dce6ba6ed9bcc6b9628dc6be0db9a78385d4905720d924d4b2d82a142f"
+    },
+    {
+      "name": "FocusTodo-1.4.3.tar.gz",
+      "size": 46342445,
+      "sha256": "d39151c38de817555060c32bc27725147571dca14c37bff48072c441fcae07b3"
+    }
+  ],
+  "sourceCommit": "16c6575e45dca863f8114ed2f0a77df24bca0ab0",
+  "tagObject": "582f7fe7ca17313d6cda0b8e419528df517df266",
+  "latestTag": "1.4.3",
+  "checks": {
+    "mainRun": 40320120438,
+    "tagRun": 40320138793,
+    "pagesRun": 40320120726,
+    "mainMatrix": "6 passed",
+    "tagMatrix": "6 passed after retrying stalled Ubuntu package installation",
+    "publishedRuntimeVersion": "7.1.1-local.1.4.3"
+  }
+}

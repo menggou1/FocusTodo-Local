@@ -25,3 +25,18 @@
 [GitHub Release 1.4.3](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.3) 提供 `FocusTodo-1.4.3.zip`、`FocusTodo-1.4.3.tar.gz` 和 `SHA256SUMS.txt`。main、注释 Tag、发布附件中的版本字段与 [线上 Pages](https://menggou1.github.io/FocusTodo-Local/) 使用同一完整版本。
 
 Pages 使用 main 的官方 Actions 白名单产物流程，线上 `deployment.json` 记录版本与来源提交。运行与升级沿用原启动器及浏览器存储地址规则，不需要 npm 运行依赖。
+
+## 完成交付核验
+
+发行源码与注释 Tag 指向 [16c6575](https://github.com/menggou1/FocusTodo-Local/commit/16c6575e45dca863f8114ed2f0a77df24bca0ab0)，已合入并推送 main。版本一致性、57 项单元检查和语法检查通过，单元用例在 Windows 跳过 1 项 POSIX 专项；便携包通过含空格/中文路径的解压启动与文档链接检查。
+
+[main 六平台 CI](https://github.com/menggou1/FocusTodo-Local/actions/runs/40320120438) 全部通过。[Tag 六平台 CI 与 Release 发布](https://github.com/menggou1/FocusTodo-Local/actions/runs/40320138793) 全部通过；Ubuntu 首次安装任务受依赖镜像下载停滞影响，单独重跑后成功，已通过的其他任务结果保留。没有修改或覆盖 Tag。
+
+[官方 Pages 部署](https://github.com/menggou1/FocusTodo-Local/actions/runs/40320120726) 成功，实际中英文页面均正常挂载，三个语言选项和按功能归并的服务入口正确，没有页面异常；英文未请求附带中文字体。首轮线上来源为上述发行源码，记录写入 `docs/acceptance/live-pages-1.4.3.json`；后续文档提交的当前来源由线上 `deployment.json` 标识。
+
+GitHub Release 已作为最新正式版发布。三个附件均实际下载，ZIP/tar.gz 与公开 SHA256SUMS.txt 及 GitHub 附件摘要一致；两个压缩包内部版本、内联启动资产和版本文档归并结果均通过检查。完整证据在 `docs/acceptance/release-1.4.3.json`。
+
+| 附件 | SHA256 |
+|---|---|
+| FocusTodo-1.4.3.zip | `3686a4dce6ba6ed9bcc6b9628dc6be0db9a78385d4905720d924d4b2d82a142f` |
+| FocusTodo-1.4.3.tar.gz | `d39151c38de817555060c32bc27725147571dca14c37bff48072c441fcae07b3` |
