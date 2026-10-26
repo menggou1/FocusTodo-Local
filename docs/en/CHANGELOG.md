@@ -99,4 +99,4 @@ Current application: **7.1.1-local.1.4.0**, author Lexible.
 
 ## Repository provenance
 
-The repository is maintained independently. The original upstream 7.1.1 history remains on upstream/7.1.1; main is local source and gh-pages is generated static deployment. Read Maintenance for branch, tag and publishing rules.
+The repository is maintained independently. The original upstream 7.1.1 history remains on upstream/7.1.1; main keeps the complete project and the official Pages workflow publishes filtered static assets. Read Maintenance for branch, tag and publishing rules.

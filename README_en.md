@@ -25,6 +25,8 @@ Use a local HTTP server and keep your existing hostname and port. Browser data i
 
 Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). The online site and local loopback address have separate browser storage; use backup export/import to move your data.
 
+Pages deploys automatically from `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
+
 Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
 
 All systems: `node scripts/start.cjs` or `npm start`. The default browser opens after the server starts. Use `node scripts/start.cjs --no-browser --port 5511` for headless use or a different port; with npm, use `npm start -- --no-browser --port 5511`.

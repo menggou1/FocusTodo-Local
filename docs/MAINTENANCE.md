@@ -134,24 +134,23 @@ git push Focustodo-local refs/tags/1.2.3
 
 提交前检查生成文件、文档链接、已读状态和截图，确认没有用户备份、真实数据库、账号凭证或临时输出。选择相关文件提交，推送前核对 remote 和远程分支；远端新增提交时先处理分歧，不强推覆盖。
 
-### GitHub Pages 专用部署分支
+### GitHub Pages 官方工作流
 
-线上地址为 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。源码与开发继续使用 `main`，Pages 发布源固定为 `gh-pages` 分支的根目录 `/`。`gh-pages` 是长期保留的部署分支，不属于完成后删除的临时测试分支，也不要反向合入 main。
+线上地址为 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。`main` 保存完整项目；`.github/workflows/pages.yml` 在 main 推送时自动部署，也支持在 main 上手动运行。仓库 Settings → Pages → Source 使用 **GitHub Actions**，不再维护或依赖 `gh-pages` 分支。
 
-从完整仓库使用 Python 3.12+ 更新部署：
+工作流使用官方 `configure-pages`、`upload-pages-artifact` 和 `deploy-pages`，通过 `github-pages` 环境发布。构建仅有 `contents: read`；部署使用 `pages: write` 与 `id-token: write`，无需个人令牌。并发部署串行执行，避免中断正在发布的网站。
+
+沿用原有 `scripts/deploy-pages.py` 文件白名单：根目录浏览器 HTML/CSS/JS、图标、`release.json`、`LICENSE`，以及 `js/`、`audio/`、`font/`、`i18n/`、`img/`。脚本只读取已提交 main 或其祖先，输出这些运行文件、`.nojekyll` 和记录版本/来源提交的 `deployment.json`；开发脚本、测试、文档、上游 `CNAME` 仍不上传。官方工作流上传的目录是 `dist/pages`，不是整个仓库。
+
+使用 Python 3.12+ 可按同一规则生成本地预览（输出目录必须不存在）：
 
 ```bash
-# 可选：生成本地预览，输出目录必须是新目录
 python scripts/deploy-pages.py --output dist/pages-preview
-# 从已提交的 main 发布；也可用 --ref 1.2.1 指定已合入 main 的版本
-python scripts/deploy-pages.py --push
+# 在 main 上重新部署当前提交
+# GitHub Actions → Deploy GitHub Pages → Run workflow → main
 ```
 
-脚本只读取已提交的 main 或其祖先版本，发布浏览器运行资产、`.nojekyll` 和记录来源版本/提交的 `deployment.json`。不发布工作区未提交内容、开发脚本、测试、文档或上游遗留 `CNAME`；保留当前 GitHub 默认域名，不擅自关联其他域名。脚本使用独立临时索引，不切换当前工作区、改动当前索引或强推，后续部署沿 gh-pages 现有历史追加；相同来源重复执行不会重复提交。
-
-仓库 Pages 设置为 Deploy from a branch → `gh-pages` → `/`，使用本机已有 GitHub 认证推送后由 GitHub 构建。普通 `GITHUB_TOKEN` 在工作流里推送分支不会自动触发 Pages 构建；不在仓库中保存个人令牌。
-
-线上地址与本机 loopback 使用不同浏览器存储，数据迁移依赖应用备份导出/导入。部署不会读取或上传本地浏览器数据库。部署后核对 `deployment.json` 的来源提交、Pages 构建状态和项目子路径下的真实页面启动。
+脚本仅构建目录，不再提供 `--push` / `--remote` 或写入部署分支。本次迁移不修改应用版本、历史 Tag 或 Release。部署不会读取或上传本地浏览器数据库。线上地址与本机 loopback 使用不同浏览器存储，数据迁移依赖备份导出/导入。部署后核对工作流成功、线上 `deployment.json` 的来源提交，以及项目子路径下的真实页面启动。
 
 ## 6. 统一待办入口
 
@@ -162,12 +161,11 @@ python scripts/deploy-pages.py --push
 | 分支 | 用途 |
 | --- | --- |
 | `main` | 当前本地版源码、维护文档与版本发布 |
-| `gh-pages` | 从已提交版本生成的静态网站 |
 | `upstream/7.1.1` | 原始上游 7.1.1 代码及其完整历史，固定归档 |
 
 2026-10-22 从 [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 核对并归档上游提交 [fe15a1d9201c6298f1c28c16dcb0b58c481f9999](https://github.com/menggou1/FocusTodo-Local/commit/fe15a1d9201c6298f1c28c16dcb0b58c481f9999)，提交说明为 `feat: update to v7.1.1`，时间为 2025-12-15 23:32:46 UTC。远程 [upstream/7.1.1](https://github.com/menggou1/FocusTodo-Local/tree/upstream/7.1.1) 直接指向该提交，Git tree 为 `b163dc146decc50e5cc5f64ed2b046e73098c750`；没有加入本地版补丁、重写原文件或只复制工作目录。该分支及祖先的可达 Git 对象由本仓库的归档引用保留，不依赖上游分支以后是否移动。
 
-原版分支长期保留，不继续开发、不用于 Pages 或本地版 Release，也不反向合入 main。保留原作者信息、LICENSE 和包括原 CNAME 在内的原始文件；本地版继续在 main 维护，正式网站仍只从 gh-pages 部署。读取归档可执行：
+原版分支长期保留，不继续开发、不用于 Pages 或本地版 Release，也不反向合入 main。保留原作者信息、LICENSE 和包括原 CNAME 在内的原始文件；本地版继续在 main 维护，正式网站通过 main 的官方 Pages 工作流部署。读取归档可执行：
 
 ```bash
 git fetch Focustodo-local upstream/7.1.1
@@ -175,4 +173,4 @@ git log Focustodo-local/upstream/7.1.1
 git archive --format=zip --output upstream-7.1.1.zip Focustodo-local/upstream/7.1.1
 ```
 
-分支归档与 GitHub 的 fork 关系是两回事。2026-10-22 用户已在 GitHub 完成 Leave fork network；随后通过实时 REST API 确认本仓库 `fork=false`，`parent` 和 `source` 均为空，仓库 ID 仍为 `1308433974`。原版分支保留 4 个原始提交，main、gh-pages、版本标签、Release 及其附件继续保留；Pages 仍从 gh-pages 根目录发布。脱离前已在本机 `dist/repository-before-detach-2026-10-22.bundle` 保存并验证完整 Git 历史，旁边的同名 JSON 保存仓库、分支、标签、Release 和 Pages 设置快照；这些恢复辅助文件不提交、不发布，也不替代远程归档分支。
+分支归档与 GitHub 的 fork 关系是两回事。2026-10-22 用户已在 GitHub 完成 Leave fork network；随后通过实时 REST API 确认本仓库 `fork=false`，`parent` 和 `source` 均为空，仓库 ID 仍为 `1308433974`。原版分支保留 4 个原始提交，当时 main、gh-pages、版本标签、Release 及其附件均被保留；现行 Pages 部署规则见上节，gh-pages 已退出维护。脱离前已在本机 `dist/repository-before-detach-2026-10-22.bundle` 保存并验证完整 Git 历史，旁边的同名 JSON 保存仓库、分支、标签、Release 和 Pages 设置快照；这些恢复辅助文件不提交、不发布，也不替代远程归档分支。

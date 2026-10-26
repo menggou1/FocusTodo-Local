@@ -32,6 +32,6 @@ for(const u of config.updates){
  fs.writeFileSync('docs/en/'+name,body);
  changelog+='\n## '+u.version+' · '+u.date+'\n\n'+u.itemsEn.map(s=>'- '+s).join('\n')+'\n\n[English report]('+name+').\n';
 }
-changelog+='\n## Repository provenance\n\nThe repository is maintained independently. The original upstream 7.1.1 history remains on upstream/7.1.1; main is local source and gh-pages is generated static deployment. Read Maintenance for branch, tag and publishing rules.\n';
+changelog+='\n## Repository provenance\n\nThe repository is maintained independently. The original upstream 7.1.1 history remains on upstream/7.1.1; main keeps the complete project and the official Pages workflow publishes filtered static assets. Read Maintenance for branch, tag and publishing rules.\n';
 fs.writeFileSync('docs/en/CHANGELOG.md',changelog);
 console.log('Generated '+config.updates.length+' English release reports and changelog.');

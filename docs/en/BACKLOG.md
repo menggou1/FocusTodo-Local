@@ -33,7 +33,6 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 
 - A settings control for the interruption threshold, currently fixed at five minutes.
 - Release-note archival and network update checks; current metadata is static and the notification list already scrolls.
-- Fully automated Pages deployment using the official Pages workflow. Current deployment uses local authentication and the script; never put personal tokens in the repository.
 
 ## Offline feature design proposal
 

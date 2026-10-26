@@ -1,4 +1,4 @@
-"""Publish committed static assets to gh-pages without changing the worktree/index."""
+"""Build filtered static assets for the official GitHub Pages workflow."""
 import argparse
 import io
 import json
@@ -7,7 +7,6 @@ from pathlib import Path
 import subprocess
 import sys
 import tarfile
-import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 os.environ.setdefault('GIT_TERMINAL_PROMPT', '0')
@@ -26,7 +25,7 @@ def git(*args, data=None, env=None):
                           capture_output=True, check=True, env=env, timeout=120).stdout
 
 
-def deploy(ref='main', remote='Focustodo-local', output=None, push=False):
+def build(ref='main', output=Path('dist/pages')):
     source = git('rev-parse', '--verify', '--end-of-options', ref + '^{commit}').decode().strip()
     git('merge-base', '--is-ancestor', source, 'main')
     release = json.loads(git('show', source + ':release.json'))
@@ -50,61 +49,29 @@ def deploy(ref='main', remote='Focustodo-local', output=None, push=False):
     manifest = (json.dumps({'version': version, 'sourceCommit': source, 'sourceRef': ref},
                            ensure_ascii=False, indent=2) + '\n').encode('utf-8')
     generated = {'.nojekyll': b'', 'deployment.json': manifest}
-    with tempfile.TemporaryDirectory(prefix='FocusTodo-pages-index-') as temporary:
-        index_env = dict(os.environ, GIT_INDEX_FILE=str(Path(temporary) / 'index'))
-        git('read-tree', '--empty', env=index_env)
-        for name, contents in generated.items():
-            blob = git('hash-object', '-w', '--stdin', data=contents).strip()
-            entries += b'100644 blob ' + blob + b'\t' + name.encode() + b'\0'
-        git('update-index', '-z', '--index-info', data=entries, env=index_env)
-        tree = git('write-tree', env=index_env).decode().strip()
-    if output is not None:
-        output = output.resolve()
-        if output.exists():
-            raise FileExistsError('Choose a new preview output directory: ' + str(output))
-        output.mkdir(parents=True)
-        archive = git('archive', '--format=tar', source, '--', *RUNTIME_PATHS)
-        with tarfile.open(fileobj=io.BytesIO(archive)) as files:
-            files.extractall(output, filter='data')
-        for name, contents in generated.items():
-            (output / name).write_bytes(contents)
+    output = output.resolve()
+    if output.exists():
+        raise FileExistsError('Choose a new Pages output directory: ' + str(output))
+    output.mkdir(parents=True)
+    archive = git('archive', '--format=tar', source, '--', *RUNTIME_PATHS)
+    with tarfile.open(fileobj=io.BytesIO(archive)) as files:
+        files.extractall(output, filter='data')
+    for name, contents in generated.items():
+        (output / name).write_bytes(contents)
     print('Pages version:', version)
     print('Source commit:', source)
     print('Static files:', len(names) + len(generated))
-    if not push:
-        print('Preview only; use --push to update the remote gh-pages branch.')
-        return
-    branch = 'refs/heads/gh-pages'
-    existing = subprocess.run(['git', '-c', 'http.version=HTTP/1.1', 'ls-remote', '--exit-code', remote, branch],
-                              cwd=ROOT, capture_output=True, timeout=45)
-    parent = None
-    if existing.returncode == 0:
-        git('fetch', '--no-tags', remote, branch)
-        parent = git('rev-parse', 'FETCH_HEAD').decode().strip()
-        if git('rev-parse', parent + '^{tree}').decode().strip() == tree:
-            print('gh-pages already contains this deployment.')
-            return
-    elif existing.returncode != 2:
-        raise RuntimeError('Could not read the remote gh-pages branch')
-    message = f'Deploy FocusTodo {version} from {source[:12]}\n\nSource-commit: {source}\n'
-    args = ['commit-tree', tree]
-    if parent:
-        args.extend(['-p', parent])
-    commit = git(*args, data=message.encode()).decode().strip()
-    # Normal push preserves deployment history and rejects concurrent updates.
-    git('push', remote, commit + ':' + branch)
-    print('Published gh-pages:', commit)
+    print('Pages artifact:', output)
+    return output
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ref', default='main', help='Committed main revision or an ancestor tag')
-    parser.add_argument('--remote', default='Focustodo-local')
-    parser.add_argument('--output', type=Path, help='Optional new directory for a local static preview')
-    parser.add_argument('--push', action='store_true', help='Publish to the remote gh-pages branch')
+    parser.add_argument('--output', type=Path, default=Path('dist/pages'), help='New directory for the Pages artifact or local preview')
     args = parser.parse_args()
     try:
-        deploy(args.ref, args.remote, args.output, args.push)
+        build(args.ref, args.output)
     except subprocess.CalledProcessError as error:
         print(error.stderr.decode('utf-8', errors='replace'), file=sys.stderr)
         sys.exit(error.returncode)

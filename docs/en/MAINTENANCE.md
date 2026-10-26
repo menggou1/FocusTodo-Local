@@ -89,14 +89,20 @@ The workflow tests Windows/macOS/Linux × Node 22/24. Node 24 also runs browser 
 
 ## GitHub Pages
 
-The site is [FocusTodo Local](https://menggou1.github.io/FocusTodo-Local/). Main is source; `gh-pages` is the long-lived static deployment branch and is never merged back into main. Pages uses that branch root. Publish only committed main or an ancestor:
+The site is [FocusTodo Local](https://menggou1.github.io/FocusTodo-Local/). `main` keeps the complete project. Repository Settings → Pages → Source must be **GitHub Actions**. `.github/workflows/pages.yml` deploys automatically on main pushes and supports manual runs on main. The `gh-pages` branch is no longer maintained or required.
+
+Official `configure-pages`, `upload-pages-artifact` and `deploy-pages` actions publish through the `github-pages` environment. Build has `contents: read`; deployment has `pages: write` and `id-token: write`. No personal token is required. Deployments run serially without cancelling an active deployment.
+
+The existing whitelist in `scripts/deploy-pages.py` is unchanged: root browser HTML/CSS/JS, icons, release.json, LICENSE, and js/audio/font/i18n/img. Only committed main or its ancestors are read. The artifact includes `.nojekyll` and `deployment.json` with source commit/version, excluding scripts, tests, documentation and the old CNAME. The workflow uploads `dist/pages`, never the repository root.
+
+Build a local preview with Python 3.12+ into a new directory:
 
 ```bash
-python scripts/deploy-pages.py --push
+python scripts/deploy-pages.py --output dist/pages-preview
 ```
 
-The script uses a temporary index, preserves deployment history, excludes development documents and the old CNAME, and writes `deployment.json` with the source commit and version. It does not upload local browser databases. Verify the Pages workflow, live manifest and actual application startup under the project path. The online origin has separate storage from local loopback, so moving data requires backup/import.
+To redeploy, run **Deploy GitHub Pages** on main in Actions. The build script no longer accepts `--push` or `--remote` and does not write a deployment branch. This migration keeps the application version, historical tags and Releases unchanged. It does not upload local browser databases. Verify the successful workflow, live manifest and actual startup under the project path. The online origin has separate storage from local loopback; moving data requires backup/import.
 
 ## Provenance
 
-`upstream/7.1.1` preserves original commit `fe15a1d9201c6298f1c28c16dcb0b58c481f9999` and its original history. Keep the author and LICENSE. Main and gh-pages are local-product branches. The repository left the fork network in October 2026; the upstream archive remains independent of that relationship. Do not modify or merge the archive into current development.
+`upstream/7.1.1` preserves original commit `fe15a1d9201c6298f1c28c16dcb0b58c481f9999` and its original history. Keep the author and LICENSE. Main keeps the local product; the official Pages workflow publishes a filtered artifact. The repository left the fork network in October 2026; the upstream archive remains independent of that relationship. Do not modify or merge the archive into current development.
