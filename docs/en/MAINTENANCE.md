@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current application: `7.1.1-local.1.4.2`, author Lexible. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current application: `7.1.1-local.1.4.3`, author Lexible. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -83,6 +83,8 @@ python tests/package-smoke.py
 `npm run benchmark:backup` runs the optional generated 1/10/50 MB benchmark. Its sampled JS heap and fixture responsiveness are not process peak memory or full UI throughput. Do not include private backups, credentials or images in test evidence.
 
 ## Version and release
+
+Each new repair release increments the third local-version component. Preserve already-pushed failed tags; publish the corrected commit under the next patch version. Version reports follow the actual task scope, and failed 1.4.2 content is consolidated into 1.4.3.
 
 The official base remains 7.1.1. Full version: `7.1.1-local.<major>.<minor>.<patch>`; the annotated Git tag uses only the local version, for example `1.4.0`. The database version and legacy settings marker `Version=6.5` are separate and must not be renamed to match the product version.
 

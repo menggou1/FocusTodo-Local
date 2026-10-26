@@ -2,26 +2,24 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.4.2** · Git Tag **1.4.2** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.4.3** · Git Tag **1.4.3** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
 
-## 7.1.1-local.1.4.2 · 2026-10-26
+## 7.1.1-local.1.4.3 · 2026-10-26
 
-- 将本轮启动、语言字体和功能归属整理正式发布为 `1.4.2`。
-- 提供 ZIP、tar.gz 与 SHA256SUMS.txt，并同步 main、注释 Tag、Release 和官方 Actions Pages。
-- 具体行为及验证参见本版发布记录和 1.4.1 实现记录。
+- 正式发布本轮中文/英文字体、官方计时字体与按功能归并服务的改进。
+- 修正跨标签验收的回拨时间注入竞态，覆盖实际广播、初始化和通知。
+- 1.4.2 为失败版本，原 Tag 保留，其内容与修复统一记录在本版。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.2) · [中文报告](docs/UPDATE-7.1.1-local.1.4.2.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.2.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.3) · [中文报告](docs/UPDATE-7.1.1-local.1.4.3.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.3.md)。
 
 ## 7.1.1-local.1.4.1 · 2026-10-26
 
-- 内联启动骨架与真实步骤进度，脚本并行下载、顺序执行；界面就绪后进入，无需等待所有图片和字体。
-- 中英文复用已交付词库，其他语言异步读取；中文使用附带字体并在就绪后应用，英文优先系统西文字体；番茄钟保留官方字体，并保留主机 HTTP 缓存策略。
-- 增加慢加载说明、失败重试与深色/窄屏适配；记录当前官方 Pages Actions 部署方式。
-- 将旧补丁按功能归入现有数据、备份、设置和主题服务，网络策略独立维护；移除无效轮询和调试入口。
+- 首次加载先显示骨架与真实进度，资源就绪后显示应用。
+- 语言读取异步化，增加长等待、失败重试与外观适配。
 
-[中文报告](docs/UPDATE-7.1.1-local.1.4.1.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.1.md)。通过 main 的官方 Actions 工作流部署 Pages。
+[统一版本记录](docs/UPDATE-7.1.1-local.1.4.1.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.1.md)。
 
 ## 7.1.1-local.1.4.0 · 2026-10-25
 

@@ -1,45 +1,43 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.4.2",
+  "localVersion": "1.4.3",
   "author": "Lexible",
   "date": "2026-10-26",
   "repositoryRemote": "Focustodo-local",
   "updates": [
     {
-      "version": "7.1.1-local.1.4.2",
+      "version": "7.1.1-local.1.4.3",
       "date": "2026-10-26",
-      "title": "启动、字体与功能整合正式发布",
+      "title": "语言字体、功能整合与发布验收修复",
       "items": [
-        "启动即显示骨架与真实进度，界面就绪后进入，慢加载或失败时可重试。",
         "中文附带字体就绪后自动应用，英文优先系统西文字体，番茄钟保留官方字体。",
-        "按功能整合数据、备份、设置与主题服务，保留资料修改和数据恢复行为。",
-        "提供 Windows、macOS 和 Linux 的便携包与 SHA256 校验。"
+        "按功能整合数据、备份、设置和主题服务，移除无效轮询与调试入口。",
+        "保留渐进启动和真实进度，界面就绪后显示，加载失败时可重试。",
+        "完善跨标签协同验收，提供跨平台便携包与 SHA256 校验。"
       ],
-      "titleEn": "Startup, typography and feature consolidation release",
+      "titleEn": "Language fonts, feature consolidation and release verification",
       "itemsEn": [
-        "See a first screen and real progress immediately, enter when ready, and retry slow or failed loads.",
-        "Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain the official timer fonts.",
-        "Consolidate data, backup, settings and theme services while preserving profile updates and recovery.",
-        "Download portable Windows, macOS and Linux packages with SHA256 verification."
+        "Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain official timer fonts.",
+        "Consolidate data, backup, settings and theme services, removing unused polling and debug controls.",
+        "Keep progressive startup and real progress, show the workspace when ready, and retry failed loads.",
+        "Improve cross-tab verification and provide portable packages with SHA256 verification."
       ],
-      "report": "docs/UPDATE-7.1.1-local.1.4.2.md"
+      "report": "docs/UPDATE-7.1.1-local.1.4.3.md"
     },
     {
       "version": "7.1.1-local.1.4.1",
       "date": "2026-10-26",
-      "title": "渐进启动、语言字体与兼容模块整理",
+      "title": "渐进启动与加载反馈",
       "items": [
-        "先显示轻量启动界面和真实加载进度，页面就绪后立即进入，图片和字体继续加载。",
-        "中英文启动直接使用已有词库，其他语言异步加载，慢加载或失败时可重试。",
-        "中文使用附带字体并在加载后自动应用；英文优先系统西文字体，番茄钟沿用官方字体。",
-        "按功能整合本地数据、备份、设置和主题服务，移除无效轮询和调试入口，保留资料修改与恢复行为。"
+        "启动先显示轻量骨架与真实步骤进度，核心界面就绪后进入。",
+        "中英文复用已有词库，其他语言异步读取，长等待或失败时可重试。",
+        "启动反馈支持深色、窄屏、减少动态效果与无 JavaScript 提示。"
       ],
-      "titleEn": "Progressive startup, language fonts and local compatibility",
+      "titleEn": "Progressive startup and loading feedback",
       "itemsEn": [
-        "See a lightweight first screen and real loading progress, then enter the workspace while images and fonts finish loading.",
-        "Start Chinese and English from the existing catalog, load other languages asynchronously, and retry slow or failed loads.",
-        "Apply bundled Chinese fonts once loaded, prefer western system fonts in English, and retain the official timer fonts.",
-        "Consolidate local data, backup, settings and theme services, remove unused polling and debugging, and preserve profile edits and recovery."
+        "See a lightweight first screen and real step progress, then enter when the core workspace is ready.",
+        "Reuse Chinese and English catalogs, load other locales asynchronously, and retry long or failed loads.",
+        "Use startup feedback with dark appearance, narrow screens, reduced motion and a no-JavaScript explanation."
       ],
       "report": "docs/UPDATE-7.1.1-local.1.4.1.md"
     },

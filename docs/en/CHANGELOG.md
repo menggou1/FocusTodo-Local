@@ -2,23 +2,22 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.4.2**, author Lexible.
+Current application: **7.1.1-local.1.4.3**, author Lexible.
 
-## 7.1.1-local.1.4.2 · 2026-10-26
+## 7.1.1-local.1.4.3 · 2026-10-26
 
-- See a first screen and real progress immediately, enter when ready, and retry slow or failed loads.
-- Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain the official timer fonts.
-- Consolidate data, backup, settings and theme services while preserving profile updates and recovery.
-- Download portable Windows, macOS and Linux packages with SHA256 verification.
+- Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain official timer fonts.
+- Consolidate data, backup, settings and theme services, removing unused polling and debug controls.
+- Keep progressive startup and real progress, show the workspace when ready, and retry failed loads.
+- Improve cross-tab verification and provide portable packages with SHA256 verification.
 
-[English report](UPDATE-7.1.1-local.1.4.2.md).
+[English report](UPDATE-7.1.1-local.1.4.3.md).
 
 ## 7.1.1-local.1.4.1 · 2026-10-26
 
-- See a lightweight first screen and real loading progress, then enter the workspace while images and fonts finish loading.
-- Start Chinese and English from the existing catalog, load other languages asynchronously, and retry slow or failed loads.
-- Apply bundled Chinese fonts once loaded, prefer western system fonts in English, and retain the official timer fonts.
-- Consolidate local data, backup, settings and theme services, remove unused polling and debugging, and preserve profile edits and recovery.
+- See a lightweight first screen and real step progress, then enter when the core workspace is ready.
+- Reuse Chinese and English catalogs, load other locales asynchronously, and retry long or failed loads.
+- Use startup feedback with dark appearance, narrow screens, reduced motion and a no-JavaScript explanation.
 
 [English report](UPDATE-7.1.1-local.1.4.1.md).
 

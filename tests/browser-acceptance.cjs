@@ -73,6 +73,31 @@ const server = http.createServer((request, response) => {
             return anchor;
         }, minutes);
     }
+    async function commitElapsed(page, minutes) {
+        const seeded = await page.evaluate(async minutes => {
+            // Seed and reduce inside the real timer transaction. No tab can see
+            // an aged cursor before its intended commit and enter recovery.
+            const original = FocusTimerCore.reduce;
+            let injected = false;
+            FocusTimerCore.reduce = function(session, action, now) {
+                if (!injected && action.type === 'tick' && action.gapMs === 1e9) {
+                    if (session.state !== 'work') throw new Error('Expected a running fixture');
+                    injected = true;
+                    session = { ...session, cursorAt: now - minutes * 60000, observedAt: now - minutes * 60000,
+                        phaseElapsed: 0, totalSeconds: 0, recordedSeconds: 0, spans: [], pendingRecovery: null };
+                }
+                return original(session, action, now);
+            };
+            try {
+                // Leave the real polling loops active while preparing the seed.
+                await new Promise(resolve => setTimeout(resolve, 1100));
+                const result = await window.__acceptanceTimer.localTimer.run('tick', { gapMs: 1e9 });
+                return { result, injected };
+            } finally { FocusTimerCore.reduce = original; }
+        }, minutes);
+        assert(seeded.injected, 'Elapsed-time fixture was applied within the commit');
+        return seeded.result;
+    }
     const snapshot = page => page.evaluate(() => window.FocusLocalData.snapshot());
     async function themeFixture(page, bing = false) {
         await page.evaluate(bing => {
@@ -786,8 +811,7 @@ const server = http.createServer((request, response) => {
                 window.__acceptanceTimer.playWorkAlarm = () => window.__alarms.push('work');
                 window.__acceptanceTimer.playBreakAlarm = () => window.__alarms.push('break');
             });
-            await begin(page); await age(page, 60);
-            await page.evaluate(() => window.__acceptanceTimer.localTimer.run('tick', { gapMs: 1e9 }));
+            await begin(page); await commitElapsed(page, 60);
             await page.evaluate(() => window.__acceptanceTimer.localTimer.run('tick'));
             assert.equal(await page.evaluate(() => window.__notifications.length), 1, (await page.locator('#focus-local-notice').allTextContents()).join(' '));
             await age(page, 120);
@@ -834,8 +858,7 @@ const server = http.createServer((request, response) => {
                 window.__peerRows = [];
                 window.__acceptanceOptions.events.on('pomodoro_new', row => window.__peerRows.push(row));
             });
-            await age(page, 60);
-            await page.evaluate(() => window.__acceptanceTimer.localTimer.run('tick', { gapMs: 1e9 }));
+            await commitElapsed(page, 60);
             try {
                 await other.waitForFunction(() => window.__peerRows.length >= 2 && window.__acceptanceTimer.props.task.pomodoros.reduce((n, v) => n + v, 0) > 1.999999);
             } catch (error) {
@@ -878,8 +901,7 @@ const server = http.createServer((request, response) => {
                 window.__peerRows = [];
                 window.__acceptanceOptions.events.on('pomodoro_new', row => window.__peerRows.push(row));
             });
-            await age(page, 60);
-            const committed = await page.evaluate(() => window.__acceptanceTimer.localTimer.run('tick', { gapMs: 1e9 }));
+            const committed = await commitElapsed(page, 60);
             assert.equal(committed.session.state, 'work');
             assert.equal(new Set(committed.records.map(row => row.blockId)).size, 2);
             await other.waitForFunction(expected => window.__receivedRecords.length === expected, committed.records.length);

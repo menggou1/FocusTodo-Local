@@ -1,0 +1,70 @@
+{
+  "url": "https://menggou1.github.io/FocusTodo-Local/",
+  "manifest": {
+    "version": "7.1.1-local.1.4.2",
+    "sourceCommit": "464ed373d96408ccdbd9f7cac8ae76f45abbe571",
+    "sourceRef": "HEAD"
+  },
+  "expectedCommit": "464ed373d96408ccdbd9f7cac8ae76f45abbe571",
+  "checkedAt": "2026-10-26T11:47:46.344Z",
+  "results": [
+    {
+      "language": "zh-CN",
+      "version": "7.1.1-local.1.4.2",
+      "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+      "featureServices": true,
+      "firstContentfulPaintMs": 1296,
+      "globalJQuery": "undefined",
+      "chineseFonts": [
+        {
+          "weight": "400",
+          "status": "loading"
+        },
+        {
+          "weight": "500",
+          "status": "loading"
+        },
+        {
+          "weight": "700",
+          "status": "loading"
+        }
+      ],
+      "languageChoices": [
+        "auto",
+        "zh-CN",
+        "en"
+      ],
+      "cjkRequests": 3,
+      "errors": []
+    },
+    {
+      "language": "en",
+      "version": "7.1.1-local.1.4.2",
+      "fontFamily": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+      "featureServices": true,
+      "firstContentfulPaintMs": 880,
+      "globalJQuery": "undefined",
+      "chineseFonts": [
+        {
+          "weight": "400",
+          "status": "unloaded"
+        },
+        {
+          "weight": "500",
+          "status": "unloaded"
+        },
+        {
+          "weight": "700",
+          "status": "unloaded"
+        }
+      ],
+      "languageChoices": [
+        "auto",
+        "zh-CN",
+        "en"
+      ],
+      "cjkRequests": 0,
+      "errors": []
+    }
+  ]
+}
