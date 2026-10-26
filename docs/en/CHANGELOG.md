@@ -2,7 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.4.1**, author Lexible.
+Current application: **7.1.1-local.1.4.2**, author Lexible.
+
+## 7.1.1-local.1.4.2 · 2026-10-26
+
+- See a first screen and real progress immediately, enter when ready, and retry slow or failed loads.
+- Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain the official timer fonts.
+- Consolidate data, backup, settings and theme services while preserving profile updates and recovery.
+- Download portable Windows, macOS and Linux packages with SHA256 verification.
+
+[English report](UPDATE-7.1.1-local.1.4.2.md).
 
 ## 7.1.1-local.1.4.1 · 2026-10-26
 

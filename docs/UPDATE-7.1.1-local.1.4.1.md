@@ -44,3 +44,7 @@
 `main` 推送或在 main 上手动运行 **Deploy GitHub Pages** → 按白名单生成 `dist/pages` → 官方 `upload-pages-artifact` 上传 → `deploy-pages` 通过 `github-pages` 环境发布。仓库 Pages Source 使用 GitHub Actions；不再写入或依赖 `gh-pages`，构建脚本没有 `--push` / `--remote`。构建使用 `contents: read`，部署使用 `pages: write` / `id-token: write`，不需要个人令牌。
 
 本次内联的启动样式和控制器由 `npm run build:release` 从 `startup.css` / `js/local-startup.js` 生成进 `index.html`；网络模块与归并后的功能模块均位于既有 `js/` 白名单。`scripts/deploy-pages.py` 同时检查这些必需文件存在，产物保留记录版本和来源提交的 `deployment.json`。
+
+## 交付证据
+
+实现提交 [562c6e6](https://github.com/menggou1/FocusTodo-Local/commit/562c6e6aa187686e7fea677fd9ecc39891bd5321) 已合入并推送 main。[六平台 CI](https://github.com/menggou1/FocusTodo-Local/actions/runs/40315087314) 与 [官方 Pages 部署](https://github.com/menggou1/FocusTodo-Local/actions/runs/40315087312) 均成功。线上 manifest 来源为该提交；中英文启动、三个语言选项及功能服务入口均通过，没有页面异常。中文字体下载未完成时工作区已可用，英文不请求附带中文字体。隔离线上证据保存为 `docs/acceptance/live-pages-1.4.1.json`。

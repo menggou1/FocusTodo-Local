@@ -1,10 +1,29 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.4.1",
+  "localVersion": "1.4.2",
   "author": "Lexible",
   "date": "2026-10-26",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.4.2",
+      "date": "2026-10-26",
+      "title": "启动、字体与功能整合正式发布",
+      "items": [
+        "启动即显示骨架与真实进度，界面就绪后进入，慢加载或失败时可重试。",
+        "中文附带字体就绪后自动应用，英文优先系统西文字体，番茄钟保留官方字体。",
+        "按功能整合数据、备份、设置与主题服务，保留资料修改和数据恢复行为。",
+        "提供 Windows、macOS 和 Linux 的便携包与 SHA256 校验。"
+      ],
+      "titleEn": "Startup, typography and feature consolidation release",
+      "itemsEn": [
+        "See a first screen and real progress immediately, enter when ready, and retry slow or failed loads.",
+        "Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain the official timer fonts.",
+        "Consolidate data, backup, settings and theme services while preserving profile updates and recovery.",
+        "Download portable Windows, macOS and Linux packages with SHA256 verification."
+      ],
+      "report": "docs/UPDATE-7.1.1-local.1.4.2.md"
+    },
     {
       "version": "7.1.1-local.1.4.1",
       "date": "2026-10-26",

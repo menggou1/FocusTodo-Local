@@ -2,9 +2,17 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.4.1**· 最近发布 Tag **1.4.0** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.4.2** · Git Tag **1.4.2** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
+
+## 7.1.1-local.1.4.2 · 2026-10-26
+
+- 将本轮启动、语言字体和功能归属整理正式发布为 `1.4.2`。
+- 提供 ZIP、tar.gz 与 SHA256SUMS.txt，并同步 main、注释 Tag、Release 和官方 Actions Pages。
+- 具体行为及验证参见本版发布记录和 1.4.1 实现记录。
+
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.2) · [中文报告](docs/UPDATE-7.1.1-local.1.4.2.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.2.md)。
 
 ## 7.1.1-local.1.4.1 · 2026-10-26
 
