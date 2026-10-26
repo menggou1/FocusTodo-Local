@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "fe15a1d9201c6298f1c28c16dcb0b58c481f9999",
+  "rules": [
+    {
+      "selector": ".FullscreenTimer-countdown-3IUFG span",
+      "family": "HelveticaNeue-Light, 'Helvetica Neue', sans-serif, Helvetica, Tahoma,Arial,'Microsoft YaHei','\\5FAE\\8F6F\\96C5\\9ED1',SimSun,Heiti,'\\9ED1\\4F53',STXihei,'\\534E\\6587\\7EC6\\9ED1'"
+    },
+    {
+      "selector": ".FlipDigitView-frontTop-3BWI9,\n.FlipDigitView-frontBottom-30nsP,\n.FlipDigitView-backTop-2n1gM,\n.FlipDigitView-backBottom-2sKuc",
+      "family": "DINCond-Black,DINCond,'Helvetica Neue', sans-serif, Helvetica, Tahoma, Arial, 'Microsoft YaHei', '\\5FAE\\8F6F\\96C5\\9ED1', SimSun, Heiti, '\\9ED1\\4F53', STXihei, '\\534E\\6587\\7EC6\\9ED1','Helvetica Neue',sans-serif,Helvetica,Tahoma,Arial,'Microsoft YaHei','\\5FAE\\8F6F\\96C5\\9ED1',SimSun,Heiti,'\\9ED1\\4F53',STXihei,'\\534E\\6587\\7EC6\\9ED1'"
+    }
+  ]
+}

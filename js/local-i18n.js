@@ -30,6 +30,19 @@
     root.FocusI18n = {
         locale, preference, text, lookupLegacy, update,
         attachLegacy(api) { legacyApi=api; },
+        loadLegacy(api) {
+            legacyApi = api;
+            // Both complete languages are already in the generated catalog.
+            // Avoid synchronous requests (including a missing strings_zh.txt).
+            if (locale === 'en' || locale === 'zh-CN') {
+                api.map = { ...catalog.english, ...(locale === 'zh-CN' ? catalog.chinese : {}) };
+                return Promise.resolve();
+            }
+            return new Promise(resolve => api.properties({
+                name: 'strings', path: './i18n/', cache: true, mode: 'map',
+                async: true, callback: resolve
+            }));
+        },
         legacyText(key, ...args) { return legacyApi ? legacyApi.prop.apply(legacyApi,[key,...args]) : lookupLegacy(key); },
         accountCookie(key,value) {
             if(key!=='NAME') return value;

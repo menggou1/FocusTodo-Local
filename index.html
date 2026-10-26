@@ -1,30 +1,184 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="focus-starting">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://www.bing.com https://bing.com https://bing.biturl.top https://th.bing.com; connect-src 'self' https://www.bing.com https://bing.com https://bing.biturl.top; font-src 'self' data:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
-  <title>专注清单 · 7.1.1-local.1.4.0 · Lexible</title>
-  <link href="main.css?v=7.1.1-local.1.4.0" rel="stylesheet">
-  <link href="local-ui.css?v=7.1.1-local.1.4.0" rel="stylesheet">
+  <title>专注清单 · 7.1.1-local.1.4.1 · Lexible</title>
+  <style id="focus-startup-style">
+/* Inlined first-screen styles. Keep independent of app CSS, fonts and images. */
+html.focus-starting, .focus-starting body { margin:0; height:100%; min-width:0; background:#f6f7f9; }
+.focus-starting body { overflow:hidden; }
+.focus-starting #root { visibility:hidden; }
+#focus-startup { --startup-bg:#fff; --startup-line:#e9ecf1; --startup-text:#303846; --startup-muted:#687385; position:fixed; inset:0; z-index:2147483000; display:flex; flex-direction:column; color:var(--startup-text); background:var(--startup-bg); font:15px/1.6 var(--focus-ui-font,system-ui),sans-serif; }
+#focus-startup * { box-sizing:border-box; }
+#focus-startup header { display:flex; align-items:center; gap:12px; height:72px; padding:0 32px; border-bottom:1px solid var(--startup-line); }
+#focus-startup-title { margin:0; font-size:18px; font-weight:600; }
+.focus-startup-logo { display:grid; place-items:center; width:32px; height:32px; border-radius:10px; color:#fff; background:#e65350; font-size:22px; }
+.focus-startup-layout { flex:1; display:grid; grid-template-columns:240px minmax(0,1fr) 300px; min-height:0; }
+.focus-startup-sidebar { padding:36px 24px; border-right:1px solid var(--startup-line); }
+.focus-startup-skeleton { height:12px; max-width:100%; margin-bottom:24px; border-radius:6px; background:var(--startup-line); }
+.focus-startup-sidebar .focus-startup-skeleton:nth-child(2n) { width:70%; }
+.focus-startup-content { padding:48px; }
+.focus-startup-content .focus-startup-skeleton { height:16px; width:80%; margin-bottom:32px; }
+.focus-startup-content .focus-startup-skeleton:first-child { width:35%; height:22px; margin-bottom:48px; }
+.focus-startup-timer { display:flex; justify-content:center; padding:64px 24px; border-left:1px solid var(--startup-line); }
+.focus-startup-ring { width:180px; height:180px; border:8px solid var(--startup-line); border-radius:50%; }
+.focus-startup-card { position:absolute; top:47%; left:50%; transform:translate(-50%,-50%); width:min(460px,calc(100% - 40px)); padding:28px 32px; border:1px solid var(--startup-line); border-radius:16px; background:var(--startup-bg); box-shadow:0 12px 48px #1828400d; }
+#focus-startup-status { margin:0 0 18px; font-size:18px; font-weight:600; }
+.focus-startup-meter { display:flex; align-items:center; gap:14px; }
+#focus-startup-progress { display:block; flex:1; min-width:0; height:6px; overflow:hidden; border:0; border-radius:8px; appearance:none; background:var(--startup-line); accent-color:#e65350; }
+#focus-startup-progress::-webkit-progress-bar { background:var(--startup-line); border-radius:8px; }
+#focus-startup-progress::-webkit-progress-value { background:#e65350; border-radius:8px; transition:width .2s ease; }
+#focus-startup-progress::-moz-progress-bar { background:#e65350; border-radius:8px; }
+#focus-startup-count { font-size:12px; color:var(--startup-muted); font-variant-numeric:tabular-nums; }
+#focus-startup-hint { margin:16px 0 0; font-size:13px; color:var(--startup-muted); }
+#focus-startup-retry { margin-top:20px; padding:8px 18px; border:0; border-radius:8px; background:#e65350; color:white; font:inherit; cursor:pointer; }
+#focus-startup-retry:focus-visible { outline:3px solid #e6535080; outline-offset:3px; }
+#focus-startup [hidden] { display:none; }
+#focus-startup noscript { display:block; padding:24px; }
+.focus-startup-dark #focus-startup { --startup-bg:#20242b; --startup-line:#333943; --startup-text:#e8ebf0; --startup-muted:#a5afbc; }
+@media(max-width:900px) { .focus-startup-layout { grid-template-columns:180px minmax(0,1fr); } .focus-startup-timer { display:none; } }
+@media(max-width:600px) { #focus-startup header { height:60px; padding:0 20px; } .focus-startup-layout { grid-template-columns:1fr; } .focus-startup-sidebar { display:none; } .focus-startup-content { padding:40px 24px; } .focus-startup-card { padding:24px; } }
+@media(prefers-reduced-motion:reduce) { #focus-startup-progress::-webkit-progress-value { transition:none; } }
+</style>
+  <link rel="preload" href="js/main.js?v=7.1.1-local.1.4.1" as="script" fetchpriority="high">
 </head>
 <body>
-  <div id="root" style="height:100%;width:100%"></div>
+  <div id="focus-startup">
+    <header><span class="focus-startup-logo" aria-hidden="true">✓</span><h1 id="focus-startup-title">专注清单 · FocusTodo</h1></header>
+    <div class="focus-startup-layout" aria-hidden="true">
+      <div class="focus-startup-sidebar"><div class="focus-startup-skeleton"></div><div class="focus-startup-skeleton"></div><div class="focus-startup-skeleton"></div><div class="focus-startup-skeleton"></div></div>
+      <div class="focus-startup-content"><div class="focus-startup-skeleton"></div><div class="focus-startup-skeleton"></div><div class="focus-startup-skeleton"></div><div class="focus-startup-skeleton"></div></div>
+      <div class="focus-startup-timer"><div class="focus-startup-ring"></div></div>
+    </div>
+    <section class="focus-startup-card" aria-labelledby="focus-startup-status">
+      <h2 id="focus-startup-status" role="status" aria-live="polite">正在准备你的专注空间 · Loading FocusTodo</h2>
+      <div class="focus-startup-meter"><progress id="focus-startup-progress" max="16" value="0" aria-label="启动进度 · Startup progress"></progress><span id="focus-startup-count" aria-hidden="true">0 / 16</span></div>
+      <p id="focus-startup-hint">已准备好的界面会先显示。</p>
+      <button id="focus-startup-retry" type="button" hidden>重新加载 · Reload</button>
+    </section>
+    <noscript>请启用 JavaScript 后重新加载。Enable JavaScript and reload to open FocusTodo.</noscript>
+  </div>
+  <div id="root" aria-busy="true" style="height:100%;width:100%"></div>
   <div id="modal-root"></div>
   <div id="task-deadline-width" class="small-font" style="display:inline-block;position:absolute;top:-10000px"></div>
-  <script src="js/local-i18n-catalog.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-i18n.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-release.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-timer-core.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-data.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-timer-ui.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-app-ui.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-backup.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-theme-storage.js?v=7.1.1-local.1.4.0"></script>
-  <script src="patch.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/local-settings-ui.js?v=7.1.1-local.1.4.0"></script>
-  <script src="js/main.js?v=7.1.1-local.1.4.0"></script>
+  <script id="focus-startup-code">
+/* Inlined by build:release so the first screen needs no network request. */
+(function (root) {
+    'use strict';
+    const screen = document.getElementById('focus-startup');
+    const app = document.getElementById('root');
+    const status = document.getElementById('focus-startup-status');
+    const hint = document.getElementById('focus-startup-hint');
+    const progress = document.getElementById('focus-startup-progress');
+    const count = document.getElementById('focus-startup-count');
+    const retry = document.getElementById('focus-startup-retry');
+    const completed = new Set();
+    let preference = 'auto', dark = null;
+    try {
+        preference = localStorage.getItem('FocusTodo.language') || 'auto';
+        dark = localStorage.getItem('DarkMode');
+    } catch (_) { /* The status screen also works when storage is unavailable. */ }
+    const chinese = preference === 'zh-CN' || (preference !== 'en' && /^zh\b/i.test(navigator.language));
+    const text = chinese ? {
+        title: '专注清单', loading: '正在准备你的专注空间', opening: '正在打开你的清单',
+        hint: '已准备好的界面会先显示，图片和字体会继续加载。',
+        slow: '加载比平时久一些。你可以继续等待，或检查网络后重试。',
+        failed: '暂时无法打开专注清单', failureHint: '请检查网络后重试；已保存的数据不会被清除。',
+        retry: '重新加载', progress: '启动进度', steps: '个启动步骤已就绪'
+    } : {
+        title: 'FocusTodo', loading: 'Preparing your focus space', opening: 'Opening your lists',
+        hint: 'Your workspace appears first. Images and fonts can finish loading afterward.',
+        slow: 'This is taking a little longer. You can keep waiting, or check your connection and retry.',
+        failed: 'Unable to open FocusTodo', failureHint: 'Check your connection and retry. Your saved data will stay in place.',
+        retry: 'Reload', progress: 'Startup progress', steps: 'startup steps ready'
+    };
+    document.getElementById('focus-startup-title').textContent = text.title;
+    document.documentElement.classList.toggle('focus-startup-dark', dark === 'true' || (dark === null && root.matchMedia('(prefers-color-scheme: dark)').matches));
+    screen.lang = chinese ? 'zh-CN' : 'en';
+    document.documentElement.lang = screen.lang;
+    status.textContent = text.loading;
+    hint.textContent = text.hint;
+    retry.textContent = text.retry;
+    progress.setAttribute('aria-label', text.progress);
+    const total = Number(progress.max);
+    let failed = false, finished = false, mainLoaded = false;
+    const observer = new MutationObserver(maybeFinish);
+    observer.observe(app, { childList: true });
+    const slowTimer = root.setTimeout(() => {
+        if (finished || failed) return;
+        hint.textContent = text.slow;
+        retry.hidden = false;
+    }, 15000);
+    retry.onclick = () => root.location.reload();
+    function update() {
+        progress.value = completed.size;
+        count.textContent = completed.size + ' / ' + total;
+        progress.setAttribute('aria-valuetext', completed.size + ' / ' + total + ' ' + text.steps);
+    }
+    function fail() {
+        if (finished || failed) return;
+        failed = true;
+        root.clearTimeout(slowTimer);
+        status.textContent = text.failed;
+        hint.textContent = text.failureHint;
+        retry.hidden = false;
+        screen.dataset.state = 'error';
+    }
+    function maybeFinish() {
+        // The real application controls its own data recovery before mounting.
+        // Never uncover an unstyled app or wait for optional images/web fonts.
+        if (finished || failed || !mainLoaded || !app.firstElementChild) return;
+        const styles = Array.from(document.querySelectorAll('link[data-focus-asset]'));
+        if (!styles.every(link => completed.has(link))) return;
+        completed.add(app);
+        update();
+        finished = true;
+        observer.disconnect();
+        root.clearTimeout(slowTimer);
+        document.documentElement.classList.remove('focus-starting', 'focus-startup-dark');
+        app.removeAttribute('aria-busy');
+        screen.remove();
+        root.dispatchEvent(new Event('focus-startup-ready'));
+    }
+    root.FocusStartup = {
+        loaded(element) {
+            if (finished || failed) return;
+            completed.add(element);
+            if (element.dataset.focusAsset === 'app') {
+                mainLoaded = true;
+                status.textContent = text.opening;
+                if (root.FocusLocalReady) root.FocusLocalReady.catch(fail);
+            }
+            update();
+            maybeFinish();
+        },
+        failed: fail
+    };
+    // Capture resource failures and initialization exceptions before the legacy
+    // handlers are installed; a failed load must retain a usable retry action.
+    root.addEventListener('error', event => {
+        if (event.error || event.target?.hasAttribute?.('data-focus-asset')) fail();
+    }, true);
+    root.addEventListener('unhandledrejection', fail);
+    update();
+})(window);
+</script>
+  <link href="main.css?v=7.1.1-local.1.4.1" rel="stylesheet" media="print" data-focus-asset="style" onload="this.media='all';FocusStartup.loaded(this)">
+  <link href="local-ui.css?v=7.1.1-local.1.4.1" rel="stylesheet" media="print" data-focus-asset="style" onload="this.media='all';FocusStartup.loaded(this)">
+  <script defer src="js/local-i18n-catalog.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-i18n.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-release.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-timer-core.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-data.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-timer-ui.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-app-ui.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-backup.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-theme-storage.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-settings-ui.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/local-network.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="patch.js?v=7.1.1-local.1.4.1" data-focus-asset="script" onload="FocusStartup.loaded(this)"></script>
+  <script defer src="js/main.js?v=7.1.1-local.1.4.1" data-focus-asset="app" onload="FocusStartup.loaded(this)"></script>
 </body>
 </html>

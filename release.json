@@ -1,10 +1,29 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.4.0",
+  "localVersion": "1.4.1",
   "author": "Lexible",
-  "date": "2026-10-25",
+  "date": "2026-10-26",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.4.1",
+      "date": "2026-10-26",
+      "title": "渐进启动、语言字体与兼容模块整理",
+      "items": [
+        "先显示轻量启动界面和真实加载进度，页面就绪后立即进入，图片和字体继续加载。",
+        "中英文启动直接使用已有词库，其他语言异步加载，慢加载或失败时可重试。",
+        "中文使用附带字体并在加载后自动应用；英文优先系统西文字体，番茄钟沿用官方字体。",
+        "按功能整合本地数据、备份、设置和主题服务，移除无效轮询和调试入口，保留资料修改与恢复行为。"
+      ],
+      "titleEn": "Progressive startup, language fonts and local compatibility",
+      "itemsEn": [
+        "See a lightweight first screen and real loading progress, then enter the workspace while images and fonts finish loading.",
+        "Start Chinese and English from the existing catalog, load other languages asynchronously, and retry slow or failed loads.",
+        "Apply bundled Chinese fonts once loaded, prefer western system fonts in English, and retain the official timer fonts.",
+        "Consolidate local data, backup, settings and theme services, remove unused polling and debugging, and preserve profile edits and recovery."
+      ],
+      "report": "docs/UPDATE-7.1.1-local.1.4.1.md"
+    },
     {
       "version": "7.1.1-local.1.4.0",
       "date": "2026-10-25",

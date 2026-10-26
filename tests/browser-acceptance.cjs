@@ -103,6 +103,20 @@ const server = http.createServer((request, response) => {
         return { started, release };
     }
     try {
+        await check('compatibility modules install once and retain isolated storage boundaries', () => app(async page => {
+            const result = await page.evaluate(async () => {
+                const before = { set: Storage.prototype.setItem, remove: Storage.prototype.removeItem, xhr: XMLHttpRequest, fetch, ready: FocusLocalReady, themes: FocusThemes };
+                const identity = FocusLocalData.installIdentity();
+                FocusLocalNetwork.install(identity); FocusLocalBackup.installUI();
+                FocusSettings.installCompatibility(identity); FocusThemeStorage.installUI(identity);
+                const same = before.set === Storage.prototype.setItem && before.remove === Storage.prototype.removeItem && before.xhr === XMLHttpRequest && before.fetch === fetch && before.ready === FocusLocalReady && before.themes === FocusThemes;
+                const name = localStorage.getItem('cookie.NAME');
+                localStorage.removeItem('cookie.NAME'); localStorage.setItem('cookie.NAME', '');
+                sessionStorage.setItem('cookie.NAME', 'temporary'); sessionStorage.removeItem('cookie.NAME');
+                return { same, namePreserved: name === localStorage.getItem('cookie.NAME'), sessionRemoved: sessionStorage.getItem('cookie.NAME') === null, jquery: typeof window.jQuery, debug: typeof window.testSetUsername };
+            });
+            assert.deepEqual(result, { same: true, namePreserved: true, sessionRemoved: true, jquery: 'undefined', debug: 'undefined' });
+        }));
         await check('language settings switch to complete English and notifications are opt-in', () => app(async page => {
             await page.mouse.click(1255,25); await page.getByText('通用',{exact:true}).click();
             assert.deepEqual(await page.locator('#focus-language option').evaluateAll(nodes=>nodes.map(x=>x.value)),['auto','zh-CN','en']);
@@ -582,7 +596,17 @@ const server = http.createServer((request, response) => {
             await page.waitForFunction(() => window.__acceptanceTimer && !document.getElementById('focus-reset-dialog'));
             await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 0);
             const after = await snapshot(page);
-            assert.equal(after.indexedDB.Pomodoro.length, 0); assert.equal(after.indexedDB.TimerSession.length, 0);
+            assert.equal(after.indexedDB.Pomodoro.length, 0);
+            // The restarted adapter may already have persisted its empty idle
+            // session. Assert reset semantics instead of racing that write.
+            assert(after.indexedDB.TimerSession.length <= 1);
+            for (const session of after.indexedDB.TimerSession) {
+                assert.equal(session.state, 'initial');
+                assert.equal(session.taskId, ''); assert.equal(session.subtaskId, '');
+                assert.equal(session.totalSeconds, 0); assert.equal(session.recordedSeconds, 0);
+                assert.equal(session.phaseElapsed, 0); assert.deepEqual(session.spans, []);
+                assert.equal(session.pendingRecovery, null);
+            }
             assert.equal(after.indexedDB.Project.length, 15);
             assert(after.indexedDB.Project.some(p => p.id === 'id-deadline-today' && p.state === 0));
             assert(after.indexedDB.Project.some(p => p.id === 'id-task-tasks' && p.state === 0));

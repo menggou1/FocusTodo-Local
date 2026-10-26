@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current application: `7.1.1-local.1.4.0`, author Lexible. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current application: `7.1.1-local.1.4.1`, author Lexible. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -14,6 +14,7 @@ Run `npm ci` to install locked development dependencies. Node.js 22+ is required
 
 | File | Responsibility |
 |---|---|
+| `startup.css` / `js/local-startup.js` | First-screen sources inlined into HTML by `build:release`; independent of external styles/fonts. Progress follows real resource completion and app mounting. Reveal after required styles/data recovery, without waiting for optional images/fonts |
 | `js/local-timer-core.js` | Pure timer transitions, historical spans and completion events; no DOM or database access |
 | `js/local-data.js` | `PomodoroDB6` v3, transaction persistence, import/reset journals and complete snapshots |
 | `js/local-timer-ui.js` | Legacy timer adapter, recovery confirmation, subscriptions, audio and completion notifications |
@@ -25,7 +26,8 @@ Run `npm ci` to install locked development dependencies. Node.js 22+ is required
 | `js/local-i18n-catalog.js` | Generated complete fallback catalog; do not edit directly |
 | `js/local-settings-ui.js` | General language controls and explicit notification permission/test controls |
 | `release.json` | Human-edited version, author, dates and Chinese/English release notes |
-| `patch.js` | Local compatibility, network restrictions, backup controls and themes |
+| `patch.js` | Ordered, idempotent installation of identity, network, backup UI, settings and themes through their owning feature services |
+| `local-network.js` | Same-origin/Bing policy and reachable legacy account XHR behavior; preserve real profile edits |
 | `js/main.js` | Modified legacy bundle; it cannot be discarded and fully rebuilt from an upstream bundle |
 
 Change legacy integration through the checked AST scripts, then retain both script and bundle changes:
@@ -39,6 +41,9 @@ node scripts/revise-pomodoro-rendering.cjs
 The shared bundle editor checks the known 1,484-module structure, unique boundaries, overlapping edits and final syntax. Inspect a failed boundary instead of bypassing it. Historical `upgrade-*.cjs` scripts are not a complete rebuild pipeline.
 
 `scripts/localize-local-modules.cjs` migrated static local messages to the translation service; it does not translate task names, notes or uploaded filenames. Add new local English messages to `i18n/local-en.json`. Release titles and items also require `titleEn` and `itemsEn`. `npm run build:release` regenerates the catalog, release module, package versions, title and cache tags. Keep Chinese and English current documents aligned; the English historical reports may summarize the original technical history.
+
+
+Module ownership follows features. Reuse the existing data, backup, settings and theme APIs before adding another compatibility file; reducing line count alone does not complete a refactor.
 
 ## Data rules
 
@@ -106,3 +111,7 @@ To redeploy, run **Deploy GitHub Pages** on main in Actions. The build script no
 ## Provenance
 
 `upstream/7.1.1` preserves original commit `fe15a1d9201c6298f1c28c16dcb0b58c481f9999` and its original history. Keep the author and LICENSE. Main keeps the local product; the official Pages workflow publishes a filtered artifact. The repository left the fork network in October 2026; the upstream archive remains independent of that relationship. Do not modify or merge the archive into current development.
+
+## Startup feedback and performance sampling
+
+After editing `startup.css` or `js/local-startup.js`, run `npm run build:release` to regenerate the inlined first screen. `node tests/startup-acceptance.cjs` runs the fourteen startup/font cases; the full `npm run test:browser` includes them. For an optional cold-start comparison, run `node tests/startup-performance.cjs <verified baseline commit>`. It uses isolated data and the project subpath, 150 ms synthetic latency and 200 KiB/s download throughput, aborting optional images/fonts equally. The JSON evidence is not a live Pages speed guarantee or a CI timing threshold.

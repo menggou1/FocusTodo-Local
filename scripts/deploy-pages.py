@@ -43,7 +43,8 @@ def build(ref='main', output=Path('dist/pages')):
         names.append(name.decode('utf-8'))
     for required in ('index.html', 'js/main.js', 'js/local-release.js', 'js/local-data.js',
                      'js/local-timer-core.js', 'js/local-timer-ui.js', 'js/local-app-ui.js', 'js/local-backup.js', 'js/local-theme-storage.js',
-                     'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js'):
+                     'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js',
+                     'js/local-network.js'):
         if required not in names:
             raise ValueError('Missing runtime asset: ' + required)
     manifest = (json.dumps({'version': version, 'sourceCommit': source, 'sourceRef': ref},

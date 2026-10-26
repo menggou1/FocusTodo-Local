@@ -11,7 +11,7 @@
     border:1px solid var(--border);
     border-radius:10px;
     box-shadow:0 6px 30px #0002;
-    font:14px/1.6 sans-serif
+    font:14px/1.6 var(--focus-ui-font)
 }
 
 .focus-local-notice button {
@@ -45,7 +45,7 @@
     border-radius:16px;
     padding:28px;
     box-shadow:0 20px 80px #0004;
-    font:15px/1.7 sans-serif
+    font:15px/1.7 var(--focus-ui-font)
 }
 
 .focus-recovery-card h2 {
@@ -254,7 +254,7 @@
     color:var(--text-title);
     padding:26px;
     box-shadow:0 20px 80px #0004;
-    font:15px/1.75 sans-serif
+    font:15px/1.75 var(--focus-ui-font)
 }
 
 .focus-app-dialog h2 {
@@ -299,7 +299,7 @@
     padding:9px 16px;
     cursor:pointer;
     color:var(--text-title);
-    font:14px/1.5 sans-serif
+    font:14px/1.5 var(--focus-ui-font)
 }
 
 .focus-app-actions button.focus-app-danger {

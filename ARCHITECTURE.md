@@ -6,11 +6,13 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 当前本地版排除小组、在线排名和旧森林入口，也停用隐藏森林的后台奖励初始化。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
 
-当前应用版本 `7.1.1-local.1.4.0`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
+当前应用版本 `7.1.1-local.1.4.1`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
 ## 当前计时与数据边界
+
+首屏由 `startup.css` / `js/local-startup.js` 经版本生成器内联到 HTML，先于外部应用资源显示骨架与真实步骤进度。样式异步下载，脚本使用 `defer` 并行下载、按原顺序执行；真实应用和必要样式就绪后展示，不等待图片和字体。中英文复用同步词库，其他系统语言使用异步旧解析器；数据与主题恢复的先后边界保持不变。
 
 - `local-timer-core.js`：纯状态转换和实际时间片段结算；不足 25 秒的待结算专注不写入历史，短暂停保留有效区间供继续累计；停止/模式切换/解除任务会清零会话显示，历史记录独立保留。完成事件与部分记录分开表达。
 - `local-data.js`：数据库 v3 升级、计时事务、完整备份、导入恢复日志；记录和会话在同一事务提交。重置事务恢复默认系统清单；启动补回缺失系统清单并保留已有清单设置。跨标签页广播已提交记录以刷新各页统计。
@@ -19,10 +21,10 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 - `local-release.js`：从 `release.json` 和 Git remote 生成版本及更新元信息。
 - `local-backup.js`：紧凑 JSON/Gzip 编码、内容识别、128 MB 解压边界、备份范围和体积分析；业务表和计时快照校验仍由数据层负责。主题图片仍保留 data URL，不引入数据库升级。
 - `local-app-ui.js`：通知更新详情、关于页版本与 GitHub 图标、无需密码的 5 秒删除确认。
-- `local-theme-storage.js`：协调主题 JSON、激活 ID 和 Theme 三键，用不含图片副本的小日志恢复对应元信息。`patch.js` 在导入日志恢复后完成主题恢复，再启动主题服务；内部日志不进入备份。
+- `local-theme-storage.js`：协调主题 JSON、激活 ID 和 Theme 三键，用不含图片副本的小日志恢复对应元信息。主题模块在导入日志恢复后完成主题恢复，再启动主题界面；内部日志不进入备份。
 - `local-i18n.js` / `local-settings-ui.js`：同步决定界面语言，提供原界面和本地补丁的回退；通用设置只显式提供完整中文/英语，其他既有翻译由系统选择，缺项不显示键名。用户数据不经过 DOM 翻译。
 - 用户更新与维护报告分开：详情只显示标题、日期、版本、作者和简短条目，不展示 Markdown 按钮；报告在仓库 docs 中提供，`release.json` 的 report 字段仅供维护和一致性检查。
-- 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-timer-ui.js` → `local-app-ui.js` → `local-backup.js` → `local-theme-storage.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志与主题恢复。
+- 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-timer-ui.js` → `local-app-ui.js` → `local-backup.js` → `local-theme-storage.js` → `local-settings-ui.js` → `local-network.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志与主题恢复。
 - `scripts/revise-timer-integration.cjs` 只更新明确的计时接入边界，可重复执行；旧 `upgrade-*.cjs` 仍是一次性改造记录，不能当作最终版本完整构建脚本。
 - `scripts/revise-app-integration.cjs` 维护关于、通知、删除及项目刷新保护；与计时脚本共用 `scripts/lib/bundle-editor.cjs` 的检查和写入流程。
 - 本地账号读取统一使用 localStorage，避免旧浏览器 Cookie 覆盖重置/导入后的用户名。`local-ui.css` 使用原应用主题变量，使通知、独立弹窗及导入/导出按钮跟随外观切换。
@@ -78,33 +80,15 @@ FocusTodo/
 
 ## 加载时序
 
-当前实际顺序如下。`patch.js` 仍保留旧网络和用户操作兼容拦截，但界面删除不再进入旧密码/用户名接口。
+HTML 内联首屏先显示；应用样式异步加载，以下脚本并行下载并按顺序执行。
 
+```text
+local-i18n-catalog → local-i18n → local-release → local-timer-core
+  → local-data → local-timer-ui → local-app-ui → local-backup
+  → local-theme-storage → local-settings-ui → local-network → patch → main
 ```
-浏览器请求 index.html
-  │
-  ├─ 1. 加载 local-release/core/data/timer-ui/app-ui
-  │     └─ 注册版本、计时、持久化和独立界面服务
-  │
-  ├─ 2. 加载 patch.js（在旧主应用前执行）
-  │     ├─ 设置 local@local 伪造登录凭证
-  │     ├─ 拦截 localStorage 保护关键 key
-  │     ├─ 阻断 XMLHttpRequest / fetch / jQuery.ajax
-  │     ├─ 注册导出/导入功能
-  │     │     └─ v63/user 兼容拦截；不作为当前界面删除入口
-  │     ├─ 隐藏"功能开关"设置项
-  │     ├─ 禁用评分弹窗
-  │     ├─ 自定义主题管理器（Bing每日壁纸 + 本地上传）
-  │     └─ 调试工具：手动修改用户名
-  │
-  ├─ 3. 加载 js/main.js（React 应用启动）
-  │     ├─ 初始化 IndexedDB (PomodoroDB6)
-  │     ├─ 读取 localStorage 恢复用户状态
-  │     ├─ ReactDOM.render(<Provider store={store}><App /></Provider>)
-  │     └─ 渲染主界面，关于/通知/删除在明确边界调用 local-app-ui
-  │
-  └─ main.css/local-ui.css 并行加载，应用样式
-```
+
+`patch.js` 按数据身份/存储、网络、备份界面、设置兼容和主题依次安装。身份复用数据服务原生写入能力；导入日志恢复后才恢复主题设置；主应用等待同一 `FocusLocalReady`。当前界面删除直接调用本地 reset，用户名修改仍经过已验证的旧 XHR 调用。应用与必要样式就绪后展示，图片和字体继续加载。
 
 ## 数据存储
 
@@ -210,31 +194,20 @@ App
 └── ForestView (专注森林)
 ```
 
-## patch.js 补丁系统
+## 本地功能模块
 
-`patch.js` 在 `main.js` 之前加载，通过以下机制修改应用行为：
+入口 `patch.js` 只组织安装顺序，逻辑按所属功能维护。
 
-### 注入方式
-- **DOM 操作**: 通过 `MutationObserver` 监测 DOM 变化，在合适的时机插入/替换元素
-- **API 拦截**: 重写 `XMLHttpRequest`, `fetch`, `jQuery.ajax` 限制请求，精确主机名白名单允许 Bing 壁纸来源，CSP 约束直接资源请求
-- **localStorage 代理**: 保护关键 cookie key 不被删除
+| 模块 | 当前职责 |
+|---|---|
+| `local-data.js` | 数据、备份快照、重置/恢复、原生存储能力及本地身份保护 |
+| `local-network.js` | XHR/fetch 策略、精确 Bing 白名单和现存账号操作兼容 |
+| `local-backup.js` | 编码/解码/下载与导入导出界面，统一 `installUI` 入口 |
+| `local-settings-ui.js` | 语言/通知设置、旧偏好和隐藏功能分类的兼容安装 |
+| `local-theme-storage.js` | 主题写入/恢复日志与主题界面，恢复在导入之后 |
+| `main.css` / `local-ui.css` | 按语言统一界面字体；附带字体加载后应用；计时数字保留官方规则 |
 
-### 当前补丁列表
-
-| 节 | 功能 | 说明 |
-|----|------|------|
-| 原 0 | 关于页信息 | DOM 注入已移除；改由 local-app-ui 在 React 边界渲染，版本来自 release.json |
-| 1 | 字体统一 | Noto Sans SC 全局字体，抵御 JS 内联样式覆盖 |
-| 2 | 本地登录凭证 | 伪造 `local@local` 用户，自动修复乱码 |
-| 3 | 数据保护 | 防止 ExpiredDate 和 cookies 被清除，定期检查并恢复 |
-| 4 | 网络阻断 | XMLHttpRequest + fetch 拦截，白名单放行 Bing 壁纸 |
-| 5 | jQuery 阻断 + 用户操作 | jQuery.ajax 拦截；v63/user 保留旧兼容路径，当前删除 UI 直接调用本地 reset |
-| 6 | 数据导出/导入 | 完整数据迁移 (IndexedDB + localStorage)，自动备份，导入前确认 |
-| 原 7 | 删除提示美化 | 密码提示轮询已移除；改由 local-app-ui 展示 5 秒冷却及备份提示，无密码 |
-| 8 | 禁用评分弹窗 | 使用偏好开关 HasRated=true、ShowRateDialog=false，不再高频遍历 React 内部树 |
-| 9 | 隐藏功能开关 | 隐藏"通用设置"中的"功能开关"分类标题和分隔线 |
-| 10 | 自定义主题管理器 | Bing每日壁纸（12小时自动刷新）+ 本地上传图片，缩略图预览，删除功能 |
-| 11 | 调试工具 | window.testSetUsername(name) 手动测试用户名修改 |
+上述安装入口可重复调用，避免重复包装存储和网络 API、重复恢复主题。没有全局 jQuery 轮询或手动修改用户名的调试入口。
 
 ## 国际化 (i18n)
 

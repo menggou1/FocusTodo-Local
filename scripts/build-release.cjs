@@ -34,5 +34,15 @@ if (fs.existsSync(lockPath)) {
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 html = html.replace(/<title>[^<]*<\/title>/, '<title>专注清单 · ' + version + ' · ' + config.author + '</title>');
 html = html.replace(/\?v=[^"\s]+/g, '?v=' + version);
+// Keep the first paint independent of external CSS/JS without hand-maintaining
+// duplicate loader code. Inline only our checked, repository-owned sources.
+const startupCode = fs.readFileSync(path.join(root, 'js/local-startup.js'), 'utf8');
+const startupStyle = fs.readFileSync(path.join(root, 'startup.css'), 'utf8');
+if (/<\/script/i.test(startupCode) || /<\/style/i.test(startupStyle)) throw new Error('Unsafe startup inline boundary.');
+html = html.replace(/(<style id="focus-startup-style">)[\s\S]*?(<\/style>)/, (_, start, end) => start + '\n' + startupStyle + end);
+html = html.replace(/(<script id="focus-startup-code">)[\s\S]*?(<\/script>)/, (_, start, end) => start + '\n' + startupCode + end);
+const startupSteps = [...html.matchAll(/data-focus-asset="/g)].length + 1;
+html = html.replace(/(id="focus-startup-progress" max=")\d+/, '$1' + startupSteps);
+html = html.replace(/(id="focus-startup-count"[^>]*>)0 \/ \d+/, (_, start) => start + '0 / ' + startupSteps);
 fs.writeFileSync(path.join(root, 'index.html'), html);
 console.log('Generated ' + version + ' from ' + config.repositoryRemote + ': ' + url.href);

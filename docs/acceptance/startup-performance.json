@@ -1,0 +1,24 @@
+{
+  "version": "7.1.1-local.1.4.1",
+  "baselineCommit": "89274a163ecd8f292b6bcb7a712812cd31fef35e",
+  "network": {
+    "latencyMs": 150,
+    "downloadBytesPerSecond": 204800,
+    "uploadBytesPerSecond": 102400
+  },
+  "method": "One cold isolated Edge/Chromium run per revision, HTTP cache disabled, generated empty database, loopback project subpath. Optional images and fonts aborted equally. Baseline uses committed copies of the changed existing runtime files; unchanged runtime assets are shared. Synthetic network results are not a live GitHub Pages speed guarantee.",
+  "results": [
+    {
+      "mode": "baseline",
+      "firstContentfulPaintMs": 17828,
+      "workspaceVisibleMs": 17759,
+      "pageErrors": []
+    },
+    {
+      "mode": "current",
+      "firstContentfulPaintMs": 332,
+      "workspaceVisibleMs": 15154,
+      "pageErrors": []
+    }
+  ]
+}

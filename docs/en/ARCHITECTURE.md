@@ -6,11 +6,15 @@ FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local mo
 
 ## Startup and module flow
 
+The version generator inlines `startup.css` and `js/local-startup.js` into HTML so the skeleton and real step progress can appear before external assets. Styles load asynchronously; deferred scripts download in parallel and execute in the preserved order. Reveal the workspace when the application and required styles are ready, without waiting for optional images/fonts. Chinese and English reuse the generated catalog; other locales retain the legacy parser with asynchronous requests. Database and theme recovery still precede mounting.
+
 ```text
 local-i18n-catalog -> local-i18n -> local-release -> local-timer-core
     -> local-data -> local-timer-ui -> local-app-ui -> local-backup
-    -> local-theme-storage -> patch -> local-settings-ui -> legacy main
+    -> local-theme-storage -> local-settings-ui -> local-network -> patch -> legacy main
 ```
+
+Feature ownership is explicit: identity/raw-storage policy belongs to data, backup UI to backup, legacy preferences to settings, and theme UI to theme storage/recovery. Network has its own policy module. The bootstrap installs these idempotent APIs in the original order; it contains no feature implementations.
 
 The legacy entry waits for `FocusLocalReady`. This restores import/reset journals, then theme settings, before application data is used. Language selection is resolved synchronously before the legacy translation loader. The legacy formatter is retained; missing messages are supplied by the fallback catalog.
 

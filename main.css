@@ -21,6 +21,12 @@
     font-display: swap;
 }
 
+:root { --focus-ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Helvetica,Arial,sans-serif; }
+html:lang(zh) { --focus-ui-font:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif; }
+html:lang(ja) { --focus-ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic","Meiryo",sans-serif; }
+html:lang(ko) { --focus-ui-font:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+body, #root, #modal-root { font-family:var(--focus-ui-font) !important; }
+
 .App-root-3lUsX {
     height: 100%;
     width: 100%;
@@ -3556,7 +3562,7 @@
 .Subscription-forever-2A4cx .Subscription-price-2j29y,
 .Subscription-quarterly-3w4zc .Subscription-price-2j29y {
     font-size: 22px;
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     margin-bottom: 4px;
     display: inline-flex;
     align-items: baseline;
@@ -3594,7 +3600,7 @@
     text-decoration: line-through;
     font-size: 18px;
     /*font-family: Helvetica,Tahoma,Arial,'Microsoft YaHei','微软雅黑',SimSun,Heiti,'黑体',sans-serif,STXihei,'华文细黑';*/
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
 }
 .GeneralSettings-root-3_s9q {
     height: 100%;
@@ -3938,7 +3944,7 @@
     margin-left: 12px;
     min-width: 20px;
     text-align: center;
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
 }
 
 .RankingList-userRow-1jx3a .RankingList-userInfo-2ke5g {
@@ -3965,7 +3971,7 @@
 .RankingList-userRow-1jx3a .RankingList-pomodoroTime-TN_nv {
     font-size: 16px;
     color: var(--theme-red);
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     margin-right: 14px;
 }
 
@@ -3998,7 +4004,7 @@
 
 .RankingList-rankValue-1IVp8 {
     /*margin: 3px 0;*/
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     font-size: 16px;
     /*margin-right: 16px;*/
     margin-top: -4px;
@@ -4007,7 +4013,7 @@
 
 .RankingList-focusTimeValue-1jxD8 {
     /*margin: 3px 0;*/
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     margin-right: 16px;
     font-size: 16px;
 }
@@ -4162,13 +4168,13 @@
 .RankingList-levelLine-zcpgI {
     line-height: 1;
     font-size: 14px;
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
 }
 
 .RankingList-expLine-1e0Q1 {
     font-size: 12px;
     line-height: 1;
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     margin-top: 2px;
 }
 
@@ -4187,7 +4193,7 @@
     font-size: 14px;
 
     /*margin-left: 4px;*/
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     margin-top: 3px;
 }
 
@@ -4264,7 +4270,7 @@
 .ForestSection-levelText-TVL8D {
     font-size: 16px;
     /*font-weight: bold;*/
-    font-family: DINCond-Black, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond-Black;
     /*font-weight: 2000;*/
     color: var(--text-forest-green);
     margin-left: 2px;
@@ -4299,7 +4305,7 @@
     font-size: 14px;
     /*font-weight: bold;*/
     color: var(--text-forest-badge);
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     /*margin-top: 5px;*/
     margin-right: 2px;
     padding-top: 5px;
@@ -4341,7 +4347,7 @@
             transform: translate(-50%, -50%);
     font-size: 10px;
     color: var(--text-forest-badge);
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     z-index: 2;
     white-space: nowrap;
 }
@@ -5318,7 +5324,7 @@
     /*margin-left: 12px;*/
     /*min-width: 20px;*/
     /*text-align: center;*/
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
 }
 
 .GroupDetail-rankIcon-1r6az {
@@ -5405,7 +5411,7 @@
 
 .GroupDetail-timeValue-1Owx5 {
     font-size: 14px;
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     color: var(--theme-red);
 }
 
@@ -5458,7 +5464,7 @@
 .GroupDetail-memberFocusTime-26Gmp {
     font-size: 12px;
     color: var(--theme-red);
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
 }
 
 /* 留言列表样式 */
@@ -8043,7 +8049,7 @@
 }
 
 .StatisticsRegion-number-Ausvu{
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     font-size: 30px;
     color: var(--theme-red);
     margin-left: 4px;
@@ -10639,7 +10645,7 @@
     overflow: hidden;
     background-color: #202020;
     color: #bababa;
-    font-family: DINCond-Black, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond-Black,DINCond,'Helvetica Neue', sans-serif, Helvetica, Tahoma, Arial, 'Microsoft YaHei', '\5FAE\8F6F\96C5\9ED1', SimSun, Heiti, '\9ED1\4F53', STXihei, '\534E\6587\7EC6\9ED1','Helvetica Neue',sans-serif,Helvetica,Tahoma,Arial,'Microsoft YaHei','\5FAE\8F6F\96C5\9ED1',SimSun,Heiti,'\9ED1\4F53',STXihei,'\534E\6587\7EC6\9ED1';
     /*font-family: DINCond;*/
     font-weight: 500;
 }
@@ -10955,7 +10961,7 @@
 }
 
 .TodaySpentTime-number-2m5Y6{
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     color: var(--theme-red);
     font-size: 30px;
 }
@@ -11315,7 +11321,7 @@
 }
 
 .ProjectChart-number-3d7-j{
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     color: var(--theme-red);
     font-size: 30px;
 }
@@ -11574,7 +11580,7 @@
 }
 
 .Summary-number-Iqn2I{
-    font-family: DINCond, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    font-family: DINCond;
     color: var(--theme-red);
     font-size: 30px;
 }

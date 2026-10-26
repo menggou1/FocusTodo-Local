@@ -27,6 +27,8 @@ Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). 
 
 Pages deploys automatically from `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
 
+Version `1.4.1` adds an immediate first screen, real progress and retry. Chinese swaps to bundled fonts when ready; English prefers western system fonts, and the timer keeps official typography. See the [implementation and verification report](docs/en/UPDATE-7.1.1-local.1.4.1.md).
+
 Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
 
 All systems: `node scripts/start.cjs` or `npm start`. The default browser opens after the server starts. Use `node scripts/start.cjs --no-browser --port 5511` for headless use or a different port; with npm, use `npm start -- --no-browser --port 5511`.
@@ -109,7 +111,7 @@ The application guide, maintenance, architecture, backlog and release documentat
 | Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.4.0`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.4.1`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 Version 1.2.1 fixed a cross-tab initialization race exposed by intermittent macOS acceptance failures. The [English backlog](docs/en/BACKLOG.md) mirrors the canonical open-work list with the same item IDs.
 

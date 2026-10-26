@@ -2,7 +2,7 @@
 
 [返回首页](../README.md) · [更新记录与版本报告](../CHANGELOG.md) · [架构说明](../ARCHITECTURE.md)
 
-本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.4.0`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
+本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.4.1`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
 
 ## 1. 开始修改前
 
@@ -42,6 +42,7 @@ npm run test:browser
 
 | 文件/边界 | 维护规则 |
 |---|---|
+| `startup.css` / `js/local-startup.js` | 首屏源文件，经 `build:release` 内联到 HTML；独立于外部样式/字体。步骤进度只统计真实资源完成和应用挂载，必要样式与数据恢复就绪后展示，不等待可选资源 |
 | `local-timer-core.js` | 保持纯状态转换；区分完整番茄、部分片段、正常完成事件与恢复补记，不依赖 React/DOM |
 | `local-data.js` | 数据库仍为 `PomodoroDB6` v3；记录和游标同事务提交；导入/删除保留完整备份与设置日志；数据库版本变更须设计迁移 |
 | `local-timer-ui.js` | 调用数据服务后更新旧界面；处理任务/子任务清除、订阅释放、跨页刷新、提示与音频 |
@@ -50,7 +51,8 @@ npm run test:browser
 | `local-theme-storage.js` | 单次主题设置提交与恢复日志；内部日志不复制图片、不写入备份，初始化必须等待数据库导入日志恢复 |
 | `local-i18n.js` / `local-settings-ui.js` | 语言解析、回退、通用设置中的语言与通知授权；不翻译用户任务/备注。显式选项只包含完整适配语言 |
 | `release.json` | 唯一人工编辑的发布元信息；`report` 字段保留供仓库维护和一致性检查，不作为 UI 入口 |
-| `patch.js` | 仍有网络、凭证、主题和 DOM 兼容层；抽离前检查初始化顺序，不全局转换变量或删未知调用分支 |
+| `patch.js` | 按原边界安装数据身份、网络、备份界面、设置兼容与主题；逻辑按功能归入已有模块，重复安装无副作用 |
+| `local-network.js` | 同源/精确 Bing 白名单与实际旧账号 XHR 兼容；资料修改的调用路径必须保留验证 |
 | `js/main.js` | 已修改的压缩旧包，非可丢弃构建产物；不要替换成原版后假定脚本能重建所有修改 |
 
 只修改独立本地模块时通常不需要编辑旧包。需要改变旧组件接入时，修改对应脚本后在仓库根目录运行：
@@ -65,13 +67,16 @@ node scripts/revise-pomodoro-rendering.cjs
 
 `upgrade-local.cjs`、`upgrade-patch.cjs` 是历史一次性记录，不是最终构建链。没有完整组件源码、依赖清单及原打包配置的恢复流程。
 
+
+模块按功能归属维护。新增或整理兼容逻辑时，先复用现有数据、备份、设置与主题服务；只拆文件、缩短行数不构成完成依据。
+
 ## 4. 版本与发布
 
 官方基础版本固定为 **7.1.1**，作者为 **Lexible**。完整版本格式为 `7.1.1-local.<主版本>.<功能版本>.<修复版本>`，Git Tag 只使用本地三段数字：
 
 | 情况 | 完整版本示例 | Tag |
 |---|---|---|
-| 当前发布 | `7.1.1-local.1.4.0` | `1.4.0` |
+| 当前 main / Pages | `7.1.1-local.1.4.1` | — |
 | 兼容修复 | `7.1.1-local.1.2.3` | `1.2.3` |
 | 兼容功能 | `7.1.1-local.1.3.0` | `1.3.0` |
 | 本地不兼容改变 | `7.1.1-local.2.0.0` | `2.0.0`，另附迁移和回退方案 |
@@ -100,7 +105,7 @@ git diff --stat
 git status --short
 ```
 
-当前全量包含计时核心、服务、发布信息、启动器、备份编码，56 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
+当前全量包含计时核心、服务、发布信息、启动器、备份编码，14 项启动/字体用例、57 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 
@@ -133,6 +138,12 @@ git push Focustodo-local refs/tags/1.2.3
 可清理重复、失败和取消的 Actions 运行记录，保留成功发布验收与最新 Pages 部署。删除运行记录会移除其日志/Artifact，先在版本报告保留失败原因；清理记录不等于修复缺陷。发布失败应检查日志，修复后用新版本，或在尚未创建 Release 时重跑失败任务。
 
 提交前检查生成文件、文档链接、已读状态和截图，确认没有用户备份、真实数据库、账号凭证或临时输出。选择相关文件提交，推送前核对 remote 和远程分支；远端新增提交时先处理分歧，不强推覆盖。
+
+### 启动反馈与性能取样
+
+修改 `startup.css` 或 `js/local-startup.js` 后运行 `npm run build:release`，将首屏源文件内联到 HTML；不要直接维护两份启动代码。`node tests/startup-acceptance.cjs` 可独立运行启动用例；`npm run test:browser` 包含它们。
+
+按需运行 `node tests/startup-performance.cjs <已确认的基线提交>`，在隔离数据库和项目子路径下比较一次冷启动。模拟条件为 150 ms 延迟、200 KiB/s 下载，双方同样拦截可选字体和图片；结果写入 `docs/acceptance/startup-performance.json`，不代表线上速度承诺，也不作为每次 CI 的波动阈值。
 
 ### GitHub Pages 官方工作流
 

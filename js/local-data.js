@@ -499,7 +499,115 @@
             root.dispatchEvent(new Event('focus-local-maintenance')); notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'):'数据已在另一个标签页更新，请刷新本页。'));
         } else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
-    root.FocusLocalData = { DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
+    let localIdentity = null;
+    function installIdentity() {
+        if (localIdentity) return localIdentity;
+
+        localStorage.setItem('ExpiredDate', '0');
+
+        // ========== 2. 设置本地用户登录凭证 ==========
+        // 注意：应用使用 Base64.decode() 读取 ACCT 和 NAME
+        // 所以需要存入 Base64 编码后的值
+        var localAccount = 'local@local';
+        var localName = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('\u672c\u5730\u7528\u6237'):'\u672c\u5730\u7528\u6237'); // "本地用户"
+
+        // UTF-8 Base64 编码辅助函数
+        function utf8Base64Encode(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+                function(match, p1) { return String.fromCharCode('0x' + p1); }
+            ));
+        }
+
+        var localCookies = {
+            'cookie.ACCT': utf8Base64Encode(localAccount),
+            'cookie.NAME': utf8Base64Encode(localName),
+            'cookie.PID': 'local-' + Math.random().toString(36).substr(2, 9),
+            'cookie.UID': 'local-' + Math.random().toString(36).substr(2, 9),
+            'cookie.JSESSIONID': Math.random().toString(36).substr(2, 16)
+        };
+
+        // 仅在 cookie 不存在时设置，避免覆盖已有数据
+        for (var ck in localCookies) {
+            if (localCookies.hasOwnProperty(ck) && !localStorage.getItem(ck)) {
+                localStorage.setItem(ck, localCookies[ck]);
+            }
+        }
+
+        // ========== 3. 保护关键数据不被清除 ==========
+        var _origSetItem = rawSet;
+        var _origRemoveItem = rawRemove;
+
+        var _nativeSetItem = Storage.prototype.setItem;
+        var _nativeRemoveItem = Storage.prototype.removeItem;
+        Storage.prototype.setItem = function(key, value) {
+            if (this !== localStorage) return _nativeSetItem.call(this, key, value);
+            key = String(key);
+            // 阻止将 ExpiredDate 设为空
+            if (key === 'ExpiredDate' && (value === null || value === '' || value === undefined)) {
+                return;
+            }
+            // 阻止清空登录 cookies
+            if (key.indexOf('cookie.') === 0 && (value === null || value === '' || value === undefined)) {
+                return;
+            }
+            _origSetItem(key, value);
+        };
+
+        Storage.prototype.removeItem = function(key) {
+            if (this !== localStorage) return _nativeRemoveItem.call(this, key);
+            key = String(key);
+            // 阻止删除 ExpiredDate
+            if (key === 'ExpiredDate') return;
+            // 阻止删除登录 cookies
+            if (key.indexOf('cookie.') === 0) return;
+            _origRemoveItem(key);
+        };
+
+        // 定期确保关键数据存在且有效
+        setInterval(function() {
+            if (localStorage.getItem('ExpiredDate') !== '0') {
+                _origSetItem('ExpiredDate', '0');
+            }
+            // 检查 cookies 是否存在
+            for (var ck in localCookies) {
+                if (localCookies.hasOwnProperty(ck) && !localStorage.getItem(ck)) {
+                    _origSetItem(ck, localCookies[ck]);
+                }
+            }
+            // 修复乱码：验证 NAME 和 ACCT 能否正确解码，不能则恢复默认
+            try {
+                var nameVal = localStorage.getItem('cookie.NAME');
+                if (nameVal) {
+                    var decoded = decodeURIComponent(atob(nameVal).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    // 解码后应该是可读的中文/英文，如果全是乱码字符则修复
+                    if (!decoded || decoded.length === 0 || /^[\x00-\x1f\x7f-\x9f]+$/.test(decoded)) {
+                        _origSetItem('cookie.NAME', utf8Base64Encode(localName));
+                    }
+                }
+            } catch (e) {
+                // atob 失败（非 Base64）→ 修复
+                _origSetItem('cookie.NAME', utf8Base64Encode(localName));
+            }
+            try {
+                var acctVal = localStorage.getItem('cookie.ACCT');
+                if (acctVal) {
+                    var acctDecoded = decodeURIComponent(atob(acctVal).split('').map(function(c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    if (!acctDecoded || acctDecoded.length === 0 || acctDecoded.indexOf('@') < 0) {
+                        _origSetItem('cookie.ACCT', utf8Base64Encode(localAccount));
+                    }
+                }
+            } catch (e) {
+                _origSetItem('cookie.ACCT', utf8Base64Encode(localAccount));
+            }
+        }, 1000);
+            return localIdentity = Object.freeze({ set: _origSetItem, remove: _origRemoveItem, encode: utf8Base64Encode });
+    }
+
+    root.FocusLocalData = { installIdentity, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
         snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
         storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify,
         get maintenance() { return maintenance; } };

@@ -1,0 +1,86 @@
+{
+  "version": "7.1.1-local.1.4.1",
+  "results": [
+    {
+      "name": "first screen paints while CSS and scripts are pending; scripts download in parallel",
+      "passed": true,
+      "ms": 1962,
+      "firstContentfulPaintMs": 396,
+      "completedWhileMainPending": 14,
+      "totalSteps": 16
+    },
+    {
+      "name": "mounted application waits for critical CSS without exposing an unstyled screen",
+      "passed": true,
+      "ms": 1685
+    },
+    {
+      "name": "workspace appears before optional images and fonts; Chinese needs no language requests",
+      "passed": true,
+      "ms": 1141,
+      "optionalRequestsStillPending": 28,
+      "languageRequests": 0
+    },
+    {
+      "name": "failed application download offers retry and preserves saved settings",
+      "passed": true,
+      "ms": 1450
+    },
+    {
+      "name": "stylesheet failures retain a visible recovery action",
+      "passed": true,
+      "ms": 1376
+    },
+    {
+      "name": "initialization exceptions retain retry instead of a permanent blank screen",
+      "passed": true,
+      "ms": 779
+    },
+    {
+      "name": "failed data recovery retains the loading screen and retry without clearing settings",
+      "passed": true,
+      "ms": 983
+    },
+    {
+      "name": "long waits show an explanation without inventing progress",
+      "passed": true,
+      "ms": 1207
+    },
+    {
+      "name": "saved English, dark appearance, narrow screens and reduced motion work before assets load",
+      "passed": true,
+      "ms": 1019
+    },
+    {
+      "name": "existing system-selected locales load asynchronously with an immediate first screen",
+      "passed": true,
+      "ms": 886
+    },
+    {
+      "name": "failed optional language files finish asynchronously with readable English fallback",
+      "passed": true,
+      "ms": 736
+    },
+    {
+      "name": "Chinese workspace appears before bundled fonts and swaps to Noto when they finish",
+      "passed": true,
+      "ms": 1428,
+      "bundledFontRequests": 3,
+      "renderedFonts": [
+        "Noto Sans SC"
+      ]
+    },
+    {
+      "name": "English prioritizes western system fonts without downloading bundled CJK fonts",
+      "passed": true,
+      "ms": 1151,
+      "family": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", \"Helvetica Neue\", Helvetica, Arial, sans-serif",
+      "bundledCjkRequests": 0
+    },
+    {
+      "name": "disabled JavaScript keeps a readable explanation",
+      "passed": true,
+      "ms": 387
+    }
+  ]
+}

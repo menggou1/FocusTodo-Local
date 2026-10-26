@@ -2,7 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.4.0**, author Lexible.
+Current application: **7.1.1-local.1.4.1**, author Lexible.
+
+## 7.1.1-local.1.4.1 · 2026-10-26
+
+- See a lightweight first screen and real loading progress, then enter the workspace while images and fonts finish loading.
+- Start Chinese and English from the existing catalog, load other languages asynchronously, and retry slow or failed loads.
+- Apply bundled Chinese fonts once loaded, prefer western system fonts in English, and retain the official timer fonts.
+- Consolidate local data, backup, settings and theme services, remove unused polling and debugging, and preserve profile edits and recovery.
+
+[English report](UPDATE-7.1.1-local.1.4.1.md).
 
 ## 7.1.1-local.1.4.0 · 2026-10-25
 
