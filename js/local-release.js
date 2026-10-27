@@ -3,11 +3,30 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.4.3",
+    "localVersion": "1.4.4",
     "author": "Lexible",
-    "date": "2026-10-26",
+    "date": "2026-10-27",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.4.4",
+            "date": "2026-10-27",
+            "title": "字体、清单排序与滚动修复",
+            "items": [
+                "英文附带字体加载完成后自动应用，恢复组件各自的字体样式。",
+                "设置中的系统清单与自定义清单分别支持拖动和键盘排序，并保存顺序。",
+                "修复清单管理底部出现双滚动条的问题。",
+                "改善本地网络兼容，修复复用请求时的同源访问。"
+            ],
+            "titleEn": "Fonts, list ordering and scrolling fixes",
+            "itemsEn": [
+                "Apply the bundled English font when ready while retaining individual component fonts.",
+                "Reorder system and custom lists separately by dragging or keyboard; the order is saved.",
+                "Fix the extra scrollbar in list management.",
+                "Improve local network compatibility for reused same-origin requests."
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.4.4.md"
+        },
         {
             "version": "7.1.1-local.1.4.3",
             "date": "2026-10-26",
@@ -242,7 +261,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.4.3",
+    "version": "7.1.1-local.1.4.4",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

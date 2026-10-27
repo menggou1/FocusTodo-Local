@@ -92,7 +92,32 @@
         _origSetItem('ShowRateDialog', 'false');
     }
 
-    root.FocusSettings = { installCompatibility };
+    // Read and write the affected orders in one transaction, retaining every other field.
+    function reorderProjects(db, snapshot, from, to) {
+        return new Promise((resolve, reject) => {
+            const ids=snapshot.map(item=>item.id), fromIndex=ids.indexOf(from), toIndex=ids.indexOf(to);
+            if(fromIndex<0 || toIndex<0) return reject(new Error(t('清单已变化，请重试。')));
+            const tx=db.transaction('Project','readwrite'), store=tx.objectStore('Project'), request=store.getAll();
+            let changed, problem;
+            request.onsuccess=()=>{
+                const byId=new Map(request.result.map(item=>[item.id,item]));
+                const current=ids.map(id=>byId.get(id));
+                if(current.some((item,index)=>!item || item.order!==snapshot[index].order)) {
+                    problem=new Error(t('清单已变化，请重试。')); tx.abort(); return;
+                }
+                const slots=current.map(item=>item.order).sort((a,b)=>a-b);
+                if(slots.some((value,index)=>!Number.isFinite(value)||(index && value===slots[index-1]))) {
+                    problem=new Error(t('清单顺序无效，请重试。')); tx.abort(); return;
+                }
+                const reordered=current.slice(), moved=reordered.splice(fromIndex,1)[0]; reordered.splice(toIndex,0,moved);
+                changed=reordered.map((item,index)=>Object.assign({},item,{order:slots[index]}));
+                changed.forEach(item=>store.put(item));
+            };
+            tx.oncomplete=()=>resolve(changed);
+            tx.onabort=tx.onerror=()=>reject(problem || tx.error || new Error(t('保存失败')));
+        });
+    }
+    root.FocusSettings = { installCompatibility, reorderProjects };
     new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
     root.addEventListener('focus',()=>refreshPermission());
     mount();

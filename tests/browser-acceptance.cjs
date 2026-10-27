@@ -128,6 +128,37 @@ const server = http.createServer((request, response) => {
         return { started, release };
     }
     try {
+        await check('list management reorders within groups, persists and uses one scroll area', () => app(async page => {
+            await page.evaluate(async () => {
+                const db=await FocusLocalData.open();
+                await FocusLocalData.transaction(db,['Project'],'readwrite',tx=>{
+                    const store=tx.objectStore('Project');
+                    for(let i=0;i<24;i++) store.put({id:'accept-list-'+i,objType:1,creationDate:Date.now(),state:0,name:'List '+String(i).padStart(2,'0'),order:10000+i*10000,color:'AEBDC3',isDefault:false,parentId:'',orderingRule:0,type:1000,imageName:'',expanded:true,sync:0});
+                });
+            });
+            await page.reload(); await page.waitForFunction(() => window.__acceptanceTimer && document.querySelector('#root').children.length > 0); await page.evaluate(() => window.FocusLocalReady);
+            await page.mouse.click(1255,25); await page.getByText('清单管理',{exact:true}).click();
+            const preset=page.locator('[class*="PresetProjectItem-root"]'), custom=page.locator('[class*="CustomProjectItem-root"]');
+            await custom.first().waitFor();
+            const firstPreset=await preset.first().innerText(), secondPreset=await preset.nth(1).innerText();
+            await preset.first().dragTo(preset.nth(1));
+            await page.waitForFunction(name=>document.querySelector('[class*="PresetProjectItem-root"]')?.innerText===name,secondPreset);
+            await custom.first().dragTo(preset.first());
+            assert.equal((await custom.first().innerText()).trim(), 'List 00');
+            await custom.first().dragTo(custom.nth(1));
+            await page.waitForFunction(()=>document.querySelector('[class*="CustomProjectItem-root"]')?.innerText.trim()==='List 01');
+            const scroller=page.locator('.ProjectManagement-content--kCla .ScrollView-root-1KhMW');
+            await scroller.evaluate(el=>el.scrollTop=el.scrollHeight);
+            const dimensions=await page.locator('.ProjectManagement-content--kCla').evaluate(el=>({top:el.scrollTop,overflow:getComputedStyle(el).overflowY,inner:el.querySelector('ul').scrollTop}));
+            assert.equal(dimensions.top,0); assert.equal(dimensions.overflow,'hidden'); assert(dimensions.inner>0);
+            await custom.nth(1).focus(); await page.keyboard.press('ArrowUp');
+            await page.waitForFunction(()=>document.querySelector('[class*="CustomProjectItem-root"]')?.innerText.trim()==='List 00');
+            await page.reload(); await page.waitForFunction(() => window.__acceptanceTimer && document.querySelector('#root').children.length > 0); await page.evaluate(() => window.FocusLocalReady);
+            await page.mouse.click(1255,25); await page.getByText('清单管理',{exact:true}).click();
+            assert.equal(await preset.first().innerText(),secondPreset);
+            assert.equal(await preset.nth(1).innerText(),firstPreset);
+            assert.equal((await custom.first().innerText()).trim(),'List 00');
+        }));
         await check('compatibility modules install once and retain isolated storage boundaries', () => app(async page => {
             const result = await page.evaluate(async () => {
                 const before = { set: Storage.prototype.setItem, remove: Storage.prototype.removeItem, xhr: XMLHttpRequest, fetch, ready: FocusLocalReady, themes: FocusThemes };
@@ -1202,6 +1233,18 @@ const server = http.createServer((request, response) => {
             assert(result.backup.indexedDB.Project.length > 0);
             assert.equal(result.after.indexedDB.Project.length, 15);
             assert.equal(result.after.indexedDB.TimerSession.length, 0);
+        }));
+        await check('reused XHR allows same-origin requests after a blocked request', () => app(async page => {
+            const result=await page.evaluate(async () => {
+                const xhr=new XMLHttpRequest();
+                const send=(url)=>new Promise((resolve,reject)=>{
+                    xhr.onload=()=>resolve(xhr.responseText); xhr.onerror=()=>reject(new Error('XHR failed'));
+                    xhr.open('GET',url); xhr.send();
+                });
+                await send('https://example.invalid/blocked');
+                return send(new URL('/release.json',location.href).href);
+            });
+            assert.equal(JSON.parse(result).localVersion,release.localVersion);
         }));
         await check('Request and URL inputs cannot bypass exact network allowlist', () => app(async (page, context, errors, external) => {
             const rejected = await page.evaluate(async () => {

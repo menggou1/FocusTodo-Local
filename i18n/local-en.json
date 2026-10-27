@@ -200,5 +200,10 @@
   "无法保存语言设置：": "Could not save the language setting: ",
   "通知设置失败：": "Could not update notification permission: ",
   "语言与通知": "Language and notifications",
-  "通知": "Notifications"
+  "通知": "Notifications",
+  "清单排序失败：": "Could not reorder lists: ",
+  "清单已变化，请重试。": "Lists changed. Please retry.",
+  "清单顺序无效，请重试。": "List order is invalid. Please retry.",
+  "保存失败": "Save failed",
+  "拖动或使用上下方向键排序": "Drag or use the up and down arrow keys to reorder"
 }

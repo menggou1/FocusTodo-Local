@@ -21,11 +21,18 @@
             var origOpen = xhr.open;
             var origSetRequestHeader = xhr.setRequestHeader;
             xhr.open = function(method, url) {
-                // 拦截所有远程 URL 以及包含 v63/user 的相对路径
-                var isRemote = url && (url.indexOf('http://') === 0 || url.indexOf('https://') === 0);
-                var isUserApi = url && url.indexOf('v63/user') >= 0;
-                // 白名单放行：Bing API / 图片请求不受拦截
-                if (isRemote && _isWhitelisted(url)) {
+                xhr._focusRequestGeneration = (xhr._focusRequestGeneration || 0) + 1;
+                // A reused XHR must not retain the previous request's blocked state.
+                if (xhr._blocked) {
+                    delete xhr.readyState; delete xhr.status; delete xhr.responseText;
+                }
+                xhr._blocked = false;
+                xhr._blockedMethod = xhr._blockedUrl = undefined;
+                var parsed = new URL(String(url), location.href);
+                var isRemote = parsed.origin !== location.origin;
+                var isUserApi = parsed.pathname.indexOf('v63/user') >= 0;
+                // The legacy user API remains local; ordinary same-origin assets and Bing pass through.
+                if (!isUserApi && (!isRemote || _isWhitelisted(parsed.href))) {
                     return origOpen.apply(xhr, arguments);
                 }
                 if (isRemote || isUserApi) {
@@ -80,12 +87,14 @@
                     }
 
                     var _xhrRespStr = JSON.stringify(_xhrResponse);
+                    var generation = xhr._focusRequestGeneration;
                     setTimeout(function() {
-                        Object.defineProperty(xhr, 'readyState', { value: 4, writable: true });
-                        Object.defineProperty(xhr, 'status', { value: 200, writable: true });
-                        Object.defineProperty(xhr, 'responseText', { value: _xhrRespStr, writable: true });
+                        if (xhr._focusRequestGeneration !== generation) return;
+                        Object.defineProperty(xhr, 'readyState', { value: 4, writable: true, configurable: true });
+                        Object.defineProperty(xhr, 'status', { value: 200, writable: true, configurable: true });
+                        Object.defineProperty(xhr, 'responseText', { value: _xhrRespStr, writable: true, configurable: true });
                         if (xhr.onload) xhr.onload();
-                        if (xhr.onreadystatechange) xhr.onreadystatechange();
+                        if (xhr._focusRequestGeneration === generation && xhr.onreadystatechange) xhr.onreadystatechange();
                     }, 0);
                     return;
                 }

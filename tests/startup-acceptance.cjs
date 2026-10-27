@@ -197,17 +197,25 @@ function gate() {
                 return { bundledFontRequests: requested.length, renderedFonts: rendered.map(font => font.familyName) };
             } finally { fonts.release(); }
         });
-        await scenario('English prioritizes western system fonts without downloading bundled CJK fonts', async page => {
-            const requested = [];
+        await scenario('English swaps to bundled western font without downloading CJK fonts', async (page, context) => {
+            const fonts = gate(), requested = [];
             await page.addInitScript(() => localStorage.setItem('FocusTodo.language', 'en'));
             page.on('request', request => { if (/NotoSansSC-/.test(request.url())) requested.push(request.url()); });
-            await page.goto(origin); await ready(page);
-            assert.deepEqual(requested, []);
-            const family = await page.locator('#root').evaluate(node => getComputedStyle(node).fontFamily);
-            assert(/Segoe UI|apple-system|BlinkMacSystemFont/.test(family));
-            assert(!family.includes('Noto Sans SC'));
-            await page.screenshot({ path: path.join(evidence, 'typography-english.png') });
-            return { family, bundledCjkRequests: requested.length };
+            await page.route('**/font/NotoSans-Variable.ttf', async route => { await fonts.promise; await route.continue(); });
+            try {
+                await page.goto(origin, { waitUntil: 'domcontentloaded' }); await ready(page);
+                assert(await page.evaluate(() => [...document.fonts].some(font => font.family === 'Focus Noto Sans' && font.status === 'loading')));
+                fonts.release(); await page.evaluate(() => document.fonts.ready);
+                const client = await context.newCDPSession(page);
+                await client.send('DOM.enable'); await client.send('CSS.enable');
+                const { root: documentNode } = await client.send('DOM.getDocument');
+                const { nodeId } = await client.send('DOM.querySelector', { nodeId: documentNode.nodeId, selector: '[class*="HomeHeader-username"]' });
+                const { fonts: rendered } = await client.send('CSS.getPlatformFontsForNode', { nodeId });
+                assert(rendered.some(font => font.isCustomFont && /Noto Sans/.test(font.familyName)), JSON.stringify(rendered));
+                assert.deepEqual(requested, []);
+                await page.screenshot({ path: path.join(evidence, 'typography-english.png') });
+                return { renderedFonts: rendered.map(font => font.familyName), bundledCjkRequests: requested.length };
+            } finally { fonts.release(); }
         });
         await scenario('disabled JavaScript keeps a readable explanation', async page => {
             await page.goto(origin);

@@ -2,7 +2,7 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Canonical Chinese list](../BACKLOG.md)
 
-Updated 2026-10-26. This is the English view of the same canonical item IDs, not an independent backlog. Remove completed items and record their evidence in release reports. Do not copy unfinished lists into old reports. V01 was removed after the user confirmed manual acceptance; E05 and E06 were completed in 1.4.0.
+Updated 2026-10-27. This is the English view of the same canonical item IDs, not an independent backlog. Remove completed items and record their evidence in release reports. Do not copy unfinished lists into old reports. V01 was removed after the user confirmed manual acceptance; E05 and E06 were completed in 1.4.0.
 
 ## Engineering
 
@@ -13,7 +13,7 @@ Updated 2026-10-26. This is the English view of the same canonical item IDs, not
 | E03 | P1 | Binary-resource backup format | Evaluate ZIP + JSON + manifest, content deduplication and thumbnail rebuilding while retaining original image bytes. Validate references, integrity, versions and expanded size before replacement. Gzip is already implemented. |
 | E04 | P1 | Large-backup responsiveness, memory and broadcasts | Generated 1/10/50 MB measurements exist. Evaluate workers, batched reads/serialization and large recovery broadcasts from observed bottlenecks, preserving snapshot and journal semantics. |
 | E07 | P2 | Audio coordination without Web Locks | Define a fallback for visible multi-window playback and ownership transfer. Existing Web Lock behavior does not guarantee one player where that API is absent. |
-| E08 | P3 | Consolidate remaining legacy network behavior by feature | Identity/storage belongs to the data service; backup UI, preferences and theme UI now belong to their existing feature modules. Network retains its distinct responsibility. Trace legacy account/cloud callers, move reachable local profile updates to explicit services and remove proven-dead simulated responses. Further work must reuse the owning feature service, not split files for line count. Preserve same-origin/Bing access and initialization/recovery order. |
+| E08 | P3 | Consolidate remaining legacy network behavior by feature | Identity/storage belongs to the data service; backup UI, preferences and theme UI now belong to their existing feature modules. Network retains its distinct responsibility. Trace legacy account/cloud callers, move reachable local profile updates to explicit services and remove proven-dead simulated responses. Further work must reuse the owning feature service, not split files for line count. Preserve same-origin/Bing access and initialization/recovery order.  Reused XHR state and same-origin handling were corrected in 1.4.4; simulated responses still need investigation. |
 | E09 | P3 | Restore component sources and a normal build | Recover source, dependencies and configuration component by component. Preserve Redux, events and timer lifecycle; AST integration is not a complete source build. |
 
 ## Outstanding real-environment verification

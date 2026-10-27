@@ -6,7 +6,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 当前本地版排除小组、在线排名和旧森林入口，也停用隐藏森林的后台奖励初始化。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
 
-当前应用版本 `7.1.1-local.1.4.3`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
+当前应用版本 `7.1.1-local.1.4.4`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
@@ -205,7 +205,7 @@ App
 | `local-backup.js` | 编码/解码/下载与导入导出界面，统一 `installUI` 入口 |
 | `local-settings-ui.js` | 语言/通知设置、旧偏好和隐藏功能分类的兼容安装 |
 | `local-theme-storage.js` | 主题写入/恢复日志与主题界面，恢复在导入之后 |
-| `main.css` / `local-ui.css` | 按语言统一界面字体；附带字体加载后应用；计时数字保留官方规则 |
+| `main.css` / `local-ui.css` | 按语言设置默认字体，附带字体加载后应用；组件可保留自己的字体规则 |
 
 上述安装入口可重复调用，避免重复包装存储和网络 API、重复恢复主题。没有全局 jQuery 轮询或手动修改用户名的调试入口。
 
