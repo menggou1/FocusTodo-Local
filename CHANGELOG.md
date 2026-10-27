@@ -2,17 +2,18 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.4.4** · Git Tag **1.4.4** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.5.0** · Git Tag **1.5.0** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
 
-## 7.1.1-local.1.4.4 · 2026-10-27
+## 7.1.1-local.1.5.0 · 2026-10-27
 
+- 本轮原以 1.4.4 完成测试与发行，因新增功能调整为 1.5.0；已推送的 1.4.4 Tag 保留。
 - 英文附带字体自动切换，恢复不同组件各自的字体样式。
 - 设置中的系统清单和自定义清单分别支持拖动与键盘排序。
 - 修复清单管理双滚动条，改善复用请求的同源兼容。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.4) · [中文报告](docs/UPDATE-7.1.1-local.1.4.4.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.4.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.0) · [中文报告](docs/UPDATE-7.1.1-local.1.5.0.md) · [English](docs/en/UPDATE-7.1.1-local.1.5.0.md)。
 
 ## 7.1.1-local.1.4.3 · 2026-10-26
 

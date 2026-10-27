@@ -3,13 +3,13 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.4.4",
+    "localVersion": "1.5.0",
     "author": "Lexible",
     "date": "2026-10-27",
     "repositoryRemote": "Focustodo-local",
     "updates": [
         {
-            "version": "7.1.1-local.1.4.4",
+            "version": "7.1.1-local.1.5.0",
             "date": "2026-10-27",
             "title": "字体、清单排序与滚动修复",
             "items": [
@@ -25,7 +25,7 @@
                 "Fix the extra scrollbar in list management.",
                 "Improve local network compatibility for reused same-origin requests."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.4.4.md"
+            "report": "docs/UPDATE-7.1.1-local.1.5.0.md"
         },
         {
             "version": "7.1.1-local.1.4.3",
@@ -261,7 +261,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.4.4",
+    "version": "7.1.1-local.1.5.0",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

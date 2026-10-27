@@ -2,16 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.4.4**, author Lexible.
+Current application: **7.1.1-local.1.5.0**, author Lexible.
 
-## 7.1.1-local.1.4.4 · 2026-10-27
+## 7.1.1-local.1.5.0 · 2026-10-27
 
 - Apply the bundled English font when ready while retaining individual component fonts.
 - Reorder system and custom lists separately by dragging or keyboard; the order is saved.
 - Fix the extra scrollbar in list management.
 - Improve local network compatibility for reused same-origin requests.
 
-[English report](UPDATE-7.1.1-local.1.4.4.md).
+[English report](UPDATE-7.1.1-local.1.5.0.md).
 
 ## 7.1.1-local.1.4.3 · 2026-10-26
 
