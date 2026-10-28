@@ -1,5 +1,5 @@
 {
-  "version": "7.1.1-local.1.6.0",
+  "version": "7.1.1-local.1.7.0",
   "results": [
     {
       "name": "double click creates task and spaced plans atomically, persists and exports",
@@ -35,6 +35,30 @@
     },
     {
       "name": "estimate cap, custom list, top ordering and maintenance exclusion preserve data",
+      "passed": true
+    },
+    {
+      "name": "schedule is reorderable and hideable in system list management",
+      "passed": true
+    },
+    {
+      "name": "month view loads records, scrolls to final week and opens a selected day",
+      "passed": true
+    },
+    {
+      "name": "countup pause then repeated stop never creates zero-minute history",
+      "passed": true
+    },
+    {
+      "name": "countdown pause then repeated stop never creates zero-minute history",
+      "passed": true
+    },
+    {
+      "name": "invalid zero-duration legacy record is absent without deleting saved data",
+      "passed": true
+    },
+    {
+      "name": "official-style day, task sidebar and compact quick task render together",
       "passed": true
     },
     {

@@ -232,5 +232,15 @@
   "请填写有效的任务、时间和预计番茄数。": "Enter a valid task, time and estimated pomodoro count.",
   "确定": "Confirm",
   "复制": "Copy",
-  "删除": "Delete"
+  "删除": "Delete",
+  "日程视图": "Schedule view",
+  "前一天": "Previous day",
+  "后一天": "Next day",
+  "显示任务面板": "Show tasks",
+  "日": "Day",
+  "周": "Week",
+  "月": "Month",
+  "番茄": "Pomodoros",
+  "添加任务...": "Add task...",
+  "秒": " seconds"
 }

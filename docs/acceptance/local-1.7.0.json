@@ -1,0 +1,56 @@
+{
+  "version": "7.1.1-local.1.7.0",
+  "date": "2026-10-28",
+  "scope": "local-worktree",
+  "baseCommit": "e7d0048d01451a29b5610d43cf125fd78ed810f3",
+  "previousWorktreeCommit": "6ddb248",
+  "checks": {
+    "unit": {
+      "passed": 60,
+      "skipped": 1
+    },
+    "syntax": "passed",
+    "browser": {
+      "startup": 14,
+      "application": 59,
+      "maintenance": 7,
+      "listOrdering": 3,
+      "audioCoordination": 5,
+      "profile": 5,
+      "scheduleAndHistory": 16,
+      "total": 109,
+      "passed": true
+    },
+    "portablePackages": {
+      "zip": "passed",
+      "tarGz": "passed",
+      "documentLinks": "passed"
+    },
+    "astIdempotence": "passed"
+  },
+  "shortFocusReproduction": {
+    "modes": [
+      "countup",
+      "countdown"
+    ],
+    "steps": [
+      "start",
+      "27 seconds active",
+      "pause",
+      "stop",
+      "stop"
+    ],
+    "savedRecords": 1,
+    "interval": 27,
+    "taskCount": 0,
+    "display": "27秒"
+  },
+  "bundleSha256": "9abf365111c2c98fa3072815e42b00c521cda58c7551113fa940265f816e90fa",
+  "publication": {
+    "merged": false,
+    "pushed": false,
+    "tagged": false,
+    "deployed": false,
+    "remoteCI": false
+  }
+}

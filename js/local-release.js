@@ -3,11 +3,30 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.6.0",
+    "localVersion": "1.7.0",
     "author": "Lexible",
     "date": "2026-10-28",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.7.0",
+            "date": "2026-10-28",
+            "title": "日程页面、月视图与短专注记录修复",
+            "items": [
+                "日程按官方布局显示时间轴、任务面板和紧凑添加任务窗口。",
+                "日程加入清单管理，支持排序和隐藏，设置会保存。",
+                "月视图支持滚动、显示已安排与已完成记录，并可打开具体日期。",
+                "不足一分钟的有效专注显示秒数，避免暂停停止后出现误导的 0 分钟记录。"
+            ],
+            "titleEn": "Schedule layout, scrolling month view and short-focus fixes",
+            "itemsEn": [
+                "Use the official-style schedule timeline, task sidebar and compact quick task dialog.",
+                "Reorder and hide Schedule in list management with saved preferences.",
+                "Scroll the month view, see planned/completed records and open a selected day.",
+                "Display sub-minute focus in seconds rather than a misleading zero-minute history entry."
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.7.0.md"
+        },
         {
             "version": "7.1.1-local.1.6.0",
             "date": "2026-10-28",
@@ -316,7 +335,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.6.0",
+    "version": "7.1.1-local.1.7.0",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

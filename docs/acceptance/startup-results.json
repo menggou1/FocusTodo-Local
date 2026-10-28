@@ -1,70 +1,70 @@
 {
-  "version": "7.1.1-local.1.6.0",
+  "version": "7.1.1-local.1.7.0",
   "results": [
     {
       "name": "first screen paints while CSS and scripts are pending; scripts download in parallel",
       "passed": true,
-      "ms": 2169,
-      "firstContentfulPaintMs": 308,
+      "ms": 2003,
+      "firstContentfulPaintMs": 348,
       "completedWhileMainPending": 15,
       "totalSteps": 17
     },
     {
       "name": "mounted application waits for critical CSS without exposing an unstyled screen",
       "passed": true,
-      "ms": 1727
+      "ms": 1171
     },
     {
       "name": "workspace appears before optional images and fonts; Chinese needs no language requests",
       "passed": true,
-      "ms": 1027,
+      "ms": 808,
       "optionalRequestsStillPending": 29,
       "languageRequests": 0
     },
     {
       "name": "failed application download offers retry and preserves saved settings",
       "passed": true,
-      "ms": 1393
+      "ms": 1114
     },
     {
       "name": "stylesheet failures retain a visible recovery action",
       "passed": true,
-      "ms": 1166
+      "ms": 870
     },
     {
       "name": "initialization exceptions retain retry instead of a permanent blank screen",
       "passed": true,
-      "ms": 777
+      "ms": 635
     },
     {
       "name": "failed data recovery retains the loading screen and retry without clearing settings",
       "passed": true,
-      "ms": 1176
+      "ms": 808
     },
     {
       "name": "long waits show an explanation without inventing progress",
       "passed": true,
-      "ms": 1322
+      "ms": 923
     },
     {
       "name": "saved English, dark appearance, narrow screens and reduced motion work before assets load",
       "passed": true,
-      "ms": 1332
+      "ms": 943
     },
     {
       "name": "existing system-selected locales load asynchronously with an immediate first screen",
       "passed": true,
-      "ms": 1252
+      "ms": 854
     },
     {
       "name": "failed optional language files finish asynchronously with readable English fallback",
       "passed": true,
-      "ms": 1142
+      "ms": 899
     },
     {
       "name": "Chinese workspace appears before bundled fonts and swaps to Noto when they finish",
       "passed": true,
-      "ms": 1948,
+      "ms": 1243,
       "bundledFontRequests": 3,
       "renderedFonts": [
         "Noto Sans SC"
@@ -73,7 +73,7 @@
     {
       "name": "English swaps to bundled western font without downloading CJK fonts",
       "passed": true,
-      "ms": 1339,
+      "ms": 1189,
       "renderedFonts": [
         "Noto Sans"
       ],
@@ -82,7 +82,7 @@
     {
       "name": "disabled JavaScript keeps a readable explanation",
       "passed": true,
-      "ms": 571
+      "ms": 515
     }
   ]
 }

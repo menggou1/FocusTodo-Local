@@ -2,7 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.6.0**, author Lexible.
+Current application: **7.1.1-local.1.7.0**, author Lexible.
+
+## 7.1.1-local.1.7.0 · 2026-10-28
+
+- Use the official-style schedule timeline, task sidebar and compact quick task dialog.
+- Reorder and hide Schedule in list management with saved preferences.
+- Scroll the month view, see planned/completed records and open a selected day.
+- Display sub-minute focus in seconds rather than a misleading zero-minute history entry.
+
+[English report](UPDATE-7.1.1-local.1.7.0.md).
 
 ## 7.1.1-local.1.6.0 · 2026-10-28
 

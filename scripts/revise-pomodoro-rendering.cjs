@@ -2,6 +2,12 @@
 // views that filter raw records by subtask retain their record representation.
 const { load, walk } = require('./lib/bundle-editor.cjs');
 const bundle = load();
+// Preserve valid sub-minute focus records without labelling them as zero minutes.
+const history=bundle.method(1019,'render').value;
+let historyCode=bundle.source.slice(history.start,history.end);
+if(!historyCode.includes('isVisibleFocusRecord'))historyCode=historyCode.replace('function(){','function(){if(!window.FocusLocal.isVisibleFocusRecord(this.props.pomodoro))return null;');
+historyCode=historyCode.replace('a.secondsToLocalHH_MM()','window.FocusLocal.formatFocusDuration(a)');
+bundle.replace(history,historyCode);
 for (const [id, name] of [[586, 'getPomodoroList'], [976, 'getPomodoroList'], [1018, 'getPomodoroList'], [1040, 'renderPomodoros'], [1049, 'getPomodoroView'], [935, 'render']]) {
     const scopes = [];
     if (name === 'render') scopes.push(bundle.method(id, name).value);

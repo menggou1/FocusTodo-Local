@@ -349,5 +349,14 @@
             notification.onclick = () => { root.focus(); notification.close(); };
         } else if (legacy) legacy();
     }
-    root.FocusLocal = { attachTimer, attachAudio, RELEASE, notice, notifyCompletion, pomodoroValues };
+    function isVisibleFocusRecord(record) {
+        return record && record.state !== -1 && Number.isFinite(Number(record.interval)) && Number(record.interval) > 0 &&
+            Number.isFinite(Number(record.endDate)) && Number(record.endDate) > 0;
+    }
+    function formatFocusDuration(value) {
+        const seconds = Number(value);
+        if (seconds > 0 && seconds < 60) return Math.max(1, Math.round(seconds)) + root.FocusI18n.text('秒');
+        return seconds.secondsToLocalHH_MM();
+    }
+    root.FocusLocal = { attachTimer, attachAudio, RELEASE, notice, notifyCompletion, pomodoroValues, isVisibleFocusRecord, formatFocusDuration };
 })(window);

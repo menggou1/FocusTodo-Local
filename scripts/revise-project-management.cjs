@@ -1,5 +1,12 @@
 const {load}=require('./lib/bundle-editor.cjs');
 const b=load();
+// Schedule is a regular system list: preserve the same ordering/visibility path.
+const init=b.source.slice(b.modules[1174].start,b.modules[1174].end);
+const calendarSkip='e.t0===T.default.calendar?17:';
+if(init.includes(calendarSkip)) {
+  const position=b.modules[1174].start+init.indexOf(calendarSkip);
+  b.edits.push({start:position,end:position+calendarSkip.length,code:'e.t0===T.default.calendar?15:'});
+} else if(!init.includes('e.t0===T.default.calendar?15:')) throw Error('Missing schedule classification');
 // Preserve the legacy row contents/actions; regenerate only our integration props and handle.
 for (const id of [1175,1176]) {
   const node=b.method(id,'render').value;

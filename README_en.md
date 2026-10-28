@@ -27,7 +27,7 @@ Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). 
 
 Pages deploys automatically from `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
 
-Worktree version `1.6.0` adds quick calendar tasks, plan-to-focus controls, overlap layout, date selection and the seven-day deadline shortcut. Tasks and plans commit together. This work is local only, not merged into main or published; hosted/downloaded versions follow their actual deployment. See the [completion report](docs/en/UPDATE-7.1.1-local.1.6.0.md).
+Worktree version `1.7.0` adds the official-style schedule, managed Schedule visibility/order, a scrolling month view and precise sub-minute history. This work is local only, not merged or published. See the [completion report](docs/en/UPDATE-7.1.1-local.1.7.0.md).
 
 Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
 
@@ -111,7 +111,7 @@ The application guide, maintenance, architecture, backlog and release documentat
 | Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current worktree application: `7.1.1-local.1.6.0` (not published), author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current worktree application: `7.1.1-local.1.7.0` (not published), author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 Version 1.2.1 fixed a cross-tab initialization race exposed by intermittent macOS acceptance failures. The [English backlog](docs/en/BACKLOG.md) mirrors the canonical open-work list with the same item IDs.
 

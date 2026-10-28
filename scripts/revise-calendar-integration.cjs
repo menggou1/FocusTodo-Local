@@ -22,6 +22,9 @@ attach(1021, 'G', `window.FocusCalendar.attachController(G,{React:b.default,mome
 taskManager:D.default.shared,subtaskManager:M.default.shared,startTask:function(task,subtask){focusCalendarTasks.shared.startTask(task,subtask)},
 actions:Y,events:focusCalendarEvents.shared,eventTypes:focusCalendarEvents.Event})`);
 attach(1036, 't', 'window.FocusCalendar.attachTimeline(t,f.default,m.default)');
+bundle.method(1033, 'render', 'function(){return window.FocusCalendar.renderShell(this,d.default,m.default)}');
+bundle.assignment(1033, 'getTaskPaneEmptyLabel', 'function(){return ""}');
+bundle.method(1036, 'render', 'function(){return window.FocusCalendar.renderDay(this,f.default,m.default)}');
 bundle.method(256, 'updateSchedule', 'function(record){return window.FocusLocalData.putSchedule(record)}');
 // The legacy local fork filtered the calendar out despite retaining its view.
 // Restore the real system-list entry so users can reach these enhancements.

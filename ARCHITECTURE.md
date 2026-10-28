@@ -6,7 +6,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 当前本地版排除小组、在线排名和旧森林入口，也停用隐藏森林的后台奖励初始化。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
 
-当前应用版本 `7.1.1-local.1.6.0`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
+当前应用版本 `7.1.1-local.1.7.0`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
@@ -88,7 +88,7 @@ local-i18n-catalog → local-i18n → local-release → local-timer-core
   → local-theme-storage → local-settings-ui → local-network → patch → local-calendar → main
 ```
 
-`patch.js` 按数据身份/存储、网络、备份界面、设置兼容和主题依次安装。身份复用数据服务原生写入能力；导入日志恢复后才恢复主题设置；主应用等待同一 `FocusLocalReady`。当前界面删除直接调用本地 reset，用户名和头像通过本地资料服务保存。日历任务与安排由同一事务创建，提交后沿用现有通道刷新其他页面；数据库仍为 v3。应用与必要样式就绪后展示，图片和字体继续加载。
+`patch.js` 按数据身份/存储、网络、备份界面、设置兼容和主题依次安装。身份复用数据服务原生写入能力；导入日志恢复后才恢复主题设置；主应用等待同一 `FocusLocalReady`。当前界面删除直接调用本地 reset，用户名和头像通过本地资料服务保存。日程任务与安排由同一事务创建，提交后沿用现有通道刷新其他页面；数据库仍为 v3。应用与必要样式就绪后展示，图片和字体继续加载。
 
 ## 数据存储
 
@@ -102,7 +102,7 @@ local-i18n-catalog → local-i18n → local-release → local-timer-core
 | **Task** | `id` | projectId, deadline, reminderDate, finishedDate, sync | 任务 |
 | **Subtask** | `id` | taskId, sync, finishedDate | 子任务 |
 | **Pomodoro** | `id` | taskId, subtaskId, endDate, sync | 番茄计时记录 |
-| **Schedule** | `id` | taskId, subtaskId, endDate, sync | 日程/日历事件 |
+| **Schedule** | `id` | taskId, subtaskId, endDate, sync | 日程/日程事件 |
 | **Group** | `groupId` | groupLeader, createdDate, secret | 小组 |
 | **GroupUser** | `id` | groupId, uuid, sync, name, todayPomodoroTime, weekPomodoroTime, focusEndDate | 小组成员 |
 | **Message** | `messageId` | groupId, userId, state, sync, creationDate, replyUserId, replyMessageId, parentId, username | 小组留言 |
@@ -149,7 +149,7 @@ local-i18n-catalog → local-i18n → local-release → local-timer-core
 |--------|------|------|
 | 任务列表 | 默认视图 | 按清单分组显示任务 |
 | 今日事 | MyDay | 今日待办 |
-| 日历 | Calendar | 日历视图 |
+| 日程 | Calendar | 日程视图 |
 | 已完成 | History | 历史任务 |
 | 搜索 | Search | 关键词搜索 |
 | 报表 | Report | 专注时间统计图表 |
@@ -168,7 +168,7 @@ App
 │   ├── TaskList (任务列表视图)
 │   │   ├── TaskItem
 │   │   └── SubtaskItem
-│   ├── CalendarView (日历视图)
+│   ├── CalendarView (日程视图)
 │   ├── ReportView (报表视图)
 │   │   ├── PomodoroChart
 │   │   ├── TaskChart
@@ -201,7 +201,7 @@ App
 | 模块 | 当前职责 |
 |---|---|
 | `local-data.js` | 数据、备份快照、重置/恢复、原生存储能力及本地身份保护 |
-| `local-calendar.js` | 日历快速创建、重叠布局、详情/跨页刷新、日程启动本地计时与生命周期；数据写入复用本地数据服务 |
+| `local-calendar.js` | 日程快速创建、重叠布局、详情/跨页刷新、日程启动本地计时与生命周期；数据写入复用本地数据服务 |
 | `local-network.js` | XHR/fetch 策略、精确 Bing 白名单和现存账号操作兼容 |
 | `local-backup.js` | 编码/解码/下载与导入导出界面，统一 `installUI` 入口 |
 | `local-settings-ui.js` | 语言/通知设置、旧偏好和隐藏功能分类的兼容安装 |

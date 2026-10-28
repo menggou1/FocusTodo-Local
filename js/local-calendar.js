@@ -62,14 +62,58 @@
         back.type = 'button'; back.textContent = text('取消'); back.onclick = cancel;
         save.type = 'submit'; save.textContent = text('确定'); row.append(back, save); form.append(row); return { back, save };
     }
+    function renderShell(view, React, styles) {
+        const h = React.createElement, p = view.props, mode = p.calendarViewMode;
+        const select = h('select', { className: 'focus-schedule-view', value: mode, 'aria-label': text('日程视图'),
+            onChange: event => p.onViewModeChange({ value: event.target.value }) },
+            ['day', 'week', 'month'].map((value, index) => h('option', { key: value, value }, text(['日', '周', '月'][index]))));
+        return h('div', { className: styles.layout + ' focus-schedule-shell' },
+            h('div', { className: styles.pane + (p.showTaskPane ? '' : ' ' + styles.paneExpanded) },
+                h('div', { className: styles.navigatorWrapper }, h('div', { className: styles.navigator },
+                    h('div', { className: styles.left },
+                        h('button', { type: 'button', className: styles.todayButton, onClick: p.onToday }, view.getTodayLabel()),
+                        h('button', { type: 'button', className: styles.navButton, 'aria-label': text('前一天'), onClick: p.onNavigatePrev }, '‹'),
+                        h('button', { type: 'button', className: styles.navButton, 'aria-label': text('后一天'), onClick: p.onNavigateNext }, '›'),
+                        h('button', { type: 'button', className: styles.dateButton, onClick: p.onDatePicker },
+                            h('span', { className: styles.dateText }, view.getDateLabel(p.calendarDate, mode)), h('span', { className: styles.dateArrow }))),
+                    h('div', { className: styles.right }, select, h('button', { type: 'button', className: 'focus-schedule-add',
+                        'aria-label': text('显示任务面板'), 'aria-expanded': p.showTaskPane, onClick: p.onToggleTaskPane }, '+')))),
+                h('div', { className: styles.body }, view.renderCalendarContent(p.dayViewProps || {}, p.weekViewProps || {}, p.monthViewProps || {}))),
+            p.showTaskPane ? h('div', { className: styles.taskPane }, view.renderTaskPaneContent()) : null);
+    }
+    function renderDay(view, React, styles) {
+        const date = view.getMoment(view.props.date), today = date.isSame(view.getMoment(), 'day');
+        const chinese = root.FocusI18n.locale.startsWith('zh');
+        const label = (today ? text('今天') + ' ' : date.format(chinese ? 'M月D日' : 'MMM D') + ' ') + date.format('dddd');
+        return React.createElement('div', { className: styles.root + ' focus-schedule-day', style: { '--calendar-day-hour-height': (view.props.hourHeight || 124) + 'px' } },
+            React.createElement('div', { className: styles.header }, React.createElement('div', { className: styles.weekday }, label)),
+            view.renderAllDaySection(), view.renderTimeline(view.shouldUseDualColumn(date)));
+    }
     function attachController(controller, options) {
         if (controller.focusCalendarAttached) return; controller.focusCalendarAttached = true;
         const c = controller, { React, moment, preference, taskManager, subtaskManager, startTask, actions: redux, events, eventTypes } = options;
         let quick = null, picker = null, saving = false, live = true;
+        let periodRequest = 0;
         const invalidate = () => { c.calendarDayEventCache = { tasks: new Map(), subtasks: new Map(), projects: new Map() }; };
+        async function loadPeriod() {
+            const mode = c.state.calendarViewMode; if (mode === 'day' || !live || root.FocusLocalData.maintenance) return;
+            const token = ++periodRequest, date = c.state.calendarDate;
+            const start = date.clone().startOf(mode === 'month' ? 'month' : 'isoWeek').startOf('isoWeek').valueOf();
+            const end = date.clone().endOf(mode === 'month' ? 'month' : 'isoWeek').endOf('isoWeek').valueOf();
+            const db = await root.FocusLocalData.open();
+            const rows = await root.FocusLocalData.transaction(db, ['Schedule', 'Pomodoro'], 'readonly', (tx, done) => {
+                const result = {}; let pending = 2;
+                for (const name of ['Schedule', 'Pomodoro']) {
+                    const request = tx.objectStore(name).index('endDate').getAll(IDBKeyRange.bound(start, end + 7 * 86400000));
+                    request.onsuccess = () => { result[name] = request.result; if (!--pending) done(result); };
+                }
+            });
+            const result = await c.transformCalendarDayEntries(rows.Schedule, rows.Pomodoro, start, end);
+            if (live && c._isMounted && token === periodRequest) c.setState({ calendarMonthEvents: [...result.scheduled, ...result.completed], focusWeekEvents: [...result.scheduled, ...result.completed] });
+        }
         const refresh = async () => {
             if (!c._isMounted || root.FocusLocalData.maintenance) return;
-            invalidate(); await c.loadCalendarDayEntries();
+            invalidate(); await c.loadCalendarDayEntries(); await loadPeriod();
             if (c.state.showCalendarTasks) await c.loadCalendarTasks(c.state.calendarSelectedProjectId);
             const detail = c.state.calendarPomodoroDetail;
             if (detail) {
@@ -112,21 +156,31 @@
                 focusCalendarPreview: { id: 'local-calendar-preview', start: startTime, end: startTime + interval * 1000,
                     title: text('未指定任务'), category: 'scheduled', focusPreview: true } });
             quick.dialog = modal('添加任务', (form) => {
+                form.classList.add('focus-schedule-quick');
+                form.parentElement.classList.add('focus-schedule-quick-overlay');
                 const name = field(form, '任务名称', 'focus-calendar-name'); name.required = true; name.maxLength = 1000;
-                const time = document.createElement('p'); time.textContent = moment(startTime).format('YYYY-MM-DD HH:mm'); form.append(time);
-                const count = field(form, '预计番茄数', 'focus-calendar-count', 'number'); count.min = '1'; count.max = '99'; count.step = '1'; count.value = '1'; count.required = true;
-                const minutes = field(form, '每个番茄（分钟）', 'focus-calendar-minutes', 'number');
+                name.placeholder = text('添加任务...'); name.parentElement.classList.add('focus-schedule-name');
+                const pomodoro = document.createElement('details'); pomodoro.className = 'focus-schedule-pomodoro';
+                const trigger = document.createElement('summary'); trigger.className = 'focus-schedule-setting-row';
+                const icon = document.createElement('span'); icon.textContent = '◷'; icon.className = 'focus-schedule-setting-icon';
+                const caption = document.createElement('span'); caption.textContent = text('番茄');
+                const value = document.createElement('span'); value.className = 'focus-schedule-pomodoro-value';
+                trigger.append(icon, caption, value); pomodoro.append(trigger); form.append(pomodoro);
+                const count = field(pomodoro, '预计番茄数', 'focus-calendar-count', 'number'); count.min = '1'; count.max = '99'; count.step = '1'; count.value = '1'; count.required = true;
+                const minutes = field(pomodoro, '每个番茄（分钟）', 'focus-calendar-minutes', 'number');
                 minutes.min = '1'; minutes.max = '180'; minutes.step = '1'; minutes.value = interval / 60; minutes.required = true;
                 const list = field(form, '清单', 'focus-calendar-project', 'select');
+                list.parentElement.classList.add('focus-schedule-setting-row', 'focus-schedule-list');
                 projects.forEach(project => {
                     const option = document.createElement('option'); option.value = project.id;
                     option.textContent = project.type === 7005 ? text('任务') : project.name; list.append(option);
                 });
                 if (defaultProject) list.value = defaultProject.id;
-                const summary = document.createElement('p'); summary.className = 'focus-calendar-summary'; form.append(summary);
+                const summary = document.createElement('p'); summary.className = 'focus-calendar-summary'; pomodoro.append(summary);
                 const updatePreview = () => {
                     const seconds = Math.max(60, Math.min(10800, Number(minutes.value) * 60 || 60));
                     summary.textContent = count.value + ' × ' + minutes.value + text(' 分钟') + ' · ' + text('最多安排前 5 个番茄，间隔使用短休息时长。');
+                    value.textContent = '🍅 0 / 🍅 ' + count.value + '\n= ' + Number(count.value) * Number(minutes.value) + text(' 分钟');
                     c.setState({ focusCalendarPreview: { ...c.state.focusCalendarPreview, title: name.value.trim() || text('未指定任务'), end: startTime + seconds * 1000 } });
                 };
                 name.oninput = count.oninput = minutes.oninput = updatePreview; updatePreview();
@@ -151,6 +205,20 @@
                     }
                 };
             }, c.cancelQuickTask);
+            const pending = quick;
+            const position = () => {
+                if (quick !== pending || !pending.dialog.form.isConnected) return;
+                const preview = document.querySelector('.focus-calendar-preview');
+                if (!preview) return;
+                const anchor = preview.getBoundingClientRect(), form = pending.dialog.form, bounds = form.getBoundingClientRect();
+                const below = anchor.bottom + 12;
+                const top = below + bounds.height <= root.innerHeight - 12 ? below : anchor.top - bounds.height - 12;
+                Object.assign(form.style, { position: 'fixed', left: Math.max(12, Math.min(root.innerWidth - bounds.width - 12, anchor.left + anchor.width / 2 - bounds.width / 2)) + 'px',
+                    top: Math.max(12, Math.min(root.innerHeight - bounds.height - 12, top)) + 'px' });
+                form.dataset.anchored = 'true';
+            };
+            pending.dialog.form.querySelector('details').ontoggle = position;
+            root.requestAnimationFrame(position);
         };
         c.handleCalendarTimeSlotDoubleClick = date => c.openQuickTask(Number(date), preference.workInterval);
         c.handleCalendarTimeRangeSelect = (start, end) => c.openQuickTask(Math.min(Number(start), Number(end)), Math.abs(Number(end) - Number(start)) / 1000);
@@ -184,9 +252,13 @@
             } catch (error) { notice(error); }
         };
         wrap(c, 'getCalendarDayViewProps', previous => ({ ...previous(),
-            scheduledEvents: c.state.focusCalendarPreview ? [...c.state.calendarDayScheduledEvents, c.state.focusCalendarPreview] : c.state.calendarDayScheduledEvents,
+            hourHeight: 124, scheduledEvents: c.state.focusCalendarPreview ? [...c.state.calendarDayScheduledEvents, c.state.focusCalendarPreview] : c.state.calendarDayScheduledEvents,
             onTimeSlotDoubleClick: c.handleCalendarTimeSlotDoubleClick, onTimeRangeSelect: c.handleCalendarTimeRangeSelect,
             onEventStartPomodoro: c.handleCalendarEventStartPomodoro }));
+        wrap(c, 'getCalendarWeekViewProps', previous => ({ ...previous(), timedEvents: c.state.focusWeekEvents || [] }));
+        c.handleCalendarMonthEventClick = event => c.setState({ calendarDate: moment(event.start).startOf('day'), calendarViewMode: 'day' }, () => c.handleCalendarEventClick(event));
+        c.handleCalendarMonthDayClick = date => c.setState({ calendarDate: date.clone().startOf('day'), calendarViewMode: 'day' });
+        wrap(c, 'componentDidMount', previous => { previous(); loadPeriod().catch(notice); });
         wrap(c, 'handleScheduleDetailChange', (previous, ...args) => { previous(...args); invalidate(); c.loadCalendarDayEntries(); });
         // The original handlers hide write failures. Reload from committed data on
         // failure as well as success so an optimistic block cannot remain fictitious.
@@ -220,10 +292,11 @@
             previous(oldProps, oldState);
             if (!oldState.calendarDate.isSame(c.state.calendarDate, 'day') || oldState.calendarViewMode !== c.state.calendarViewMode) {
                 c.cancelQuickTask(); picker?.close(); picker = null;
+                loadPeriod().catch(notice);
             }
         });
         wrap(c, 'componentWillUnmount', previous => {
-            live = false; quick?.dialog.close(); picker?.close(); quick = picker = null;
+            live = false; periodRequest++; quick?.dialog.close(); picker?.close(); quick = picker = null;
             root.removeEventListener('focus-local-calendar-changed', changed);
             root.removeEventListener('focus-local-timer-changed', changed); root.removeEventListener('focus', focusRefresh); previous();
             events.removeListener(eventTypes.POMODORO_NEW, focusRefresh);
@@ -302,10 +375,10 @@
                 const top = (row.start - start.valueOf()) / 60000 * minuteHeight, height = (row.end - row.start) / 60000 * minuteHeight;
                 const theme = t.getEventAppearance(event, category) || {};
                 const width = 'calc((100% - ' + (12 + (row.columns - 1) * 4) + 'px) / ' + row.columns + ')';
-                const style = { ...theme.containerStyle, top, height, right: 'auto', width,
+                const style = { ...theme.containerStyle, ...(category === 'completed' ? { backgroundColor: event.colorHex || '#4670F6', borderColor: event.colorHex || '#4670F6', color: '#fff' } : {}), top, height, right: 'auto', width,
                     left: 'calc(6px + ' + row.column + ' * (' + width + ' + 4px))' };
-                const duration = Math.max(1, Math.round((event.end - event.start) / 60000));
-                const label = duration >= 60 ? Math.floor(duration / 60) + 'h' + (duration % 60 ? duration % 60 + 'm' : '') : duration + 'm';
+                const seconds = Math.max(1, Math.round((event.end - event.start) / 1000)), duration = Math.round(seconds / 60);
+                const label = seconds < 60 ? seconds + 's' : duration >= 60 ? Math.floor(duration / 60) + 'h' + (duration % 60 ? duration % 60 + 'm' : '') : duration + 'm';
                 const title = event.title || text('未指定任务'), short = height < 52;
                 const onClick = e => { e.stopPropagation(); if (!event.focusPreview) t.handleEventClick(e, event); };
                 return h('div', { key: event.id, className: classes.eventItem + ' focus-calendar-event' + (event.focusPreview ? ' focus-calendar-preview' : ''), style,
@@ -316,9 +389,9 @@
                     onClick, onDoubleClick: e => e.stopPropagation(),
                     onKeyDown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(e); } },
                     onContextMenu: e => { if (!event.focusPreview) t.handleEventContextMenu(e, event, category); } },
-                h('div', { className: 'focus-calendar-event-text' + (short ? ' focus-calendar-inline' : ''), style: theme.titleStyle },
+                h('div', { className: 'focus-calendar-event-text' + (short ? ' focus-calendar-inline' : ''), style: category === 'completed' ? { color: '#fff' } : theme.titleStyle },
                     h('span', { className: 'focus-calendar-event-title', style: short ? {} : { WebkitLineClamp: Math.max(1, Math.floor((height - 30) / 17)) } }, title),
-                    h('span', { className: 'focus-calendar-event-duration', style: theme.timeStyle }, label)),
+                    h('span', { className: 'focus-calendar-event-duration', style: category === 'completed' ? { color: '#fff' } : theme.timeStyle }, label)),
                 category === 'scheduled' && !event.focusPreview ? h('button', { type: 'button', className: 'focus-calendar-start',
                     'aria-label': text('开始专注'), title: text('开始专注'),
                     onMouseDown: e => e.stopPropagation(), onDoubleClick: e => e.stopPropagation(),
@@ -362,7 +435,7 @@
         });
         wrap(t, 'componentWillUnmount', previous => { stopSelection(); clearInterval(nowTimer); t.clearPendingEventDrag(); previous(); });
     }
-    const api = { deadlineInSevenDays, layoutEvents, attachController, attachTimeline };
+    const api = { deadlineInSevenDays, layoutEvents, attachController, attachTimeline, renderShell, renderDay };
     if (typeof module === 'object' && module.exports) module.exports = api;
     else root.FocusCalendar = api;
 })(typeof window === 'undefined' ? globalThis : window);

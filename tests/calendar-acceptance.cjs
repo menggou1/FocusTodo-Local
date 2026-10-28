@@ -50,7 +50,7 @@ fs.mkdirSync(evidence, { recursive: true });
         await page.evaluate(() => FocusLocalReady);
     }
     async function calendar(page, locale = 'zh-CN') {
-        await page.getByText(locale === 'en' ? 'Calendar' : '日历', { exact: true }).click();
+        await page.getByText(locale === 'en' ? 'Schedule' : '日程', { exact: true }).click();
         await page.waitForFunction(() => window.__calendar?._isMounted && window.__timeline?.timelineRef.current);
     }
     async function waitForData(page, predicate, argument) {
@@ -66,12 +66,12 @@ fs.mkdirSync(evidence, { recursive: true });
         const element = page.locator('[class*="timelineScroll"]').first();
         const box = await element.boundingBox();
         await element.evaluate(el => { el.scrollTop = 0; });
-        return { x: box.x + box.width * (completed ? .75 : .25), y: box.y + minutes * 64 / 60 };
+        return { x: box.x + box.width * (completed ? .75 : .25), y: box.y + minutes * await page.evaluate(() => window.__timeline.getMinuteHeight()) };
     }
     async function create(page, name = 'Calendar task', minutes = 100) {
         const position = await slot(page, minutes); await page.mouse.dblclick(position.x, position.y);
         await page.locator('#focus-calendar-name').fill(name);
-        await page.locator('#focus-calendar-count').fill('3'); await page.locator('#focus-calendar-minutes').fill('30');
+        await page.locator('.focus-schedule-pomodoro').evaluate(el => el.open = true); await page.locator('#focus-calendar-count').fill('3'); await page.locator('#focus-calendar-minutes').fill('30');
         await page.getByRole('button', { name: '确定', exact: true }).click();
         await page.locator('.focus-calendar-dialog').waitFor({ state: 'detached' });
         await blocks(page).first().waitFor();
@@ -88,7 +88,7 @@ fs.mkdirSync(evidence, { recursive: true });
             await page.reload(); await ready(page); if (!(await blocks(page).count())) await calendar(page);
             assert.equal(await blocks(page).count(), 3);
             assert.equal((await snapshot(page)).indexedDB.Task.filter(row => row.id === task.id).length, 1);
-            await page.screenshot({ path: path.join(evidence, 'calendar-1.6.0.png') });
+            await page.screenshot({ path: path.join(evidence, 'calendar-1.7.0.png') });
         });
         await scenario('upward and downward selections work; completed column and cancel never write', async page => {
             for (const reverse of [false, true]) {
@@ -162,12 +162,12 @@ fs.mkdirSync(evidence, { recursive: true });
             const block = page.locator('[data-event-id="' + plan.id + '"]');
             let box = await block.boundingBox();
             await page.mouse.move(box.x + 20, box.y + 9); await page.mouse.down();
-            await page.mouse.move(box.x + 20, box.y + 73, { steps: 10 }); await page.mouse.up();
+            await page.mouse.move(box.x + 20, box.y + 9 + 124, { steps: 10 }); await page.mouse.up();
             await page.waitForFunction(({ id, end }) => window.__calendar.state.calendarDayScheduledEvents.find(row => row.id === id)?.end === end, { id: plan.id, end: plan.endDate + 3600000 });
             assert.equal((await snapshot(page)).indexedDB.Schedule.find(row => row.id === plan.id).endDate, plan.endDate + 3600000);
             const handle = block.locator('[class*="eventResizeHandle"]'); box = await handle.boundingBox();
             await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down();
-            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 32, { steps: 10 }); await page.mouse.up();
+            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 62, { steps: 10 }); await page.mouse.up();
             await page.waitForFunction(id => window.__calendar.state.calendarDayScheduledEvents.find(row => row.id === id)?.raw.interval === 3600, plan.id);
             await block.click({ button: 'right' }); await page.getByText('复制', { exact: true }).click();
             await page.waitForFunction(() => document.querySelectorAll('.focus-calendar-event').length === 4);
@@ -216,7 +216,7 @@ fs.mkdirSync(evidence, { recursive: true });
             // Refresh the actual project model before opening the dialog.
             await page.reload(); await ready(page); await calendar(page);
             const position = await slot(page); await page.mouse.dblclick(position.x, position.y);
-            await page.locator('#focus-calendar-name').fill('Seven pomodoros'); await page.locator('#focus-calendar-count').fill('7');
+            await page.locator('#focus-calendar-name').fill('Seven pomodoros'); await page.locator('.focus-schedule-pomodoro').evaluate(el=>el.open=true); await page.locator('#focus-calendar-count').fill('7');
             await page.locator('#focus-calendar-project').selectOption('custom-calendar');
             await page.getByRole('button', { name: '确定', exact: true }).click(); await page.locator('.focus-calendar-dialog').waitFor({ state: 'detached' });
             const data = await snapshot(page); assert.equal(data.indexedDB.Schedule.length, 5);
@@ -231,6 +231,92 @@ fs.mkdirSync(evidence, { recursive: true });
             assert(message.includes('维护'));
             assert.equal((await snapshot(page)).indexedDB.Task.length, 1);
         });
+        await scenario('schedule is reorderable and hideable in system list management', async page => {
+            await page.mouse.click(1255,25); await page.getByText('清单管理',{exact:true}).click();
+            const row = page.locator('[data-project-id="id-task-schedule"]'); await row.waitFor();
+            assert((await row.innerText()).includes('日程')); assert.equal(await row.locator('.focus-project-handle').count(),1);
+            const before = (await snapshot(page)).indexedDB.Project.find(row => row.id === 'id-task-schedule').order;
+            await row.locator('.focus-project-handle').focus(); await page.keyboard.press('ArrowUp');
+            await waitForData(page, async order => (await FocusLocalData.snapshot()).indexedDB.Project.find(row => row.id === 'id-task-schedule').order !== order, before);
+            await row.getByRole('checkbox').click({force:true});
+            await waitForData(page, async () => (await FocusLocalData.snapshot()).indexedDB.Project.find(row => row.id === 'id-task-schedule').state === 1);
+            await page.reload(); await ready(page);
+            assert.equal(await page.getByText('日程',{exact:true}).count(),0);
+            await page.mouse.click(1255,25); await page.getByText('清单管理',{exact:true}).click();
+            const hidden = page.locator('[data-project-id="id-task-schedule"]'); await hidden.waitFor();
+            await hidden.getByRole('checkbox').click({force:true});
+            await waitForData(page, async () => (await FocusLocalData.snapshot()).indexedDB.Project.find(row => row.id === 'id-task-schedule').state === 0);
+            assert.notEqual((await snapshot(page)).indexedDB.Project.find(row => row.id === 'id-task-schedule').order,before);
+        });
+        await scenario('month view loads records, scrolls to final week and opens a selected day', async page => {
+            await create(page,'Month task');
+            await page.locator('.focus-schedule-view').selectOption('month');
+            const grid=page.locator('[class*="CalendarMonthView-gridWrapper"]'); await grid.waitFor();
+            await page.locator('[class*="CalendarMonthView-eventItem"]').first().waitFor();
+            const size=await grid.evaluate(el=>({height:el.clientHeight,scroll:el.scrollHeight}));assert(size.scroll>size.height);
+            await grid.hover();await page.mouse.wheel(0,900);
+            await page.waitForFunction(()=>document.querySelector('[class*="CalendarMonthView-gridWrapper"]').scrollTop>0);
+            await page.screenshot({path:path.join(evidence,'schedule-month.png')});
+            const cell=page.locator('[class*="CalendarMonthView-cell-"]').last();await cell.scrollIntoViewIfNeeded();
+            await cell.click();await page.waitForFunction(()=>window.__calendar.state.calendarViewMode==='day');
+        });
+        for(const mode of ['countup','countdown'])await scenario(mode+' pause then repeated stop never creates zero-minute history',async page=>{
+            await page.evaluate(async mode=>{
+                await window.__timer.localTimer.run('start',{mode,taskId:'',subtaskId:'',config:{interval:1500}});
+                const reduce=FocusTimerCore.reduce;
+                FocusTimerCore.reduce=function(session,action,now){
+                    if(action.type==='pause')session={...session,cursorAt:now-27000,observedAt:now-27000,phaseElapsed:0,totalSeconds:0,recordedSeconds:0,spans:[]};
+                    return reduce(session,action,now);
+                };
+                try{await window.__timer.localTimer.run('pause');}finally{FocusTimerCore.reduce=reduce;}
+                await window.__timer.localTimer.run('stop');await window.__timer.localTimer.run('stop');
+            },mode);
+            const data=await snapshot(page);assert.equal(data.indexedDB.Pomodoro.length,1);assert.equal(data.indexedDB.Pomodoro[0].interval,27);
+            assert.equal(data.indexedDB.Task.length,0,'A focus record must not create a task');
+            const legacy=await page.evaluate(()=>Number(27).secondsToLocalHH_MM());assert(legacy.includes('0'));
+            await page.getByText('已完成',{exact:true}).first().click();
+            await page.locator('[class*="PomodoroItem-interval"]').filter({hasText:'27秒'}).waitFor();
+            assert.equal(await page.locator('[class*="PomodoroItem-interval"]').filter({hasText:'0分钟'}).count(),0);
+            await page.screenshot({path:path.join(evidence,'history-subminute-'+mode+'.png')});
+        });
+        await scenario('invalid zero-duration legacy record is absent without deleting saved data',async page=>{
+            await page.evaluate(()=>FocusLocalData.putPomodoro({id:'legacy-zero',objType:'POMODORO',state:0,interval:0,pomodoroInterval:1500,endDate:Date.now(),taskId:'',subtaskId:'',sync:0}));
+            await page.getByText('已完成',{exact:true}).first().click();
+            assert.equal(await page.locator('[class*="PomodoroItem-root"]').count(),0);
+            assert.equal((await snapshot(page)).indexedDB.Pomodoro.length,1,'Keep legacy data intact');
+        });
+        await scenario('official-style day, task sidebar and compact quick task render together',async page=>{
+            await page.evaluate(async()=>{
+                const start=new Date();start.setHours(12,50,0,0);
+                const first=await FocusLocalData.createCalendarTask({name:'0',projectId:'id-task-tasks',startTime:start.getTime(),interval:1500,count:1,shortBreak:300});
+                start.setHours(14,5,0,0);
+                await FocusLocalData.createCalendarTask({name:'2',projectId:'id-task-tasks',startTime:start.getTime(),interval:6060,count:1,shortBreak:300});
+                const db=await FocusLocalData.open();await FocusLocalData.transaction(db,['Task'],'readwrite',tx=>tx.objectStore('Task').put({...first.task,id:'visual-completed-task',name:'1'}));
+                start.setHours(14,20,0,0);
+                await FocusLocalData.putPomodoro({id:'visual-completed',objType:'POMODORO',state:0,interval:3960,pomodoroInterval:1500,endDate:start.getTime(),taskId:'visual-completed-task',subtaskId:'',sync:0});
+            });
+            await page.locator('[data-event-id="visual-completed"]').waitFor();
+            const scroll=page.locator('[class*="timelineScroll"]').first();await scroll.evaluate(el=>el.scrollTop=12.5*124);
+            const completed=page.locator('[data-event-id="visual-completed"]');
+            assert.equal(await completed.evaluate(el=>getComputedStyle(el).color),'rgb(255, 255, 255)');
+            await page.screenshot({path:path.join(evidence,'schedule-day.png')});
+            await page.locator('.focus-schedule-add').click();
+            await page.locator('[class*="CalendarView-taskListTrigger"]').click();
+            await page.locator('#calendar-task-list-popover').waitFor();
+            await page.waitForFunction(()=>{
+                let node=document.getElementById('calendar-task-list-popover');
+                if(!node)return false;
+                for(;node;node=node.parentElement)if(Number(getComputedStyle(node).opacity)<.99)return false;
+                return true;
+            });
+            await page.screenshot({path:path.join(evidence,'schedule-task-panel.png')});
+            await page.locator('#calendar-task-list-popover').getByText('明天',{exact:true}).click();
+            await page.locator('[class*="CalendarView-taskPaneClose"]').click();
+            await page.evaluate(()=>{const date=new Date();date.setHours(13,50,0,0);window.__calendar.openQuickTask(date.getTime(),3000)});
+            assert.equal(await page.locator('.focus-schedule-pomodoro').getAttribute('open'),null);
+            await page.screenshot({path:path.join(evidence,'schedule-quick.png')});
+            await page.keyboard.press('Escape');
+        });
         await scenario('English dark quick task stays within a narrow viewport', async page => {
             await page.setViewportSize({ width: 600, height: 720 });
             await page.evaluate(() => window.__calendar.openQuickTask(Date.now(), 1500));
@@ -238,7 +324,7 @@ fs.mkdirSync(evidence, { recursive: true });
             assert(!(await form.innerText()).includes('unavailable in English'));
             const box = await form.boundingBox(); assert(box.x >= 0 && box.x + box.width <= 600);
             assert.equal(await form.getAttribute('data-dark'), 'true');
-            await page.screenshot({ path: path.join(evidence, 'calendar-english-dark-1.6.0.png') });
+            await page.screenshot({ path: path.join(evidence, 'calendar-english-dark-1.7.0.png') });
             await page.keyboard.press('Escape');
         }, 'en', true);
     } finally {
