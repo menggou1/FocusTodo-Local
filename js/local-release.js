@@ -3,13 +3,13 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.5.3",
+    "localVersion": "1.5.4",
     "author": "Lexible",
     "date": "2026-10-28",
     "repositoryRemote": "Focustodo-local",
     "updates": [
         {
-            "version": "7.1.1-local.1.5.3",
+            "version": "7.1.1-local.1.5.4",
             "date": "2026-10-28",
             "title": "系统清单排序与用户名存储修复",
             "items": [
@@ -25,7 +25,7 @@
                 "Restore the default system list order while preserving hidden states and custom-list data.",
                 "Remove the unused NAME browser cookie and read usernames from local storage."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.5.3.md"
+            "report": "docs/UPDATE-7.1.1-local.1.5.4.md"
         },
         {
             "version": "7.1.1-local.1.5.2",
@@ -297,7 +297,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.5.3",
+    "version": "7.1.1-local.1.5.4",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

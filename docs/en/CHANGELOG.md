@@ -2,16 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.5.3**, author Lexible.
+Current application: **7.1.1-local.1.5.4**, author Lexible.
 
-## 7.1.1-local.1.5.3 · 2026-10-28
+## 7.1.1-local.1.5.4 · 2026-10-28
 
 - Use in-app dragging for system lists without browser text-search gestures, keeping the moved row above other rows.
 - Remove custom-list ordering from settings; continue reordering custom lists in the main view.
 - Restore the default system list order while preserving hidden states and custom-list data.
 - Remove the unused NAME browser cookie and read usernames from local storage.
 
-[English report](UPDATE-7.1.1-local.1.5.3.md).
+[English report](UPDATE-7.1.1-local.1.5.4.md).
 
 ## 7.1.1-local.1.5.2 · 2026-10-28
 

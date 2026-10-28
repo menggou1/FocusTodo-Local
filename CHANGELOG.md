@@ -2,18 +2,18 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.5.3** · Git Tag **1.5.3** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.5.4** · Git Tag **1.5.4** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
 
-## 7.1.1-local.1.5.3 · 2026-10-28
+## 7.1.1-local.1.5.4 · 2026-10-28
 
 - 系统清单使用界面内拖动，取消浏览器文本搜索干扰，主动移动行处于动画上层。
 - 管理界面取消自定义清单排序，保留主界面的原版拖动。
 - 新增恢复系统清单默认排序，保留隐藏状态及其他清单数据。
 - 清理不再使用的 NAME Cookie，保留本地用户名并停用旧 Cookie 写入。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.3) · [报告](docs/UPDATE-7.1.1-local.1.5.3.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.4) · [报告](docs/UPDATE-7.1.1-local.1.5.4.md)。
 
 ## 7.1.1-local.1.5.2 · 2026-10-28
 

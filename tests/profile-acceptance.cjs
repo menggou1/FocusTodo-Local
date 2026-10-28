@@ -52,6 +52,8 @@ const server = http.createServer((req, res) => {
         } finally { await context.close(); }
     }
     async function account(page) {
+        await page.waitForFunction(() => window.FocusLocalData && document.querySelector('#root')?.children.length && !document.documentElement.classList.contains('focus-starting'));
+        await page.evaluate(() => window.FocusLocalReady);
         await page.mouse.click(1255, 25); await page.getByText('账号', { exact: true }).click();
         const pane = page.locator('[class*="AccountSettings-root"]'); await pane.locator('input[type=text]').waitFor(); return pane;
     }
