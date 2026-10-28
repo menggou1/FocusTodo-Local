@@ -1,0 +1,32 @@
+{
+  "version": "7.1.1-local.1.5.1",
+  "date": "2026-10-28",
+  "environment": "Windows, Node 24.16.0, isolated headless Edge",
+  "syntax": "passed",
+  "unit": {
+    "passed": 57,
+    "skipped": 1,
+    "skipReason": "POSIX wrapper test on Windows"
+  },
+  "browser": {
+    "startup": 14,
+    "application": 59,
+    "maintenance": 7,
+    "listOrdering": 2,
+    "audioCoordination": 5,
+    "localProfile": 5,
+    "total": 92,
+    "status": "passed"
+  },
+  "packaging": [
+    "ZIP extracted launch passed",
+    "tar.gz extracted launch passed",
+    "mismatched tag refused"
+  ],
+  "pagesFiltering": {
+    "passed": 2,
+    "source": "committed baseline main; release workflow verifies the new committed source"
+  },
+  "integrationGenerators": "repeated output hashes unchanged",
+  "limits": "Generated data only. Audio test doubles verify coordination, not physical sound. Remaining actual-environment verification stays in BACKLOG.md."
+}

@@ -633,7 +633,7 @@ const server = http.createServer((request, response) => {
             await createActiveTask(page, 'countup');
             await page.evaluate(() => window.__acceptanceTimer.zoomDown());
             await openReset(page);
-            // Rename uses the legacy account API, which also writes a browser cookie.
+            // The account entry saves directly through the local profile service.
             await page.getByRole('button', { name: '取消', exact: true }).click();
             const account = page.locator('[class*="AccountSettings-root"]');
             const username = account.locator('input[type=text]');

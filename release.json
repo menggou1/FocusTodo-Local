@@ -1,10 +1,27 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.5.0",
+  "localVersion": "1.5.1",
   "author": "Lexible",
-  "date": "2026-10-27",
+  "date": "2026-10-28",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.5.1",
+      "date": "2026-10-28",
+      "title": "清单排序反馈与本地兼容修复",
+      "items": [
+        "清单每行新增三条杠拖动手柄、排序动画和插入提示，拖动时不可放置的清单分组变灰。",
+        "改善背景音的多窗口交接；缺少 Web Locks 时说明兼容限制，保留试听与完成提示音。",
+        "本地昵称和头像直接通过数据服务保存，写入失败时正确反馈。"
+      ],
+      "titleEn": "List ordering feedback and local compatibility fixes",
+      "itemsEn": [
+        "Add visible three-bar drag handles, reorder animation and insertion feedback; dim lists in the unavailable group while dragging.",
+        "Improve background-audio handoff between windows; explain the fallback without Web Locks while retaining previews and completion sounds.",
+        "Save local names and avatars through the data service and report failed writes."
+      ],
+      "report": "docs/UPDATE-7.1.1-local.1.5.1.md"
+    },
     {
       "version": "7.1.1-local.1.5.0",
       "date": "2026-10-27",

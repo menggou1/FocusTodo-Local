@@ -14,6 +14,118 @@
     font:14px/1.6 var(--focus-ui-font)
 }
 
+/* Keep the instructions visible while the single list viewport scrolls. */
+.focus-project-management {
+    display:flex;
+    flex-direction:column;
+    box-sizing:border-box;
+    min-height:0;
+}
+
+.focus-project-management .ProjectManagement-content--kCla {
+    flex:1;
+    min-height:0;
+    height:auto;
+}
+
+.focus-project-hint {
+    flex:none;
+    margin:0 0 12px;
+    color:var(--text-desc);
+    font:12px/1.6 var(--focus-ui-font);
+}
+
+.focus-project-management [data-project-id] {
+    position:relative;
+    cursor:grab;
+    transition:opacity .15s ease,background-color .15s ease;
+}
+
+.focus-project-management .focus-project-handle-cell {
+    width:30px;
+    padding:0 6px 0 0;
+    vertical-align:middle;
+}
+
+.focus-project-handle {
+    box-sizing:border-box;
+    display:inline-flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:3px;
+    width:28px;
+    height:28px;
+    padding:5px;
+    border:0;
+    border-radius:5px;
+    color:var(--text-desc);
+    background:transparent;
+    vertical-align:middle;
+    cursor:grab;
+}
+
+.focus-project-handle span {
+    display:block;
+    width:14px;
+    height:2px;
+    border-radius:1px;
+    background:currentColor;
+    pointer-events:none;
+}
+
+.focus-project-handle:hover {
+    color:var(--text-title);
+    background:var(--bg-hover);
+}
+
+.focus-project-management [data-project-id]:focus-visible,
+.focus-project-handle:focus-visible {
+    outline:2px solid var(--theme-red);
+    outline-offset:-2px;
+}
+
+.focus-project-management [data-dragging="true"] {
+    opacity:.5;
+    cursor:grabbing;
+}
+
+.focus-project-management [data-dragging="true"] .focus-project-handle {
+    cursor:grabbing;
+}
+
+.focus-project-management[data-drag-group="presetProjects"] [data-project-group="customProjects"],
+.focus-project-management[data-drag-group="customProjects"] [data-project-group="presetProjects"] {
+    opacity:.35;
+    filter:grayscale(1);
+    background:var(--bg-button);
+    cursor:not-allowed;
+}
+
+.focus-project-management[data-drag-group="presetProjects"] [data-project-group="customProjects"] *,
+.focus-project-management[data-drag-group="customProjects"] [data-project-group="presetProjects"] * {
+    cursor:not-allowed;
+}
+
+.focus-project-management [data-drop-position]::after {
+    content:"";
+    position:absolute;
+    z-index:1;
+    left:5px;
+    right:5px;
+    height:3px;
+    border-radius:2px;
+    background:var(--theme-red);
+    pointer-events:none;
+}
+
+.focus-project-management [data-drop-position="before"]::after { top:0; }
+.focus-project-management [data-drop-position="after"]::after { bottom:0; }
+
+@media (prefers-reduced-motion:reduce) {
+    .focus-project-management [data-project-id] { transition:none; }
+}
+
 .focus-local-notice button {
     margin-left:16px;
     cursor:pointer;

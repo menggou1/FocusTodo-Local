@@ -60,3 +60,7 @@ XHR/fetch compatibility and CSP restrict external runtime traffic to the allowed
 ## Legacy integration boundary
 
 React 16.14, Redux, Moment, jQuery and styles remain inside the legacy assets. Historical component-tree descriptions are not a source build. The AST scripts maintain known module boundaries and retain the changed bundle. UI navigation, task lists and reports still use the legacy component model; data and timer rules have explicit local boundaries. Current module ownership and release commands are in the maintenance guide; unfinished engineering lives only in the backlog.
+
+## Local profile and audio ownership
+
+Names and avatars are saved directly through the local data service under import/reset maintenance ownership. Failed writes retain the saved profile and report the error. Background sound queues an abortable Web Lock for immediate handoff; without Web Locks, automatic background audio stays paused with an on-demand explanation. Manual previews and completion effects remain available.

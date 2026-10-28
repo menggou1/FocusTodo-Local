@@ -2,9 +2,18 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前应用 **7.1.1-local.1.5.0** · Git Tag **1.5.0** · 作者 **Lexible**。
+当前应用 **7.1.1-local.1.5.1** · Git Tag **1.5.1** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
+
+## 7.1.1-local.1.5.1 · 2026-10-28
+
+- 清单排序新增三条杠手柄、动画和插入提示，拖动时灰显不可放置分组。
+- 改善多窗口背景音交接，明确无 Web Locks 时的兼容行为。
+- 本地资料直接通过数据服务保存，正确反馈写入失败。
+- 后续提交统一使用 Conventional Commits 格式。
+
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.1) · [中文报告](docs/UPDATE-7.1.1-local.1.5.1.md) · [English](docs/en/UPDATE-7.1.1-local.1.5.1.md)。
 
 ## 7.1.1-local.1.5.0 · 2026-10-27
 

@@ -2,7 +2,7 @@
 
 [返回首页](../README.md) · [更新记录与版本报告](../CHANGELOG.md) · [架构说明](../ARCHITECTURE.md)
 
-本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.5.0`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
+本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.5.1`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
 
 ## 1. 开始修改前
 
@@ -62,6 +62,7 @@ node scripts/revise-timer-integration.cjs
 node scripts/revise-app-integration.cjs
 node scripts/revise-pomodoro-rendering.cjs
 node scripts/revise-project-management.cjs
+node scripts/revise-local-profile.cjs
 ```
 
 这些脚本共用 `scripts/lib/bundle-editor.cjs`，校验已知 1484 个模块的 AST 边界、唯一匹配及编辑重叠，写入前再次解析。番茄渲染脚本维护数字进度转换及完成按钮的异步点击锁。脚本结构断言失败时先检查新 bundle，不能绕过断言强行替换。修改后重复运行并比较哈希，确保结果稳定。
@@ -79,7 +80,7 @@ node scripts/revise-project-management.cjs
 
 | 情况 | 完整版本示例 | Tag |
 |---|---|---|
-| 当前发布 / main / Pages | `7.1.1-local.1.5.0` | `1.5.0` |
+| 当前发布 / main / Pages | `7.1.1-local.1.5.1` | `1.5.1` |
 | 兼容修复 | `7.1.1-local.1.2.3` | `1.2.3` |
 | 兼容功能 | `7.1.1-local.1.3.0` | `1.3.0` |
 | 本地不兼容改变 | `7.1.1-local.2.0.0` | `2.0.0`，另附迁移和回退方案 |
@@ -98,6 +99,8 @@ node scripts/revise-project-management.cjs
 
 ## 5. 验收与提交
 
+提交遵循 Conventional Commits：`类型(可选范围): 简短说明`，例如 `fix(lists): improve drag feedback`。`fix:` 表示修复，`feat:` 表示新增功能，`docs:`、`refactor:`、`test:`、`chore:` 分别用于文档、重构、测试和维护；只约束后续提交，不改写已发布历史。
+
 ```powershell
 npm run build:release
 npm test
@@ -108,7 +111,7 @@ git diff --stat
 git status --short
 ```
 
-当前全量包含计时核心、服务、发布信息、启动器、备份编码，14 项启动/字体用例、59 项应用浏览器用例和 7 项并发维护场景。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
+当前全量包含计时核心、服务、发布信息、启动器、备份编码，14 项启动/字体用例、59 项应用浏览器用例和 7 项并发维护场景，以及清单拖动、音频协调和本地资料专项验收。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 

@@ -205,5 +205,11 @@
   "清单已变化，请重试。": "Lists changed. Please retry.",
   "清单顺序无效，请重试。": "List order is invalid. Please retry.",
   "保存失败": "Save failed",
-  "拖动或使用上下方向键排序": "Drag or use the up and down arrow keys to reorder"
+  "拖动或使用上下方向键排序": "Drag or use the up and down arrow keys to reorder",
+  "拖动三条杠排序，也可聚焦后使用上下方向键。系统清单与自定义清单分别排序。": "Drag the three-line handle to reorder, or focus a row and use the up and down arrow keys. System and custom lists are ordered separately.",
+  "仅能在同类清单内排序，灰色区域不可放置。": "Reorder within the same list type. Grey areas cannot accept a drop.",
+  "当前浏览器不支持多标签页背景音协调，已暂停自动背景音。计时、完成铃声和手动试听仍可使用。": "This browser cannot coordinate background audio across tabs, so automatic background audio is paused. The timer, completion sounds and manual previews remain available.",
+  "背景音协调不可用，已暂停自动背景音。计时、完成铃声和手动试听仍可使用；刷新后可重试。": "Background audio coordination is unavailable, so automatic background audio is paused. The timer, completion sounds and manual previews remain available. Reload to retry.",
+  "用户名必须为 1 至 50 个字符。": "Username must contain 1 to 50 characters.",
+  "头像图片无效，请重新选择。": "The avatar image is invalid. Please choose another image."
 }

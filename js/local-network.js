@@ -5,7 +5,6 @@
     root.FocusLocalNetwork = { install(identity) {
         if (installed) return;
         installed = true;
-        var _origSetItem = identity.set, utf8Base64Encode = identity.encode;
         var _REQUEST_WHITELIST = ['www.bing.com', 'bing.com', 'bing.biturl.top'];
         function _isWhitelisted(input) {
             try {
@@ -56,35 +55,6 @@
                 if (xhr._blocked) {
                     // 构建响应数据
                     var _xhrResponse = { status: 0 };
-
-                    // 检查是否是修改用户名的请求
-                    if (xhr._blockedUrl && xhr._blockedUrl.indexOf('v63/user') >= 0 && data) {
-                        try {
-                            var _xhrDataStr = typeof data === 'string' ? data : '';
-                            // 解析 form data 中的 username 参数
-                            var _pairs = _xhrDataStr.split('&');
-                            for (var _pi = 0; _pi < _pairs.length; _pi++) {
-                                var _kv = _pairs[_pi].split('=');
-                                if (_kv[0] === 'username' && _kv[1]) {
-                                    var _rawName = decodeURIComponent(_kv[1].replace(/\+/g, ' '));
-                                    if (_rawName) {
-
-                                        var _encodeFn = (window.Base64 && window.Base64.encode)
-                                            ? function(s) { return window.Base64.encode(s); }
-                                            : utf8Base64Encode;
-                                        var _encoded = _encodeFn(_rawName);
-                                        // 写入 localStorage
-                                        try { _origSetItem('cookie.NAME', _encoded); } catch (e) {}
-                                        _xhrResponse.name = _encoded;
-
-                                    }
-                                    break;
-                                }
-                            }
-                        } catch (e) {
-                            console.warn('[Lexible XHR] Error parsing username:', e);
-                        }
-                    }
 
                     var _xhrRespStr = JSON.stringify(_xhrResponse);
                     var generation = xhr._focusRequestGeneration;

@@ -499,6 +499,36 @@
             root.dispatchEvent(new Event('focus-local-maintenance')); notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'):'数据已在另一个标签页更新，请刷新本页。'));
         } else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
+    // Profile edits share the import/reset ownership boundary, then commit one
+    // atomic localStorage value. A failed write never publishes a new profile.
+    async function saveProfile(field, value) {
+        const text = message => root.FocusI18n ? root.FocusI18n.text(message) : message;
+        let key, stored;
+        if (field === 'name') {
+            if (typeof value !== 'string' || !value.trim() || value.trim().length > 50) return Promise.reject(new Error(text('用户名必须为 1 至 50 个字符。')));
+            key = 'cookie.NAME'; stored = installIdentity().encode(value.trim());
+        } else if (field === 'avatar') {
+            if (typeof value !== 'string' || value.length > 512 * 1024 || !/^data:image\/(?:png|jpeg|gif);base64,[A-Za-z0-9+/]+=*$/.test(value)) return Promise.reject(new Error(text('头像图片无效，请重新选择。')));
+            key = 'Portrait'; stored = value;
+        } else return Promise.reject(new Error('Unknown local profile field'));
+        return exclusive(() => maintenanceLock(async lease => {
+            if (maintenance || invalidated) throw new Error(text('本地数据维护中，请等待完成后刷新。'));
+            const db = await open();
+            await transaction(db, ['LocalMeta'], 'readonly', (tx, done, fail) => {
+                let remaining = 2;
+                for (const id of ['maintenance', 'settings-journal']) {
+                    const request = tx.objectStore('LocalMeta').get(id);
+                    request.onsuccess = () => {
+                        if (request.result) fail(new Error(text('存在进行中或待恢复的数据维护，请等待或刷新。')));
+                        else if (!--remaining) done();
+                    };
+                }
+            });
+            lease.assert();
+            rawSet(key, stored);
+            return stored;
+        }));
+    }
     let localIdentity = null;
     function installIdentity() {
         if (localIdentity) return localIdentity;
@@ -609,7 +639,7 @@
 
     root.FocusLocalData = { installIdentity, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
         snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
-        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify,
+        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, saveProfile,
         get maintenance() { return maintenance; } };
     root.FocusLocalReady = exclusive(recoverJournal);
     root.FocusLocalReady.catch(error => { notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据初始化失败：'):'本地数据初始化失败：') + error.message); console.error(error); });

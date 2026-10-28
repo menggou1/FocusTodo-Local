@@ -252,7 +252,8 @@
         return timer.localTimer;
     }
     function attachAudio(player, preference) {
-        let background = null, audition = null, wantsBackground = false, requesting = false, releaseLock = null, suspended = false, retryAfterRelease = false;
+        let background = null, audition = null, wantsBackground = false, requesting = false, releaseLock = null, suspended = false;
+        let lockRequest = null, coordinationFailed = false, coordinationNoticeShown = false;
         const effects = new Set();
         const stop = audio => { if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); } };
         function play(file, volume, loop) {
@@ -270,30 +271,52 @@
         };
         function stopBackground() {
             stop(background); background = null;
+            if (lockRequest) lockRequest.abort();
             if (releaseLock) { releaseLock(); releaseLock = null; }
+        }
+        function explainCoordination() {
+            if (coordinationNoticeShown) return;
+            coordinationNoticeShown = true;
+            const message = coordinationFailed
+                ? '背景音协调不可用，已暂停自动背景音。计时、完成铃声和手动试听仍可使用；刷新后可重试。'
+                : '当前浏览器不支持多标签页背景音协调，已暂停自动背景音。计时、完成铃声和手动试听仍可使用。';
+            notice(root.FocusI18n ? root.FocusI18n.text(message) : message);
         }
         function ensureBackground() {
             const file = preference.bgMusic, volume = preference.whiteNoiseVolume / 100;
-            if (!wantsBackground || suspended || document.hidden || player.timerState !== 'work' || file === 'bgm_Mute' || volume <= 0) { stopBackground(); return; }
+            if (!wantsBackground || suspended || document.hidden || player.timerState !== 'work' || file === 'bgm_Mute' || typeof file !== 'string' || !/^[A-Za-z0-9_]+$/.test(file) || volume <= 0) { stopBackground(); return; }
             if (background && background.dataset.name === file) {
                 background.volume = volume;
                 if (background.paused) background.play().catch(() => {});
                 return;
             }
             if (background) { stopBackground(); }
-            if (navigator.locks && !releaseLock) {
-                if (requesting) { retryAfterRelease = true; return; }
+            if (coordinationFailed || !navigator.locks || typeof navigator.locks.request !== 'function') {
+                explainCoordination(); return;
+            }
+            if (!releaseLock) {
+                if (requesting) return;
                 requesting = true;
-                navigator.locks.request('focustodo-local-background-audio', { ifAvailable: true }, async lock => {
-                    if (!lock) return;
+                const controller = new AbortController(); lockRequest = controller;
+                // A queued browser lock transfers ownership immediately when the
+                // current page stops. A timeout cannot safely replace this lock:
+                // a suspended page may still be playing through the audio device.
+                Promise.resolve().then(() => navigator.locks.request('focustodo-local-background-audio', { signal: controller.signal }, async () => {
+                    if (controller.signal.aborted) return;
                     await new Promise(resolve => {
                         releaseLock = resolve;
                         ensureBackground();
                     });
-                }).catch(error => console.warn('[Local audio] Lock unavailable:', error.message))
+                })).catch(error => {
+                    if (error.name === 'AbortError') return;
+                    coordinationFailed = true; stopBackground();
+                    console.warn('[Local audio] Lock unavailable:', error.message);
+                    if (wantsBackground && !suspended && !document.hidden) explainCoordination();
+                })
                     .finally(() => {
+                        if (lockRequest === controller) lockRequest = null;
                         requesting = false;
-                        if (retryAfterRelease) { retryAfterRelease = false; ensureBackground(); }
+                        if (!coordinationFailed) ensureBackground();
                     });
                 return;
             }
