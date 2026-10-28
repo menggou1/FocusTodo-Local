@@ -3,11 +3,30 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.5.2",
+    "localVersion": "1.5.3",
     "author": "Lexible",
     "date": "2026-10-28",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.5.3",
+            "date": "2026-10-28",
+            "title": "系统清单排序与用户名存储修复",
+            "items": [
+                "系统清单改用界面内拖动，禁放位置不再触发浏览器文本搜索，主动移动行显示在动画上层。",
+                "清单管理取消自定义清单排序，自定义清单继续在主界面拖动。",
+                "新增恢复系统清单默认排序按钮，保留隐藏状态和自定义清单数据。",
+                "清理已停用的 NAME Cookie，用户名统一从本地存储读取。"
+            ],
+            "titleEn": "System list ordering and username storage fixes",
+            "itemsEn": [
+                "Use in-app dragging for system lists without browser text-search gestures, keeping the moved row above other rows.",
+                "Remove custom-list ordering from settings; continue reordering custom lists in the main view.",
+                "Restore the default system list order while preserving hidden states and custom-list data.",
+                "Remove the unused NAME browser cookie and read usernames from local storage."
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.5.3.md"
+        },
         {
             "version": "7.1.1-local.1.5.2",
             "date": "2026-10-28",
@@ -278,7 +297,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.5.2",
+    "version": "7.1.1-local.1.5.3",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

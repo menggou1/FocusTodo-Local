@@ -64,3 +64,5 @@ React 16.14, Redux, Moment, jQuery and styles remain inside the legacy assets. H
 ## Local profile and audio ownership
 
 Names and avatars are saved directly through the local data service under import/reset maintenance ownership. Failed writes retain the saved profile and report the error. Background sound queues an abortable Web Lock for immediate handoff; without Web Locks, automatic background audio stays paused with an on-demand explanation. Manual previews and completion effects remain available.
+
+`cookie.NAME` is a legacy-compatible localStorage key, not a browser cookie. Startup, name saves and the legacy NAME setter remove the obsolete browser NAME cookie. The old console rename helper remains removed.

@@ -211,5 +211,7 @@
   "当前浏览器不支持多标签页背景音协调，已暂停自动背景音。计时、完成铃声和手动试听仍可使用。": "This browser cannot coordinate background audio across tabs, so automatic background audio is paused. The timer, completion sounds and manual previews remain available.",
   "背景音协调不可用，已暂停自动背景音。计时、完成铃声和手动试听仍可使用；刷新后可重试。": "Background audio coordination is unavailable, so automatic background audio is paused. The timer, completion sounds and manual previews remain available. Reload to retry.",
   "用户名必须为 1 至 50 个字符。": "Username must contain 1 to 50 characters.",
-  "头像图片无效，请重新选择。": "The avatar image is invalid. Please choose another image."
+  "头像图片无效，请重新选择。": "The avatar image is invalid. Please choose another image.",
+  "拖动三条杠或使用上下方向键调整系统清单。自定义清单请在主界面排序。": "Drag the handles or use the up and down arrow keys to reorder system lists. Reorder custom lists in the main view.",
+  "恢复系统清单默认排序": "Restore default system list order"
 }

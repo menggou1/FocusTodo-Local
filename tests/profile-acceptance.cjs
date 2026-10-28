@@ -43,6 +43,7 @@ const server = http.createServer((req, res) => {
         await context.route('**/*', route => route.request().url().startsWith(url) || !/^https?:/.test(route.request().url()) ? route.continue() : route.abort());
         const page = await context.newPage(); page.on('pageerror', error => { errors.push(error.message); console.error(error.message); });
         try {
+            await context.addCookies([{name:'NAME',value:'obsolete-cookie',url}]);
             await page.goto(url); await page.waitForFunction(() => window.FocusLocalData && document.querySelector('#root')?.innerText);
             await page.evaluate(() => window.FocusLocalReady);
             await body(page, context);
@@ -66,7 +67,9 @@ const server = http.createServer((req, res) => {
     }
     try {
         await scenario('local Unicode name persists through reload without a cloud request', async page => {
+            assert.equal((await page.context().cookies()).some(cookie=>cookie.name==='NAME'),false);
             const pane = await account(page); await rename(page, pane, '  本地名字 + 🙂  ');
+            assert.equal((await page.context().cookies()).some(cookie=>cookie.name==='NAME'),false);
             assert.equal(await pane.locator('input[type=text]').inputValue(), '本地名字 + 🙂');
             assert.equal(await page.evaluate(() => Base64.decode(localStorage.getItem('cookie.NAME'))), '本地名字 + 🙂');
             assert.deepEqual(await page.evaluate(() => window.__profileRequests), []);

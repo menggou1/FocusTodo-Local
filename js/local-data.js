@@ -526,10 +526,24 @@
             });
             lease.assert();
             rawSet(key, stored);
+            if (field === 'name') clearLegacyNameCookie();
             return stored;
         }));
     }
     let localIdentity = null;
+    function clearLegacyNameCookie() {
+        if (!document.cookie.split(';').some(part => part.trim().startsWith('NAME='))) return;
+        const paths = new Set(['/', location.pathname]);
+        const parts = location.pathname.split('/');
+        for (let index = 1; index < parts.length; index++) {
+            const prefix = parts.slice(0, index).join('/') || '/';
+            paths.add(prefix); paths.add(prefix.endsWith('/') ? prefix : prefix + '/');
+        }
+        for (const path of paths) {
+            document.cookie = 'NAME=; Max-Age=0; path=' + path;
+            document.cookie = 'NAME=; Max-Age=0; path=' + path + '; domain=' + location.hostname;
+        }
+    }
     function installIdentity() {
         if (localIdentity) return localIdentity;
 
@@ -562,6 +576,7 @@
                 localStorage.setItem(ck, localCookies[ck]);
             }
         }
+        clearLegacyNameCookie();
 
         // ========== 3. 保护关键数据不被清除 ==========
         var _origSetItem = rawSet;
@@ -637,7 +652,7 @@
             return localIdentity = Object.freeze({ set: _origSetItem, remove: _origRemoveItem, encode: utf8Base64Encode });
     }
 
-    root.FocusLocalData = { installIdentity, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
+    root.FocusLocalData = { installIdentity, defaultProjects, clearLegacyNameCookie, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
         snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
         storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, saveProfile,
         get maintenance() { return maintenance; } };

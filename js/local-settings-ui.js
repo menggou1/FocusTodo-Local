@@ -117,7 +117,24 @@
             tx.onabort=tx.onerror=()=>reject(problem || tx.error || new Error(t('保存失败')));
         });
     }
-    root.FocusSettings = { installCompatibility, reorderProjects };
+    function restoreSystemProjectOrder(db) {
+        return new Promise((resolve, reject) => {
+            const defaults = new Map(root.FocusLocalData.defaultProjects().map(item => [item.id, item]));
+            const tx = db.transaction('Project', 'readwrite'), store = tx.objectStore('Project'), request = store.getAll();
+            let changed = [];
+            request.onsuccess = () => {
+                for (const item of request.result) {
+                    const original = defaults.get(item.id);
+                    if (!original || item.type !== original.type) continue;
+                    const restored = Object.assign({}, item, { order: original.order });
+                    store.put(restored); changed.push(restored);
+                }
+            };
+            tx.oncomplete = () => resolve(changed);
+            tx.onabort = tx.onerror = () => reject(tx.error || new Error(t('保存失败')));
+        });
+    }
+    root.FocusSettings = { installCompatibility, reorderProjects, restoreSystemProjectOrder };
     new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
     root.addEventListener('focus',()=>refreshPermission());
     mount();

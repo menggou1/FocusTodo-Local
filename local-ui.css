@@ -28,9 +28,30 @@
     height:auto;
 }
 
+.focus-project-toolbar {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px 12px;
+    margin-bottom:12px;
+}
+
+.focus-project-reset {
+    flex:none;
+    padding:5px 9px;
+    border:1px solid var(--border);
+    border-radius:5px;
+    background:var(--bg-popup);
+    color:var(--text-title);
+    font:12px/1.5 var(--focus-ui-font);
+    cursor:pointer;
+}
+
+.focus-project-reset:disabled { opacity:.5; cursor:wait; }
+
 .focus-project-hint {
     flex:none;
-    margin:0 0 12px;
+    margin:0;
     color:var(--text-desc);
     font:12px/1.6 var(--focus-ui-font);
 }
@@ -41,7 +62,25 @@
     transition:opacity .15s ease,background-color .15s ease;
 }
 
-.focus-project-management .focus-project-handle-cell {
+.focus-project-management [data-reorder-active="true"] { z-index:10; }
+.focus-project-management [data-project-group="presetProjects"] { user-select:none; touch-action:pan-y; }
+.focus-project-management .focus-project-handle { touch-action:none; }
+.focus-project-drag-preview {
+    position:fixed;
+    z-index:100001;
+    margin:0;
+    list-style:none;
+    pointer-events:none;
+    background:var(--bg-popup);
+    box-shadow:0 4px 16px #0003;
+    border-radius:5px;
+    opacity:.95;
+}
+.focus-project-management [data-project-group="customProjects"] { cursor:default; }
+.focus-project-management [data-project-group="customProjects"] img { -webkit-user-drag:none; }
+
+.focus-project-management .focus-project-handle-cell,
+.focus-project-drag-preview .focus-project-handle-cell {
     width:30px;
     padding:0 6px 0 0;
     vertical-align:middle;
