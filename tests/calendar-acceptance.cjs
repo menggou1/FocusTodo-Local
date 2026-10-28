@@ -1,0 +1,250 @@
+/* Isolated real browser UI and IndexedDB transactions; no personal database. */
+const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
+const { createServer } = require('../scripts/server.cjs');
+const { chromium } = require('playwright');
+const root = path.resolve(__dirname, '..');
+const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'docs/acceptance'));
+fs.mkdirSync(evidence, { recursive: true });
+(async () => {
+    const server = createServer(); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+    const url = 'http://127.0.0.1:' + server.address().port;
+    const executablePath = process.env.FOCUS_TEST_BROWSER || (!process.env.FOCUS_TEST_BUNDLED_BROWSER && ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
+    const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
+    const results = [];
+    async function scenario(name, body, locale = 'zh-CN', dark = false) {
+        if (process.env.FOCUS_CALENDAR_FILTER && !name.includes(process.env.FOCUS_CALENDAR_FILTER)) return;
+        const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
+        const errors = [], external = [];
+        await context.addInitScript(({ locale, dark }) => {
+            localStorage.setItem('FocusTodo.language', locale); if (dark) localStorage.setItem('DarkMode', 'true');
+            let api, timer;
+            Object.defineProperty(window, 'FocusCalendar', { configurable: true, get: () => api, set(value) {
+                api = value; const controller = api.attachController, timeline = api.attachTimeline;
+                api.attachController = function(component, options) { window.__calendar = component; return controller(component, options); };
+                api.attachTimeline = function(component, ...args) { window.__timeline = component; return timeline(component, ...args); };
+            } });
+            Object.defineProperty(window, 'FocusLocal', { configurable: true, get: () => timer, set(value) {
+                timer = value; const attach = timer.attachTimer;
+                timer.attachTimer = function(component, options) { window.__timer = component; return attach(component, options); };
+            } });
+        }, { locale, dark });
+        await context.route('**/*', route => {
+            if (/^https?:/.test(route.request().url()) && !route.request().url().startsWith(url)) { external.push(route.request().url()); return route.abort(); }
+            return route.continue();
+        });
+        const page = await context.newPage(); page.on('pageerror', error => errors.push(error.stack));
+        try {
+            await page.goto(url); await ready(page); await calendar(page, locale);
+            await body(page, context);
+            assert.deepEqual(errors, [], 'No browser errors'); assert.deepEqual(external, [], 'No external requests');
+            results.push({ name, passed: true }); console.log('PASS ' + name);
+        } catch (error) {
+            await page.screenshot({ path: path.join(root, 'dist/calendar-failure.png') }).catch(() => {});
+            console.error('Browser notices: ' + await page.locator('.focus-local-notice').allTextContents());
+            results.push({ name, passed: false, error: error.stack }); console.error('FAIL ' + name + '\n' + error.stack);
+        }
+        finally { await context.close(); }
+    }
+    async function ready(page) {
+        await page.waitForFunction(() => window.__timer && document.querySelector('#root')?.innerText && !document.documentElement.classList.contains('focus-starting'));
+        await page.evaluate(() => FocusLocalReady);
+    }
+    async function calendar(page, locale = 'zh-CN') {
+        await page.getByText(locale === 'en' ? 'Calendar' : '日历', { exact: true }).click();
+        await page.waitForFunction(() => window.__calendar?._isMounted && window.__timeline?.timelineRef.current);
+    }
+    async function waitForData(page, predicate, argument) {
+        const limit = Date.now() + 10000;
+        while (!(await page.evaluate(predicate, argument))) {
+            if (Date.now() > limit) throw new Error('Timed out waiting for committed calendar data');
+            await new Promise(resolve => setTimeout(resolve, 50));
+        }
+    }
+    const snapshot = page => page.evaluate(() => FocusLocalData.snapshot());
+    const blocks = page => page.locator('.focus-calendar-event:not(.focus-calendar-preview)');
+    async function slot(page, minutes = 100, completed = false) {
+        const element = page.locator('[class*="timelineScroll"]').first();
+        const box = await element.boundingBox();
+        await element.evaluate(el => { el.scrollTop = 0; });
+        return { x: box.x + box.width * (completed ? .75 : .25), y: box.y + minutes * 64 / 60 };
+    }
+    async function create(page, name = 'Calendar task', minutes = 100) {
+        const position = await slot(page, minutes); await page.mouse.dblclick(position.x, position.y);
+        await page.locator('#focus-calendar-name').fill(name);
+        await page.locator('#focus-calendar-count').fill('3'); await page.locator('#focus-calendar-minutes').fill('30');
+        await page.getByRole('button', { name: '确定', exact: true }).click();
+        await page.locator('.focus-calendar-dialog').waitFor({ state: 'detached' });
+        await blocks(page).first().waitFor();
+    }
+    try {
+        await scenario('double click creates task and spaced plans atomically, persists and exports', async page => {
+            await create(page, 'Quick calendar task');
+            const data = await snapshot(page), task = data.indexedDB.Task.find(row => row.name === 'Quick calendar task');
+            assert(task); const plans = data.indexedDB.Schedule.filter(row => row.taskId === task.id).sort((a, b) => a.endDate - b.endDate);
+            assert.equal(plans.length, 3); assert.equal(task.estimatePomoNum, 3); assert.equal(task.pomodoroInterval, 1800);
+            assert.equal(plans[1].endDate - plans[0].endDate, 2100000);
+            assert.equal(await page.evaluate(value => new Date(value).getHours(), task.deadline), 23);
+            await page.evaluate(data => FocusLocalData.replace(data, { backup: false }), data);
+            await page.reload(); await ready(page); if (!(await blocks(page).count())) await calendar(page);
+            assert.equal(await blocks(page).count(), 3);
+            assert.equal((await snapshot(page)).indexedDB.Task.filter(row => row.id === task.id).length, 1);
+            await page.screenshot({ path: path.join(evidence, 'calendar-1.6.0.png') });
+        });
+        await scenario('upward and downward selections work; completed column and cancel never write', async page => {
+            for (const reverse of [false, true]) {
+                const a = await slot(page, reverse ? 180 : 120), b = await slot(page, reverse ? 120 : 180);
+                await page.mouse.move(a.x, a.y); await page.mouse.down(); await page.mouse.move(b.x, b.y, { steps: 12 }); await page.mouse.up();
+                await page.locator('#focus-calendar-name').waitFor();
+                assert.equal(Number(await page.locator('#focus-calendar-minutes').inputValue()), 60);
+                await page.keyboard.press('Escape'); assert.equal(await page.locator('.focus-calendar-preview').count(), 0);
+            }
+            const a = await slot(page, 100, true); await page.mouse.dblclick(a.x, a.y);
+            assert.equal(await page.locator('.focus-calendar-dialog').count(), 0);
+            const data = await snapshot(page); assert.equal(data.indexedDB.Task.length, 0); assert.equal(data.indexedDB.Schedule.length, 0);
+        });
+        await scenario('schedule transaction failure leaves no orphan task and UI can retry once', async page => {
+            await page.evaluate(() => {
+                const add = IDBObjectStore.prototype.add;
+                IDBObjectStore.prototype.add = function(...args) {
+                    if (this.name === 'Schedule' && window.__failCalendar !== false) { window.__failCalendar = false; throw new DOMException('Injected calendar failure', 'QuotaExceededError'); }
+                    return add.apply(this, args);
+                };
+            });
+            const position = await slot(page); await page.mouse.dblclick(position.x, position.y);
+            await page.locator('#focus-calendar-name').fill('Retry task'); await page.getByRole('button', { name: '确定', exact: true }).click();
+            await page.getByRole('alert').filter({ hasText: '保存失败' }).waitFor();
+            let data = await snapshot(page); assert.equal(data.indexedDB.Task.length, 0); assert.equal(data.indexedDB.Schedule.length, 0);
+            await page.getByRole('button', { name: '确定', exact: true }).click(); await page.locator('.focus-calendar-dialog').waitFor({ state: 'detached' });
+            data = await snapshot(page); assert.equal(data.indexedDB.Task.length, 1); assert.equal(data.indexedDB.Schedule.length, 1);
+        });
+        await scenario('overlapping plans and records have separate hit targets, project colors and timer start guards', async page => {
+            await create(page, 'Start me');
+            const originalId = await page.evaluate(async () => {
+                const snapshot = await FocusLocalData.snapshot(), plan = snapshot.indexedDB.Schedule[0];
+                await FocusLocalData.putSchedule({ ...plan, id: 'overlap-plan', endDate: plan.endDate + 300000 });
+                await FocusLocalData.putPomodoro({ id: 'completed-record', objType: 'POMODORO', taskId: plan.taskId, subtaskId: '',
+                    creationDate: plan.endDate, endDate: plan.endDate, interval: 300, pomodoroInterval: 1800, state: 0, sync: 0 });
+                return plan.id;
+            });
+            await page.waitForFunction(() => document.querySelectorAll('[data-category="scheduled"]').length === 4);
+            const a = await page.locator('[data-event-id="' + originalId + '"]').boundingBox(), b = await page.locator('[data-event-id="overlap-plan"]').boundingBox();
+            assert(a.x + a.width <= b.x || b.x + b.width <= a.x, 'Overlapping blocks are side by side');
+            assert.equal(await page.locator('[data-category="completed"] .focus-calendar-start').count(), 0);
+            await page.locator('[data-category="scheduled"] .focus-calendar-start').first().click();
+            await page.waitForFunction(() => window.__timer.localTimer && window.__timer.props.task?.name === 'Start me');
+            assert.equal((await page.evaluate(() => FocusLocalData.session())).state, 'work');
+            await page.evaluate(async () => { await window.__timer.localTimer.run('stop'); window.__timer.zoomDown(); });
+            await page.evaluate(async () => {
+                const db = await FocusLocalData.open(); await FocusLocalData.transaction(db, ['Task'], 'readwrite', tx => {
+                    const store = tx.objectStore('Task'), request = store.getAll(); request.onsuccess = () => request.result.forEach(task => store.put({ ...task, isFinished: true }));
+                });
+            });
+            await page.locator('[data-category="scheduled"] .focus-calendar-start').first().click();
+            await page.locator('.focus-local-notice').filter({ hasText: '该任务已完成' }).waitFor();
+            assert.notEqual((await page.evaluate(() => FocusLocalData.session())).state, 'work');
+        });
+        await scenario('date selection and scroll restore work across navigation and refresh', async page => {
+            const scroll = page.locator('[class*="timelineScroll"]').first();
+            await scroll.evaluate(el => { el.scrollTop = 500; el.dispatchEvent(new Event('scroll')); });
+            await page.evaluate(() => window.__calendar.handleCalendarDatePicker({ stopPropagation() {} }));
+            await page.locator('#focus-calendar-date').fill('2026-11-02'); await page.getByRole('button', { name: '确定', exact: true }).click();
+            await page.waitForFunction(() => window.__calendar.state.calendarDate.format('YYYY-MM-DD') === '2026-11-02');
+            assert.equal(await scroll.evaluate(el => el.scrollTop), 500);
+            await page.reload(); await ready(page); await calendar(page);
+            assert.equal(await scroll.evaluate(el => el.scrollTop), 500);
+            const position = await slot(page); await page.mouse.dblclick(position.x, position.y); await page.keyboard.press('Escape');
+            assert.equal(await page.locator('.focus-calendar-dialog').count(), 0);
+        });
+        await scenario('plan movement, resizing, copy/delete and failed writes keep committed data', async page => {
+            await create(page, 'Move and resize', 90);
+            let data = await snapshot(page);
+            const plan = data.indexedDB.Schedule.sort((a, b) => a.endDate - b.endDate)[0];
+            const block = page.locator('[data-event-id="' + plan.id + '"]');
+            let box = await block.boundingBox();
+            await page.mouse.move(box.x + 20, box.y + 9); await page.mouse.down();
+            await page.mouse.move(box.x + 20, box.y + 73, { steps: 10 }); await page.mouse.up();
+            await page.waitForFunction(({ id, end }) => window.__calendar.state.calendarDayScheduledEvents.find(row => row.id === id)?.end === end, { id: plan.id, end: plan.endDate + 3600000 });
+            assert.equal((await snapshot(page)).indexedDB.Schedule.find(row => row.id === plan.id).endDate, plan.endDate + 3600000);
+            const handle = block.locator('[class*="eventResizeHandle"]'); box = await handle.boundingBox();
+            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down();
+            await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + 32, { steps: 10 }); await page.mouse.up();
+            await page.waitForFunction(id => window.__calendar.state.calendarDayScheduledEvents.find(row => row.id === id)?.raw.interval === 3600, plan.id);
+            await block.click({ button: 'right' }); await page.getByText('复制', { exact: true }).click();
+            await page.waitForFunction(() => document.querySelectorAll('.focus-calendar-event').length === 4);
+            const before = await snapshot(page), ids = data.indexedDB.Schedule.map(row => row.id);
+            const copy = before.indexedDB.Schedule.find(row => !ids.includes(row.id));
+            assert.equal(copy.interval, 3600); assert.equal(copy.endDate, plan.endDate + 3600000 + 1800000 + 3900000);
+            await page.locator('[data-event-id="' + copy.id + '"]').click({ button: 'right' }); await page.getByText('删除', { exact: true }).click();
+            await waitForData(page, async id => (await FocusLocalData.snapshot()).indexedDB.Schedule.find(row => row.id === id).state === -1, copy.id);
+            const error = await page.evaluate(async id => {
+                const put = FocusLocalData.putSchedule; FocusLocalData.putSchedule = () => Promise.reject(new Error('Injected move failure'));
+                const event = window.__calendar.state.calendarDayScheduledEvents.find(row => row.id === id);
+                try { await window.__calendar.handleCalendarEventDrop({ event, startTime: event.start + 3600000, endTime: event.end + 3600000 }); }
+                finally { FocusLocalData.putSchedule = put; }
+                return document.getElementById('focus-local-notice').textContent;
+            }, plan.id);
+            assert(error.includes('Injected move failure'));
+            data = await snapshot(page); assert.equal(data.indexedDB.Schedule.find(row => row.id === plan.id).endDate, plan.endDate + 5400000);
+        });
+        await scenario('calendar writes refresh another tab and completed-record association without stale names', async (page, context) => {
+            const peer = await context.newPage(); await peer.goto(url); await ready(peer); await calendar(peer);
+            await create(page, 'Peer task'); await peer.locator('.focus-calendar-event').first().waitFor();
+            const record = await page.evaluate(async () => {
+                const { indexedDB: data } = await FocusLocalData.snapshot(), task = data.Task[0];
+                const record = { id: 'edit-record', objType: 'POMODORO', taskId: task.id, subtaskId: '', creationDate: Date.now(),
+                    endDate: data.Schedule[0].endDate, interval: 1500, pomodoroInterval: 1500, state: 0, sync: 0 };
+                await FocusLocalData.putPomodoro(record); return record;
+            });
+            await page.locator('[data-event-id="edit-record"]').click();
+            await page.waitForFunction(() => window.__calendar.state.calendarPomodoroDetail?.id === 'edit-record');
+            await peer.evaluate(record => FocusLocalData.putPomodoro({ ...record, taskId: '', interval: 600 }), record);
+            await page.waitForFunction(() => window.__calendar.state.calendarPomodoroDetail?.taskId === '');
+            await page.waitForFunction(() => document.querySelector('[data-event-id="edit-record"]')?.textContent.includes('10m'));
+            assert((await page.locator('[data-event-id="edit-record"]').innerText()).includes('未指定任务'));
+        });
+        await scenario('task context menu saves next week as seven days ahead', async page => {
+            await create(page, 'Deadline task'); await page.getByText('任务', { exact: true }).first().click();
+            await page.getByText('Deadline task', { exact: true }).first().click({ button: 'right' });
+            await page.getByText('下周到期', { exact: true }).click();
+            await waitForData(page, async () => { const snapshot = await FocusLocalData.snapshot(); return snapshot.indexedDB.Task[0].deadline === FocusCalendar.deadlineInSevenDays(); });
+        });
+        await scenario('estimate cap, custom list, top ordering and maintenance exclusion preserve data', async page => {
+            await page.evaluate(async () => {
+                const db = await FocusLocalData.open(); await FocusLocalData.transaction(db, ['Project'], 'readwrite', tx =>
+                    tx.objectStore('Project').add({ ...FocusLocalData.defaultProjects().find(row => row.type === 7005), id: 'custom-calendar', type: 1000, name: 'My list', order: 10000, color: 'DF542A' }));
+            });
+            // Refresh the actual project model before opening the dialog.
+            await page.reload(); await ready(page); await calendar(page);
+            const position = await slot(page); await page.mouse.dblclick(position.x, position.y);
+            await page.locator('#focus-calendar-name').fill('Seven pomodoros'); await page.locator('#focus-calendar-count').fill('7');
+            await page.locator('#focus-calendar-project').selectOption('custom-calendar');
+            await page.getByRole('button', { name: '确定', exact: true }).click(); await page.locator('.focus-calendar-dialog').waitFor({ state: 'detached' });
+            const data = await snapshot(page); assert.equal(data.indexedDB.Schedule.length, 5);
+            assert.equal(data.indexedDB.Task[0].estimatePomoNum, 7); assert.equal(data.indexedDB.Task[0].projectId, 'custom-calendar');
+            assert(data.indexedDB.Task[0].order < 0);
+            const message = await page.evaluate(async () => {
+                const db = await FocusLocalData.open(); await FocusLocalData.transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').put({ id: 'maintenance', stage: 'fixture' }));
+                try { await FocusLocalData.createCalendarTask({ name: 'Blocked task', startTime: Date.now(), interval: 1500, count: 1, projectId: 'custom-calendar' }); return ''; }
+                catch (error) { return error.message; }
+                finally { await FocusLocalData.transaction(db, ['LocalMeta'], 'readwrite', tx => tx.objectStore('LocalMeta').delete('maintenance')); }
+            });
+            assert(message.includes('维护'));
+            assert.equal((await snapshot(page)).indexedDB.Task.length, 1);
+        });
+        await scenario('English dark quick task stays within a narrow viewport', async page => {
+            await page.setViewportSize({ width: 600, height: 720 });
+            await page.evaluate(() => window.__calendar.openQuickTask(Date.now(), 1500));
+            const form = page.getByRole('dialog'); await form.waitFor(); assert((await form.innerText()).includes('Add task'));
+            assert(!(await form.innerText()).includes('unavailable in English'));
+            const box = await form.boundingBox(); assert(box.x >= 0 && box.x + box.width <= 600);
+            assert.equal(await form.getAttribute('data-dark'), 'true');
+            await page.screenshot({ path: path.join(evidence, 'calendar-english-dark-1.6.0.png') });
+            await page.keyboard.press('Escape');
+        }, 'en', true);
+    } finally {
+        fs.writeFileSync(path.join(evidence, 'calendar-results.json'), JSON.stringify({ version: require('../package.json').version, results }, null, 2) + '\n');
+        await browser.close(); await new Promise(resolve => server.close(resolve));
+    }
+    if (results.some(result => !result.passed)) process.exitCode = 1;
+    console.log(`${results.filter(result => result.passed).length}/${results.length} calendar scenarios passed.`);
+})().catch(error => { console.error(error); process.exitCode = 1; });

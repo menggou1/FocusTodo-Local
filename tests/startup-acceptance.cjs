@@ -4,7 +4,7 @@ const fs = require('node:fs'), path = require('node:path');
 const { chromium } = require('playwright');
 const { createServer } = require('../scripts/server.cjs');
 const root = path.resolve(__dirname, '..');
-const evidence = path.join(root, 'docs/acceptance');
+const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'docs/acceptance'));
 const results = [];
 function gate() {
     let release;

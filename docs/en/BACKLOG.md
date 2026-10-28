@@ -14,6 +14,8 @@ Updated 2026-10-28. This is the English view of the same canonical item IDs, not
 | E04 | P1 | Large-backup responsiveness, memory and broadcasts | Generated 1/10/50 MB measurements exist. Evaluate workers, batched reads/serialization and large recovery broadcasts from observed bottlenecks, preserving snapshot and journal semantics. |
 | E08 | P3 | Consolidate remaining legacy network behavior by feature | Identity/storage belongs to the data service; backup UI, preferences and theme UI now belong to their existing feature modules. Network retains its distinct responsibility. Local name/avatar updates now use an explicit data service with real failure reporting. Trace other legacy account/cloud callers and remove proven-dead simulated responses. Further work must reuse the owning feature service, not split files for line count. Preserve same-origin/Bing access and initialization/recovery order.  Reused XHR state and same-origin handling were corrected in 1.5.0; simulated responses still need investigation. |
 | E09 | P3 | Restore component sources and a normal build | Recover source, dependencies and configuration component by component. Preserve Redux, events and timer lifecycle; AST integration is not a complete source build. |
+| E10 | P1 | Confirmed local Focus forest, for a later implementation | Not implemented this round. Add an offline forest and settings entry, reusing tree assets and deriving growth from committed focus records. No server points, login rewards, groups or rankings. Implementation below. |
+| E11 | P2 | Separate browser mini-timer window | Keep the existing in-page floating timer this round. Detect Document Picture-in-Picture and bridge the existing timer state/commands; fall back when unavailable. Do not promise native always-on-top behavior from a normal popup. |
 
 ## Outstanding real-environment verification
 
@@ -22,7 +24,7 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 | ID | Priority | Scope | Missing evidence |
 |---|---|---|---|
 | V02 | P2 | Firefox/Safari and capability fallback | Complete startup, timer, recovery, backup and theme coverage on those engines. Existing limited no-BroadcastChannel/no-Web-Locks/no-compression tests are not full engine acceptance. |
-| V03 | P2 | Reports, history and calendar | Known real focus spans across midnight/timezones and task/subtask attribution. Groups, online rankings and the old forest are outside the current local product. |
+| V03 | P2 | Reports, history and calendar | Isolated calendar creation, persistence, backup restore, peer refresh and overlap automation exist. Still verify known real spans, midnight/DST/timezones, chart values and task/subtask attribution. Follow the procedure below. Groups/rankings stay excluded; E10 receives its own acceptance later. |
 | V04 | P2 | Real notifications and audio | Actual permission states, operating-system display, every sound/white-noise track, autoplay restrictions, visible multi-window playback and owner termination. Stub calls are not physical display/listening evidence. |
 | V05 | P2 | Bing failures and cross-day refresh | Real source failure, timeout, redirect boundaries and expired/cross-day cache updates. |
 | V06 | P2 | Manual backup and desktop-launch experience | Blocked/cancelled downloads, human confirmation of saved files and file-picker restore; Windows double-click, visible default browser, Python fallback and failure messages. Automated saved-file restore and cross-platform launch already exist. |
@@ -35,17 +37,25 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 
 ## Offline feature design proposal
 
-This is a product proposal, not a restored entry point.
+Focus forest is confirmed as E10 for a later implementation. This round does not restore its entry point. Groups and online rankings remain excluded.
 
 **Groups and online rankings are permanently excluded.** Do not restore group creation/joining, members, invitations, chat or server ranking. Group, GroupUser and Message tables remain only for backup compatibility; hiding their UI must not erase historical backup contents.
 
-**Recommended forest replacement: optional Personal growth.** Tasks, timer and reports remain the primary navigation. If an incentive view is wanted, add a separately enabled Personal growth page in General settings, off by default. Do not simply expose the old server-backed forest.
+### E10 implementation
 
-- Derive growth only from saved valid focus seconds. A suggested rule is one tree per 60 accumulated minutes, including valid partial spans of at least 25 seconds. Do not reward a count of Pomodoros whose configured lengths vary.
-- Exclude breaks, rejected interruptions and confirmation waiting. Allocate cross-day displays by actual spans and local calendar days; task/subtask attribution is a local filter.
-- Compute the view from existing records rather than a separate spendable sunlight balance. Import, delete and rollback recalculate the view, preventing duplicate launch/import/recovery rewards.
-- Show total focus, recent calendar-day trends and personal milestones; no server sunlight, global rankings or friend comparisons. Disabling the view never changes tasks or history.
-- Start with a read-only derived view, without networking or a database upgrade. Implementing it and choosing the proposed 60-minute rule require a subsequent product decision.
+1. Add `js/local-forest.js`, named Focus forest, as a read-only local growth view. Provide a General setting, off by default, and reuse bundled tree/background assets and local avatars. Keep the old network forest disabled in `scripts/revise-app-integration.cjs`; add a separate local setting and explicit rendering hook.
+2. Read valid active `Pomodoro` records from database v3 (state 0 or compatible missing state, finite positive interval/endDate). Exclude planned `Schedule` entries. Derive seconds and initially use a documented constant such as one tree per 3600 seconds. Do not filter every saved fragment below 25 seconds: valid timer blocks can be split into shorter persisted spans after the core has applied its threshold.
+3. Compute each span from endDate minus interval, splitting by successive local calendar-day boundaries, including DST. Show totals, daily trends, personal milestones and task/subtask filters. Do not use old Sunlight/LaunchReward/PomodoroReward/TaskReward balances or create a separate reward wallet.
+4. Recompute after timer commits, history edits, imports and resets; clean up subscriptions. Opening, reloading or importing the same records must never award duplicate growth. Keep the database version and existing backup settings path, and add complete English messages.
+5. Test 25/60-minute focus, legal partial spans, pause exclusions, midnight/DST, edits/deletes, repeated imports, rollback, peer updates and disabling the view while timing. Run fully offline and assert no point/ranking/account requests or writes to legacy reward keys.
+
+### E11 implementation
+
+Add a user-gesture entry in `local-timer-ui.js`. Where Document Picture-in-Picture exists, render current state and bridge start/pause/stop to the existing adapter. Never create a second writing tick loop, database or session. Dispose subscriptions/styles/references on closure. Fall back to the current in-page floating timer. Verify opening/closing, rest transitions, recovery, multi-tab ownership and cleanup on Chromium, then Firefox/Safari fallback. A window.open alternative additionally needs blocked-popup and same-origin disconnect handling; it cannot promise native always-on-top or window movement rights.
+
+### V03 procedure
+
+Use isolated known 23:50–00:20 spans, pauses and different task/subtask associations. Compare calendar, history and daily/weekly reports before and after backup restore, including IDs, seconds, attribution and chart values. Cover Asia/Shanghai and America/New_York DST transition days. If needed, correct day boundaries in createCalendarDayEvent/local-calendar.js and report splitting without rewriting historical timestamps. Synthetic clocks and transaction fault tests do not replace this real-environment evidence.
 
 ## Maintenance rule
 

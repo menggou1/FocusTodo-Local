@@ -585,3 +585,28 @@
         padding:6px 3px;
     }
 }
+/* Calendar enhancements use the surrounding theme and each component's font. */
+.focus-calendar-overlay { position:fixed; inset:0; z-index:50000; background:rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; padding:16px; }
+.focus-calendar-dialog { box-sizing:border-box; width:420px; max-width:100%; max-height:calc(100vh - 32px); overflow:auto; background:var(--bg-popup); color:var(--text-title); border-radius:12px; padding:24px; box-shadow:0 12px 48px #0004; }
+.focus-calendar-dialog h2 { font-size:19px; margin:0 0 18px; }
+.focus-calendar-dialog label { display:flex; align-items:center; justify-content:space-between; gap:16px; margin:12px 0; }
+.focus-calendar-dialog input,.focus-calendar-dialog select { box-sizing:border-box; min-width:0; width:58%; font:inherit; color:inherit; background:transparent; border:1px solid #8888; border-radius:5px; padding:7px; }
+.focus-calendar-dialog p { line-height:1.5; }
+.focus-calendar-dialog [role="alert"] { color:#cc4040; }
+.focus-calendar-summary { opacity:.75; font-size:12px; }
+.focus-calendar-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+.focus-calendar-actions button { font:inherit; padding:7px 20px; border:1px solid #8887; border-radius:6px; background:transparent; color:inherit; cursor:pointer; }
+.focus-calendar-actions button[type="submit"] { background:#4670f6; color:#fff; border-color:#4670f6; }
+.focus-calendar-actions button:disabled { opacity:.5; cursor:wait; }
+.focus-calendar-dialog[data-dark="true"] { color-scheme:dark; }
+.focus-calendar-selection { position:absolute; left:0; pointer-events:none; background:#4670f633; border:1px solid #4670f6; box-sizing:border-box; z-index:6; }
+.focus-calendar-event { box-sizing:border-box; min-height:18px; padding:4px 26px 4px 6px; cursor:pointer; }
+.focus-calendar-event:focus-visible { outline:2px solid #4670f6; outline-offset:1px; z-index:5; }
+.focus-calendar-event-text { display:flex; flex-direction:column; min-width:0; overflow:hidden; gap:2px; line-height:17px; }
+.focus-calendar-event-title { display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }
+.focus-calendar-inline { flex-direction:row; gap:5px; white-space:nowrap; }
+.focus-calendar-inline .focus-calendar-event-title { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.focus-calendar-event-duration { font-size:11px; flex-shrink:0; }
+.focus-calendar-start { position:absolute; right:3px; top:2px; width:20px; height:20px; border:0; border-radius:50%; color:inherit; background:transparent; cursor:pointer; padding:0; font-size:12px; }
+.focus-calendar-start:hover { background:#8883; }
+.focus-calendar-preview { opacity:.65; pointer-events:none; border-style:dashed!important; }

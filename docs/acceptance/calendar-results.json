@@ -1,0 +1,45 @@
+{
+  "version": "7.1.1-local.1.6.0",
+  "results": [
+    {
+      "name": "double click creates task and spaced plans atomically, persists and exports",
+      "passed": true
+    },
+    {
+      "name": "upward and downward selections work; completed column and cancel never write",
+      "passed": true
+    },
+    {
+      "name": "schedule transaction failure leaves no orphan task and UI can retry once",
+      "passed": true
+    },
+    {
+      "name": "overlapping plans and records have separate hit targets, project colors and timer start guards",
+      "passed": true
+    },
+    {
+      "name": "date selection and scroll restore work across navigation and refresh",
+      "passed": true
+    },
+    {
+      "name": "plan movement, resizing, copy/delete and failed writes keep committed data",
+      "passed": true
+    },
+    {
+      "name": "calendar writes refresh another tab and completed-record association without stale names",
+      "passed": true
+    },
+    {
+      "name": "task context menu saves next week as seven days ahead",
+      "passed": true
+    },
+    {
+      "name": "estimate cap, custom list, top ordering and maintenance exclusion preserve data",
+      "passed": true
+    },
+    {
+      "name": "English dark quick task stays within a narrow viewport",
+      "passed": true
+    }
+  ]
+}

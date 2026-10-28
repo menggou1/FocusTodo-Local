@@ -1,0 +1,46 @@
+{
+  "version": "7.1.1-local.1.6.0",
+  "date": "2026-10-28",
+  "scope": "local-worktree",
+  "baseCommit": "e7d0048d01451a29b5610d43cf125fd78ed810f3",
+  "branch": "codex/port-7-2-2-local",
+  "runtime": {
+    "node": "v24.16.0",
+    "python": "3.12.14",
+    "browser": "Windows Edge, isolated Playwright contexts"
+  },
+  "checks": {
+    "syntax": "passed",
+    "unit": {
+      "passed": 60,
+      "skipped": 1,
+      "reason": "POSIX wrapper on Windows"
+    },
+    "browser": {
+      "startup": 14,
+      "application": 59,
+      "maintenance": 7,
+      "listOrdering": 3,
+      "audioCoordination": 5,
+      "profile": 5,
+      "calendar": 10,
+      "total": 103,
+      "passed": true
+    },
+    "packages": {
+      "zip": "passed extracted startup",
+      "tarGz": "passed extracted startup",
+      "documentLinks": "passed",
+      "mismatchedTag": "rejected"
+    },
+    "calendarPatchIdempotent": true
+  },
+  "bundleSha256": "4f5c5945f915bd5c591f38aef7191efba2c0b53d28afdc147634e5db0949b753",
+  "publication": {
+    "merged": false,
+    "pushed": false,
+    "tagged": false,
+    "pages": false,
+    "remoteCI": false
+  }
+}

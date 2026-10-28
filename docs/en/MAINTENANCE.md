@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current application: `7.1.1-local.1.5.4`, author Lexible. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.6.0`, author Lexible. It is prepared locally, not merged into main or published. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -28,6 +28,7 @@ Run `npm ci` to install locked development dependencies. Node.js 22+ is required
 | `release.json` | Human-edited version, author, dates and Chinese/English release notes |
 | `patch.js` | Ordered, idempotent installation of identity, network, backup UI, settings and themes through their owning feature services |
 | `local-network.js` | Same-origin/Bing policy and reachable legacy account XHR behavior; preserve real profile edits |
+| `js/local-calendar.js` | Local calendar selection/layout/lifecycle; data and timer commands use the existing services |
 | `js/main.js` | Modified legacy bundle; it cannot be discarded and fully rebuilt from an upstream bundle |
 
 Change legacy integration through the checked AST scripts, then retain both script and bundle changes:
@@ -38,6 +39,7 @@ node scripts/revise-app-integration.cjs
 node scripts/revise-pomodoro-rendering.cjs
 node scripts/revise-project-management.cjs
 node scripts/revise-local-profile.cjs
+node scripts/revise-calendar-integration.cjs
 ```
 
 The shared bundle editor checks the known 1,484-module structure, unique boundaries, overlapping edits and final syntax. Inspect a failed boundary instead of bypassing it. Historical `upgrade-*.cjs` scripts are not a complete rebuild pipeline.
@@ -59,9 +61,11 @@ Images remain data URLs in localStorage. Backup compression is lossless, but lar
 
 General settings offer Follow system, Simplified Chinese and English. Other existing translations are selected only by Follow system. System language resolution tries an available language/base, then English. Missing legacy strings use the complete English catalog and a readable fallback rather than exposing keys. Changing a language reloads the page without moving browser data. The language preference is included in backups and retained by reset.
 
-Groups, online rankings and the old server-backed forest are disabled, including old imported enable flags. Legacy group-related backup tables remain for compatibility. The personal-growth proposal is described in the backlog; no new forest entry is implied by the legacy bundle containing its code.
+Groups, online rankings and the old server-backed forest are disabled, including old imported enable flags. Legacy group-related backup tables remain for compatibility. Confirmed offline Focus forest is scheduled for a later implementation in the backlog; no new forest entry is implied by the legacy bundle containing its code.
 
 ## Focused verification
+
+If an existing screenshot is temporarily locked on Windows, set `FOCUS_ACCEPTANCE_DIR` to a separate absolute output directory. Startup, app, list and calendar checks write evidence there; copy it into `docs/acceptance/` after the complete run. File-output failures must not bypass business assertions.
 
 Use checks appropriate to the change. Do not repeat expensive performance or manual-environment runs merely to re-confirm unrelated code.
 

@@ -474,14 +474,84 @@
         return exclusive(async () => {
             if (maintenance) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据维护中，无法保存专注记录。'):'数据维护中，无法保存专注记录。'));
             const db = await open();
-            return transaction(db, ['Pomodoro', 'LocalMeta'], 'readwrite', (tx, done, fail) => {
+            await transaction(db, ['Pomodoro', 'LocalMeta'], 'readwrite', (tx, done, fail) => {
                 const marker = tx.objectStore('LocalMeta').get('maintenance'), journal = tx.objectStore('LocalMeta').get('settings-journal');
                 journal.onsuccess = () => {
                     if (marker.result || journal.result) { fail(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在进行中或待恢复的数据导入，请刷新页面。'):'存在进行中或待恢复的数据导入，请刷新页面。'))); return; }
                     tx.objectStore('Pomodoro').put(record); done(record);
                 };
             });
+            calendarChanged();
+            return record;
         });
+    }
+    function calendarChanged() {
+        root.dispatchEvent(new Event('focus-local-calendar-changed'));
+        broadcast('calendar');
+    }
+    // Calendar task creation shares one transaction with every planned block.
+    // Readers and import/reset see either the complete result or no change.
+    async function calendarWrite(stores, body) {
+        return exclusive(async () => {
+            if (maintenance || invalidated) throw new Error(root.FocusI18n.text('本地数据维护中，请等待完成后刷新。'));
+            const db = await open();
+            const result = await transaction(db, [...new Set([...stores, 'LocalMeta'])], 'readwrite', (tx, done, fail) => {
+                let waiting = 2;
+                for (const id of ['maintenance', 'settings-journal']) {
+                    const request = tx.objectStore('LocalMeta').get(id);
+                    request.onsuccess = () => {
+                        if (request.result) fail(new Error(root.FocusI18n.text('存在进行中或待恢复的数据维护，请等待或刷新。')));
+                        else if (!--waiting) { try { body(tx, done, fail); } catch (error) { fail(error); } }
+                    };
+                }
+            });
+            calendarChanged();
+            return result;
+        });
+    }
+    function createCalendarTask(input) {
+        const name = String(input.name || '').trim(), count = Number(input.count), interval = Number(input.interval);
+        const start = Number(input.startTime), pause = Number(input.shortBreak || 0);
+        if (!name || name.length > 1000 || !Number.isInteger(count) || count < 1 || count > 99 ||
+            !Number.isInteger(interval) || interval < 60 || interval > 10800 || !Number.isFinite(start) ||
+            !Number.isFinite(new Date(start).getTime()) || !Number.isFinite(pause) || pause < 0 || pause > 10800) {
+            return Promise.reject(new Error(root.FocusI18n.text('请填写有效的任务、时间和预计番茄数。')));
+        }
+        return calendarWrite(['Project', 'Task', 'Schedule'], (tx, done, fail) => {
+            const request = tx.objectStore('Project').get(input.projectId);
+            request.onsuccess = () => {
+                const project = request.result;
+                if (!project || project.state === -1 || ![1000, 7005].includes(project.type)) {
+                    fail(new Error(root.FocusI18n.text('清单已变化，请重试。'))); return;
+                }
+                const tasks = tx.objectStore('Task').getAll();
+                tasks.onsuccess = () => {
+                    try {
+                        const now = Date.now(), orders = tasks.result.filter(row => row.projectId === project.id && row.state !== -1).map(row => Number(row.order) || 0);
+                        const deadline = new Date(start); deadline.setHours(23, 59, 59, 999);
+                        const task = { id: crypto.randomUUID(), objType: 'TASK', creationDate: now, name, state: 0,
+                            estimatePomoNum: count, actualPomoNum: 0, pomodoroInterval: interval, projectId: project.id,
+                            deadline: deadline.getTime(), isFinished: false, finishedDate: 0, reminderDate: 0,
+                            rCycle: 0, rFirstDeadline: 0, rUnit: '', rValue: '', rId: '', rStartDate: 0, rEndDate: 0,
+                            reminders: '', remark: '', order: input.addToTop ? orders.reduce((a, b) => Math.min(a, b), 0) - 10000 : orders.reduce((a, b) => Math.max(a, b), 0) + 10000,
+                            hasSubtask: false, isExpanded: false, priority: 0, tags: '', sync: 0 };
+                        const schedules = Array.from({ length: Math.min(5, count) }, (_, index) => ({
+                            id: crypto.randomUUID(), objType: 'SCHEDULE', creationDate: now, state: 0,
+                            taskId: task.id, subtaskId: '', projectId: project.id, interval, isAllDay: false, sync: 0,
+                            endDate: start + (index * (interval + pause) + interval) * 1000
+                        }));
+                        tx.objectStore('Task').add(task);
+                        schedules.forEach(row => tx.objectStore('Schedule').add(row));
+                        done({ task, schedules });
+                    } catch (error) { fail(error); }
+                };
+            };
+        });
+    }
+    function putSchedule(record) {
+        if (!record || typeof record.id !== 'string' || !Number.isFinite(record.endDate) ||
+            !Number.isFinite(record.interval) || record.interval < 60) return Promise.reject(new Error('Invalid schedule'));
+        return calendarWrite(['Schedule'], (tx, done) => { tx.objectStore('Schedule').put(record); done(record); });
     }
     let channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('focustodo-local') : null;
     function broadcast(type, records, operation) { if (channel) channel.postMessage({ type, records: records || [], operationId: operation && operation.operationId }); }
@@ -497,7 +567,8 @@
         } else if (message.type === 'replaced') {
             remoteOperation = null; maintenance = true; invalidated = !initializing;
             root.dispatchEvent(new Event('focus-local-maintenance')); notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'):'数据已在另一个标签页更新，请刷新本页。'));
-        } else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
+        } else if (message.type === 'calendar') root.dispatchEvent(new Event('focus-local-calendar-changed'));
+        else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
     // Profile edits share the import/reset ownership boundary, then commit one
     // atomic localStorage value. A failed write never publishes a new profile.
@@ -654,7 +725,7 @@
 
     root.FocusLocalData = { installIdentity, defaultProjects, clearLegacyNameCookie, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
         snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
-        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, saveProfile,
+        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, saveProfile, createCalendarTask, putSchedule,
         get maintenance() { return maintenance; } };
     root.FocusLocalReady = exclusive(recoverJournal);
     root.FocusLocalReady.catch(error => { notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据初始化失败：'):'本地数据初始化失败：') + error.message); console.error(error); });

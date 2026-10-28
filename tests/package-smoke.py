@@ -69,7 +69,7 @@ for suffix in ('.zip', '.tar.gz'):
                     if process.poll() is not None or time.monotonic() >= deadline:
                         raise RuntimeError('Extracted server did not start')
                     time.sleep(0.1)
-            for resource in ('js/main.js', 'js/local-release.js', 'js/local-backup.js', 'js/local-theme-storage.js', 'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js', 'img/github.svg', 'audio/alm_AlarmBeep.mp3'):
+            for resource in ('js/main.js', 'js/local-calendar.js', 'js/local-release.js', 'js/local-backup.js', 'js/local-theme-storage.js', 'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js', 'img/github.svg', 'audio/alm_AlarmBeep.mp3'):
                 with urllib.request.urlopen(f'http://127.0.0.1:{port}/{resource}', timeout=3) as response:
                     assert response.status == 200 and len(response.read()) > 0
             if sys.platform != 'win32':

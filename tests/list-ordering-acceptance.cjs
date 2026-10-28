@@ -2,6 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
+const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'docs/acceptance'));
 const release=require('../release.json');
 // Bound launch, input and cleanup so a failed check cannot hold a CI worker.
 const suiteWatchdog=setTimeout(()=>{console.error('FAIL list acceptance exceeded 180 seconds');process.exit(1)},180000);
@@ -61,7 +62,7 @@ const server=http.createServer((request,response)=>{
       assert.equal(await manager.getAttribute('data-drag-group'),'presetProjects');
       await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('[data-project-group="customProjects"]')).opacity)<.5);
       assert.equal(await preset.nth(1).getAttribute('data-drop-position'),'after');
-      fs.mkdirSync(path.join(root,'docs/acceptance'),{recursive:true});await page.screenshot({path:path.join(root,'docs/acceptance/list-drag-'+release.localVersion+'.png')});
+      fs.mkdirSync(evidence,{recursive:true});await page.screenshot({path:path.join(evidence,'list-drag-'+release.localVersion+'.png')});
       await page.mouse.up();await page.waitForFunction(id=>document.querySelector('[data-project-group="presetProjects"]').dataset.projectId===id,second);
       assert.equal(await manager.getAttribute('data-drag-group'),null);assert.equal(await page.locator('[data-drop-position]').count(),0);
       assert((await page.evaluate(()=>window.__listAnimations.length))>0);

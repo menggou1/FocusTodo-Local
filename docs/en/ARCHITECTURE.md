@@ -11,7 +11,7 @@ The version generator inlines `startup.css` and `js/local-startup.js` into HTML 
 ```text
 local-i18n-catalog -> local-i18n -> local-release -> local-timer-core
     -> local-data -> local-timer-ui -> local-app-ui -> local-backup
-    -> local-theme-storage -> local-settings-ui -> local-network -> patch -> legacy main
+    -> local-theme-storage -> local-settings-ui -> local-network -> patch -> local-calendar -> legacy main
 ```
 
 Feature ownership is explicit: identity/raw-storage policy belongs to data, backup UI to backup, legacy preferences to settings, and theme UI to theme storage/recovery. Network has its own policy module. The bootstrap installs these idempotent APIs in the original order; it contains no feature implementations.
@@ -66,3 +66,7 @@ React 16.14, Redux, Moment, jQuery and styles remain inside the legacy assets. H
 Names and avatars are saved directly through the local data service under import/reset maintenance ownership. Failed writes retain the saved profile and report the error. Background sound queues an abortable Web Lock for immediate handoff; without Web Locks, automatic background audio stays paused with an on-demand explanation. Manual previews and completion effects remain available.
 
 `cookie.NAME` is a legacy-compatible localStorage key, not a browser cookie. Startup, name saves and the legacy NAME setter remove the obsolete browser NAME cookie. The old console rename helper remains removed.
+
+## Local calendar
+
+`local-calendar.js` attaches through the checked calendar integration script. It owns selection, quick task UI, overlap layout, plan-to-focus controls, date/scroll behavior and removable refresh subscriptions. `local-data.js` commits new tasks and planned blocks together, enforces maintenance journals and broadcasts only committed changes. The database stays v3, with the existing backup schema. The official account/telemetry and Windows native window bridges are not imported. This worktree prepares compatible version 1.6.0 without publishing.

@@ -2,7 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.5.4**, author Lexible.
+Current application: **7.1.1-local.1.6.0**, author Lexible.
+
+## 7.1.1-local.1.6.0 · 2026-10-28
+
+- Double-click or select empty planned time to create a task, preview it, and save the task and plans together.
+- View overlapping blocks side by side, start focus from a plan, and refresh edited details.
+- Choose dates, retain timeline scrolling and refresh the current-time indicator.
+- Use Due next week in the task menu for the end of the day seven calendar days ahead.
+
+[English report](UPDATE-7.1.1-local.1.6.0.md).
 
 ## 7.1.1-local.1.5.4 · 2026-10-28
 

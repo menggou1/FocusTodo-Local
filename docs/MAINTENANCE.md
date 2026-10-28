@@ -2,7 +2,7 @@
 
 [返回首页](../README.md) · [更新记录与版本报告](../CHANGELOG.md) · [架构说明](../ARCHITECTURE.md)
 
-本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前应用为 `7.1.1-local.1.5.4`。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
+本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前工作树应用为 `7.1.1-local.1.6.0`，仅本地准备，尚未合入 main/发布；已发布 main/Pages 版本见下表。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划及未完成验收只在[统一待办与验收](BACKLOG.md)维护。
 
 ## 1. 开始修改前
 
@@ -38,12 +38,15 @@ npm run test:browser
 
 浏览器用例启动临时 loopback 服务，使用独立浏览器上下文、测试数据并阻断外部网络。完整结果和截图写入 `docs/acceptance/`；这是最近一次保存的本地证据，不是各历史版本独立的截图档案。筛选结果写入 `results-filtered.json`，不能用其替代全量结果。提交前核对截图只有测试数据。
 
+若 Windows 上已有截图暂被其他程序占用，可把 `FOCUS_ACCEPTANCE_DIR` 设为独立的绝对目录再运行完整验收；启动、应用、清单和日历证据都会写入该目录。全部完成后再复制回 `docs/acceptance/`，不因截图写入失败跳过业务断言。
+
 ## 3. 修改和生成边界
 
 | 文件/边界 | 维护规则 |
 |---|---|
 | `startup.css` / `js/local-startup.js` | 首屏源文件，经 `build:release` 内联到 HTML；独立于外部样式/字体。步骤进度只统计真实资源完成和应用挂载，必要样式与数据恢复就绪后展示，不等待可选资源 |
 | `local-timer-core.js` | 保持纯状态转换；区分完整番茄、部分片段、正常完成事件与恢复补记，不依赖 React/DOM |
+| `local-calendar.js` | 日历交互、布局和生命周期；快速创建复用数据服务事务，安排启动复用现有计时适配器 |
 | `local-data.js` | 数据库仍为 `PomodoroDB6` v3；记录和游标同事务提交；导入/删除保留完整备份与设置日志；数据库版本变更须设计迁移 |
 | `local-timer-ui.js` | 调用数据服务后更新旧界面；处理任务/子任务清除、订阅释放、跨页刷新、提示与音频 |
 | `local-app-ui.js` | 面向用户的更新、关于、删除确认；更新详情不包含维护 Markdown 按钮；错误反馈与关闭清理保持一致 |
@@ -63,6 +66,7 @@ node scripts/revise-app-integration.cjs
 node scripts/revise-pomodoro-rendering.cjs
 node scripts/revise-project-management.cjs
 node scripts/revise-local-profile.cjs
+node scripts/revise-calendar-integration.cjs
 ```
 
 这些脚本共用 `scripts/lib/bundle-editor.cjs`，校验已知 1484 个模块的 AST 边界、唯一匹配及编辑重叠，写入前再次解析。番茄渲染脚本维护数字进度转换及完成按钮的异步点击锁。脚本结构断言失败时先检查新 bundle，不能绕过断言强行替换。修改后重复运行并比较哈希，确保结果稳定。
@@ -80,6 +84,7 @@ node scripts/revise-local-profile.cjs
 
 | 情况 | 完整版本示例 | Tag |
 |---|---|---|
+| 当前工作树（仅本地待合并） | `7.1.1-local.1.6.0` | 尚未创建 |
 | 当前发布 / main / Pages | `7.1.1-local.1.5.4` | `1.5.4` |
 | 兼容修复 | `7.1.1-local.1.2.3` | `1.2.3` |
 | 兼容功能 | `7.1.1-local.1.3.0` | `1.3.0` |
@@ -111,7 +116,7 @@ git diff --stat
 git status --short
 ```
 
-当前全量包含计时核心、服务、发布信息、启动器、备份编码，14 项启动/字体用例、59 项应用浏览器用例和 7 项并发维护场景，以及清单拖动、音频协调和本地资料专项验收。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
+当前全量包含计时核心、服务、发布信息、启动器、备份编码，14 项启动/字体用例、59 项应用浏览器用例和 7 项并发维护场景，以及清单拖动、音频协调、本地资料和 10 项日历专项验收。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 

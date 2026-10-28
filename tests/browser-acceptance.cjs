@@ -8,6 +8,7 @@ function playwright() {
     }
 }
 const root = path.resolve(__dirname, '..');
+const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'docs/acceptance'));
 const release = require('../release.json');
 const releaseVersion = release.officialVersion + '-local.' + release.localVersion;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.mp3': 'audio/mpeg' };
@@ -25,7 +26,7 @@ const server = http.createServer((request, response) => {
     const executablePath = process.env.FOCUS_TEST_BROWSER || (!process.env.FOCUS_TEST_BUNDLED_BROWSER && ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
     const browser = await playwright().chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
     const failures = [], results = [];
-    fs.mkdirSync(path.join(root, 'docs/acceptance'), { recursive: true });
+    fs.mkdirSync(evidence, { recursive: true });
     async function app(testBody, beforeLoad, baseUrl = url, locale = 'zh-CN') {
         const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
         const errors = [], external = [];
@@ -185,7 +186,7 @@ const server = http.createServer((request, response) => {
             await page.getByText('Account',{exact:true}).click();await page.getByRole('button',{name:'Export data',exact:true}).click();
             await page.getByRole('button',{name:'Create and download',exact:true}).waitFor();
             assert(!/[\u3400-\u9fff]/.test(await page.locator('#focus-backup-dialog').innerText()));
-            await page.screenshot({path:path.join(root,'docs/acceptance/english-backup.png')});
+            await page.screenshot({path:path.join(evidence, 'english-backup.png')});
             await page.getByRole('button',{name:'Close',exact:true}).click();
             await page.locator('[class^="Settings-close-"]').click();
             await page.getByRole('button',{name:'Notifications',exact:true}).click();
@@ -314,7 +315,7 @@ const server = http.createServer((request, response) => {
         await check('fresh app starts without external requests', () => app(async (page, context, errors, external) => {
             await page.waitForTimeout(1200);
             assert.match(await page.locator('body').innerText(), /本地用户/); assert.deepEqual(external, []);
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/app.png'), fullPage: true });
+            await page.screenshot({ path: path.join(evidence, 'app.png'), fullPage: true });
         }));
         await check('empty projects with an existing version recover system navigation on startup', () => app(async page => {
             const after = await snapshot(page);
@@ -381,7 +382,7 @@ const server = http.createServer((request, response) => {
                 await page.getByRole('button', { name: '通知', exact: true }).click();
                 await checkSurface('.focus-release-entry:first-of-type');
                 await page.waitForTimeout(400);
-                await page.screenshot({ path: path.join(root, `docs/acceptance/notifications-${isDark ? 'dark' : 'light'}.png`), fullPage: true });
+                await page.screenshot({ path: path.join(evidence, `notifications-${isDark ? 'dark' : 'light'}.png`), fullPage: true });
                 await page.locator('.focus-release-entry').first().click();
                 await checkSurface('.focus-app-dialog');
                 await page.getByRole('button', { name: '关闭', exact: true }).click();
@@ -398,7 +399,7 @@ const server = http.createServer((request, response) => {
                     assert.equal(height, '30px');
                 }
                 await page.waitForTimeout(400);
-                await page.screenshot({ path: path.join(root, `docs/acceptance/account-${isDark ? 'dark' : 'light'}.png`), fullPage: true });
+                await page.screenshot({ path: path.join(evidence, `account-${isDark ? 'dark' : 'light'}.png`), fullPage: true });
                 await page.locator('[class*="AccountSettings-root"]').getByText('删除数据', { exact: true }).click();
                 await checkSurface('.focus-app-dialog');
                 await page.getByRole('button', { name: '取消', exact: true }).click();
@@ -483,7 +484,7 @@ const server = http.createServer((request, response) => {
             await page.setViewportSize({ width: 375, height: 600 });
             const box = await page.locator('.focus-backup-dialog').boundingBox();
             assert(box.x >= 0 && box.x + box.width <= 376 && box.y >= 0 && box.y + box.height <= 601, JSON.stringify(box));
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/backup-narrow-dark.png') });
+            await page.screenshot({ path: path.join(evidence, 'backup-narrow-dark.png') });
             await page.keyboard.press('Escape');
             await page.locator('#focus-backup-dialog').waitFor({ state: 'detached' });
         }, async page => page.addInitScript(() => { window.CompressionStream = undefined; window.BroadcastChannel = undefined; })));
@@ -517,7 +518,7 @@ const server = http.createServer((request, response) => {
             assert.equal(await repository.locator('img').getAttribute('alt'), 'GitHub');
             assert.doesNotMatch(await page.locator('[class*="AboutSettings-root"]').innerText(), /给予好评|立即评分|更新内容/);
             assert.equal(await page.locator('.lexible-release-notes').count(), 0);
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/about.png'), fullPage: true });
+            await page.screenshot({ path: path.join(evidence, 'about.png'), fullPage: true });
             await context.route('https://github.com/menggou1/FocusTodo-Local', route => route.fulfill({ contentType: 'text/html', body: '<title>Repository link acceptance</title>' }));
             const opened = page.waitForEvent('popup'); await repository.click(); const popup = await opened;
             await popup.waitForLoadState(); assert.equal(popup.url(), 'https://github.com/menggou1/FocusTodo-Local'); await popup.close();
@@ -542,7 +543,7 @@ const server = http.createServer((request, response) => {
             assert.equal(await page.locator('.focus-release-entry').count(), release.updates.length);
             assert(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()));
             await page.waitForTimeout(400);
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/notifications.png'), fullPage: true });
+            await page.screenshot({ path: path.join(evidence, 'notifications.png'), fullPage: true });
             await page.locator('.focus-release-entry').filter({ hasText: release.updates[0].title }).click();
             await page.locator('#focus-update-dialog').waitFor();
             assert((await page.locator('#focus-update-dialog').innerText()).includes(releaseVersion));
@@ -550,7 +551,7 @@ const server = http.createServer((request, response) => {
             assert.equal(await page.locator('#focus-update-dialog a').count(), 0, 'User-facing updates do not expose maintenance reports');
             assert.doesNotMatch(await page.locator('#focus-update-dialog').innerText(), /Markdown|验收报告/);
             assert.equal(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()), false);
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/update-details.png'), fullPage: true });
+            await page.screenshot({ path: path.join(evidence, 'update-details.png'), fullPage: true });
             await page.getByRole('button', { name: '关闭', exact: true }).click();
             await page.locator('#focus-update-dialog').waitFor({ state: 'detached' });
             await page.reload(); await page.waitForFunction(() => window.FocusAppUI && window.__acceptanceTimer);
@@ -579,7 +580,7 @@ const server = http.createServer((request, response) => {
                 const point = await hint.evaluate(el => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
                 assert(await hint.evaluate((el, point) => el.contains(document.elementFromPoint(point.x, point.y)), point), 'Last update link is unobscured');
                 assert.equal(await page.locator('.focus-notification-panel > :first-child').evaluate(el => el.getBoundingClientRect().top), geometry.title, 'Title stays fixed while scrolling');
-                await page.screenshot({ path: path.join(root, `docs/acceptance/notifications-${width}-${zoom}.png`) });
+                await page.screenshot({ path: path.join(evidence, `notifications-${width}-${zoom}.png`) });
                 await last.click();
                 assert((await page.locator('#focus-update-dialog').innerText()).includes(release.updates.at(-1).version));
                 await page.getByRole('button', { name: '关闭', exact: true }).click();
@@ -624,7 +625,7 @@ const server = http.createServer((request, response) => {
             assert.deepEqual((await snapshot(page)).indexedDB.Task, before.indexedDB.Task);
             await page.locator('[class*="AccountSettings-root"]').getByText('删除数据', { exact: true }).click();
             assert.match(await page.locator('#focus-reset-dialog .focus-app-danger').innerText(), /5 秒/);
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/reset-confirm.png'), fullPage: true });
+            await page.screenshot({ path: path.join(evidence, 'reset-confirm.png'), fullPage: true });
         }));
         await check('UI delete downloads a full backup before clearing and reloads only after success', () => app(async page => {
             await createActiveTask(page, 'countup');
@@ -1046,7 +1047,7 @@ const server = http.createServer((request, response) => {
             await begin(page); const anchor = await age(page, 120);
             await page.reload(); await page.locator('#focus-recovery').waitFor();
             assert.match(await page.locator('.focus-recovery-summary').innerText(), /补记 2 段，共 120 分钟/);
-            await page.screenshot({ path: path.join(root, 'docs/acceptance/recovery.png'), fullPage: true });
+            await page.screenshot({ path: path.join(evidence, 'recovery.png'), fullPage: true });
             assert.equal((await snapshot(page)).indexedDB.Pomodoro.length, 0);
             await page.getByRole('button', { name: '全部计入', exact: true }).click();
             await page.locator('#focus-recovery').waitFor({ state: 'detached' });
@@ -1251,6 +1252,6 @@ const server = http.createServer((request, response) => {
             assert.deepEqual(rejected, [true, true, true]); assert.deepEqual(external, []);
         }));
     } finally { await browser.close(); server.close(); }
-    fs.writeFileSync(path.join(root, 'docs/acceptance/' + (process.env.FOCUS_TEST_FILTER ? 'results-filtered.json' : 'results.json')), JSON.stringify({ version: releaseVersion, date: release.date, results }, null, 2));
+    fs.writeFileSync(path.join(evidence, '' + (process.env.FOCUS_TEST_FILTER ? 'results-filtered.json' : 'results.json')), JSON.stringify({ version: releaseVersion, date: release.date, results }, null, 2));
     if (failures.length) throw new Error(failures.join('\n'));
 })().catch(error => { console.error(error); server.close(); process.exitCode = 1; });

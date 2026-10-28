@@ -1,10 +1,29 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.5.4",
+  "localVersion": "1.6.0",
   "author": "Lexible",
   "date": "2026-10-28",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.6.0",
+      "date": "2026-10-28",
+      "title": "日程快速创建、布局与任务快捷日期",
+      "items": [
+        "日历支持在已安排列双击或拖选创建任务，预览可取消，任务与安排一起保存。",
+        "重叠时间块并排显示，安排可直接开始专注，修改详情后及时刷新。",
+        "增加日期选择、保留时间轴滚动位置，并持续刷新当前时间线。",
+        "任务右键菜单新增下周到期，按 7 天后的当天结束计算。"
+      ],
+      "titleEn": "Quick calendar tasks, layout and deadline shortcuts",
+      "itemsEn": [
+        "Double-click or select empty planned time to create a task, preview it, and save the task and plans together.",
+        "View overlapping blocks side by side, start focus from a plan, and refresh edited details.",
+        "Choose dates, retain timeline scrolling and refresh the current-time indicator.",
+        "Use Due next week in the task menu for the end of the day seven calendar days ahead."
+      ],
+      "report": "docs/UPDATE-7.1.1-local.1.6.0.md"
+    },
     {
       "version": "7.1.1-local.1.5.4",
       "date": "2026-10-28",
