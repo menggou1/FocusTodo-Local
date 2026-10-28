@@ -624,7 +624,12 @@
 .focus-schedule-shell .CalendarView-taskPane-3tvJl { flex:0 0 400px; width:400px; min-width:400px; max-width:400px; padding:0; margin:20px 20px 20px 0; border:0; border-radius:14px; background:var(--bg-main); }
 .focus-schedule-shell .CalendarView-taskPaneHeader-3Sx8e { min-height:62px; padding:0 20px; }
 .focus-schedule-shell .CalendarView-taskListTrigger-S5vQh { font-size:18px; font-weight:600; }
-.focus-schedule-shell .CalendarView-taskPaneClose-13D1F { opacity:.7; }
+.focus-schedule-shell .CalendarView-taskListTrigger-S5vQh { border:0; background:transparent; box-shadow:none; padding-left:0; }
+.focus-schedule-shell .CalendarView-taskPaneClose-13D1F { opacity:.7; background:transparent; border:0; box-shadow:none; position:relative; width:32px; height:32px; color:var(--text-desc); }
+.focus-schedule-shell .CalendarView-taskPaneClose-13D1F:before,
+.focus-schedule-shell .CalendarView-taskPaneClose-13D1F:after { content:''; position:absolute; left:15px; top:4px; width:1px; height:24px; background:currentColor; transform:rotate(45deg); }
+.focus-schedule-shell .CalendarView-taskPaneClose-13D1F:after { transform:rotate(-45deg); }
+.focus-schedule-shell .CalendarView-todayButton-2-jac { box-shadow:none; }
 .focus-schedule-day .CalendarDayView-header-34xgd { min-height:62px; padding:20px 24px 14px; border:0; }
 .focus-schedule-day .CalendarDayView-weekday-20TDc { font-size:22px; font-weight:600; }
 .focus-schedule-day .CalendarDayView-columnHeaderRow-3VKCF { min-height:40px; }

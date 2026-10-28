@@ -26,7 +26,8 @@
       "tarGz": "passed",
       "documentLinks": "passed"
     },
-    "astIdempotence": "passed"
+    "astIdempotence": "passed",
+    "finalVisualRefinement": "passed official-style day/sidebar/quick-task scenario after final CSS changes"
   },
   "shortFocusReproduction": {
     "modes": [
