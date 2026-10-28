@@ -2,15 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.5.1**, author Lexible.
+Current application: **7.1.1-local.1.5.2**, author Lexible.
 
-## 7.1.1-local.1.5.1 · 2026-10-28
+## 7.1.1-local.1.5.2 · 2026-10-28
 
 - Add visible three-bar drag handles, reorder animation and insertion feedback; dim lists in the unavailable group while dragging.
 - Improve background-audio handoff between windows; explain the fallback without Web Locks while retaining previews and completion sounds.
 - Save local names and avatars through the data service and report failed writes.
 
-[English report](UPDATE-7.1.1-local.1.5.1.md).
+[English report](UPDATE-7.1.1-local.1.5.2.md).
 
 ## 7.1.1-local.1.5.0 · 2026-10-27
 

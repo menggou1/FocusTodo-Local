@@ -1,0 +1,32 @@
+{
+  "version": "7.1.1-local.1.5.2",
+  "date": "2026-10-28",
+  "syntax": "passed",
+  "unit": {
+    "passed": 57,
+    "skipped": 1,
+    "skipReason": "POSIX wrapper on Windows"
+  },
+  "candidate1.5.1": {
+    "localEdgeBrowserPassed": 92,
+    "ciStartupPassed": 14,
+    "ciApplicationPassed": 59,
+    "ciMaintenancePassed": 7,
+    "ciState": "cancelled after new native drag test hung; pushed tag retained; no Release"
+  },
+  "correctiveChromiumChecks": {
+    "listOrdering": 3,
+    "audioCoordination": 5,
+    "localProfile": 5,
+    "startup": 14,
+    "listRepeatedRunsPassed": 2,
+    "status": "passed"
+  },
+  "finalCiBrowserScenarioCount": 93,
+  "packaging": [
+    "ZIP extracted launch passed",
+    "tar.gz extracted launch passed",
+    "mismatched tag refused"
+  ],
+  "limits": "Generated data only; audio test doubles verify coordination rather than audible output. Final CI and publication are linked from the release report."
+}

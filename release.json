@@ -1,12 +1,12 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.5.1",
+  "localVersion": "1.5.2",
   "author": "Lexible",
   "date": "2026-10-28",
   "repositoryRemote": "Focustodo-local",
   "updates": [
     {
-      "version": "7.1.1-local.1.5.1",
+      "version": "7.1.1-local.1.5.2",
       "date": "2026-10-28",
       "title": "清单排序反馈与本地兼容修复",
       "items": [
@@ -20,7 +20,7 @@
         "Improve background-audio handoff between windows; explain the fallback without Web Locks while retaining previews and completion sounds.",
         "Save local names and avatars through the data service and report failed writes."
       ],
-      "report": "docs/UPDATE-7.1.1-local.1.5.1.md"
+      "report": "docs/UPDATE-7.1.1-local.1.5.2.md"
     },
     {
       "version": "7.1.1-local.1.5.0",

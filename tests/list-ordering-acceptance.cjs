@@ -2,6 +2,10 @@
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const root=path.resolve(__dirname,'..');
+const release=require('../release.json');
+// Native drag CDP commands have no action timeout. Fail the process (including
+// launch/cleanup) instead of leaving a CI worker waiting for the job deadline.
+const suiteWatchdog=setTimeout(()=>{console.error('FAIL list acceptance exceeded 180 seconds');process.exit(1)},180000);
 const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css','.json':'application/json','.woff2':'font/woff2','.ttf':'font/ttf','.png':'image/png','.jpg':'image/jpeg','.mp3':'audio/mpeg'};
 const server=http.createServer((request,response)=>{
   const name=new URL(request.url,'http://localhost').pathname,file=path.resolve(root,'.'+(name==='/'?'/index.html':decodeURIComponent(name)));
@@ -22,6 +26,7 @@ const server=http.createServer((request,response)=>{
       Element.prototype.animate=function(){if(this.hasAttribute('data-project-id'))window.__listAnimations.push(this.dataset.projectId);return animate.apply(this,arguments)};
     });
     const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
+    const watchdog=setTimeout(()=>{console.error('FAIL list scenario exceeded 90 seconds: '+name);process.exit(1)},90000);
     try{
       await page.goto(url);await page.evaluate(()=>window.FocusLocalReady);
       await page.waitForFunction(()=>document.querySelector('#root').children.length);
@@ -34,7 +39,7 @@ const server=http.createServer((request,response)=>{
       await page.mouse.click(1255,25);await page.getByText(locale==='en-US'?'Projects':'清单管理',{exact:true}).click();
       await page.locator('[data-project-group="customProjects"]').first().waitFor();
       await body(page);assert.deepEqual(errors,[]);passed++;console.log('PASS '+name);
-    }finally{await context.close()}
+    }finally{await context.close();clearTimeout(watchdog)}
   }
   const group=(page,type)=>page.locator('[data-project-group="'+type+'"]');
   async function beginDrag(page,source,target){
@@ -54,7 +59,7 @@ const server=http.createServer((request,response)=>{
       assert.equal(await manager.getAttribute('data-drag-group'),'presetProjects');
       await page.waitForFunction(()=>Number(getComputedStyle(document.querySelector('[data-project-group="customProjects"]')).opacity)<.5);
       assert.equal(await preset.nth(1).getAttribute('data-drop-position'),'after');
-      fs.mkdirSync(path.join(root,'docs/acceptance'),{recursive:true});await page.screenshot({path:path.join(root,'docs/acceptance/list-drag-1.5.1.png')});
+      fs.mkdirSync(path.join(root,'docs/acceptance'),{recursive:true});await page.screenshot({path:path.join(root,'docs/acceptance/list-drag-'+release.localVersion+'.png')});
       await page.mouse.up();await page.waitForFunction(id=>document.querySelector('[data-project-group="presetProjects"]').dataset.projectId===id,second);
       assert.equal(await manager.getAttribute('data-drag-group'),null);assert.equal(await page.locator('[data-drop-position]').count(),0);
       assert((await page.evaluate(()=>window.__listAnimations.length))>0);
@@ -64,8 +69,10 @@ const server=http.createServer((request,response)=>{
       await page.mouse.up();assert.equal(await custom.first().getAttribute('data-project-id'),'drag-list-0');
       await page.reload();await page.evaluate(()=>window.FocusLocalReady);await page.mouse.click(1255,25);await page.getByText('清单管理',{exact:true}).click();
       assert.equal(await preset.first().getAttribute('data-project-id'),second);assert.equal(await preset.nth(1).getAttribute('data-project-id'),first);
+      await beginDrag(page,preset.first().locator('.focus-project-handle'),preset.nth(1));await page.keyboard.press('Escape');await page.mouse.up();
+      assert.equal(await manager.getAttribute('data-drag-group'),null);assert.equal(await page.locator('[data-drop-position]').count(),0);
     });
-    await scenario('keyboard handle ordering, reduced motion and protected action controls','en-US','reduce',async page=>{
+    await scenario('keyboard handle ordering and reduced motion','en-US','reduce',async page=>{
       const preset=group(page,'presetProjects'),custom=group(page,'customProjects'),manager=page.locator('.focus-project-management');
       assert.match(await page.locator('.focus-project-hint').innerText(),/three-line handle/);
       const handle=custom.first().locator('.focus-project-handle');await handle.focus();await page.keyboard.press('ArrowDown');
@@ -73,11 +80,14 @@ const server=http.createServer((request,response)=>{
       assert.equal(await page.locator(':focus').evaluate(element=>element.closest('[data-project-id]').dataset.projectId),'drag-list-0');
       assert.equal(await page.evaluate(()=>window.__listAnimations.length),0);
       assert.equal(await preset.first().evaluate(element=>getComputedStyle(element).transitionDuration),'0s');
+    });
+    // Isolate a rejected native control gesture from later keyboard/native drag
+    // protocols; Playwright's Chromium interception can otherwise wait forever.
+    await scenario('protected action controls do not initiate ordering','en-US','reduce',async page=>{
+      const custom=group(page,'customProjects'),manager=page.locator('.focus-project-management');
       await beginDrag(page,custom.first().locator('[class*="CustomProjectItem-hide"]'),custom.nth(1));await page.mouse.up();
-      assert.equal(await manager.getAttribute('data-drag-group'),null);assert.equal(await custom.first().getAttribute('data-project-id'),'drag-list-1');
-      await beginDrag(page,preset.first().locator('.focus-project-handle'),preset.nth(1));await page.keyboard.press('Escape');await page.mouse.up();
-      assert.equal(await manager.getAttribute('data-drag-group'),null);assert.equal(await page.locator('[data-drop-position]').count(),0);
+      assert.equal(await manager.getAttribute('data-drag-group'),null);assert.equal(await custom.first().getAttribute('data-project-id'),'drag-list-0');
     });
     console.log('List ordering acceptance: '+passed+' scenarios passed.');
-  }finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
-})().catch(error=>{console.error(error);process.exitCode=1});
+  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));clearTimeout(suiteWatchdog)}
+})().catch(error=>{console.error(error);process.exit(1)});
