@@ -599,7 +599,7 @@
 .focus-calendar-actions button[type="submit"] { background:#4670f6; color:#fff; border-color:#4670f6; }
 .focus-calendar-actions button:disabled { opacity:.5; cursor:wait; }
 .focus-calendar-dialog[data-dark="true"] { color-scheme:dark; }
-.focus-calendar-selection { position:absolute; left:0; pointer-events:none; background:#4670f633; border:1px solid #4670f6; box-sizing:border-box; z-index:6; }
+.focus-calendar-selection { position:absolute; left:0; pointer-events:none; background:#4670f633; border:1px solid #4670f6; border-radius:8px; box-sizing:border-box; z-index:6; }
 .focus-calendar-event { box-sizing:border-box; min-height:18px; padding:4px 26px 4px 6px; cursor:pointer; }
 .focus-calendar-event:focus-visible { outline:2px solid #4670f6; outline-offset:1px; z-index:5; }
 .focus-calendar-event-text { display:flex; flex-direction:column; min-width:0; overflow:hidden; gap:2px; line-height:17px; }
@@ -647,14 +647,7 @@
 .focus-schedule-name > span { position:absolute; clip-path:inset(50%); width:1px; height:1px; overflow:hidden; }
 .focus-schedule-quick .focus-schedule-name input { width:100%; height:42px; background:var(--bg-input); border-color:var(--border-input); }
 .focus-schedule-quick .focus-schedule-name input:focus { outline:none; box-shadow:none; }
-.focus-schedule-quick label,.focus-schedule-quick input,.focus-schedule-quick select { font-weight:400; }
-.focus-schedule-setting-row { display:flex; align-items:center; gap:12px; min-height:44px; list-style:none; font-size:16px; color:var(--text-desc); cursor:pointer; }
-.focus-schedule-setting-row::-webkit-details-marker { display:none; }
-.focus-schedule-setting-icon { font-size:26px; color:var(--text-desc); width:24px; }
-.focus-schedule-pomodoro-value { margin-left:auto; font-size:12px; color:var(--theme-red,#ff5656); white-space:pre-line; text-align:right; }
-.focus-schedule-list:before { content:'☷'; font-size:24px; width:24px; }
-.focus-schedule-quick label.focus-schedule-list { justify-content:flex-start; gap:12px; margin:0; }
-.focus-schedule-quick .focus-schedule-list select { margin-left:auto; border:0; width:58%; padding-right:0; text-align:right; color:var(--text-title); }
+.focus-schedule-quick .focus-schedule-name input { font-weight:400; }
 .focus-schedule-quick .focus-calendar-actions { margin-top:12px; }
 .focus-schedule-quick .focus-calendar-actions button { min-width:94px; height:38px; padding:0 12px; }
 .focus-schedule-quick .focus-calendar-actions button[type=submit] { background:var(--theme-red,#ff5656); border:0; }
@@ -672,3 +665,18 @@
   .focus-schedule-shell .CalendarView-navButton-1xPcj { width:28px; }
   .focus-schedule-view { width:42px; }
 }
+
+/* Native task controls retain their existing icons, typography and popovers. */
+body.focus-schedule-quick-open #pomodoro-selection-popover,
+body.focus-schedule-quick-open #project-selection-popover { z-index:50010; }
+.focus-schedule-native-fields { width:100%; }
+/* Match the supplied screen without replacing individual component fonts. */
+.HomeHeader-username-2_ExH { font-size:18px; }
+.ProjectItem-root-1iGkr { height:46px; }
+.ProjectItem-content-2_ONW { height:44px; }
+.ProjectItem-name-3IyjO { font-size:18px; line-height:41px; }
+.ProjectItem-estimatedTime-1FiA2,.ProjectItem-taskQuantity-2TAGR { font-size:14px; }
+.SearchItem-searchContainer-33crx { height:42px; }
+.SearchItem-searchInput-a6ypV,.SearchItem-searchInput-a6ypV::placeholder { font-size:18px; }
+.focus-schedule-day .CalendarDayView-timeLabel-2NbT4 { font-size:14px; }
+.focus-schedule-day .CalendarDayView-columnHeaderCell-2ZG6q { font-size:14px; }

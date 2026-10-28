@@ -512,8 +512,8 @@
     function createCalendarTask(input) {
         const name = String(input.name || '').trim(), count = Number(input.count), interval = Number(input.interval);
         const start = Number(input.startTime), pause = Number(input.shortBreak || 0);
-        if (!name || name.length > 1000 || !Number.isInteger(count) || count < 1 || count > 99 ||
-            !Number.isInteger(interval) || interval < 60 || interval > 10800 || !Number.isFinite(start) ||
+        if (!name || name.length > 1000 || !Number.isInteger(count) || count < 0 || count > 1000 ||
+            !Number.isInteger(interval) || interval < 60 || interval > 28800 || !Number.isFinite(start) ||
             !Number.isFinite(new Date(start).getTime()) || !Number.isFinite(pause) || pause < 0 || pause > 10800) {
             return Promise.reject(new Error(root.FocusI18n.text('请填写有效的任务、时间和预计番茄数。')));
         }
@@ -535,7 +535,7 @@
                             rCycle: 0, rFirstDeadline: 0, rUnit: '', rValue: '', rId: '', rStartDate: 0, rEndDate: 0,
                             reminders: '', remark: '', order: input.addToTop ? orders.reduce((a, b) => Math.min(a, b), 0) - 10000 : orders.reduce((a, b) => Math.max(a, b), 0) + 10000,
                             hasSubtask: false, isExpanded: false, priority: 0, tags: '', sync: 0 };
-                        const schedules = Array.from({ length: Math.min(5, count) }, (_, index) => ({
+                        const schedules = Array.from({ length: Math.max(1, Math.min(5, count)) }, (_, index) => ({
                             id: crypto.randomUUID(), objType: 'SCHEDULE', creationDate: now, state: 0,
                             taskId: task.id, subtaskId: '', projectId: project.id, interval, isAllDay: false, sync: 0,
                             endDate: start + (index * (interval + pause) + interval) * 1000

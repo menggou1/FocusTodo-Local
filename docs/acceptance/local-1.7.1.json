@@ -1,0 +1,50 @@
+{
+  "version": "7.1.1-local.1.7.1",
+  "date": "2026-10-28",
+  "scope": "local-worktree",
+  "baseCommit": "e7d0048d01451a29b5610d43cf125fd78ed810f3",
+  "checks": {
+    "unit": {
+      "passed": 60,
+      "skipped": 1
+    },
+    "syntax": "passed",
+    "browser": {
+      "startup": 14,
+      "application": 59,
+      "maintenance": 7,
+      "listOrdering": 3,
+      "audio": 5,
+      "profile": 5,
+      "schedule": 19,
+      "total": 112,
+      "passed": true
+    },
+    "nativeUISupplement": 3,
+    "portablePackages": "zip and tar.gz extracted startup passed",
+    "astIdempotence": "passed"
+  },
+  "nativeComponents": {
+    "pomodoro": 935,
+    "wheels": 936,
+    "project": 964,
+    "projectPicker": 278,
+    "datePicker": 277
+  },
+  "fonts": {
+    "sidebar": 18,
+    "search": 18,
+    "username": 18,
+    "scheduleHeading": 22,
+    "timeline": 14
+  },
+  "selectionRadius": 8,
+  "bundleSha256": "31d9b1bd775aeb52d91bdd6647b20426beabb28c07d6475925fb48fe0970977e",
+  "publication": {
+    "merged": false,
+    "pushed": false,
+    "tagged": false,
+    "deployed": false,
+    "remoteCI": false
+  }
+}

@@ -2,7 +2,7 @@
 
 FocusTodo 专注清单 - 浏览器本地版
 
-官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.7.0** · 作者 **Lexible** · [English](README_en.md)
+官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.7.1** · 作者 **Lexible** · [English](README_en.md)
 
 ## 项目说明
 
@@ -31,7 +31,7 @@ FocusTodo 专注清单 - 浏览器本地版
 
 Pages 随 `main` 推送由官方 Actions 自动部署，沿用运行文件白名单；`main` 保留完整项目，无需维护 `gh-pages`。部署与本地预览见[维护指南](docs/MAINTENANCE.md)。
 
-`1.7.0` 按官方样式完善日程、任务面板和快速添加窗口；日程可在清单管理中排序与隐藏，月视图支持滚动和记录查看，短专注历史显示秒数。当前仅本地提交，未合入 main 或发布。详见[完成报告](docs/UPDATE-7.1.1-local.1.7.0.md)。
+`1.7.1` 修复日程控件复用：番茄、清单和日期均使用程序已有组件；拖选框为圆角矩形，字号按参考页面调整。当前仅本地提交，未合入 main 或发布。详见[完成报告](docs/UPDATE-7.1.1-local.1.7.1.md)。
 
 从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载 ZIP 或 tar.gz 并解压，安装 Node.js 22+。三个系统使用同一份便携包，无需运行 `npm install`。发布附带 `SHA256SUMS.txt`，运行时需自行安装，不包含在压缩包中。
 

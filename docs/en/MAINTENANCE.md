@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.0`, author Lexible. It is prepared locally, not merged into main or published. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.1`, author Lexible. It is prepared locally, not merged into main or published. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 

@@ -37,7 +37,14 @@
         form.dataset.dark = String(localStorage.getItem('DarkMode') === 'true' || document.documentElement.getAttribute('data-theme') === 'dark');
         const heading = document.createElement('h2'); heading.id = 'focus-calendar-dialog-title'; heading.textContent = text(title);
         form.setAttribute('aria-labelledby', heading.id); form.append(heading); overlay.append(form); document.body.append(overlay);
-        const close = () => { overlay.remove(); if (focus && focus.isConnected) focus.focus(); };
+        const dialog = { form, dispose: null };
+        const close = () => { document.removeEventListener('keydown', escape, true); dialog.dispose?.(); overlay.remove(); if (focus && focus.isConnected) focus.focus(); };
+        dialog.close = close;
+        function escape(event) {
+            if (event.key !== 'Escape' || dialog.hasOpenNative?.()) return;
+            event.preventDefault(); event.stopImmediatePropagation(); onCancel();
+        }
+        document.addEventListener('keydown', escape, true);
         overlay.onmousedown = event => { if (event.target === overlay) onCancel(); };
         form.onkeydown = event => {
             event.stopPropagation();
@@ -49,7 +56,7 @@
                 else if (!event.shiftKey && document.activeElement === last) { first.focus(); event.preventDefault(); }
             }
         };
-        build(form, close); form.querySelector('input,select,button')?.focus(); return { close, form };
+        build(form, close); form.querySelector('input,select,button')?.focus(); return dialog;
     }
     function field(form, label, id, type = 'text') {
         const row = document.createElement('label'), caption = document.createElement('span');
@@ -91,7 +98,7 @@
     }
     function attachController(controller, options) {
         if (controller.focusCalendarAttached) return; controller.focusCalendarAttached = true;
-        const c = controller, { React, moment, preference, taskManager, subtaskManager, startTask, actions: redux, events, eventTypes } = options;
+        const c = controller, { React, moment, preference, taskManager, subtaskManager, startTask, actions: redux, events, eventTypes, native } = options;
         let quick = null, picker = null, saving = false, live = true;
         let periodRequest = 0;
         const invalidate = () => { c.calendarDayEventCache = { tasks: new Map(), subtasks: new Map(), projects: new Map() }; };
@@ -140,18 +147,21 @@
         root.addEventListener('focus', focusRefresh);
         events.on(eventTypes.POMODORO_NEW, focusRefresh);
         c.cancelQuickTask = () => {
-            if (saving) return; quick?.dialog.close(); quick = null;
+            if (saving) return;
+            const previous = quick; quick = null; previous?.dialog.close();
             if (live) c.setState({ focusCalendarPreview: null });
         };
         c.openQuickTask = (startTime, interval) => {
             if (saving || root.FocusLocalData.maintenance) return;
             c.cancelQuickTask(); picker?.close(); picker = null;
             startTime = Math.floor(startTime / 60000) * 60000;
-            interval = Math.max(60, Math.min(10800, Math.round(interval / 60) * 60));
+            interval = Math.max(60, Math.min(28800, Math.round(interval / 60) * 60));
             const projectId = c.state.calendarSelectedProjectId;
             const projects = (c.props.projects || []).filter(row => row && row.state !== -1 && [1000, 7005].includes(row.type));
             const defaultProject = projects.find(row => row.id === projectId) || projects.find(row => row.type === 7005) || projects[0];
-            quick = { startTime, interval, dialog: null };
+            quick = { startTime, interval, dialog: null, draft: { id: 'local-schedule-draft', estimatePomoNum: 0,
+                pomodoroInterval: interval, projectId: defaultProject?.id || '', pomodoros: [] } };
+            const entry = quick;
             c.setState({ calendarPomodoroDetail: null, calendarScheduleDetail: null, showCalendarTasks: false,
                 focusCalendarPreview: { id: 'local-calendar-preview', start: startTime, end: startTime + interval * 1000,
                     title: text('未指定任务'), category: 'scheduled', focusPreview: true } });
@@ -160,30 +170,31 @@
                 form.parentElement.classList.add('focus-schedule-quick-overlay');
                 const name = field(form, '任务名称', 'focus-calendar-name'); name.required = true; name.maxLength = 1000;
                 name.placeholder = text('添加任务...'); name.parentElement.classList.add('focus-schedule-name');
-                const pomodoro = document.createElement('details'); pomodoro.className = 'focus-schedule-pomodoro';
-                const trigger = document.createElement('summary'); trigger.className = 'focus-schedule-setting-row';
-                const icon = document.createElement('span'); icon.textContent = '◷'; icon.className = 'focus-schedule-setting-icon';
-                const caption = document.createElement('span'); caption.textContent = text('番茄');
-                const value = document.createElement('span'); value.className = 'focus-schedule-pomodoro-value';
-                trigger.append(icon, caption, value); pomodoro.append(trigger); form.append(pomodoro);
-                const count = field(pomodoro, '预计番茄数', 'focus-calendar-count', 'number'); count.min = '1'; count.max = '99'; count.step = '1'; count.value = '1'; count.required = true;
-                const minutes = field(pomodoro, '每个番茄（分钟）', 'focus-calendar-minutes', 'number');
-                minutes.min = '1'; minutes.max = '180'; minutes.step = '1'; minutes.value = interval / 60; minutes.required = true;
-                const list = field(form, '清单', 'focus-calendar-project', 'select');
-                list.parentElement.classList.add('focus-schedule-setting-row', 'focus-schedule-list');
-                projects.forEach(project => {
-                    const option = document.createElement('option'); option.value = project.id;
-                    option.textContent = project.type === 7005 ? text('任务') : project.name; list.append(option);
-                });
-                if (defaultProject) list.value = defaultProject.id;
-                const summary = document.createElement('p'); summary.className = 'focus-calendar-summary'; pomodoro.append(summary);
+                const nativeHost = document.createElement('div'); nativeHost.className = 'focus-schedule-native-fields'; form.append(nativeHost);
                 const updatePreview = () => {
-                    const seconds = Math.max(60, Math.min(10800, Number(minutes.value) * 60 || 60));
-                    summary.textContent = count.value + ' × ' + minutes.value + text(' 分钟') + ' · ' + text('最多安排前 5 个番茄，间隔使用短休息时长。');
-                    value.textContent = '🍅 0 / 🍅 ' + count.value + '\n= ' + Number(count.value) * Number(minutes.value) + text(' 分钟');
-                    c.setState({ focusCalendarPreview: { ...c.state.focusCalendarPreview, title: name.value.trim() || text('未指定任务'), end: startTime + seconds * 1000 } });
+                    if (quick !== entry) return;
+                    c.setState({ focusCalendarPreview: { ...c.state.focusCalendarPreview, title: name.value.trim() || text('未指定任务'), end: startTime + entry.draft.pomodoroInterval * 1000 } });
                 };
-                name.oninput = count.oninput = minutes.oninput = updatePreview; updatePreview();
+                function updateDraft(change) {
+                    if (quick !== entry || saving) return;
+                    entry.draft = { ...entry.draft, ...change }; renderNative(); updatePreview();
+                }
+                function renderNative() {
+                    native.ReactDOM.render(React.createElement(native.Provider, { store: c.context.store }, React.createElement(React.Fragment, null,
+                        React.createElement(native.Pomodoro, { task: entry.draft, onLocalDraftChange: updateDraft, ref: value => entry.pomodoroRow = value }),
+                        React.createElement(native.Project, { task: entry.draft, projects, onLocalDraftChange: updateDraft, ref: value => entry.projectRow = value }))), nativeHost);
+                }
+                const dismissNative = event => {
+                    if (event.key !== 'Escape') return;
+                    const pomo = entry.pomodoroRow, project = entry.projectRow;
+                    if (pomo?.state.inputShown || project?.state.inputShown) {
+                        event.preventDefault(); event.stopImmediatePropagation();
+                        pomo?.hideInput(); project?.setState({ inputShown: false });
+                    }
+                };
+                entry.dispose = () => { document.body.classList.remove('focus-schedule-quick-open'); document.removeEventListener('keydown', dismissNative, true); native.ReactDOM.unmountComponentAtNode(nativeHost); };
+                document.body.classList.add('focus-schedule-quick-open'); document.addEventListener('keydown', dismissNative, true);
+                renderNative(); name.oninput = updatePreview; updatePreview();
                 const error = document.createElement('p'); error.setAttribute('role', 'alert'); form.append(error);
                 const buttons = actions(form, c.cancelQuickTask);
                 form.onsubmit = async event => {
@@ -191,8 +202,8 @@
                     if (!name.value.trim()) { name.focus(); return; }
                     saving = true; buttons.save.disabled = buttons.back.disabled = true; error.textContent = '';
                     try {
-                        const result = await root.FocusLocalData.createCalendarTask({ name: name.value, count: Number(count.value),
-                            interval: Number(minutes.value) * 60, startTime, projectId: list.value,
+                        const result = await root.FocusLocalData.createCalendarTask({ name: name.value, count: entry.draft.estimatePomoNum,
+                            interval: entry.draft.pomodoroInterval, startTime, projectId: entry.draft.projectId,
                             shortBreak: preference.shortBreakInterval, addToTop: preference.newTaskOnTop });
                         if (live) {
                             events.emit(eventTypes.NEED_TO_REFRESH_PROJECT_INFO_OF_TASKS, [result.task]);
@@ -205,6 +216,8 @@
                     }
                 };
             }, c.cancelQuickTask);
+            entry.dialog.dispose = () => entry.dispose();
+            entry.dialog.hasOpenNative = () => !!(entry.pomodoroRow?.state.inputShown || entry.projectRow?.state.inputShown);
             const pending = quick;
             const position = () => {
                 if (quick !== pending || !pending.dialog.form.isConnected) return;
@@ -217,7 +230,6 @@
                     top: Math.max(12, Math.min(root.innerHeight - bounds.height - 12, top)) + 'px' });
                 form.dataset.anchored = 'true';
             };
-            pending.dialog.form.querySelector('details').ontoggle = position;
             root.requestAnimationFrame(position);
         };
         c.handleCalendarTimeSlotDoubleClick = date => c.openQuickTask(Number(date), preference.workInterval);
@@ -231,13 +243,16 @@
         };
         c.handleCalendarDatePicker = event => {
             event.stopPropagation(); if (saving) return;
-            c.cancelQuickTask(); picker?.close();
-            const cancel = () => { picker?.close(); picker = null; };
-            picker = modal('选择日期', form => {
-                const date = field(form, '日期', 'focus-calendar-date', 'date'); date.required = true;
-                date.value = c.state.calendarDate.format('YYYY-MM-DD'); actions(form, cancel);
-                form.onsubmit = e => { e.preventDefault(); if (!form.reportValidity()) return; c.setState({ calendarDate: moment(date.value).startOf('day') }); cancel(); };
-            }, cancel);
+            c.cancelQuickTask(); if (picker) { picker.close(); return; }
+            const host = document.createElement('div'); document.body.append(host);
+            const close = () => { if (picker?.host !== host) return; picker = null; native.ReactDOM.unmountComponentAtNode(host); host.remove(); };
+            picker = { host, close };
+            const target = event.currentTarget || document.querySelector('[class*="CalendarView-dateButton"]');
+            native.ReactDOM.render(React.createElement(native.Overlay, { show: true, target, placement: 'bottom', rootClose: true, onHide: close, containerPadding: 8 },
+                React.createElement(native.Popover, { id: 'deadline-selection-popover' }, React.createElement(native.DatePicker, {
+                    deadline: c.state.calendarDate.clone().endOf('day').valueOf(), shortcutHidden: true, actionsHidden: true,
+                    valueChange: value => { c.setState({ calendarDate: moment(value).startOf('day') }); close(); }
+                }))), host);
         };
         c.handleCalendarEventStartPomodoro = async event => {
             try {

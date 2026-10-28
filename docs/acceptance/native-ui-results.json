@@ -1,0 +1,17 @@
+{
+  "version": "7.1.1-local.1.7.1",
+  "results": [
+    {
+      "name": "native date selection and scroll restore work across navigation and refresh",
+      "passed": true
+    },
+    {
+      "name": "native quick-task fields keep edits in a draft and cancellation writes nothing",
+      "passed": true
+    },
+    {
+      "name": "original task-detail fields retain native persistence outside a schedule draft",
+      "passed": true
+    }
+  ]
+}

@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.0**, author Lexible.
+Current application: **7.1.1-local.1.7.1**, author Lexible.
+
+## 7.1.1-local.1.7.1 · 2026-10-28
+
+- Reuse the native pomodoro row, duration wheels and project picker; cancelling leaves no draft data.
+- Use the existing month/day date panel for schedule navigation.
+- Round the selection rectangle and match sidebar and schedule text sizes to the reference.
+
+[English report](UPDATE-7.1.1-local.1.7.1.md).
 
 ## 7.1.1-local.1.7.0 · 2026-10-28
 

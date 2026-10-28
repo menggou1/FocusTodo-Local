@@ -1,10 +1,27 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.7.0",
+  "localVersion": "1.7.1",
   "author": "Lexible",
   "date": "2026-10-28",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.7.1",
+      "date": "2026-10-28",
+      "title": "日程原生控件与字号修复",
+      "items": [
+        "日程快速添加复用原生番茄、时长滚轮和清单选择，取消时不保存草稿。",
+        "日期选择恢复程序原有月份和日期面板。",
+        "拖选区域改为圆角矩形，侧栏及日程字号按参考页面调整。"
+      ],
+      "titleEn": "Native schedule controls and text sizing fixes",
+      "itemsEn": [
+        "Reuse the native pomodoro row, duration wheels and project picker; cancelling leaves no draft data.",
+        "Use the existing month/day date panel for schedule navigation.",
+        "Round the selection rectangle and match sidebar and schedule text sizes to the reference."
+      ],
+      "report": "docs/UPDATE-7.1.1-local.1.7.1.md"
+    },
     {
       "version": "7.1.1-local.1.7.0",
       "date": "2026-10-28",

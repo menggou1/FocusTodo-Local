@@ -1,5 +1,5 @@
 {
-  "version": "7.1.1-local.1.7.0",
+  "version": "7.1.1-local.1.7.1",
   "results": [
     {
       "name": "double click creates task and spaced plans atomically, persists and exports",
@@ -55,6 +55,18 @@
     },
     {
       "name": "invalid zero-duration legacy record is absent without deleting saved data",
+      "passed": true
+    },
+    {
+      "name": "native quick-task fields keep edits in a draft and cancellation writes nothing",
+      "passed": true
+    },
+    {
+      "name": "original task-detail fields retain native persistence outside a schedule draft",
+      "passed": true
+    },
+    {
+      "name": "selection has rounded corners and visible text matches the reference sizes",
       "passed": true
     },
     {
