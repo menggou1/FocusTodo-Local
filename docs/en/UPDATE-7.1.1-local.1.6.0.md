@@ -1,19 +1,19 @@
-# 7.1.1-local.1.6.0 — Quick calendar tasks, layout and deadline shortcuts
+# 7.1.1-local.1.6.0 — Local schedule and compatible 7.2.2 features
 
 [Changelog](CHANGELOG.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Date: 2026-10-28. Author: Lexible.
+Date: 2026-10-29. Author: Lexible.
 
 ## Delivered behavior
 
-- Double-click or select empty planned time to create a task, preview it, and save the task and plans together.
-- View overlapping blocks side by side, start focus from a plan, and refresh edited details.
-- Choose dates, retain timeline scrolling and refresh the current-time indicator.
-- Use Due next week in the task menu for the end of the day seven calendar days ahead.
+- Create tasks by selecting schedule time, with overlap layout and native date, pomodoro and project controls.
+- Manage Schedule as a sortable, hideable list and scroll the month view.
+- Align schedule typography with the unchanged sidebar.
+- Display short focus in seconds and add the due-next-week shortcut.
 
 ## Technical and verification account
 
-Prepared and committed only in the local worktree; not merged, pushed, tagged or deployed. Compatible enhancements retain the modified 7.1.1 bundle and database v3. A checked AST integration attaches an independent calendar module. Task and up to five spaced plans commit in one transaction, with maintenance-journal exclusion, rollback and retry. The timeline adds overlap columns, clipping, project colors and compact labels, timer start guards, date selection, scroll restoration and removable minute/refresh listeners. Calendar edits broadcast after commit and refresh associations. Existing movement, resizing and copy/delete persist through the local service. Due next week means seven calendar days ahead at end of day. No official account, diagnostics, telemetry or native Windows bridges are imported. Local verification is recorded in the Chinese completion report and calendar/startup/application acceptance results. Focus forest is confirmed for a later implementation; its methods and browser mini-window adaptation are maintained only in Backlog.
+Final change set against main 1.5.4: local schedule task creation, native controls, overlap layout, month scrolling, managed system-list order and visibility, short-focus seconds and next-week deadlines. The sidebar remains unchanged. Native estimates support 0-1000 and 1-480 minutes; at most five plans are created atomically. Database and backup compatibility remain unchanged. Forest implementation remains in Backlog. Local browser verification covers 22 schedule cases, four invariant cases, 14 startup and three list-ordering cases; 60 Node tests passed and one platform check skipped. No Tag or Release is created.
 
 ## Evidence
 

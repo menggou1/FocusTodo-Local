@@ -2,38 +2,14 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.2**, author Lexible.
+Current application: **7.1.1-local.1.6.0**, author Lexible.
 
-## 7.1.1-local.1.7.2 · 2026-10-29
+## 7.1.1-local.1.6.0 · 2026-10-29
 
-- Undo out-of-scope sidebar, search and username styles, restoring original typography and row sizes.
-- Adjust only schedule typography against the unchanged sidebar, preserving native controls and rounded selection.
-
-[English report](UPDATE-7.1.1-local.1.7.2.md).
-
-## 7.1.1-local.1.7.1 · 2026-10-28
-
-- Reuse the native pomodoro row, duration wheels and project picker; cancelling leaves no draft data.
-- Use the existing month/day date panel for schedule navigation.
-- Round the selection rectangle; the sidebar typography change exceeded scope and its acceptance was invalidated, corrected by the local rollback in 1.7.2.
-
-[English report](UPDATE-7.1.1-local.1.7.1.md).
-
-## 7.1.1-local.1.7.0 · 2026-10-28
-
-- Use the official-style schedule timeline, task sidebar and compact quick task dialog.
-- Reorder and hide Schedule in list management with saved preferences.
-- Scroll the month view, see planned/completed records and open a selected day.
-- Display sub-minute focus in seconds rather than a misleading zero-minute history entry.
-
-[English report](UPDATE-7.1.1-local.1.7.0.md).
-
-## 7.1.1-local.1.6.0 · 2026-10-28
-
-- Double-click or select empty planned time to create a task, preview it, and save the task and plans together.
-- View overlapping blocks side by side, start focus from a plan, and refresh edited details.
-- Choose dates, retain timeline scrolling and refresh the current-time indicator.
-- Use Due next week in the task menu for the end of the day seven calendar days ahead.
+- Create tasks by selecting schedule time, with overlap layout and native date, pomodoro and project controls.
+- Manage Schedule as a sortable, hideable list and scroll the month view.
+- Align schedule typography with the unchanged sidebar.
+- Display short focus in seconds and add the due-next-week shortcut.
 
 [English report](UPDATE-7.1.1-local.1.6.0.md).
 

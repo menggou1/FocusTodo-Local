@@ -1,77 +1,26 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.7.2",
+  "localVersion": "1.6.0",
   "author": "Lexible",
   "date": "2026-10-29",
   "repositoryRemote": "Focustodo-local",
   "updates": [
     {
-      "version": "7.1.1-local.1.7.2",
-      "date": "2026-10-29",
-      "title": "日程字号局部回滚与参考区域保护",
-      "items": [
-        "撤销侧边栏、搜索与用户名的越界样式，恢复原有字号和行尺寸。",
-        "以原有侧边栏为基准，仅调整日程文字层级，保留原生控件与圆角。"
-      ],
-      "titleEn": "Restore the reference sidebar and scope schedule typography",
-      "itemsEn": [
-        "Undo out-of-scope sidebar, search and username styles, restoring original typography and row sizes.",
-        "Adjust only schedule typography against the unchanged sidebar, preserving native controls and rounded selection."
-      ],
-      "report": "docs/UPDATE-7.1.1-local.1.7.2.md"
-    },
-    {
-      "version": "7.1.1-local.1.7.1",
-      "date": "2026-10-28",
-      "title": "日程原生控件与字号修复",
-      "items": [
-        "日程快速添加复用原生番茄、时长滚轮和清单选择，取消时不保存草稿。",
-        "日期选择恢复程序原有月份和日期面板。",
-        "拖选区域改为圆角矩形；当时侧栏字号修改越界，相关完成结论失效，由 1.7.2 局部回滚纠正。"
-      ],
-      "titleEn": "Native schedule controls and text sizing fixes",
-      "itemsEn": [
-        "Reuse the native pomodoro row, duration wheels and project picker; cancelling leaves no draft data.",
-        "Use the existing month/day date panel for schedule navigation.",
-        "Round the selection rectangle; the sidebar typography change exceeded scope and its acceptance was invalidated, corrected by the local rollback in 1.7.2."
-      ],
-      "report": "docs/UPDATE-7.1.1-local.1.7.1.md"
-    },
-    {
-      "version": "7.1.1-local.1.7.0",
-      "date": "2026-10-28",
-      "title": "日程页面、月视图与短专注记录修复",
-      "items": [
-        "日程按官方布局显示时间轴、任务面板和紧凑添加任务窗口。",
-        "日程加入清单管理，支持排序和隐藏，设置会保存。",
-        "月视图支持滚动、显示已安排与已完成记录，并可打开具体日期。",
-        "不足一分钟的有效专注显示秒数，避免暂停停止后出现误导的 0 分钟记录。"
-      ],
-      "titleEn": "Schedule layout, scrolling month view and short-focus fixes",
-      "itemsEn": [
-        "Use the official-style schedule timeline, task sidebar and compact quick task dialog.",
-        "Reorder and hide Schedule in list management with saved preferences.",
-        "Scroll the month view, see planned/completed records and open a selected day.",
-        "Display sub-minute focus in seconds rather than a misleading zero-minute history entry."
-      ],
-      "report": "docs/UPDATE-7.1.1-local.1.7.0.md"
-    },
-    {
       "version": "7.1.1-local.1.6.0",
-      "date": "2026-10-28",
-      "title": "日程快速创建、布局与任务快捷日期",
+      "date": "2026-10-29",
+      "title": "本地日程与官方 7.2.2 兼容功能",
       "items": [
-        "日历支持在已安排列双击或拖选创建任务，预览可取消，任务与安排一起保存。",
-        "重叠时间块并排显示，安排可直接开始专注，修改详情后及时刷新。",
-        "增加日期选择、保留时间轴滚动位置，并持续刷新当前时间线。",
-        "任务右键菜单新增下周到期，按 7 天后的当天结束计算。"
+        "日程支持拖选创建任务、重叠布局、原生日期及番茄清单控件。",
+        "日程作为系统清单支持排序隐藏，月视图支持滚动和查看记录。",
+        "日程文字以原侧边栏为基准调整，其他区域保持原样。",
+        "短专注记录显示秒数，新增下周到期快捷操作。"
       ],
-      "titleEn": "Quick calendar tasks, layout and deadline shortcuts",
+      "titleEn": "Local schedule and compatible 7.2.2 features",
       "itemsEn": [
-        "Double-click or select empty planned time to create a task, preview it, and save the task and plans together.",
-        "View overlapping blocks side by side, start focus from a plan, and refresh edited details.",
-        "Choose dates, retain timeline scrolling and refresh the current-time indicator.",
-        "Use Due next week in the task menu for the end of the day seven calendar days ahead."
+        "Create tasks by selecting schedule time, with overlap layout and native date, pomodoro and project controls.",
+        "Manage Schedule as a sortable, hideable list and scroll the month view.",
+        "Align schedule typography with the unchanged sidebar.",
+        "Display short focus in seconds and add the due-next-week shortcut."
       ],
       "report": "docs/UPDATE-7.1.1-local.1.6.0.md"
     },

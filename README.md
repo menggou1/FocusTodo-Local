@@ -2,7 +2,7 @@
 
 FocusTodo 专注清单 - 浏览器本地版
 
-官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.7.2** · 作者 **Lexible** · [English](README_en.md)
+官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.6.0** · 作者 **Lexible** · [English](README_en.md)
 
 ## 项目说明
 
@@ -31,7 +31,7 @@ FocusTodo 专注清单 - 浏览器本地版
 
 Pages 随 `main` 推送由官方 Actions 自动部署，沿用运行文件白名单；`main` 保留完整项目，无需维护 `gh-pages`。部署与本地预览见[维护指南](docs/MAINTENANCE.md)。
 
-`1.7.2` 局部回滚越界侧栏样式，以恢复后的侧边栏为基准仅调整日程文字；保留原生控件和圆角，并增加非更改区域不变性检查。当前仅本地提交，未合入 main 或发布。详见[完成报告](docs/UPDATE-7.1.1-local.1.7.2.md)。
+`1.6.0` 以原有侧边栏为基准调整日程文字；保留原生控件和圆角，并增加非更改区域不变性检查。当前合入 main 并部署 Pages，暂不创建版本 Tag 或 Release。详见[完成报告](docs/UPDATE-7.1.1-local.1.6.0.md)。
 
 从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载 ZIP 或 tar.gz 并解压，安装 Node.js 22+。三个系统使用同一份便携包，无需运行 `npm install`。发布附带 `SHA256SUMS.txt`，运行时需自行安装，不包含在压缩包中。
 
