@@ -1,0 +1,93 @@
+{
+  "version": "7.1.1-local.1.7.2",
+  "results": [
+    {
+      "name": "double click creates task and spaced plans atomically, persists and exports",
+      "passed": true
+    },
+    {
+      "name": "upward and downward selections work; completed column and cancel never write",
+      "passed": true
+    },
+    {
+      "name": "schedule transaction failure leaves no orphan task and UI can retry once",
+      "passed": true
+    },
+    {
+      "name": "overlapping plans and records have separate hit targets, project colors and timer start guards",
+      "passed": true
+    },
+    {
+      "name": "native date selection and scroll restore work across navigation and refresh",
+      "passed": true
+    },
+    {
+      "name": "plan movement, resizing, copy/delete and failed writes keep committed data",
+      "passed": true
+    },
+    {
+      "name": "calendar writes refresh another tab and completed-record association without stale names",
+      "passed": true
+    },
+    {
+      "name": "task context menu saves next week as seven days ahead",
+      "passed": true
+    },
+    {
+      "name": "estimate cap, custom list, top ordering and maintenance exclusion preserve data",
+      "passed": true
+    },
+    {
+      "name": "schedule is reorderable and hideable in system list management",
+      "passed": true
+    },
+    {
+      "name": "month view loads records, scrolls to final week and opens a selected day",
+      "passed": true
+    },
+    {
+      "name": "countup pause then repeated stop never creates zero-minute history",
+      "passed": true
+    },
+    {
+      "name": "countdown pause then repeated stop never creates zero-minute history",
+      "passed": true
+    },
+    {
+      "name": "invalid zero-duration legacy record is absent without deleting saved data",
+      "passed": true
+    },
+    {
+      "name": "native quick-task fields keep edits in a draft and cancellation writes nothing",
+      "passed": true
+    },
+    {
+      "name": "original task-detail fields retain native persistence outside a schedule draft",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar zh-CN false",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar zh-CN true",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar en false",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar en true",
+      "passed": true
+    },
+    {
+      "name": "official-style day, task sidebar and compact quick task render together",
+      "passed": true
+    },
+    {
+      "name": "English dark quick task stays within a narrow viewport",
+      "passed": true
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.1`, author Lexible. It is prepared locally, not merged into main or published. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.2`, author Lexible. It is prepared locally, not merged into main or published. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -129,3 +129,7 @@ List management component integration is maintained by `node scripts/revise-proj
 ## Commit messages
 
 Use Conventional Commits for future commits: `type(optional-scope): short description`. Use `fix:` for repairs, `feat:` for new features, and `docs:`, `refactor:`, `test:` or `chore:` for their respective changes. Preserve published history.
+
+## Visual scope and unchanged regions
+
+Declare the target, reference and permitted properties before editing. A reference sidebar, search and username must retain their font family, size, weight, line height, geometry and interactions. Scope schedule rules to its own root; preserve native picker styling. Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Freeze independent computed-style evidence (current fixture: tests/fixtures/sidebar-typography-cfd6449.json); do not regenerate it from the implementation. Test both target appearance and unchanged regions, including a deliberately injected regression that the guard must reject. Baseline changes require explicit user authorization and independent evidence. Prefer a local inverse patch when correcting scope violations. Passing test counts do not replace visual acceptance.

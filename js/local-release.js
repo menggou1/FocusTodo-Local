@@ -3,11 +3,26 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.7.1",
+    "localVersion": "1.7.2",
     "author": "Lexible",
-    "date": "2026-10-28",
+    "date": "2026-10-29",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.7.2",
+            "date": "2026-10-29",
+            "title": "日程字号局部回滚与参考区域保护",
+            "items": [
+                "撤销侧边栏、搜索与用户名的越界样式，恢复原有字号和行尺寸。",
+                "以原有侧边栏为基准，仅调整日程文字层级，保留原生控件与圆角。"
+            ],
+            "titleEn": "Restore the reference sidebar and scope schedule typography",
+            "itemsEn": [
+                "Undo out-of-scope sidebar, search and username styles, restoring original typography and row sizes.",
+                "Adjust only schedule typography against the unchanged sidebar, preserving native controls and rounded selection."
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.7.2.md"
+        },
         {
             "version": "7.1.1-local.1.7.1",
             "date": "2026-10-28",
@@ -15,13 +30,13 @@
             "items": [
                 "日程快速添加复用原生番茄、时长滚轮和清单选择，取消时不保存草稿。",
                 "日期选择恢复程序原有月份和日期面板。",
-                "拖选区域改为圆角矩形，侧栏及日程字号按参考页面调整。"
+                "拖选区域改为圆角矩形；当时侧栏字号修改越界，相关完成结论失效，由 1.7.2 局部回滚纠正。"
             ],
             "titleEn": "Native schedule controls and text sizing fixes",
             "itemsEn": [
                 "Reuse the native pomodoro row, duration wheels and project picker; cancelling leaves no draft data.",
                 "Use the existing month/day date panel for schedule navigation.",
-                "Round the selection rectangle and match sidebar and schedule text sizes to the reference."
+                "Round the selection rectangle; the sidebar typography change exceeded scope and its acceptance was invalidated, corrected by the local rollback in 1.7.2."
             ],
             "report": "docs/UPDATE-7.1.1-local.1.7.1.md"
         },
@@ -352,7 +367,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.7.1",
+    "version": "7.1.1-local.1.7.2",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

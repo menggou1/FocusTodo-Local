@@ -339,21 +339,44 @@ fs.mkdirSync(evidence, { recursive: true });
             await chooseProject(page,'Native destination',scope);
             await waitForData(page,async()=>(await FocusLocalData.snapshot()).indexedDB.Task[0].projectId==='native-destination');
         });
-        await scenario('selection has rounded corners and visible text matches the reference sizes',async page=>{
+        for (const locale of ['zh-CN','en']) for (const dark of [false,true]) {
+        await scenario('schedule typography preserves reference sidebar '+locale+' '+dark,async page=>{
+            const baseline=require('./fixtures/sidebar-typography-cfd6449.json').metrics;
+            async function unchanged() {
+                const actual=await page.evaluate(selectors=>Object.fromEntries(selectors.map(selector=>{
+                    const el=document.querySelector(selector),s=getComputedStyle(el);
+                    return [selector,Object.fromEntries(['fontSize','fontWeight','lineHeight','height'].map(k=>[k,s[k]]))];
+                })),Object.keys(baseline));
+                assert.deepEqual(actual,baseline,'Reference sidebar, search and username must stay unchanged');
+                assert(await page.evaluate(selectors=>selectors.every(selector=>getComputedStyle(document.querySelector(selector)).fontFamily===getComputedStyle(document.body).fontFamily),Object.keys(baseline)),'Existing reference component font families must remain unchanged');
+            }
+            for(const width of [1024,1280]) {
+                await page.setViewportSize({width,height:900});await unchanged();
+                const sizes=await page.evaluate(()=>({
+                    list:parseFloat(getComputedStyle(document.querySelector('.ProjectItem-name-3IyjO')).fontSize),
+                    small:parseFloat(getComputedStyle(document.querySelector('.ProjectItem-estimatedTime-1FiA2')).fontSize),
+                    heading:parseFloat(getComputedStyle(document.querySelector('.CalendarDayView-weekday-20TDc')).fontSize),
+                    time:parseFloat(getComputedStyle(document.querySelector('.CalendarDayView-timeLabel-2NbT4')).fontSize),
+                    column:parseFloat(getComputedStyle(document.querySelector('.CalendarDayView-columnHeaderCell-2ZG6q')).fontSize),
+                    today:parseFloat(getComputedStyle(document.querySelector('.CalendarView-todayButton-2-jac')).fontSize)
+                }));
+                assert.equal(sizes.time,sizes.small);assert.equal(sizes.column,sizes.small);
+                assert.equal(sizes.today,sizes.list);assert.equal(sizes.heading,sizes.list+4);
+            }
             const start=await slot(page,100),end=await slot(page,130);
             await page.mouse.move(start.x,start.y);await page.mouse.down();await page.mouse.move(end.x,end.y,{steps:8});
             const selection=page.locator('.focus-calendar-selection');await selection.waitFor();
             assert.equal(await selection.evaluate(el=>getComputedStyle(el).borderRadius),'8px');
-            const sizes=await page.evaluate(()=>({
-                list:getComputedStyle(document.querySelector('.ProjectItem-name-3IyjO')).fontSize,
-                search:getComputedStyle(document.querySelector('.SearchItem-searchInput-a6ypV')).fontSize,
-                username:getComputedStyle(document.querySelector('.HomeHeader-username-2_ExH')).fontSize,
-                heading:getComputedStyle(document.querySelector('.CalendarDayView-weekday-20TDc')).fontSize,
-                time:getComputedStyle(document.querySelector('.CalendarDayView-timeLabel-2NbT4')).fontSize
-            }));assert.deepEqual(sizes,{list:'18px',search:'18px',username:'18px',heading:'22px',time:'14px'});
-            await page.screenshot({path:path.join(evidence,'schedule-selection.png')});
-            await page.mouse.up();await page.keyboard.press('Escape');
-        });
+            await page.screenshot({path:path.join(evidence,'schedule-typography-'+locale+'-'+(dark?'dark':'light')+'.png')});
+            await page.mouse.up();await unchanged();await page.keyboard.press('Escape');
+            // Prove the guard rejects the former regression instead of accepting it.
+            const fault=await page.addStyleTag({content:'.ProjectItem-name-3IyjO {font-size:18px !important}'});
+            await assert.rejects(unchanged(),/Reference sidebar/);await fault.evaluate(el=>el.remove());await unchanged();
+            for(const view of ['week','month','day']) {
+                await page.locator('.focus-schedule-view').selectOption(view);await unchanged();
+            }
+        },locale,dark);
+        }
         await scenario('official-style day, task sidebar and compact quick task render together',async page=>{
             await page.evaluate(async()=>{
                 const start=new Date();start.setHours(12,50,0,0);

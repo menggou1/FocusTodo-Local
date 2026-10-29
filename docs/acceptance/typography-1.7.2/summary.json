@@ -1,0 +1,20 @@
+{
+  "version": "7.1.1-local.1.7.2",
+  "date": "2026-10-29",
+  "baselineCommit": "cfd644910e6925ac74395e6c675648a9c4177b72",
+  "rollback": "Seven unscoped rules from e1b1477 only",
+  "browser": {
+    "schedule": 22,
+    "supplementalInvariance": 4,
+    "startup": 14,
+    "listOrdering": 3
+  },
+  "node": {
+    "passed": 60,
+    "skipped": 1
+  },
+  "syntax": "passed",
+  "regressionInjection": "Old sidebar 18px rule rejected in all four typography cases",
+  "remaining": "Existing English Today heading fallback: BACKLOG E13",
+  "delivery": "Local worktree commit only; no merge, push, tag or deployment"
+}

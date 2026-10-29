@@ -1,0 +1,53 @@
+{
+  "source": "cfd644910e6925ac74395e6c675648a9c4177b72 local-ui.css; Edge, 1280x900, zh-CN, deviceScaleFactor=1",
+  "metrics": {
+    ".ProjectItem-name-3IyjO": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "lineHeight": "33px",
+      "height": "34px"
+    },
+    ".ProjectItem-estimatedTime-1FiA2": {
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "lineHeight": "33px",
+      "height": "34px"
+    },
+    ".ProjectItem-taskQuantity-2TAGR": {
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "lineHeight": "33px",
+      "height": "34px"
+    },
+    ".ProjectItem-root-1iGkr": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "lineHeight": "20px",
+      "height": "38px"
+    },
+    ".ProjectItem-content-2_ONW": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "lineHeight": "20px",
+      "height": "36px"
+    },
+    ".SearchItem-searchContainer-33crx": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "lineHeight": "20px",
+      "height": "34px"
+    },
+    ".SearchItem-searchInput-a6ypV": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "lineHeight": "20px",
+      "height": "20px"
+    },
+    ".HomeHeader-username-2_ExH": {
+      "fontSize": "14px",
+      "fontWeight": "400",
+      "lineHeight": "50px",
+      "height": "auto"
+    }
+  }
+}

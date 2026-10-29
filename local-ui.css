@@ -616,14 +616,14 @@
 .focus-schedule-shell .CalendarView-navButton-1xPcj,
 .focus-schedule-shell .CalendarView-dateButton-1hMsC,
 .focus-schedule-add { height:42px; border:0; border-radius:8px; background:var(--bg-main); color:var(--text-title); }
-.focus-schedule-shell .CalendarView-todayButton-2-jac { padding:0 20px; font-size:18px; }
+.focus-schedule-shell .CalendarView-todayButton-2-jac { padding:0 20px; font-size:14px; }
 .focus-schedule-shell .CalendarView-navButton-1xPcj { width:42px; font:30px/38px sans-serif; color:var(--text-desc); }
-.focus-schedule-shell .CalendarView-dateButton-1hMsC { padding:0 14px; min-width:148px; font-size:16px; }
+.focus-schedule-shell .CalendarView-dateButton-1hMsC { padding:0 14px; min-width:148px; font-size:14px; }
 .focus-schedule-add { width:42px; font:30px/38px sans-serif; color:var(--text-desc); cursor:pointer; }
 .focus-schedule-view { height:32px; width:60px; border:0; border-radius:6px; background:var(--bg-main); color:var(--text-desc); font:inherit; }
 .focus-schedule-shell .CalendarView-taskPane-3tvJl { flex:0 0 400px; width:400px; min-width:400px; max-width:400px; padding:0; margin:20px 20px 20px 0; border:0; border-radius:14px; background:var(--bg-main); }
 .focus-schedule-shell .CalendarView-taskPaneHeader-3Sx8e { min-height:62px; padding:0 20px; }
-.focus-schedule-shell .CalendarView-taskListTrigger-S5vQh { font-size:18px; font-weight:600; }
+.focus-schedule-shell .CalendarView-taskListTrigger-S5vQh { font-size:14px; font-weight:600; }
 .focus-schedule-shell .CalendarView-taskListTrigger-S5vQh { border:0; background:transparent; box-shadow:none; padding-left:0; }
 .focus-schedule-shell .CalendarView-taskPaneClose-13D1F { opacity:.7; background:transparent; border:0; box-shadow:none; position:relative; width:32px; height:32px; color:var(--text-desc); }
 .focus-schedule-shell .CalendarView-taskPaneClose-13D1F:before,
@@ -631,11 +631,11 @@
 .focus-schedule-shell .CalendarView-taskPaneClose-13D1F:after { transform:rotate(-45deg); }
 .focus-schedule-shell .CalendarView-todayButton-2-jac { box-shadow:none; }
 .focus-schedule-day .CalendarDayView-header-34xgd { min-height:62px; padding:20px 24px 14px; border:0; }
-.focus-schedule-day .CalendarDayView-weekday-20TDc { font-size:22px; font-weight:600; }
+.focus-schedule-day .CalendarDayView-weekday-20TDc { font-size:18px; font-weight:600; }
 .focus-schedule-day .CalendarDayView-columnHeaderRow-3VKCF { min-height:40px; }
 .focus-schedule-day .focus-calendar-event { border-radius:7px; padding:10px 36px 8px 12px; }
 .focus-schedule-day .focus-calendar-event-text { line-height:20px; gap:4px; }
-.focus-schedule-day .focus-calendar-event-duration { font-size:14px; }
+.focus-schedule-day .focus-calendar-event-duration { font-size:12px; }
 .focus-schedule-day .focus-calendar-event-title { font-size:14px; }
 .focus-schedule-day .CalendarDayView-eventResizeHandle-2iLyR { opacity:0; }
 .focus-schedule-day .focus-calendar-event:hover .CalendarDayView-eventResizeHandle-2iLyR { opacity:1; }
@@ -670,13 +670,6 @@
 body.focus-schedule-quick-open #pomodoro-selection-popover,
 body.focus-schedule-quick-open #project-selection-popover { z-index:50010; }
 .focus-schedule-native-fields { width:100%; }
-/* Match the supplied screen without replacing individual component fonts. */
-.HomeHeader-username-2_ExH { font-size:18px; }
-.ProjectItem-root-1iGkr { height:46px; }
-.ProjectItem-content-2_ONW { height:44px; }
-.ProjectItem-name-3IyjO { font-size:18px; line-height:41px; }
-.ProjectItem-estimatedTime-1FiA2,.ProjectItem-taskQuantity-2TAGR { font-size:14px; }
-.SearchItem-searchContainer-33crx { height:42px; }
-.SearchItem-searchInput-a6ypV,.SearchItem-searchInput-a6ypV::placeholder { font-size:18px; }
-.focus-schedule-day .CalendarDayView-timeLabel-2NbT4 { font-size:14px; }
-.focus-schedule-day .CalendarDayView-columnHeaderCell-2ZG6q { font-size:14px; }
+/* Schedule-only type scale: unchanged sidebar name 14px, statistics 12px. */
+.focus-schedule-day .CalendarDayView-timeLabel-2NbT4 { font-size:12px; }
+.focus-schedule-day .CalendarDayView-columnHeaderCell-2ZG6q { font-size:12px; }
