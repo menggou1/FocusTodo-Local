@@ -168,7 +168,7 @@ git push Focustodo-local refs/tags/1.2.3
 
 工作流使用官方 `configure-pages`、`upload-pages-artifact` 和 `deploy-pages`，通过 `github-pages` 环境发布。构建仅有 `contents: read`；部署使用 `pages: write` 与 `id-token: write`，无需个人令牌。并发部署串行执行，避免中断正在发布的网站。
 
-沿用原有 `scripts/deploy-pages.py` 文件白名单：根目录浏览器 HTML/CSS/JS、图标、`release.json`、`LICENSE`，以及 `js/`、`audio/`、`font/`、`i18n/`、`img/`。脚本只读取已提交 main 或其祖先，输出这些运行文件、`.nojekyll` 和记录版本/来源提交的 `deployment.json`；开发脚本、测试、文档、上游 `CNAME` 仍不上传。官方工作流上传的目录是 `dist/pages`，不是整个仓库。
+沿用原有 `scripts/deploy-pages.py` 文件白名单：根目录浏览器 HTML/CSS/JS、图标、`release.json`、`LICENSE`，以及 `js/`、`audio/`、`font/`、`i18n/`、`img/`。脚本只读取已提交 main 或其祖先，输出这些运行文件、`.nojekyll` 和记录版本/来源提交的 `deployment.json`；开发脚本、测试和文档不上传；本地版主分支已移除上游 `CNAME`。官方工作流上传的目录是 `dist/pages`，不是整个仓库。
 
 使用 Python 3.12+ 可按同一规则生成本地预览（输出目录必须不存在）：
 

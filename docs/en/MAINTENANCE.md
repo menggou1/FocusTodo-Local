@@ -106,7 +106,7 @@ The site is [FocusTodo Local](https://menggou1.github.io/FocusTodo-Local/). `mai
 
 Official `configure-pages`, `upload-pages-artifact` and `deploy-pages` actions publish through the `github-pages` environment. Build has `contents: read`; deployment has `pages: write` and `id-token: write`. No personal token is required. Deployments run serially without cancelling an active deployment.
 
-The existing whitelist in `scripts/deploy-pages.py` is unchanged: root browser HTML/CSS/JS, icons, release.json, LICENSE, and js/audio/font/i18n/img. Only committed main or its ancestors are read. The artifact includes `.nojekyll` and `deployment.json` with source commit/version, excluding scripts, tests, documentation and the old CNAME. The workflow uploads `dist/pages`, never the repository root.
+The existing whitelist in `scripts/deploy-pages.py` is unchanged: root browser HTML/CSS/JS, icons, release.json, LICENSE, and js/audio/font/i18n/img. Only committed main or its ancestors are read. The artifact includes `.nojekyll` and `deployment.json` with source commit/version, excluding scripts, tests and documentation. The upstream CNAME has been removed from the local main branch. The workflow uploads `dist/pages`, never the repository root.
 
 Build a local preview with Python 3.12+ into a new directory:
 
