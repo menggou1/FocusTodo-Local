@@ -3,11 +3,26 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.6.0",
+    "localVersion": "1.6.1",
     "author": "Lexible",
     "date": "2026-10-29",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.6.1",
+            "date": "2026-10-29",
+            "title": "日程与提示样式优化",
+            "items": [
+                "日程创建任务时为空名称提供清晰的表单提示。",
+                "底部提示适配浅色和深色主题，并自动渐隐。"
+            ],
+            "titleEn": "Schedule and notice refinements",
+            "itemsEn": [
+                "Show an inline message when a schedule task has no name.",
+                "Adapt bottom notices to light and dark themes and fade them out automatically."
+            ],
+            "report": "docs/UPDATE-7.1.1-local.1.6.1.md"
+        },
         {
             "version": "7.1.1-local.1.6.0",
             "date": "2026-10-29",
@@ -316,7 +331,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.6.0",
+    "version": "7.1.1-local.1.6.1",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

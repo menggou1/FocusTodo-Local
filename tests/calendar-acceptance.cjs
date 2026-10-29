@@ -94,6 +94,23 @@ fs.mkdirSync(evidence, { recursive: true });
         await blocks(page).first().waitFor();
     }
     try {
+        for (const dark of [false, true]) await scenario('empty task and fading notice ' + (dark ? 'dark' : 'light'), async page => {
+            const position = await slot(page); await page.mouse.dblclick(position.x, position.y);
+            const input = page.locator('#focus-calendar-name');
+            await page.getByRole('button', { name: '确定', exact: true }).click();
+            assert.equal(await input.getAttribute('aria-invalid'), 'true');
+            assert.match(await page.locator('#focus-schedule-error').innerText(), /请输入任务名称/);
+            await input.fill('   '); await page.getByRole('button', { name: '确定', exact: true }).click();
+            assert.equal(await input.getAttribute('aria-invalid'), 'true');
+            await input.fill('Task'); assert.equal(await input.getAttribute('aria-invalid'), null);
+            await input.fill(''); await page.getByRole('button', { name: '确定', exact: true }).click();
+            await page.evaluate(() => FocusLocal.notice('First notice'));
+            const notice = page.locator('#focus-local-notice'); assert.equal(await notice.locator('button').count(), 0);
+            await page.screenshot({ path: path.join(evidence, 'notice-' + (dark ? 'dark' : 'light') + '.png') });
+            await page.waitForTimeout(3500); await page.evaluate(() => FocusLocal.notice('Second notice'));
+            await page.waitForTimeout(3000); assert.equal(await notice.innerText(), 'Second notice');
+            await notice.waitFor({ state: 'detached', timeout: 5000 });
+        }, 'zh-CN', dark);
         await scenario('double click creates task and spaced plans atomically, persists and exports', async page => {
             await create(page, 'Quick calendar task');
             const data = await snapshot(page), task = data.indexedDB.Task.find(row => row.name === 'Quick calendar task');

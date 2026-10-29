@@ -2,7 +2,14 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.6.0**, author Lexible.
+Current application: **7.1.1-local.1.6.1**, author Lexible.
+
+## 7.1.1-local.1.6.1 · 2026-10-29
+
+- Show an inline message when a schedule task has no name.
+- Adapt bottom notices to light and dark themes and fade them out automatically.
+
+[English report](UPDATE-7.1.1-local.1.6.1.md).
 
 ## 7.1.1-local.1.6.0 · 2026-10-29
 

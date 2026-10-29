@@ -13,6 +13,7 @@
             return Number.isFinite(value) ? Math.max(0, Math.min(value, 1)) : 0;
         });
     }
+    let noticeTimer, noticeRemoval;
     function notice(message) {
         let box = document.getElementById('focus-local-notice');
         if (!box) {
@@ -20,7 +21,12 @@
             document.body.appendChild(box);
         }
         box.replaceChildren(document.createTextNode(message));
-        const close = document.createElement('button'); close.textContent = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('关闭提示'):'关闭提示'); close.onclick = () => box.remove(); box.appendChild(close);
+        clearTimeout(noticeTimer); clearTimeout(noticeRemoval);
+        box.classList.remove('focus-local-notice-fading');
+        noticeTimer = setTimeout(() => {
+            box.classList.add('focus-local-notice-fading');
+            noticeRemoval = setTimeout(() => box.remove(), 400);
+        }, 6000);
     }
     root.addEventListener('focus-local-notice', event => notice(event.detail));
     function localDate(value) {

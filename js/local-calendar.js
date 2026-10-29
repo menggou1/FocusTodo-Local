@@ -166,7 +166,7 @@
                 focusCalendarPreview: { id: 'local-calendar-preview', start: startTime, end: startTime + interval * 1000,
                     title: text('未指定任务'), category: 'scheduled', focusPreview: true } });
             quick.dialog = modal('添加任务', (form) => {
-                form.classList.add('focus-schedule-quick');
+                form.classList.add('focus-schedule-quick'); form.noValidate = true;
                 form.parentElement.classList.add('focus-schedule-quick-overlay');
                 const name = field(form, '任务名称', 'focus-calendar-name'); name.required = true; name.maxLength = 1000;
                 name.placeholder = text('添加任务...'); name.parentElement.classList.add('focus-schedule-name');
@@ -194,12 +194,14 @@
                 };
                 entry.dispose = () => { document.body.classList.remove('focus-schedule-quick-open'); document.removeEventListener('keydown', dismissNative, true); native.ReactDOM.unmountComponentAtNode(nativeHost); };
                 document.body.classList.add('focus-schedule-quick-open'); document.addEventListener('keydown', dismissNative, true);
-                renderNative(); name.oninput = updatePreview; updatePreview();
-                const error = document.createElement('p'); error.setAttribute('role', 'alert'); form.append(error);
+                renderNative(); updatePreview();
+                const error = document.createElement('p'); error.className = 'focus-schedule-error'; error.id = 'focus-schedule-error'; error.setAttribute('role', 'alert'); form.append(error);
+                name.setAttribute('aria-describedby', error.id);
+                name.oninput = () => { updatePreview(); if (name.value.trim()) { error.textContent = ''; name.removeAttribute('aria-invalid'); } };
                 const buttons = actions(form, c.cancelQuickTask);
                 form.onsubmit = async event => {
-                    event.preventDefault(); if (saving || !form.reportValidity()) return;
-                    if (!name.value.trim()) { name.focus(); return; }
+                    event.preventDefault(); if (saving) return;
+                    if (!name.value.trim()) { error.textContent = text('请输入任务名称'); name.setAttribute('aria-invalid', 'true'); name.focus(); return; }
                     saving = true; buttons.save.disabled = buttons.back.disabled = true; error.textContent = '';
                     try {
                         const result = await root.FocusLocalData.createCalendarTask({ name: name.value, count: entry.draft.estimatePomoNum,

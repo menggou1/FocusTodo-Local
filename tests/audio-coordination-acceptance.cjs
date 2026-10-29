@@ -67,7 +67,7 @@ const executablePath = process.env.FOCUS_TEST_BROWSER || (!process.env.FOCUS_TES
                 await Promise.all([start(first), start(second)]);
                 assert.equal(await active(first) + await active(second), 0);
                 assert.match(await first.locator('#focus-local-notice').innerText(), /不支持多标签页背景音协调/);
-                await first.locator('#focus-local-notice button').click();
+                await first.locator('#focus-local-notice').waitFor({ state: 'detached', timeout: 8000 });
                 await start(first);
                 assert.equal(await first.locator('#focus-local-notice').count(), 0);
                 await first.evaluate(() => { __player.startAudition('bgm_Rain.m4a', 0.5); __player.start('alarm_Bell.mp3', 1); });

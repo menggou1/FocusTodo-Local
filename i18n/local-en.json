@@ -242,5 +242,6 @@
   "月": "Month",
   "番茄": "Pomodoros",
   "添加任务...": "Add task...",
-  "秒": " seconds"
+  "秒": " seconds",
+  "请输入任务名称": "Please enter a task name"
 }
