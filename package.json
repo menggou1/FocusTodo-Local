@@ -1,13 +1,13 @@
 {
   "name": "focustodo",
-  "version": "7.1.1-local.1.6.1",
+  "version": "7.1.1-local.1.7.0",
   "description": "FocusTodo web version",
   "main": "patch.js",
   "scripts": {
     "start": "node scripts/start.cjs",
     "build:release": "node scripts/build-release.cjs",
     "test": "node --test tests/timer-core.test.cjs tests/server.test.cjs tests/release.test.cjs tests/start.test.cjs tests/backup.test.cjs tests/theme-storage.test.cjs tests/calendar.test.cjs",
-    "test:browser": "node tests/startup-acceptance.cjs && node tests/browser-acceptance.cjs && node tests/maintenance-acceptance.cjs && node tests/list-ordering-acceptance.cjs && node tests/audio-coordination-acceptance.cjs && node tests/profile-acceptance.cjs && node tests/calendar-acceptance.cjs",
+    "test:browser": "node tests/startup-acceptance.cjs && node tests/browser-acceptance.cjs && node tests/maintenance-acceptance.cjs && node tests/list-ordering-acceptance.cjs && node tests/audio-coordination-acceptance.cjs && node tests/profile-acceptance.cjs && node tests/calendar-acceptance.cjs && node tests/forest-acceptance.cjs && node tests/achievements-acceptance.cjs",
     "benchmark:backup": "node tests/backup-performance.cjs",
     "check": "node scripts/check-syntax.cjs"
   },

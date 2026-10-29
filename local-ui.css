@@ -664,3 +664,8 @@ body.focus-schedule-quick-open #project-selection-popover { z-index:50010; }
 .focus-schedule-quick .focus-schedule-error:empty { display:none; }
 .focus-schedule-quick .focus-schedule-error { margin:4px 0 0; padding:9px 12px; border-radius:8px; background:color-mix(in srgb, var(--theme-red, #ff5656) 10%, var(--bg-popup)); color:var(--theme-red, #d94848); font-size:13px; line-height:1.4; }
 .focus-schedule-quick .focus-schedule-name input[aria-invalid="true"] { border-color:var(--theme-red, #ff5656); }
+.focus-achievements .focus-achievement-row { height: auto; min-height: 52px; }
+.focus-achievements .focus-achievement-text { display: flex; flex-direction: column; margin-left: 10px; min-width: 0; }
+.focus-achievements .focus-achievement-text small { color: var(--text-desc); font-size: 11px; line-height: 1.35; }
+.focus-achievements .focus-achievement-trophy.is-locked { filter: grayscale(1); opacity: .3; }
+.focus-achievements .RankingList-pomodoroTime-TN_nv { font-size: 14px; white-space: nowrap; }

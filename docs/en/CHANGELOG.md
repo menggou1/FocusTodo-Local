@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.6.1**, author Lexible.
+Current application: **7.1.1-local.1.7.0**, author Lexible.
+
+## 7.1.1-local.1.7.0 · 2026-10-29
+
+- Restore the original Focus forest, sunlight collection and detailed guide, with local storage.
+- Earn bronze, silver and gold local achievements with immediate sunlight rewards.
+- Remove the daily collection limit and fix sunlight collection and position refresh.
+
+[English report](UPDATE-7.1.1-local.1.7.0.md).
 
 ## 7.1.1-local.1.6.1 · 2026-10-29
 

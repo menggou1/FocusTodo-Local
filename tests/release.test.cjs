@@ -21,7 +21,7 @@ test('published metadata, package and page all use the same official/local relea
 
 test('release scripts load before consumers and local cache tags use the current version', () => {
     const html = read('index.html');
-    const order = ['js/local-i18n-catalog.js', 'js/local-i18n.js', 'js/local-release.js', 'js/local-timer-core.js', 'js/local-data.js', 'js/local-timer-ui.js', 'js/local-app-ui.js', 'js/local-backup.js', 'js/local-theme-storage.js', 'js/local-settings-ui.js', 'js/local-network.js', 'patch.js', 'js/local-calendar.js', 'js/main.js'];
+    const order = ['js/local-i18n-catalog.js', 'js/local-i18n.js', 'js/local-release.js', 'js/local-timer-core.js', 'js/local-data.js', 'js/local-achievements.js', 'js/local-timer-ui.js', 'js/local-app-ui.js', 'js/local-backup.js', 'js/local-theme-storage.js', 'js/local-settings-ui.js', 'js/local-network.js', 'patch.js', 'js/local-calendar.js', 'js/main.js'];
     let previous = -1;
     for (const name of order) { const index = html.indexOf('src="' + name); assert(index > previous, name + ' load order'); previous = index; }
     for (const match of html.matchAll(/\?v=([^"\s]+)/g)) assert.equal(match[1], release.version);
@@ -41,7 +41,7 @@ test('startup feedback is inlined and independent of external assets', () => {
     assert(html.includes('<style id="focus-startup-style">\n' + read('startup.css') + '</style>'));
     assert(html.includes('<script id="focus-startup-code">\n' + read('js/local-startup.js') + '</script>'));
     const assetScripts = [...html.matchAll(/<script\b[^>]*src="[^"]+"[^>]*>/g)];
-    assert.equal(assetScripts.length, 14);
+    assert.equal(assetScripts.length, 15);
     for (const [tag] of assetScripts) assert.match(tag, /\bdefer\b/);
     const steps = [...html.matchAll(/data-focus-asset="/g)].length + 1;
     assert(html.includes('id="focus-startup-progress" max="' + steps + '"'));

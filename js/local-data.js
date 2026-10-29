@@ -461,7 +461,7 @@
                     };
                 };
             });
-            broadcast('timer', result.records); return result;
+            broadcast('timer', result.records); if(result.records.length) root.dispatchEvent(new Event('focus-local-achievements-input')); return result;
         });
     }
     async function session() {
@@ -568,8 +568,74 @@
             remoteOperation = null; maintenance = true; invalidated = !initializing;
             root.dispatchEvent(new Event('focus-local-maintenance')); notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'):'数据已在另一个标签页更新，请刷新本页。'));
         } else if (message.type === 'calendar') root.dispatchEvent(new Event('focus-local-calendar-changed'));
+        else if (message.type === 'achievements') root.dispatchEvent(new Event('focus-local-achievements-changed'));
         else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
+    // The legacy forest owns the original reward rules and interface. Keep its
+    // point-service state in one backed-up localStorage value so a collection
+    // commits the balance and its reward marker together.
+    const FOREST_KEY = 'FocusTodo.forestState';
+    const FOREST_FIELDS = ['Sunlight','LaunchReward','DailyTaskReward','PomodoroReward','TaskReward'];
+    function forestState() {
+        const saved=localStorage.getItem(FOREST_KEY);
+        if (saved) {
+            const state=JSON.parse(saved);
+            if (!state || state.version!==1 || !state.fields || !Number.isFinite(state.awarded) || state.awarded<0) throw new Error('Invalid local forest data');
+            // Old blocked server responses could persist the literal string undefined.
+            // Preserve reward history and repair that missing balance on the next write.
+            if (!Number.isFinite(Number(state.fields.Sunlight))) state.fields.Sunlight='0';
+            return state;
+        }
+        const fields={};
+        for (const name of FOREST_FIELDS) fields[name]=localStorage.getItem(name) || (name==='Sunlight' ? '0' : '[]');
+        if (!Number.isFinite(Number(fields.Sunlight))) fields.Sunlight='0';
+        return {version:1,fields,day:'',awarded:0};
+    }
+    function forestGet(name) {
+        if (!FOREST_FIELDS.includes(name)) throw new Error('Invalid forest field');
+        const value=forestState().fields[name];
+        return name==='Sunlight' ? Number(value)||0 : value || '[]';
+    }
+    function forestSet(name,value) {
+        if (maintenance || invalidated) throw new Error(root.FocusI18n.text('本地数据维护中，请等待完成后刷新。'));
+        if (!FOREST_FIELDS.includes(name)) throw new Error('Invalid forest field');
+        const state=forestState();state.fields[name]=String(value);localStorage.setItem(FOREST_KEY,JSON.stringify(state));
+    }
+    async function collectForest(item) {
+        return exclusive(()=>maintenanceLock(async()=>{
+            if (maintenance || invalidated) throw new Error(root.FocusI18n.text('本地数据维护中，请等待完成后刷新。'));
+            const now=Date.now(), age=now-Number(item.date), points=Number(item.powerValue);
+            if (![0,1,2,3].includes(item.itemType) || !Number.isFinite(age) || age<86400000 || age>=172800000 || !Number.isFinite(points) || points<=0) throw new Error('Invalid forest reward');
+            const state=forestState(), fields=state.fields;
+            if (item.itemType===0 || item.itemType===1) {
+                if (typeof item.id!=='string' || !item.id) throw new Error('Invalid forest reward ID');
+                const name=item.itemType===0?'PomodoroReward':'TaskReward', rows=JSON.parse(fields[name]||'[]');
+                if (rows.some(row=>row.id===item.id)) return {collected:false,reason:'duplicate'};
+                rows.push({id:item.id,completedDate:item.date});fields[name]=JSON.stringify(rows);
+            } else {
+                const rows=JSON.parse(fields.LaunchReward||'[]'), row=rows.find(row=>row.date===item.date);
+                const name=item.itemType===2?'isGotDailyLoginReward':'isGotContinueLoginReward';
+                if (!row || row[name]) return {collected:false,reason:'duplicate'};
+                row[name]=true;fields.LaunchReward=JSON.stringify(rows);
+            }
+            const credit=points;fields.Sunlight=String((Number(fields.Sunlight)||0)+credit);
+            localStorage.setItem(FOREST_KEY,JSON.stringify(state));
+            return {collected:true,totalPoints:Number(fields.Sunlight)};
+        }));
+    }
+    async function syncAchievements() {
+        return exclusive(()=>maintenanceLock(async()=>{
+            if (maintenance || invalidated) throw new Error(root.FocusI18n.text('本地数据维护中，请等待完成后刷新。'));
+            const db=await open();
+            const data=await transaction(db,['Pomodoro','Task'],'readonly',(tx,done)=>{const rows={},names=['Pomodoro','Task'];let pending=names.length;for(const name of names){const request=tx.objectStore(name).getAll();request.onsuccess=()=>{rows[name]=request.result;if(!--pending)done(rows)}}});
+            const metrics=root.FocusAchievements.metrics(data),state=forestState(),earned=state.achievements || {};
+            if (!earned || typeof earned!=='object' || Array.isArray(earned)) throw new Error('Invalid achievement data');
+            let reward=0;const unlocked=[];
+            for(const achievement of root.FocusAchievements.catalog){if(!Object.prototype.hasOwnProperty.call(earned,achievement.id) && metrics[achievement.metric]>=achievement.target){earned[achievement.id]=Date.now();reward+=achievement.reward;unlocked.push(achievement.id)}}
+            if(unlocked.length){state.achievements=earned;state.fields.Sunlight=String((Number(state.fields.Sunlight)||0)+reward);localStorage.setItem(FOREST_KEY,JSON.stringify(state));broadcast('achievements');root.dispatchEvent(new Event('focus-local-achievements-changed'));}
+            return {metrics,earned,reward,unlocked};
+        }));
+    }
     // Profile edits share the import/reset ownership boundary, then commit one
     // atomic localStorage value. A failed write never publishes a new profile.
     async function saveProfile(field, value) {
@@ -725,7 +791,7 @@
 
     root.FocusLocalData = { installIdentity, defaultProjects, clearLegacyNameCookie, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
         snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
-        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, saveProfile, createCalendarTask, putSchedule,
+        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, forestGet, forestSet, collectForest, syncAchievements, saveProfile, createCalendarTask, putSchedule,
         get maintenance() { return maintenance; } };
     root.FocusLocalReady = exclusive(recoverJournal);
     root.FocusLocalReady.catch(error => { notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据初始化失败：'):'本地数据初始化失败：') + error.message); console.error(error); });

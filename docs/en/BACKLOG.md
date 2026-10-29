@@ -14,7 +14,6 @@ Updated 2026-10-28. This is the English view of the same canonical item IDs, not
 | E04 | P1 | Large-backup responsiveness, memory and broadcasts | Generated 1/10/50 MB measurements exist. Evaluate workers, batched reads/serialization and large recovery broadcasts from observed bottlenecks, preserving snapshot and journal semantics. |
 | E08 | P3 | Consolidate remaining legacy network behavior by feature | Identity/storage belongs to the data service; backup UI, preferences and theme UI now belong to their existing feature modules. Network retains its distinct responsibility. Local name/avatar updates now use an explicit data service with real failure reporting. Trace other legacy account/cloud callers and remove proven-dead simulated responses. Further work must reuse the owning feature service, not split files for line count. Preserve same-origin/Bing access and initialization/recovery order.  Reused XHR state and same-origin handling were corrected in 1.5.0; simulated responses still need investigation. |
 | E09 | P3 | Restore component sources and a normal build | Recover source, dependencies and configuration component by component. Preserve Redux, events and timer lifecycle; AST integration is not a complete source build. |
-| E10 | P1 | Confirmed local Focus forest, for a later implementation | Not implemented this round. Add an offline forest and settings entry, reusing tree assets and deriving growth from committed focus records. No server points, login rewards, groups or rankings. Implementation below. |
 | E11 | P2 | Separate browser mini-timer window | Keep the existing in-page floating timer this round. Detect Document Picture-in-Picture and bridge the existing timer state/commands; fall back when unavailable. Do not promise native always-on-top behavior from a normal popup. |
 
 ## Outstanding real-environment verification
@@ -24,7 +23,7 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 | ID | Priority | Scope | Missing evidence |
 |---|---|---|---|
 | V02 | P2 | Firefox/Safari and capability fallback | Complete startup, timer, recovery, backup and theme coverage on those engines. Existing limited no-BroadcastChannel/no-Web-Locks/no-compression tests are not full engine acceptance. |
-| V03 | P2 | Reports, history and calendar | Isolated calendar creation, persistence, backup restore, peer refresh and overlap automation exist. Still verify known real spans, midnight/DST/timezones, chart values and task/subtask attribution. Follow the procedure below. Groups/rankings stay excluded; E10 receives its own acceptance later. |
+| V03 | P2 | Reports, history and calendar | Isolated calendar creation, persistence, backup restore, peer refresh and overlap automation exist. Still verify known real spans, midnight/DST/timezones, chart values and task/subtask attribution. Follow the procedure below. Groups and online rankings stay excluded. |
 | V04 | P2 | Real notifications and audio | Actual permission states, operating-system display, every sound/white-noise track, autoplay restrictions, visible multi-window playback and owner termination. Stub calls are not physical display/listening evidence. |
 | V05 | P2 | Bing failures and cross-day refresh | Real source failure, timeout, redirect boundaries and expired/cross-day cache updates. |
 | V06 | P2 | Manual backup and desktop-launch experience | Blocked/cancelled downloads, human confirmation of saved files and file-picker restore; Windows double-click, visible default browser, Python fallback and failure messages. Automated saved-file restore and cross-platform launch already exist. |
@@ -37,17 +36,9 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 
 ## Offline feature design proposal
 
-Focus forest is confirmed as E10 for a later implementation. This round does not restore its entry point. Groups and online rankings remain excluded.
+Groups and online rankings remain excluded.
 
 **Groups and online rankings are permanently excluded.** Do not restore group creation/joining, members, invitations, chat or server ranking. Group, GroupUser and Message tables remain only for backup compatibility; hiding their UI must not erase historical backup contents.
-
-### E10 implementation
-
-1. Add `js/local-forest.js`, named Focus forest, as a read-only local growth view. Provide a General setting, off by default, and reuse bundled tree/background assets and local avatars. Keep the old network forest disabled in `scripts/revise-app-integration.cjs`; add a separate local setting and explicit rendering hook.
-2. Read valid active `Pomodoro` records from database v3 (state 0 or compatible missing state, finite positive interval/endDate). Exclude planned `Schedule` entries. Derive seconds and initially use a documented constant such as one tree per 3600 seconds. Do not filter every saved fragment below 25 seconds: valid timer blocks can be split into shorter persisted spans after the core has applied its threshold.
-3. Compute each span from endDate minus interval, splitting by successive local calendar-day boundaries, including DST. Show totals, daily trends, personal milestones and task/subtask filters. Do not use old Sunlight/LaunchReward/PomodoroReward/TaskReward balances or create a separate reward wallet.
-4. Recompute after timer commits, history edits, imports and resets; clean up subscriptions. Opening, reloading or importing the same records must never award duplicate growth. Keep the database version and existing backup settings path, and add complete English messages.
-5. Test 25/60-minute focus, legal partial spans, pause exclusions, midnight/DST, edits/deletes, repeated imports, rollback, peer updates and disabling the view while timing. Run fully offline and assert no point/ranking/account requests or writes to legacy reward keys.
 
 ### E11 implementation
 

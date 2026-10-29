@@ -2,7 +2,7 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Open work](BACKLOG.md)
 
-FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local modules. Tasks, focus records, sessions and settings are browser-local. Bing is an allowed external image source. The application does not require an account server; groups, server rankings and the old forest are excluded from the product.
+FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local modules. Tasks, focus records, sessions and settings are browser-local. Bing is an allowed external image source. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
 
 ## Startup and module flow
 
@@ -10,7 +10,7 @@ The version generator inlines `startup.css` and `js/local-startup.js` into HTML 
 
 ```text
 local-i18n-catalog -> local-i18n -> local-release -> local-timer-core
-    -> local-data -> local-timer-ui -> local-app-ui -> local-backup
+    -> local-data -> local-achievements -> local-timer-ui -> local-app-ui -> local-backup
     -> local-theme-storage -> local-settings-ui -> local-network -> patch -> local-calendar -> legacy main
 ```
 
@@ -69,4 +69,8 @@ Names and avatars are saved directly through the local data service under import
 
 ## Local calendar
 
-`local-calendar.js` attaches through the checked calendar integration script. It owns selection, quick task UI, overlap layout, plan-to-focus controls, date/scroll behavior and removable refresh subscriptions. `local-data.js` commits new tasks and planned blocks together, enforces maintenance journals and broadcasts only committed changes. The database stays v3, with the existing backup schema. The official account/telemetry and Windows native window bridges are not imported. This worktree prepares repair version 1.6.0 without publishing.
+`local-calendar.js` attaches through the checked calendar integration script. It owns selection, quick task UI, overlap layout, plan-to-focus controls, date/scroll behavior and removable refresh subscriptions. `local-data.js` commits new tasks and planned blocks together, enforces maintenance journals and broadcasts only committed changes. The database stays v3, with the existing backup schema. The official account/telemetry and Windows native window bridges are not imported.
+
+## Focus forest and achievements
+
+The original forest UI uses local reward state in `FocusTodo.forestState`. The data service serializes collections and achievement awards; each achievement and its sunlight credit are written together. `local-achievements.js` evaluates committed records and renders the offline drawer using the original ranking styles and bundled trophy icons. Full backups include the state; the database schema remains v3.

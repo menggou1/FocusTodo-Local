@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.6.1`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.0`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -61,7 +61,7 @@ Images remain data URLs in localStorage. Backup compression is lossless, but lar
 
 General settings offer Follow system, Simplified Chinese and English. Other existing translations are selected only by Follow system. System language resolution tries an available language/base, then English. Missing legacy strings use the complete English catalog and a readable fallback rather than exposing keys. Changing a language reloads the page without moving browser data. The language preference is included in backups and retained by reset.
 
-Groups, online rankings and the old server-backed forest are disabled, including old imported enable flags. Legacy group-related backup tables remain for compatibility. Confirmed offline Focus forest is scheduled for a later implementation in the backlog; no new forest entry is implied by the legacy bundle containing its code.
+Groups and online rankings remain disabled. The original forest UI uses local sunlight and one-time achievements. Legacy group-related backup tables remain for compatibility.
 
 ## Focused verification
 

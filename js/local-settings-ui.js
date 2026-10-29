@@ -42,51 +42,6 @@
         if (compatibilityInstalled) return;
         compatibilityInstalled = true;
         var _origSetItem = identity.set;
-        (function() {
-            var CSS_HIDE = [
-                '.GeneralSettings-categoryTitle-2aRNH { display: none !important; }',
-                '.GeneralSettings-separator-3dQ3a { display: none !important; }',
-                // 备选：如果类名变化，也隐藏包含这些类名的元素
-                '[class*="GeneralSettings-categoryTitle"] { display: none !important; }',
-                '[class*="GeneralSettings-separator"] { display: none !important; }'
-            ].join('\n');
-
-            function injectStyle() {
-                var style = document.createElement('style');
-                style.id = 'lexible-hide-general';
-                style.textContent = CSS_HIDE;
-                document.head.appendChild(style);
-            }
-
-            function init() {
-                injectStyle();
-                // 额外用 JS 确保隐藏（应对动态渲染）
-                var el = document.querySelector('.GeneralSettings-categoryTitle-2aRNH');
-                if (el) el.style.display = 'none';
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-
-            // MutationObserver 动态处理
-            var observer = new MutationObserver(function() {
-                var el = document.querySelector('.GeneralSettings-categoryTitle-2aRNH');
-                if (el && el.style.display !== 'none') {
-                    el.style.display = 'none';
-                }
-            });
-            if (document.body) {
-                observer.observe(document.body, { childList: true, subtree: true });
-            } else {
-                document.addEventListener('DOMContentLoaded', function() {
-                    observer.observe(document.body, { childList: true, subtree: true });
-                });
-            }
-        })();
-
         // Use the existing preference gate; no React-internal traversal or polling.
         _origSetItem('HasRated', 'true');
         _origSetItem('ShowRateDialog', 'false');

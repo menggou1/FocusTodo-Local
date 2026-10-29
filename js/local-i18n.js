@@ -20,6 +20,7 @@
         return Object.prototype.hasOwnProperty.call(catalog.local, value) ? catalog.local[value] : /[\u3400-\u9fff]/.test(value) ? 'This content is unavailable in English.' : value;
     }
     function lookupLegacy(key, value) {
+        if (typeof key === 'string' && key.startsWith('frt_guide_')) return (chinese ? catalog.chinese : catalog.english)[key] ?? value;
         if (value !== undefined && value !== null && value !== '' && value !== '[' + key + ']') return value;
         return catalog.english[key] ?? (chinese ? catalog.chinese[key] ?? '内容暂不可用' : 'Text unavailable');
     }

@@ -39,15 +39,61 @@ walk(modules[692], node => {
 });
 if (localeStartup.length !== 1 || !/e\.i18n\.properties|FocusI18n\.loadLegacy/.test(source.slice(localeStartup[0].start, localeStartup[0].end))) throw new Error('Locale startup boundary changed.');
 replace(localeStartup[0], 'function M(){return window.FocusI18n.loadLegacy(e.i18n)}');
-// Cloud groups/rankings and the old server-backed forest stay out of the local
-// product, including after importing an old preference that enabled them.
+// Cloud groups and rankings stay disabled, including imported preferences.
 walk(modules[13],node=>{
     if(node.type!=='ObjectExpression')return;
     const key=node.properties.find(p=>p.key?.name==='key');
-    if(!key||!['groupEnabled','forestEnabled','rankingListEnabled'].includes(key.value.value))return;
+    if(!key||!['groupEnabled','rankingListEnabled'].includes(key.value.value))return;
     const getter=node.properties.find(p=>p.key?.name==='get');
     if(getter)replace(getter.value,'function(){return false}');
 });
+// Restore the original forest preference, switch, and component; only its
+// point-service calls are adapted to the existing local data service.
+walk(modules[13], node => {
+    if (node.type !== 'ObjectExpression') return;
+    const key=node.properties.find(p=>p.key?.name==='key')?.value?.value;
+    if (key==='forestEnabled') {
+        const getter=node.properties.find(p=>p.key?.name==='get');
+        replace(getter.value, 'function(){var e=localStorage.getItem("Forest");return!e||"true"===String(e)}');
+    }
+    const fields={sunlight:'Sunlight',launchReward:'LaunchReward',dailyTaskReward:'DailyTaskReward',pomodoroReward:'PomodoroReward',taskReward:'TaskReward'};
+    if (Object.prototype.hasOwnProperty.call(fields,key)) {
+        const get=node.properties.find(p=>p.key?.name==='get'), set=node.properties.find(p=>p.key?.name==='set');
+        replace(get.value, 'function(){return window.FocusLocalData.forestGet('+JSON.stringify(fields[key])+')}');
+        replace(set.value, 'function(e){window.FocusLocalData.forestSet('+JSON.stringify(fields[key])+',e)}');
+    }
+});
+walk(modules[821], node=>{if(node.type==='ObjectExpression' && node.properties.some(p=>p.key?.name==='forestSunlight') && node.properties.some(p=>p.key?.name==='forestEnabled')){const field=node.properties.find(p=>p.key?.name==='forestEnabled');replace(field.value,'h.default.shared.forestEnabled')}});
+const general=method(1153,'render'), emptyBodies=[];
+walk(general.value,node=>{if(node.type==='CallExpression' && node.arguments[0]?.value==='tbody' && node.arguments.length===2)emptyBodies.push(node)});
+if(emptyBodies.length===1) bundle.edits.push({start:emptyBodies[0].end-1,end:emptyBodies[0].end-1,code:','+"l.default.createElement(\"tr\",null,l.default.createElement(\"td\",{className:d.default.title},e.i18n.prop(\"frt\")),l.default.createElement(\"td\",{className:d.default.value},l.default.createElement(c.default,{onChange:this.switchForest,checked:this.state.forestEnabled,checkedIcon:!1,uncheckedIcon:!1,height:18,width:36,handleDiameter:14,onColor:FTColor.themeRed,offColor:FTColor.bgSwitcherOff,activeBoxShadow:\"0 0 0 0 #000\"})))"});
+else if(emptyBodies.length!==0 || !source.slice(general.value.start,general.value.end).includes('this.switchForest'))throw Error('General forest switch boundary changed.');
+function ownAssignment(id,name,code){const nodes=[];walk(modules[id],n=>{if(n.type==='AssignmentExpression'&&n.left.type==='MemberExpression'&&n.left.property?.name===name&&n.left.object.type==='ThisExpression')nodes.push(n.right)});if(nodes.length!==1)throw Error('Forest method boundary changed: '+name);replace(nodes[0],code)}
+ownAssignment(106,'getForestInfo','function(success,fail){try{if(success)success({status:0,totalPoints:window.FocusLocalData.forestGet("Sunlight"),pointHistoryRecord:{}})}catch(error){if(fail)fail(error)}}');
+ownAssignment(106,'uploadRewardRecords','function(){}');
+method(679,'componentWillUnmount','function(){}');
+assignment(1181,'getSunlight','function(item){var self=this;function refresh(restore){var generation=self.localForestGeneration=(self.localForestGeneration||0)+1;self.setState(self.loadLocalForestState);self.generateSunItems().then(function(result){if(generation!==self.localForestGeneration)return;var old=self.props.sunItems||[];self.localForestNextId=Math.max(self.localForestNextId||0,old.reduce(function(n,x){return Math.max(n,x.id+1)},0));var items=result[0].map(function(x){var match=old.find(function(y){return y.data.itemType===x.data.itemType&&y.data.id===x.data.id&&y.data.date===x.data.date});return match?Object.assign({},x,{id:match.id,left:match.left,top:match.top}):Object.assign({},x,{id:self.localForestNextId++})});self.props.setSunItems(items);self.props.setActivityItems(result[1]);if(restore){var entry=items.find(function(x){return x.data.itemType===item.itemType&&x.data.id===item.id&&x.data.date===item.date});var node=entry&&document.getElementById("sun-"+entry.id);if(node){node.style.transition="none";node.style.left=entry.left+"px";node.style.top=entry.top+"px";node.style.opacity="1";node.style.transform=""}}})}window.FocusLocalData.collectForest(item).then(function(result){refresh(!result.collected)},function(error){window.FocusLocal.notice(error.message);refresh(true)})}');
+// Badge totals use the same per-item rounding and streak cap as the original forest.
+for(const [name,before,after] of [['getPomodoroRewards','this.POMODOROMULTIPERREWARD*f/60','this.POMODOROMULTIPERREWARD*Math.max(Math.floor(f/60),1)'],['getContinueLaunchReward','this.CONTINUELAUNCHMULTIPERREWARD*d','this.CONTINUELAUNCHMULTIPERREWARD*Math.min(d,80)']]){
+    const target=method(106,name),text=source.slice(target.value.start,target.value.end);
+    if(text.includes(before))replace(target.value,text.replace(before,after));
+    else if(!text.includes(after))throw Error('Forest badge boundary changed: '+name);
+}
+const forestMount=method(1181,'componentDidMount');
+const forestMountText=source.slice(forestMount.value.start,forestMount.value.end);
+if (!forestMountText.includes('localAchievementRefresh')) replace(forestMount.value,forestMountText.replace('var e=this;', 'var e=this;this.localAchievementRefresh=function(){e.setState(e.loadLocalForestState)};window.addEventListener("focus-local-achievements-changed",this.localAchievementRefresh);'));
+// Reuse the original forest drawer and ranking styles for offline achievements.
+const forestRender=method(1181,'render');let buttonGroup;
+walk(forestRender.value,node=>{if(node.type==='CallExpression'&&node.arguments[0]?.value==='div'&&node.arguments[1]?.properties?.some(p=>p.key?.name==='className'&&source.slice(p.value.start,p.value.end)==='g.default.buttonGroup'))buttonGroup=node});
+if(!buttonGroup)throw Error('Forest button boundary changed');
+if(buttonGroup.arguments[2]?.type==='Literal'&&buttonGroup.arguments[2].value===null)replace(buttonGroup.arguments[2],'m.default.createElement("img",{draggable:"false",src:"img/forest-badge.png",className:g.default.imageButton,title:window.FocusI18n.text("成就"),alt:window.FocusI18n.text("成就"),onClick:function(){return e.props.openDrawer("ranking")}})');
+else if(!source.slice(buttonGroup.start,buttonGroup.end).includes('img/forest-badge.png'))throw Error('Forest achievement button changed');
+method(1190,'renderContent','function(){var e=this.props.type;return"guide"===e?l.default.createElement(c.default,null):"ranking"===e?window.FocusAchievements.render(l.default,n(1463)):null}');
+// Task writes notify only after the existing IndexedDB transaction commits.
+const taskUpdate=method(23,'updateTask'),taskUpdateText=source.slice(taskUpdate.value.start,taskUpdate.value.end);
+if(!taskUpdateText.includes('focus-local-achievements-input')){if(!taskUpdateText.includes('r.onsuccess='))throw Error('Task update boundary changed');replace(taskUpdate.value,taskUpdateText.replace('r.onsuccess=', 'r.transaction.addEventListener("complete",function(){window.dispatchEvent(new Event("focus-local-achievements-input"))});r.onsuccess='));}
+const forestUnmount=method(1181,'componentWillUnmount'),forestUnmountText=source.slice(forestUnmount.value.start,forestUnmount.value.end);
+if(!forestUnmountText.includes('localAchievementRefresh'))replace(forestUnmount.value,forestUnmountText.replace('M.default.shared.off', 'window.removeEventListener("focus-local-achievements-changed",this.localAchievementRefresh);M.default.shared.off'));
 assignment(821,'onWindowsFocused','function(){}');
 const about = method(1147, 'render');
 let versionRow, versionText, rating;
@@ -103,7 +149,7 @@ walk(header.value, node => {
     }
 });
 const mount = method(821, 'componentDidMount');
-replace(mount.value,'function(){this.initNotification();this.localReleaseDispose=window.FocusAppUI.attachHeader(this)}');
+replace(mount.value,'function(){window.FocusLocalReady.then(function(){if(h.default.shared.forestEnabled)P.default.shared.setDailyLaunchReward()}).catch(function(e){window.FocusLocal.notice(e.message)});this.initNotification();this.localReleaseDispose=window.FocusAppUI.attachHeader(this)}');
 const headerModuleText = source.slice(modules[821].start, modules[821].end);
 if (headerModuleText.includes('key:"componentWillUnmount"')) {
     const unmount = method(821, 'componentWillUnmount');
