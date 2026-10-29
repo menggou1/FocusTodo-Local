@@ -1,20 +1,19 @@
 # 7.1.1-local.1.6.1 — Schedule and notice refinements
 
-[Changelog](CHANGELOG.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
+[Changelog](CHANGELOG.md) · [Maintenance](MAINTENANCE.md) · [Chinese report](../UPDATE-7.1.1-local.1.6.1.md)
 
-Date: 2026-10-29. Author: Lexible.
+Released: 2026-10-29. Author: Lexible.
 
-## Delivered behavior
+## Changes
 
-- Show an inline message when a schedule task has no name.
-- Adapt bottom notices to light and dark themes and fade them out automatically.
+- Schedule quick creation shows an inline message and focuses the name field for empty or whitespace-only names. The message clears when a valid name is entered; invalid submissions create no task.
+- Bottom notices use theme colors in light and dark modes, fade after six seconds without a close button, and reset their timer when a new notice arrives. Their position avoids the bottom timer controls.
+- The validation message is associated with the input for assistive technology; reduced-motion settings disable the fade transition.
 
-## Technical and verification account
+## Verification and release
 
-See the shipped behavior above and the linked public evidence.
+Local checks passed: 60 unit tests (one platform skip), syntax, full browser acceptance, and extracted ZIP and tar.gz startup. All 24 schedule scenarios passed, including light and dark validation, repeated notices, automatic dismissal, and sidebar invariance.
 
-## Evidence
+Commit `4389dcd` was merged into main and tagged `1.6.1`. The [tag workflow](https://github.com/menggou1/FocusTodo-Local/actions/runs/40822836444) and [main workflow](https://github.com/menggou1/FocusTodo-Local/actions/runs/40822829700) passed on three systems with Node 22 and 24. Downloaded [release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.6.1) archives matched SHA256SUMS. The [Pages site](https://menggou1.github.io/FocusTodo-Local/) reported the same source commit and passed a live startup check without script errors.
 
-The release behavior and commands are recorded in the repository history.
-
-[Original Chinese report](../UPDATE-7.1.1-local.1.6.1.md). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.
+The `1.6.0` tag points to its original commit `c81d2cc`; no Release was created for it. Open work is tracked in the [backlog](BACKLOG.md).

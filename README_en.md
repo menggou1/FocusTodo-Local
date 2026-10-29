@@ -27,7 +27,7 @@ Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). 
 
 Pages deploys automatically from `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
 
-Worktree version `1.6.0` restores the unchanged reference sidebar and adjusts only schedule typography, preserving native controls and rounded selection. Regression checks guard unchanged regions. Version 1.6.0 has a tag but no Release; 1.6.1 refines schedule validation and bottom notices. See the [completion report](docs/en/UPDATE-7.1.1-local.1.6.0.md).
+Worktree version `1.6.0` restores the unchanged reference sidebar and adjusts only schedule typography, preserving native controls and rounded selection. Regression checks guard unchanged regions. Version 1.6.0 has a tag but no Release; 1.6.1 refines schedule validation and bottom notices. See the [1.6.0 report](docs/en/UPDATE-7.1.1-local.1.6.0.md) and [1.6.1 report](docs/en/UPDATE-7.1.1-local.1.6.1.md).
 
 Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
 
