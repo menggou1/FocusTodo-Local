@@ -39,6 +39,12 @@ walk(modules[692], node => {
 });
 if (localeStartup.length !== 1 || !/e\.i18n\.properties|FocusI18n\.loadLegacy/.test(source.slice(localeStartup[0].start, localeStartup[0].end))) throw new Error('Locale startup boundary changed.');
 replace(localeStartup[0], 'function M(){return window.FocusI18n.loadLegacy(e.i18n)}');
+// Optional browser persistence permission must not delay core startup. Preserve
+// the original data migration and render order, requesting persistence once.
+const boots=[];
+walk(modules[692],node=>{if(node.type==='VariableDeclarator'&&node.id.name==='d'&&source.slice(node.init.start,node.init.end).includes('document.getElementById("root")'))boots.push(node.init)});
+if(boots.length!==1)throw Error('Application bootstrap boundary changed');
+replace(boots[0],'async function(){await Promise.all([window.FocusLocalReady,M()]);document.title=e.i18n.prop("app_name");E.default.shared.initServerUrl();E.default.shared.refreshServerAccessInfo();S();h.default.locale((0,m.normalizeLanguageCode)(window.FocusI18n.locale));window.FocusAppUI.requestStoragePersistence();await l();await(new k.default).upgrade();var store=(0,g.createStore)(v.default);(0,f.render)(c.default.createElement(p.Provider,{store:store},c.default.createElement(b.default,null)),document.getElementById("root"))}');
 // Cloud groups and rankings stay disabled, including imported preferences.
 walk(modules[13],node=>{
     if(node.type!=='ObjectExpression')return;

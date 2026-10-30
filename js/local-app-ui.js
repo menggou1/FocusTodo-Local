@@ -5,6 +5,7 @@
     const READ_KEY = 'FocusTodo.releaseRead';
     const REMINDER_READ_KEY = 'FocusTodo.taskRemindersRead';
     const headers = new WeakMap();
+    let persistenceRequested=false;
     let activeDialog = null;
 
     function node(tag, className, text) {
@@ -120,6 +121,15 @@
 
     function refreshReminders(header,open=false,notify=false){const refresh=headers.get(header);if(refresh)return refresh(open,notify)}
     function renderReminderSummary(React,items){return items.length?React.createElement('h3',{className:'focus-reminder-summary'},root.FocusI18n.text('任务到时提醒'),' · ',items.length):null}
+    function requestStoragePersistence(){
+        if(persistenceRequested)return;persistenceRequested=true;
+        // This permission is optional. A delayed or failed browser response must
+        // never hold the database migration and application mount behind it.
+        Promise.resolve().then(async()=>{
+            const storage=root.navigator.storage;
+            if(storage&&storage.persisted&&storage.persist&&!await storage.persisted())await storage.persist();
+        }).catch(()=>{});
+    }
 
     function renderAbout(React) {
         const h = React.createElement;
@@ -160,5 +170,5 @@
         update(); cancel.focus();
     }
 
-    root.FocusAppUI = { renderUpdates, renderAbout, showUpdate, hasUnreadUpdates, attachHeader, refreshReminders, renderReminderSummary, confirmReset };
+    root.FocusAppUI = { renderUpdates, renderAbout, showUpdate, hasUnreadUpdates, attachHeader, refreshReminders, renderReminderSummary, requestStoragePersistence, confirmReset };
 })(window);

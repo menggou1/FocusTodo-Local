@@ -3,13 +3,13 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.7.2",
+    "localVersion": "1.7.3",
     "author": "Lexible",
     "date": "2026-10-30",
     "repositoryRemote": "Focustodo-local",
     "updates": [
         {
-            "version": "7.1.1-local.1.7.2",
+            "version": "7.1.1-local.1.7.3",
             "date": "2026-10-30",
             "title": "本地专注森林、成就与任务提醒",
             "items": [
@@ -18,7 +18,8 @@
                 "取消每日阳光收取上限，修复连续收取与位置刷新。",
                 "修复网页标签图标，并突出圆形成就入口。",
                 "阳光沿原版路径飞向树木，收取失败可重试，兼容减少动态效果。",
-                "任务到时提醒优先展示，已读或完成后及时清除红点，保留版本更新提示。"
+                "任务到时提醒优先展示，已读或完成后及时清除红点，保留版本更新提示。",
+                "可选的浏览器存储持久化授权在后台执行，不再阻塞应用启动。"
             ],
             "titleEn": "Local Focus forest, achievements and task reminders",
             "itemsEn": [
@@ -27,9 +28,10 @@
                 "Remove the daily collection limit and fix sunlight collection and position refresh.",
                 "Fix the browser tab icon and make the achievements entry a prominent circular button.",
                 "Animate sunlight along the original flight path, retry failed collections and respect reduced motion.",
-                "Show task reminders before release history and clear read or completed reminder badges while retaining release notifications."
+                "Show task reminders before release history and clear read or completed reminder badges while retaining release notifications.",
+                "Request optional browser storage persistence in the background without blocking startup."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.7.2.md"
+            "report": "docs/UPDATE-7.1.1-local.1.7.3.md"
         },
         {
             "version": "7.1.1-local.1.6.1",
@@ -354,7 +356,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.7.2",
+    "version": "7.1.1-local.1.7.3",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

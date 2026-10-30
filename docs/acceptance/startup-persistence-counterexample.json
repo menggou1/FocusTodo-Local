@@ -1,0 +1,14 @@
+{
+  "baseline": "81f7c53941d62b8508526748635a46bc032fc938",
+  "blocked": {
+    "localDataReadyResolved": true,
+    "rootChildren": 0,
+    "persistedCalls": 1,
+    "startup": "Opening your lists"
+  },
+  "afterReleasingPermissionPromise": {
+    "rootMounted": true,
+    "workspaceVisible": true
+  },
+  "scope": "Controlled isolated Chromium counterexample, not a capture of the original Windows CI failure"
+}

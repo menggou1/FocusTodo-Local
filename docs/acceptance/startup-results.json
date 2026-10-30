@@ -1,70 +1,91 @@
 {
-  "version": "7.1.1-local.1.7.2",
+  "version": "7.1.1-local.1.7.3",
   "results": [
     {
       "name": "first screen paints while CSS and scripts are pending; scripts download in parallel",
       "passed": true,
-      "ms": 2414,
-      "firstContentfulPaintMs": 332,
+      "ms": 1179,
+      "firstContentfulPaintMs": 136,
       "completedWhileMainPending": 16,
       "totalSteps": 18
     },
     {
       "name": "mounted application waits for critical CSS without exposing an unstyled screen",
       "passed": true,
-      "ms": 1748
+      "ms": 882
     },
     {
       "name": "workspace appears before optional images and fonts; Chinese needs no language requests",
       "passed": true,
-      "ms": 998,
+      "ms": 596,
       "optionalRequestsStillPending": 30,
       "languageRequests": 0
     },
     {
+      "name": "optional storage persistence does not block startup: persisted",
+      "passed": true,
+      "ms": 736,
+      "permissionPendingWhileMounted": true,
+      "singleAttempt": true
+    },
+    {
+      "name": "optional storage persistence does not block startup: persist",
+      "passed": true,
+      "ms": 723,
+      "permissionPendingWhileMounted": true,
+      "singleAttempt": true
+    },
+    {
+      "name": "optional storage persistence does not block startup: reject",
+      "passed": true,
+      "ms": 890,
+      "permissionPendingWhileMounted": false,
+      "singleAttempt": true
+    },
+    {
       "name": "failed application download offers retry and preserves saved settings",
       "passed": true,
-      "ms": 1522
+      "ms": 1024
     },
     {
       "name": "stylesheet failures retain a visible recovery action",
       "passed": true,
-      "ms": 1321
+      "ms": 577
     },
     {
       "name": "initialization exceptions retain retry instead of a permanent blank screen",
       "passed": true,
-      "ms": 786
+      "ms": 382
     },
     {
       "name": "failed data recovery retains the loading screen and retry without clearing settings",
       "passed": true,
-      "ms": 1272
+      "ms": 527
     },
     {
       "name": "long waits show an explanation without inventing progress",
       "passed": true,
-      "ms": 1220
+      "ms": 811
     },
     {
       "name": "saved English, dark appearance, narrow screens and reduced motion work before assets load",
       "passed": true,
-      "ms": 1285
+      "ms": 619
     },
     {
       "name": "existing system-selected locales load asynchronously with an immediate first screen",
       "passed": true,
-      "ms": 1526
+      "ms": 605
     },
     {
       "name": "failed optional language files finish asynchronously with readable English fallback",
       "passed": true,
-      "ms": 1789
+      "ms": 715
     },
     {
       "name": "Chinese workspace appears before bundled fonts and swaps to Noto when they finish",
       "passed": true,
-      "ms": 3910,
+      "ms": 959,
       "bundledFontRequests": 3,
       "renderedFonts": [
         "Noto Sans SC"
@@ -73,7 +94,7 @@
     {
       "name": "English swaps to bundled western font without downloading CJK fonts",
       "passed": true,
-      "ms": 2887,
+      "ms": 886,
       "renderedFonts": [
         "Noto Sans"
       ],
@@ -82,7 +103,7 @@
     {
       "name": "disabled JavaScript keeps a readable explanation",
       "passed": true,
-      "ms": 925
+      "ms": 300
     }
   ]
 }

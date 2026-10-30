@@ -86,6 +86,21 @@ function gate() {
                 return { optionalRequestsStillPending: optionalRequests.length, languageRequests: languageRequests.length };
             } finally { optional.release(); }
         });
+        for(const pending of ['persisted','persist','reject'])await scenario('optional storage persistence does not block startup: '+pending,async page=>{
+            await page.addInitScript(pending=>{
+                window.__storageCalls=0;
+                const gate=new Promise(resolve=>window.__releaseStorage=resolve);
+                navigator.storage.persisted=async()=>{window.__storageCalls++;if(pending==='reject')throw Error('Injected persistence failure');if(pending==='persisted')await gate;return false};
+                navigator.storage.persist=async()=>{window.__storageCalls++;await gate;return true};
+            },pending);
+            await page.goto(origin,{waitUntil:'domcontentloaded'});await ready(page);
+            await page.waitForFunction(()=>window.__storageCalls>0);
+            assert(await page.locator('#root').isVisible());
+            await page.evaluate(()=>{FocusAppUI.requestStoragePersistence();FocusAppUI.requestStoragePersistence()});
+            assert.equal(await page.evaluate(()=>window.__storageCalls),pending==='persist'?2:1,'Only one persistence attempt is made');
+            await page.evaluate(()=>window.__releaseStorage());
+            return {permissionPendingWhileMounted:pending!=='reject',singleAttempt:true};
+        });
         await scenario('failed application download offers retry and preserves saved settings', async page => {
             let first = true;
             await page.addInitScript(() => localStorage.setItem('startup-test-preserve', 'saved'));

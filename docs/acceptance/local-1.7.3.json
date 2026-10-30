@@ -1,0 +1,48 @@
+{
+  "version": "7.1.1-local.1.7.3",
+  "date": "2026-10-30",
+  "scope": "isolated-local-browser",
+  "baseCommit": "81f7c53941d62b8508526748635a46bc032fc938",
+  "checks": {
+    "unit": {
+      "passed": 60,
+      "skipped": 1
+    },
+    "syntax": "passed",
+    "browser": {
+      "startup": 17,
+      "application": 59,
+      "maintenance": 7,
+      "listOrdering": 3,
+      "audio": 5,
+      "profile": 5,
+      "schedule": 24,
+      "forest": "passed",
+      "achievements": "passed",
+      "reminders": "passed including English dark appearance",
+      "fullCommandExitCode": 0,
+      "browser": "Playwright bundled Chromium (same selection as CI)"
+    },
+    "releaseGate": 3,
+    "pagesFiltering": 2,
+    "portablePackages": "ZIP and tar.gz SHA256, documentation links and extracted startup passed under Python 3.12.14",
+    "astIdempotence": "passed",
+    "localCNAME": false,
+    "optionalStoragePersistence": {
+      "pendingPersisted": "passed",
+      "pendingPersist": "passed",
+      "rejection": "passed",
+      "baselineCounterexample": "startup-persistence-counterexample.json"
+    }
+  },
+  "achievementRetry": {
+    "injectedWriteFailed": true,
+    "balanceAfterFailure": 0,
+    "earnedAfterFailure": 0,
+    "forcedAutomaticFirst": true,
+    "totalUnlocked": 9,
+    "totalReward": 1860,
+    "manualRetryReward": 0
+  },
+  "bundleSha256": "548297adcf670d2cd6f3b48d6cf0d6ce8106004870b6a0afcc2d1390422b5809"
+}

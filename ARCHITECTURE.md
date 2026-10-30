@@ -6,7 +6,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 当前本地版保留原森林界面并在本地计算阳光与成就；小组和在线排名仍排除。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
 
-当前应用版本 `7.1.1-local.1.7.2`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
+当前应用版本 `7.1.1-local.1.7.3`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](docs/MAINTENANCE.md)，未完成工作只见[统一待办与验收](docs/BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
 
 维护导航：[README](README.md) → [维护指南](docs/MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
