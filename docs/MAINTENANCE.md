@@ -191,7 +191,7 @@ python scripts/deploy-pages.py --output dist/pages-preview
 
 ## 文档存放与链接
 
-中文和英文教程分别位于 `docs/GUIDE.md`、`docs/en/GUIDE.md`，配图位于 `docs/guide-images/` 并包含在便携包中。中文版本报告位于 `docs/releases/`，英文报告位于 `docs/en/releases/`；原路径保留跳转页以兼容旧链接。更新记录指向归档报告。移动文件时同步相对链接、`release.json`、生成器和打包清单，并检查文件及锚点。
+中文和英文教程分别位于 `docs/GUIDE.md`、`docs/en/GUIDE.md`，配图位于 `docs/guide-images/` 并包含在便携包中。中文版本报告位于 `docs/releases/`，英文报告位于 `docs/en/releases/`；不保留旧路径跳转页，链接直接指向归档目录。更新记录指向归档报告。移动文件时同步相对链接、`release.json`、生成器和打包清单，并检查文件及锚点。
 
 ## 6. 统一待办入口
 
