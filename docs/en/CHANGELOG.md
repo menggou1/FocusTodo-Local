@@ -2,30 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.6**, author Lexible.
+Current application: **7.1.1-local.1.7.10**, author Lexible.
 
-## 7.1.1-local.1.7.6 · 2026-10-30
+## 7.1.1-local.1.7.10 · 2026-10-30
 
-- Open the illustrated Chinese or English guide from About.
-- Organize release reports and documentation while preserving historical links.
-- Improve startup test request handling and failed-resource recovery coverage.
+- Open illustrated Chinese and English guides from About for tasks, focus, schedules, forest and backups.
+- Close file streams when resource downloads are cancelled and retain startup failure diagnostics.
+- Consolidate unpublished changes and technical records, with consistent documentation links and release rules.
 
-[English report](releases/UPDATE-7.1.1-local.1.7.6.md).
-
-## 7.1.1-local.1.7.5 · 2026-10-30
-
-- Open the Chinese or English guide from About for tasks, focus, schedules and backups.
-- Organize release reports and document links while keeping old report entry points.
-- Capture page and request diagnostics when startup acceptance fails.
-
-[English report](releases/UPDATE-7.1.1-local.1.7.5.md).
-
-## 7.1.1-local.1.7.4 · 2026-10-30
-
-- Open the user guide from About for tasks, focus, schedules and backups.
-- Organize Chinese and English documentation and release reports while preserving old report links.
-
-[English report](releases/UPDATE-7.1.1-local.1.7.4.md).
+[English report](releases/UPDATE-7.1.1-local.1.7.10.md).
 
 ## 7.1.1-local.1.7.3 · 2026-10-30
 
@@ -46,15 +31,6 @@ Current application: **7.1.1-local.1.7.6**, author Lexible.
 
 [English report](releases/UPDATE-7.1.1-local.1.6.1.md).
 
-## 7.1.1-local.1.6.0 · 2026-10-29
-
-- Create tasks by selecting schedule time, with overlap layout and native date, pomodoro and project controls.
-- Manage Schedule as a sortable, hideable list and scroll the month view.
-- Align schedule typography with the unchanged sidebar.
-- Display short focus in seconds and add the due-next-week shortcut.
-
-[English report](releases/UPDATE-7.1.1-local.1.6.0.md).
-
 ## 7.1.1-local.1.5.4 · 2026-10-28
 
 - Use in-app dragging for system lists without browser text-search gestures, keeping the moved row above other rows.
@@ -72,15 +48,6 @@ Current application: **7.1.1-local.1.7.6**, author Lexible.
 
 [English report](releases/UPDATE-7.1.1-local.1.5.2.md).
 
-## 7.1.1-local.1.5.0 · 2026-10-27
-
-- Apply the bundled English font when ready while retaining individual component fonts.
-- Reorder system and custom lists separately by dragging or keyboard; the order is saved.
-- Fix the extra scrollbar in list management.
-- Improve local network compatibility for reused same-origin requests.
-
-[English report](releases/UPDATE-7.1.1-local.1.5.0.md).
-
 ## 7.1.1-local.1.4.3 · 2026-10-26
 
 - Apply bundled Chinese fonts when ready, prefer western system fonts in English, and retain official timer fonts.
@@ -89,14 +56,6 @@ Current application: **7.1.1-local.1.7.6**, author Lexible.
 - Improve cross-tab verification and provide portable packages with SHA256 verification.
 
 [English report](releases/UPDATE-7.1.1-local.1.4.3.md).
-
-## 7.1.1-local.1.4.1 · 2026-10-26
-
-- See a lightweight first screen and real step progress, then enter when the core workspace is ready.
-- Reuse Chinese and English catalogs, load other locales asynchronously, and retry long or failed loads.
-- Use startup feedback with dark appearance, narrow screens, reduced motion and a no-JavaScript explanation.
-
-[English report](releases/UPDATE-7.1.1-local.1.4.1.md).
 
 ## 7.1.1-local.1.4.0 · 2026-10-25
 
@@ -122,14 +81,6 @@ Current application: **7.1.1-local.1.7.6**, author Lexible.
 
 [English report](releases/UPDATE-7.1.1-local.1.3.1.md).
 
-## 7.1.1-local.1.3.0 · 2026-10-24
-
-- Create lossless Gzip backups, retain plain JSON exports and import older JSON backups.
-- Review record counts and sizes before export, with an explicit option to omit wallpapers.
-- Protect concurrent imports, resets and interrupted recovery; automatic safety backups remain complete.
-
-[English report](releases/UPDATE-7.1.1-local.1.3.0.md).
-
 ## 7.1.1-local.1.2.3 · 2026-10-22
 
 - Updates and reminders share a scroll area without a fixed empty spacer.
@@ -154,42 +105,6 @@ Current application: **7.1.1-local.1.7.6**, author Lexible.
 - Keep the same browser, hostname and port to retain existing local data.
 
 [English report](releases/UPDATE-7.1.1-local.1.2.0.md).
-
-## 7.1.1-local.1.1.2 · 2026-10-07
-
-- Handle original focus records safely when rendering task progress.
-- Ignore repeated completion clicks while the first save is in progress.
-
-[English report](releases/UPDATE-7.1.1-local.1.1.2.md).
-
-## 7.1.1-local.1.1.1 · 2026-10-04
-
-- Use the selected light or dark appearance for local notifications and dialogs.
-- Exclude focus shorter than 25 seconds; valid work can accumulate across short pauses.
-- Coordinate export and import buttons and support keyboard interaction.
-- Reset to the local user and default system lists, including recovery of missing navigation lists.
-- Keep a complete safety backup, five-second confirmation and rollback on failure.
-
-[English report](releases/UPDATE-7.1.1-local.1.1.1.md).
-
-## 7.1.1-local.1.1.0 · 2026-10-03
-
-- Read release details from the notification bell.
-- Replace rating links with the local GitHub repository link.
-- Reset data without a password after five-second confirmation, with a complete safety backup.
-- Keep timer stop, task detachment, background recovery and rollback fixes.
-- Show both the official base version and the local version.
-
-[English report](releases/UPDATE-7.1.1-local.1.1.0.md).
-
-## 7.1.1-patch.1 · 2026-10-03
-
-- Recover complete historical focus blocks and retain the remaining partial work after confirmation.
-- Persist timer sessions and commit records and progress together without duplicates.
-- Fix stale elapsed time after stopping and incorrect task cancellation or switching.
-- Validate complete backups, recover interrupted imports, and clean up notifications, audio and subscriptions.
-
-[English report](releases/UPDATE-7.1.1-patch.1.md).
 
 ## Repository provenance
 

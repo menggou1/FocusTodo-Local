@@ -1,3 +1,4 @@
+const { streamFile } = require('../scripts/server.cjs');
 /* Runs against an ephemeral loopback server and fresh browser profile only. */
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
 const assert = require('node:assert/strict');
@@ -18,7 +19,7 @@ const server = http.createServer((request, response) => {
     const file = path.resolve(root, '.' + name);
     if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { response.writeHead(404); response.end(); return; }
     response.writeHead(200, { 'Content-Type': mime[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-    fs.createReadStream(file).pipe(response);
+    streamFile(file, response);
 });
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -49,7 +50,11 @@ const server = http.createServer((request, response) => {
         try {
             if (beforeLoad) { await page.goto(baseUrl + '/tests/storage-fixture.html'); await beforeLoad(page); }
             await page.goto(baseUrl);
-            await page.waitForFunction(() => window.__acceptanceTimer && document.querySelector('#root').children.length > 0);
+            await page.waitForFunction(() => {
+                const startup = document.querySelector('#focus-startup');
+                if (startup?.dataset.state === 'error') throw Error('Application startup failed: ' + startup.innerText);
+                return window.__acceptanceTimer && document.querySelector('#root').children.length > 0 && !document.documentElement.classList.contains('focus-starting');
+            });
             await page.evaluate(() => window.FocusLocalReady);
             await testBody(page, context, errors, external);
             assert.deepEqual(errors, [], 'No unhandled browser errors');
@@ -609,8 +614,9 @@ const server = http.createServer((request, response) => {
         }));
         await check('older update details close on Escape and do not mark the latest update as read', () => app(async page => {
             await page.getByRole('button', { name: '通知', exact: true }).click();
-            await page.getByRole('button', { name: /计时恢复与数据安全修补/ }).click();
+            await page.locator('.focus-release-entry').filter({ hasText: release.updates.at(-1).title }).click();
             await page.locator('#focus-update-dialog').waitFor();
+            assert((await page.locator('#focus-update-dialog').innerText()).includes(release.updates.at(-1).version));
             assert(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()));
             await page.keyboard.press('Escape');
             await page.locator('#focus-update-dialog').waitFor({ state: 'detached' });
@@ -622,7 +628,7 @@ const server = http.createServer((request, response) => {
             assert.equal(focused.tag, 'BUTTON'); assert(focused.inDialog);
         }));
         async function openReset(page) {
-            await page.mouse.click(1255, 25);
+            await page.locator('header img[src="img/header-setting.png"]').click();
             await page.getByText('账号', { exact: true }).click();
             await page.locator('[class*="AccountSettings-root"]').getByText('删除数据', { exact: true }).click();
             await page.locator('#focus-reset-dialog').waitFor();

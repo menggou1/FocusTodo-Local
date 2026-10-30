@@ -1,0 +1,16 @@
+{
+  "version": "7.1.1-local.1.7.10",
+  "node": {
+    "passed": 62,
+    "skipped": 1,
+    "failed": 0
+  },
+  "browser": {
+    "startup-results.json": 18,
+    "results.json": 60,
+    "calendar-results.json": 24
+  },
+  "fullBrowserSuitePassed": true,
+  "releaseGateTests": 3,
+  "portableSmoke": "ZIP and tar.gz extracted startup, links and mismatched tag rejection passed"
+}

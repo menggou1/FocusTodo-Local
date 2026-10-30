@@ -31,6 +31,33 @@ test('HEAD returns metadata with no response body', async () => {
     assert.equal(Number(res.headers['content-length']), fs.statSync(path.join(root, 'audio/alm_AlarmBeep.mp3')).size);
     assert.equal(res.headers['content-type'], 'audio/mpeg');
 });
+
+test('cancelled font downloads close their file streams', async t => {
+    const original = fs.createReadStream;
+    let stream;
+    t.mock.method(fs, 'createReadStream', function (...args) {
+        const opened = original.apply(this, args);
+        if (String(args[0]).includes('NotoSansSC-')) stream = opened;
+        return opened;
+    });
+    const font = fs.readdirSync(path.join(root, 'font')).find(name => name.startsWith('NotoSansSC-'));
+    try {
+        await new Promise((resolve, reject) => {
+            const req = http.get(base + '/font/' + font, res => {
+                res.once('data', () => { res.destroy(); resolve(); });
+            });
+            req.on('error', reject);
+        });
+        assert(stream, 'The real font stream was opened');
+        await new Promise((resolve, reject) => {
+            if (stream.closed) return resolve();
+            const timer = setTimeout(() => reject(new Error('Cancelled download left a file stream open')), 2000);
+            stream.once('close', () => { clearTimeout(timer); resolve(); });
+        });
+        assert(stream.destroyed);
+        assert.equal((await request('/')).status, 200, 'The server still serves the application');
+    } finally { stream?.destroy(); }
+});
 test('closed, open and suffix audio ranges return the exact requested bytes', async () => {
     const file = fs.readFileSync(path.join(root, 'audio/alm_AlarmBeep.mp3'));
     for (const [range, start, end] of [['bytes=0-15', 0, 15], ['bytes=16-', 16, file.length - 1], ['bytes=-16', file.length - 16, file.length - 1]]) {

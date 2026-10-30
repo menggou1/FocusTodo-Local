@@ -37,6 +37,16 @@ test('every maintenance report and the local repository icon are available', () 
     assert(read('img/github.svg').includes('<svg'));
 });
 
+test('report directories contain only declared releases, without obsolete redirects', () => {
+    const expected = config.updates.map(update => path.basename(update.report)).sort();
+    for (const directory of ['docs/releases', 'docs/en/releases']) {
+        assert.deepEqual(fs.readdirSync(path.join(root, directory)).filter(name => name.endsWith('.md')).sort(), expected);
+    }
+    for (const directory of ['docs', 'docs/en']) {
+        assert.deepEqual(fs.readdirSync(path.join(root, directory)).filter(name => name.startsWith('UPDATE-')), []);
+    }
+});
+
 test('startup feedback is inlined and independent of external assets', () => {
     const html = read('index.html');
     assert(html.includes('<style id="focus-startup-style">\n' + read('startup.css') + '</style>'));

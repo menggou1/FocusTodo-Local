@@ -2,7 +2,7 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Canonical Chinese list](../BACKLOG.md)
 
-Updated 2026-10-28. This is the English view of the same canonical item IDs, not an independent backlog. Remove completed items and record their evidence in release reports. Do not copy unfinished lists into old reports. V01 was removed after the user confirmed manual acceptance; E05 and E06 were completed in 1.4.0.
+Updated 2026-10-30. This is the English view of the same canonical item IDs, not an independent backlog. Remove completed items and record their evidence in release reports. Do not copy unfinished lists into old reports. V01 was removed after the user confirmed manual acceptance; E05 and E06 were completed in 1.4.0.
 
 ## Engineering
 
@@ -27,7 +27,7 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 | V04 | P2 | Real notifications and audio | Actual permission states, operating-system display, every sound/white-noise track, autoplay restrictions, visible multi-window playback and owner termination. Stub calls are not physical display/listening evidence. |
 | V05 | P2 | Bing failures and cross-day refresh | Real source failure, timeout, redirect boundaries and expired/cross-day cache updates. |
 | V06 | P2 | Manual backup and desktop-launch experience | Blocked/cancelled downloads, human confirmation of saved files and file-picker restore; Windows double-click, visible default browser, Python fallback and failure messages. Automated saved-file restore and cross-platform launch already exist. |
-| V08 | P2 | Investigate intermittent Windows startup acceptance timeout | The 1.7.4 main run timed out waiting for the startup status without page-state evidence. Version 1.7.5 captured `net::ERR_NO_BUFFER_SPACE` on a critical script in a different scenario, without proving the 1.7.4 cause. Version 1.7.6 avoids intercepting same-origin requests unnecessarily and checks recovery from that script failing. Investigate the exhaustion source; one successful rerun does not establish the cause. |
+| V08 | P2 | Attribute historical Windows startup failures | Version 1.7.10 fixes a server stream leak with a controlled cancelled-font regression and adds uploaded calendar failure diagnostics. Missing evidence prevents exact attribution of the old 1.7.4/1.7.6 timeouts. If reproduced, use failed requests, startup DOM and screenshots; repeated passes do not establish their cause. |
 | V07 | P2 | Long-lived databases and very large recovery | Isolated evidence from long-lived data, many recovered records and broadcasts. Generated capacity measurements already exist; never commit private backups or images. |
 
 ## Other proposals

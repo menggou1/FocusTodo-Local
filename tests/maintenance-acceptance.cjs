@@ -1,3 +1,4 @@
+const { streamFile } = require('../scripts/server.cjs');
 /* Dedicated no-Web-Locks maintenance acceptance; isolated origins/profiles only. */
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
 const assert = require('node:assert/strict');
@@ -9,7 +10,7 @@ const server = http.createServer((req, res) => {
     if (req.url === '/') { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(fixture); return; }
     const file = path.resolve(root, '.' + req.url);
     if (!file.startsWith(root + path.sep) || !fs.existsSync(file)) { res.writeHead(404); res.end(); return; }
-    res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' }); fs.createReadStream(file).pipe(res);
+    res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' }); streamFile(file, res);
 });
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

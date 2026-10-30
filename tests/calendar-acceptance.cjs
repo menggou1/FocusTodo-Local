@@ -14,7 +14,7 @@ fs.mkdirSync(evidence, { recursive: true });
     async function scenario(name, body, locale = 'zh-CN', dark = false) {
         if (process.env.FOCUS_CALENDAR_FILTER && !name.includes(process.env.FOCUS_CALENDAR_FILTER)) return;
         const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
-        const errors = [], external = [];
+        const errors = [], external = [], failedRequests = [];
         await context.addInitScript(({ locale, dark }) => {
             localStorage.setItem('FocusTodo.language', locale); if (dark) localStorage.setItem('DarkMode', 'true');
             let api, timer;
@@ -33,20 +33,29 @@ fs.mkdirSync(evidence, { recursive: true });
             return route.continue();
         });
         const page = await context.newPage(); page.on('pageerror', error => errors.push(error.stack));
+        page.on('requestfailed', request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText }));
         try {
             await page.goto(url); await ready(page); await calendar(page, locale);
             await body(page, context);
             assert.deepEqual(errors, [], 'No browser errors'); assert.deepEqual(external, [], 'No external requests');
             results.push({ name, passed: true }); console.log('PASS ' + name);
         } catch (error) {
-            await page.screenshot({ path: path.join(root, 'dist/calendar-failure.png') }).catch(() => {});
+            const state = await page.evaluate(() => ({ startup: document.querySelector('#focus-startup')?.outerHTML,
+                readyState: document.readyState, rootChildren: document.querySelector('#root')?.children.length,
+                timerAttached: !!window.__timer })).catch(() => null);
+            fs.writeFileSync(path.join(evidence, 'calendar-failure.json'), JSON.stringify({ name, errors, failedRequests, state }, null, 2));
+            await page.screenshot({ path: path.join(evidence, 'calendar-failure.png'), timeout: 2000 }).catch(() => {});
             console.error('Browser notices: ' + await page.locator('.focus-local-notice').allTextContents());
             results.push({ name, passed: false, error: error.stack }); console.error('FAIL ' + name + '\n' + error.stack);
         }
         finally { await context.close(); }
     }
     async function ready(page) {
-        await page.waitForFunction(() => window.__timer && document.querySelector('#root')?.innerText && !document.documentElement.classList.contains('focus-starting'));
+        await page.waitForFunction(() => {
+            const startup = document.querySelector('#focus-startup');
+            if (startup?.dataset.state === 'error') throw Error('Application startup failed: ' + startup.innerText);
+            return window.__timer && document.querySelector('#root')?.innerText && !document.documentElement.classList.contains('focus-starting');
+        });
         await page.evaluate(() => FocusLocalReady);
     }
     async function calendar(page, locale = 'zh-CN') {

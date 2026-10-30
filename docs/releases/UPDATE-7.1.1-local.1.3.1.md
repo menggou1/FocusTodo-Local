@@ -1,6 +1,6 @@
 # FocusTodo 7.1.1-local.1.3.1 主题切换修复
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [1.3.0 详细报告](UPDATE-7.1.1-local.1.3.0.md)
+[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [1.3.0 详细报告](UPDATE-7.1.1-local.1.7.10.md)
 
 日期：2026-10-24（Asia/Shanghai），作者：Lexible，Git Tag：`1.3.1`。
 

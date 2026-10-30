@@ -1,3 +1,4 @@
+const { streamFile } = require('../scripts/server.cjs');
 /* Real list drag interactions on an isolated origin and fresh browser profiles. */
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
@@ -10,7 +11,7 @@ const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=
 const server=http.createServer((request,response)=>{
   const name=new URL(request.url,'http://localhost').pathname,file=path.resolve(root,'.'+(name==='/'?'/index.html':decodeURIComponent(name)));
   if(!file.startsWith(root+path.sep)||!fs.existsSync(file)||fs.statSync(file).isDirectory()){response.writeHead(404);response.end();return}
-  response.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});fs.createReadStream(file).pipe(response);
+  response.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});streamFile(file, response);
 });
 (async()=>{
   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
