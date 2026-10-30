@@ -57,7 +57,9 @@ jobs:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
       - name: Package runtime
         if: matrix.node == '24'
-        run: python scripts/package-release.py
+        run: |
+          python tests/release-gate-test.py
+          python scripts/package-release.py
       - name: Test extracted ZIP and tar.gz without dependencies
         if: matrix.node == '24'
         run: python tests/package-smoke.py
@@ -74,15 +76,20 @@ jobs:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     needs: test
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Require a commit merged into main
         run: git merge-base --is-ancestor HEAD origin/main
+      - name: Require successful main tests and Pages deployment
+        run: python scripts/verify-release-workflows.py
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Build portable archives and verify tag
         run: python scripts/package-release.py --tag "$RELEASE_TAG"
         env:

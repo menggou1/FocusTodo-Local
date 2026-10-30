@@ -1,6 +1,14 @@
 {
-  "version": "7.1.1-local.1.7.1",
+  "version": "7.1.1-local.1.7.2",
   "results": [
+    {
+      "name": "empty task and fading notice light",
+      "passed": true
+    },
+    {
+      "name": "empty task and fading notice dark",
+      "passed": true
+    },
     {
       "name": "double click creates task and spaced plans atomically, persists and exports",
       "passed": true
@@ -18,7 +26,7 @@
       "passed": true
     },
     {
-      "name": "date selection and scroll restore work across navigation and refresh",
+      "name": "native date selection and scroll restore work across navigation and refresh",
       "passed": true
     },
     {
@@ -66,7 +74,19 @@
       "passed": true
     },
     {
-      "name": "selection has rounded corners and visible text matches the reference sizes",
+      "name": "schedule typography preserves reference sidebar zh-CN false",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar zh-CN true",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar en false",
+      "passed": true
+    },
+    {
+      "name": "schedule typography preserves reference sidebar en true",
       "passed": true
     },
     {

@@ -28,6 +28,7 @@ test('release scripts load before consumers and local cache tags use the current
 });
 
 test('every maintenance report and the local repository icon are available', () => {
+    assert(!fs.existsSync(path.join(root, 'CNAME')), 'Local main runtime must not contain an upstream CNAME');
     for (const update of release.updates) {
         assert.match(update.report, /^docs\/[A-Za-z0-9._-]+\.md$/);
         assert(fs.statSync(path.join(root, update.report)).isFile(), update.report);

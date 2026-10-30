@@ -3,6 +3,8 @@
     'use strict';
     const release = root.FocusRelease;
     const READ_KEY = 'FocusTodo.releaseRead';
+    const REMINDER_READ_KEY = 'FocusTodo.taskRemindersRead';
+    const headers = new WeakMap();
     let activeDialog = null;
 
     function node(tag, className, text) {
@@ -74,12 +76,50 @@
                 h('span', { className: 'focus-release-hint' }, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('点击查看详情'):'点击查看详情'))); }));
     }
 
-    function attachHeader(header) {
-        const refresh = () => header.setState({ localReleaseRead: !hasUnreadUpdates() });
-        const storage = event => { if (event.key === READ_KEY || event.key === null) refresh(); };
-        root.addEventListener('focus-local-release-read', refresh); root.addEventListener('storage', storage);
-        return () => { root.removeEventListener('focus-local-release-read', refresh); root.removeEventListener('storage', storage); };
+    function attachHeader(header,onNotify) {
+        let live=true,generation=0,timer=null;
+        const announced=new Set(),key=row=>JSON.stringify([row.id,row.reminderDate]);
+        const read=()=>{try{const value=JSON.parse(localStorage.getItem(REMINDER_READ_KEY)||'[]');return new Set(Array.isArray(value)?value:[])}catch(_){return new Set()}};
+        const refresh=async(open=false,notify=false)=>{
+            const request=++generation;clearTimeout(timer);
+            try{
+                await root.FocusLocalReady;if(!live||root.FocusLocalData.maintenance)return;
+                const db=await root.FocusLocalData.open();
+                const rows=await root.FocusLocalData.transaction(db,['Task'],'readonly',(tx,done)=>{
+                    const query=tx.objectStore('Task').index('reminderDate').getAll(IDBKeyRange.lowerBound(1));query.onsuccess=()=>done(query.result);
+                });
+                if(!live||request!==generation)return;
+                const now=Date.now(),active=rows.filter(row=>row.state===0&&!row.isFinished&&Number.isFinite(row.reminderDate));
+                const due=active.filter(row=>row.reminderDate<=now).sort((a,b)=>b.reminderDate-a.reminderDate),seen=read();
+                const fresh=due.filter(row=>!seen.has(key(row))&&!announced.has(key(row)));
+                if(open||header.state.notification.show){
+                    due.forEach(row=>seen.add(key(row)));
+                    try{localStorage.setItem(REMINDER_READ_KEY,JSON.stringify([...seen]))}catch(error){root.FocusLocal.notice(root.FocusI18n.text('提醒已读状态保存失败：')+error.message)}
+                }
+                const saved=read();
+                header.setState({localReleaseRead:!hasUnreadUpdates(),notification:{show:open||header.state.notification.show,highlight:due.some(row=>!saved.has(key(row))),items:due}});
+                due.forEach(row=>announced.add(key(row)));
+                const next=Math.min(...active.filter(row=>row.reminderDate>now).map(row=>row.reminderDate));
+                if(Number.isFinite(next))timer=setTimeout(()=>refresh(false,true),Math.min(Math.max(1,next-Date.now()),86400000));
+                if(notify&&fresh.length&&!open&&!header.state.notification.show){
+                    const title=root.FocusI18n.text('任务到时提醒'),message=fresh.map(row=>row.name).join('、');
+                    root.FocusLocal.notice(title+'：'+message);
+                    if(onNotify)onNotify();
+                    root.FocusLocal.notifyCompletion(title,message);
+                }
+            }catch(error){if(live)root.FocusLocal.notice(root.FocusI18n.text('提醒读取失败：')+error.message)}
+        };
+        const update=()=>refresh(false,true),releaseRead=()=>header.setState({localReleaseRead:!hasUnreadUpdates()});
+        const storage=event=>{if(event.key===READ_KEY||event.key===REMINDER_READ_KEY||event.key===null)refresh()};
+        const events=['focus-local-tasks-changed','focus-local-calendar-changed','focus-local-maintenance-end','focus'];
+        events.forEach(name=>root.addEventListener(name,update));
+        root.addEventListener('focus-local-release-read',releaseRead);root.addEventListener('storage',storage);
+        headers.set(header,refresh);refresh(false,true);
+        return ()=>{live=false;generation++;clearTimeout(timer);headers.delete(header);events.forEach(name=>root.removeEventListener(name,update));root.removeEventListener('focus-local-release-read',releaseRead);root.removeEventListener('storage',storage)};
     }
+
+    function refreshReminders(header,open=false,notify=false){const refresh=headers.get(header);if(refresh)return refresh(open,notify)}
+    function renderReminderSummary(React,items){return items.length?React.createElement('h3',{className:'focus-reminder-summary'},root.FocusI18n.text('任务到时提醒'),' · ',items.length):null}
 
     function renderAbout(React) {
         const h = React.createElement;
@@ -120,5 +160,5 @@
         update(); cancel.focus();
     }
 
-    root.FocusAppUI = { renderUpdates, renderAbout, showUpdate, hasUnreadUpdates, attachHeader, confirmReset };
+    root.FocusAppUI = { renderUpdates, renderAbout, showUpdate, hasUnreadUpdates, attachHeader, refreshReminders, renderReminderSummary, confirmReset };
 })(window);

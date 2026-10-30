@@ -294,6 +294,7 @@
     height:auto;
     max-height:min(620px,calc(100vh - 90px));
     max-width:calc(100vw - 16px);
+    background:var(--bg-popup);
     overflow:hidden
 }
 
@@ -314,7 +315,22 @@
 }
 
 .focus-task-reminders:not(:empty) {
-    border-top:1px solid var(--border)
+    border-bottom:1px solid var(--border)
+}
+
+.focus-reminder-summary {
+    flex:none;
+    margin:0;
+    padding:10px 12px;
+    color:var(--text-title);
+    background:var(--bg-button);
+    border-bottom:1px solid var(--border);
+    font-size:14px
+}
+
+.focus-task-reminders li {
+    color:var(--text-title);
+    overflow-wrap:anywhere
 }
 
 .focus-release-list {

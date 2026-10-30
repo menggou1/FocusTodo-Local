@@ -45,6 +45,60 @@
         };
         return React.createElement(componentClass,{styles});
     }
+    // Keep the original one-second flight and tree pulse. Collection commits
+    // independently; an animation never owns reward persistence or node IDs.
+    const forests=new WeakMap();
+    function mountForest(view){forests.set(view,{pending:new Map(),animations:new Set(),generation:0});refreshForest(view)}
+    async function refreshForest(view){
+        const state=forests.get(view);if(!state)return;
+        const generation=++state.generation;
+        view.setState(view.loadLocalForestState);
+        try{
+            const result=await view.generateSunItems();
+            if(forests.get(view)!==state||generation!==state.generation)return;
+            const old=view.props.sunItems||[];
+            state.nextId=Math.max(state.nextId||0,...old.map(x=>x.id+1));
+            const same=(a,b)=>a.data.itemType===b.data.itemType&&a.data.id===b.data.id&&a.data.date===b.data.date;
+            const items=result[0].map(x=>{const match=old.find(y=>same(x,y));return Object.assign({},x,match?{id:match.id,left:match.left,top:match.top}:{id:state.nextId++})});
+            for(const entry of old)if(state.pending.has(entry.id)&&!items.some(x=>same(x,entry)))items.push(entry);
+            view.props.setSunItems(items);view.props.setActivityItems(result[1]);
+        }catch(error){root.FocusLocal.notice(error.message)}
+    }
+    function animateForest(state,element,frames,options){
+        if(!element||root.matchMedia('(prefers-reduced-motion: reduce)').matches||!element.animate)return null;
+        const animation=element.animate(frames,options);state.animations.add(animation);
+        return animation;
+    }
+    async function collectSun(view,id,item){
+        const state=forests.get(view);if(!state||state.pending.has(id))return;
+        const element=document.getElementById('sun-'+id),background=view.forestBgRef.current;
+        if(!element||!background)return;
+        state.pending.set(id,true);element.setAttribute('aria-busy','true');
+        const flight=animateForest(state,element,[
+            {left:element.style.left,top:element.style.top,opacity:1,transform:'scale(1)'},
+            {left:(background.offsetWidth/2-24)+'px',top:(.84*background.offsetHeight-34)+'px',opacity:0,transform:'scale(0.2)'}
+        ],{duration:1000,easing:'ease-in-out',fill:'forwards'});
+        const finished=flight?flight.finished.catch(()=>{}):Promise.resolve();
+        try{
+            const result=await root.FocusLocalData.collectForest(item);
+            if(forests.get(view)!==state)return;
+            view.setState(view.loadLocalForestState);
+            await finished;if(forests.get(view)!==state)return;
+            state.pending.delete(id);
+            await refreshForest(view);
+            if(result.collected&&forests.get(view)===state){
+                const pulse=animateForest(state,view.treeRef.current,[{transform:'translateX(-50%) scale(1)'},{transform:'translateX(-50%) scale(1.07)'},{transform:'translateX(-50%) scale(1)'}],{duration:800,easing:'ease-in-out'});
+                if(pulse)pulse.finished.catch(()=>{}).finally(()=>state.animations.delete(pulse));
+            }
+        }catch(error){
+            if(forests.get(view)===state){state.pending.delete(id);root.FocusLocal.notice(error.message)}
+        }finally{
+            if(flight){flight.cancel();state.animations.delete(flight)}
+            element.removeAttribute('aria-busy');
+        }
+    }
+    function unmountForest(view){const state=forests.get(view);forests.delete(view);if(state)for(const animation of state.animations)animation.cancel()}
+    root.FocusForest={mount:mountForest,refresh:refreshForest,collect:collectSun,unmount:unmountForest};
     root.FocusAchievements={catalog,metrics,render,schedule};
     for(const name of ['focus-local-achievements-input','focus-local-calendar-changed','focus-local-timer-changed','focus-local-maintenance-end','focus'])root.addEventListener(name,schedule);
     root.FocusLocalReady.then(schedule).catch(()=>{});

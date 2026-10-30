@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.1`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.2`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -18,7 +18,8 @@ Run `npm ci` to install locked development dependencies. Node.js 22+ is required
 | `js/local-timer-core.js` | Pure timer transitions, historical spans and completion events; no DOM or database access |
 | `js/local-data.js` | `PomodoroDB6` v3, transaction persistence, import/reset journals and complete snapshots |
 | `js/local-timer-ui.js` | Legacy timer adapter, recovery confirmation, subscriptions, audio and completion notifications |
-| `js/local-app-ui.js` | Updates, About and five-second reset confirmation |
+| `js/local-app-ui.js` | Task reminders, independent task/release reads, About and five-second reset confirmation |
+| `js/local-achievements.js` | Original forest collection animations, reduced motion, local achievements, original ranking drawer and refresh scheduling |
 | `js/local-backup.js` | Compact JSON/Gzip, content sniffing, scope, size analysis and bounded decoding |
 | `js/local-theme-storage.js` | Recoverable theme JSON/active/theme writes without copying image data into the journal |
 | `js/local-i18n.js` | Language preference, system resolution, local text and legacy fallback |
@@ -133,3 +134,5 @@ Use Conventional Commits for future commits: `type(optional-scope): short descri
 ## Visual scope and unchanged regions
 
 Declare the target, reference and permitted properties before editing. A reference sidebar, search and username must retain their font family, size, weight, line height, geometry and interactions. Scope schedule rules to its own root; preserve native picker styling. Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Freeze independent computed-style evidence (current fixture: tests/fixtures/sidebar-typography-cfd6449.json); do not regenerate it from the implementation. Test both target appearance and unchanged regions, including a deliberately injected regression that the guard must reject. Baseline changes require explicit user authorization and independent evidence. Prefer a local inverse patch when correcting scope violations. Passing test counts do not replace visual acceptance.
+
+Candidate tags 1.7.0 and 1.7.1 are preserved; their unfinished updates are consolidated in the 1.7.2 report, with no separate formal report or Release. Publication requires the same commit's main tests, tag tests and Pages deployment to succeed. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.

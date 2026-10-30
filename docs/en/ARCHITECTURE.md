@@ -74,3 +74,7 @@ Names and avatars are saved directly through the local data service under import
 ## Focus forest and achievements
 
 The original forest UI uses local reward state in `FocusTodo.forestState`. The data service serializes collections and achievement awards; each achievement and its sunlight credit are written together. `local-achievements.js` evaluates committed records and renders the offline drawer using the original ranking styles and bundled trophy icons. Full backups include the state; the database schema remains v3.
+
+The forest adapter keeps each sunlight item until its original flight completes, preserves other positions and cancels animations on failure or unmount. Reduced motion skips the flight and tree pulse. Persistence commits independently of animation.
+
+`local-app-ui.js` shows due task reminders before release history and saves reads per task ID/reminder time in `FocusTodo.taskRemindersRead`. Successful task transactions and cross-tab messages refresh active reminders; completion, deletion and rescheduling recompute the badge. Release reads remain independent in `FocusTodo.releaseRead`.

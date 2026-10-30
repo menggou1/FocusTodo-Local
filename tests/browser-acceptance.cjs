@@ -537,9 +537,9 @@ const server = http.createServer((request, response) => {
             assert.match(await page.locator('#notification-popover').innerText(), /原任务提醒保留/);
             const panel = await page.locator('.focus-notification-panel').boundingBox();
             const remindersList = page.locator('.focus-task-reminders');
-            await remindersList.scrollIntoViewIfNeeded();
             const reminders = await remindersList.boundingBox();
-            assert(panel && reminders && reminders.y + reminders.height <= panel.y + panel.height + 1, 'Reminders are reachable in the shared scroll area');
+            assert(panel && reminders && reminders.y + reminders.height <= panel.y + panel.height + 1, 'Due reminders are immediately visible before release history');
+            assert.equal(await page.locator('.focus-notification-content').evaluate(el=>el.scrollTop),0);
             assert.equal(await page.locator('.focus-release-entry').count(), release.updates.length);
             assert(await page.evaluate(() => window.FocusAppUI.hasUnreadUpdates()));
             await page.waitForTimeout(400);

@@ -80,6 +80,7 @@
                     const scope = typeof names === 'string' ? [names] : Array.from(names);
                     if (!scope.includes('LocalMeta')) scope.push('LocalMeta');
                     const tx = nativeTransaction.call(db, scope, mode, options);
+                    if(scope.includes('Task'))tx.addEventListener('complete',tasksChanged);
                     const meta = tx.objectStore('LocalMeta');
                     ['maintenance', 'settings-journal'].forEach(id => {
                         const check = meta.get(id);
@@ -106,7 +107,7 @@
             let tx, result, failure;
             try {
                 tx = nativeTransaction.call(db, names, mode);
-                tx.oncomplete = () => resolve(result);
+                tx.oncomplete = () => { if(mode==='readwrite'&&(typeof names==='string'?names==='Task':names.includes('Task')))tasksChanged();resolve(result); };
                 tx.onabort = () => reject(failure || tx.error || new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据库事务已取消。'):'数据库事务已取消。')));
                 tx.onerror = () => { failure = tx.error || failure; };
                 body(tx, value => { result = value; }, error => { failure = error; tx.abort(); });
@@ -555,6 +556,7 @@
     }
     let channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('focustodo-local') : null;
     function broadcast(type, records, operation) { if (channel) channel.postMessage({ type, records: records || [], operationId: operation && operation.operationId }); }
+    function tasksChanged(){root.dispatchEvent(new Event('focus-local-tasks-changed'));broadcast('tasks')}
     if (channel) channel.onmessage = event => {
         const message = event.data;
         if (message.type === 'maintenance') {
@@ -569,6 +571,7 @@
             root.dispatchEvent(new Event('focus-local-maintenance')); notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'):'数据已在另一个标签页更新，请刷新本页。'));
         } else if (message.type === 'calendar') root.dispatchEvent(new Event('focus-local-calendar-changed'));
         else if (message.type === 'achievements') root.dispatchEvent(new Event('focus-local-achievements-changed'));
+        else if (message.type === 'tasks') root.dispatchEvent(new Event('focus-local-tasks-changed'));
         else root.dispatchEvent(new CustomEvent('focus-local-timer-changed', { detail: { records: message.records || [] } }));
     };
     // The legacy forest owns the original reward rules and interface. Keep its

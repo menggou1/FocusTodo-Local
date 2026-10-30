@@ -2,16 +2,18 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.1**, author Lexible.
+Current application: **7.1.1-local.1.7.2**, author Lexible.
 
-## 7.1.1-local.1.7.1 · 2026-10-30
+## 7.1.1-local.1.7.2 · 2026-10-30
 
 - Restore the original Focus forest, sunlight collection and detailed guide, with local storage.
 - Earn bronze, silver and gold local achievements with immediate sunlight rewards.
 - Remove the daily collection limit and fix sunlight collection and position refresh.
 - Fix the browser tab icon and make the achievements entry a prominent circular button.
+- Animate sunlight along the original flight path, retry failed collections and respect reduced motion.
+- Show task reminders before release history and clear read or completed reminder badges while retaining release notifications.
 
-[English report](UPDATE-7.1.1-local.1.7.1.md).
+[English report](UPDATE-7.1.1-local.1.7.2.md).
 
 ## 7.1.1-local.1.6.1 · 2026-10-29
 

@@ -1,0 +1,41 @@
+{
+  "version": "7.1.1-local.1.7.2",
+  "date": "2026-10-30",
+  "scope": "isolated-local-browser",
+  "baseCommit": "9fe445f9b875bb31eee6201d6edd93235f0bf910",
+  "checks": {
+    "unit": {
+      "passed": 60,
+      "skipped": 1
+    },
+    "syntax": "passed",
+    "browser": {
+      "startup": 14,
+      "application": 59,
+      "maintenance": 7,
+      "listOrdering": 3,
+      "audio": 5,
+      "profile": 5,
+      "schedule": 24,
+      "forest": "passed",
+      "achievements": "passed",
+      "reminders": "passed including English dark appearance",
+      "fullCommandExitCode": 0
+    },
+    "releaseGate": 3,
+    "pagesFiltering": 2,
+    "portablePackages": "ZIP and tar.gz SHA256, documentation links and extracted startup passed under Python 3.12.14",
+    "astIdempotence": "passed",
+    "localCNAME": false
+  },
+  "achievementRetry": {
+    "injectedWriteFailed": true,
+    "balanceAfterFailure": 0,
+    "earnedAfterFailure": 0,
+    "forcedAutomaticFirst": true,
+    "totalUnlocked": 9,
+    "totalReward": 1860,
+    "manualRetryReward": 0
+  },
+  "bundleSha256": "56b49569b24d4446d2eec2c424ae49df5acf742eca16d6a4c917d95cd36b976a"
+}

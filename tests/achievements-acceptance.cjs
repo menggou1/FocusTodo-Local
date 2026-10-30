@@ -20,8 +20,34 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   await p.locator('[class*=HomeHeader-forest]').click();await p.locator('[class*=ForestSection-buttonGroup] img[src*=forest-badge]').click();await p.locator('[data-achievement="focus-1"]').waitFor();await p.waitForTimeout(500);fs.mkdirSync('dist',{recursive:true});await p.screenshot({path:path.resolve('dist/forest-achievements.png')});
   const live=await browser.newContext({locale:'zh-CN',timezoneId:'Asia/Shanghai',viewport:{width:1280,height:900}});await live.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());const lp=await live.newPage();await ready(lp);const input=lp.getByPlaceholder(/添加一个任务/);await input.fill('成就实时任务');await input.press('Enter');await lp.locator('[class*=TaskItem-complete-]').first().click();await lp.waitForFunction(()=>FocusLocalData.forestGet('Sunlight')===20);assert(JSON.parse(await lp.evaluate(()=>localStorage.getItem('FocusTodo.forestState'))).achievements['task-1']);await live.close();
   const tiers=await browser.newContext({locale:'zh-CN',timezoneId:'Asia/Shanghai'});await tiers.addInitScript(()=>{const set=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(window.__denyAchievement&&k==='FocusTodo.forestState')throw new Error('Injected achievement write failure');return set.apply(this,arguments)}});await tiers.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());const tp=await tiers.newPage();await ready(tp);
-  const tierResult=await tp.evaluate(async()=>{const d=FocusLocalData,db=await d.open(),today=new Date();today.setHours(12,0,0,0);await d.transaction(db,['Pomodoro','Task'],'readwrite',(tx,done)=>{for(let i=0;i<30;i++){const day=new Date(today);day.setDate(day.getDate()-i);tx.objectStore('Pomodoro').put({id:'tier-'+i,interval:12000,endDate:day.getTime(),state:0})}for(let i=0;i<50;i++)tx.objectStore('Task').put({id:'tier-task-'+i,isFinished:true,state:0});done()});window.__denyAchievement=true;let failed=false;try{await d.syncAchievements()}catch(e){failed=true}window.__denyAchievement=false;const before=d.forestGet('Sunlight'),first=await d.syncAchievements(),second=await d.syncAchievements();return {failed,before,first,second,total:d.forestGet('Sunlight')}});
-  assert(tierResult.failed);assert.equal(tierResult.before,0);assert.equal(tierResult.first.unlocked.length,9);assert.equal(tierResult.first.reward,1860);assert.equal(tierResult.second.reward,0);assert.equal(tierResult.total,1860);await tiers.close();
+  const tierResult=await tp.evaluate(async()=>{
+   const d=FocusLocalData,original=d.syncAchievements.bind(d),successful=[];
+   let nextAutomatic;
+   d.syncAchievements=async()=>{const result=await original();successful.push(result);if(nextAutomatic){nextAutomatic(result);nextAutomatic=null}return result};
+   await d.syncAchievements(); // Drain startup work before inserting the fault fixture.
+   window.__denyAchievement=true;
+   const db=await d.open(),today=new Date();today.setHours(12,0,0,0);
+   await d.transaction(db,['Pomodoro','Task'],'readwrite',(tx,done)=>{
+    for(let i=0;i<30;i++){const day=new Date(today);day.setDate(day.getDate()-i);tx.objectStore('Pomodoro').put({id:'tier-'+i,interval:12000,endDate:day.getTime(),state:0})}
+    for(let i=0;i<50;i++)tx.objectStore('Task').put({id:'tier-task-'+i,isFinished:true,state:0});done();
+   });
+   let failed=false;try{await d.syncAchievements()}catch(e){failed=true}
+   const before=d.forestGet('Sunlight'),beforeEarned=JSON.parse(localStorage.getItem('FocusTodo.forestState')||'{}').achievements||{};
+   // Force the actual automatic scheduler to win before the manual retry.
+   // This deterministically reproduces 1.7.1's 0 !== 9 without delaying a DOM check.
+   window.__denyAchievement=false;
+   const automatic=new Promise(resolve=>nextAutomatic=resolve);FocusAchievements.schedule();await automatic;
+   const first=await d.syncAchievements(),second=await d.syncAchievements();
+   return {failed,before,beforeEarned,successful,first,second,total:d.forestGet('Sunlight'),earned:JSON.parse(localStorage.getItem('FocusTodo.forestState')).achievements};
+  });
+  assert(tierResult.failed);assert.equal(tierResult.before,0);assert.deepEqual(tierResult.beforeEarned,{});
+  assert.equal(tierResult.first.unlocked.length,0,'Automatic sync has already committed all tiers');
+  assert.equal(tierResult.successful.reduce((sum,r)=>sum+r.unlocked.length,0),9);
+  assert.equal(tierResult.successful.reduce((sum,r)=>sum+r.reward,0),1860);
+  assert.equal(Object.keys(tierResult.earned).length,9);assert.equal(tierResult.second.reward,0);assert.equal(tierResult.total,1860);
+  fs.mkdirSync(path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'docs/acceptance'),{recursive:true});
+  fs.writeFileSync(path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'docs/acceptance','achievement-retry.json'),JSON.stringify(tierResult,null,2)+'\n');
+  await tiers.close();
   const english=await browser.newContext({locale:'en',timezoneId:'Asia/Shanghai',viewport:{width:960,height:720}});await english.addInitScript(()=>{localStorage.setItem('FocusTodo.language','en');localStorage.setItem('DarkMode','true')});await english.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());const ep=await english.newPage();await ready(ep);await ep.locator('[class*=HomeHeader-forest]').click();await ep.locator('[class*=ForestSection-buttonGroup] img[src*=forest-badge]').click();await ep.locator('[data-achievement="days-30"]').waitFor();const et=await ep.locator('.focus-achievements').innerText();assert.match(et,/Achievements/);assert.doesNotMatch(et,/[\u3400-\u9fff]/);await ep.locator('[data-achievement="days-30"]').scrollIntoViewIfNeeded();assert(await ep.locator('[data-achievement="days-30"]').isVisible());await english.close();
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);console.log('PASS original drawer, trophies, immediate rewards, concurrent tabs and repeated backup restore');
  }finally{await context.close();await browser.close();await new Promise(r=>server.close(r))}

@@ -266,5 +266,8 @@
   "七日生长": "Seven-day growth",
   "在 7 个自然日留下专注记录": "Record focus on 7 calendar days",
   "三十日树荫": "Thirty-day shade",
-  "在 30 个自然日留下专注记录": "Record focus on 30 calendar days"
+  "在 30 个自然日留下专注记录": "Record focus on 30 calendar days",
+  "任务到时提醒": "Task reminders",
+  "提醒已读状态保存失败：": "Could not save read reminders: ",
+  "提醒读取失败：": "Could not load reminders: "
 }

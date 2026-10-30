@@ -20,6 +20,7 @@ spec.loader.exec_module(pages)
 class PagesBuildTests(unittest.TestCase):
     def test_artifact_matches_committed_runtime_and_does_not_mutate_repository(self):
         before = pages.git('status', '--porcelain')
+        self.assertFalse(pages.git('ls-tree', '--name-only', 'main', '--', 'CNAME').strip(), 'main must not contain CNAME')
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / 'site'
             pages.build('main', output)
