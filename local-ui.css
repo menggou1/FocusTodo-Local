@@ -279,6 +279,12 @@
     display:block
 }
 
+.focus-guide-link {
+    display:inline-block;
+    margin-left:10px;
+    vertical-align:middle
+}
+
 .focus-repository-link:hover {
     background:var(--bg-hover)
 }

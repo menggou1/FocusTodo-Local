@@ -2,7 +2,14 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.3**, author Lexible.
+Current application: **7.1.1-local.1.7.4**, author Lexible.
+
+## 7.1.1-local.1.7.4 · 2026-10-30
+
+- Open the user guide from About for tasks, focus, schedules and backups.
+- Organize Chinese and English documentation and release reports while preserving old report links.
+
+[English report](releases/UPDATE-7.1.1-local.1.7.4.md).
 
 ## 7.1.1-local.1.7.3 · 2026-10-30
 
@@ -14,14 +21,14 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Show task reminders before release history and clear read or completed reminder badges while retaining release notifications.
 - Request optional browser storage persistence in the background without blocking startup.
 
-[English report](UPDATE-7.1.1-local.1.7.3.md).
+[English report](releases/UPDATE-7.1.1-local.1.7.3.md).
 
 ## 7.1.1-local.1.6.1 · 2026-10-29
 
 - Show an inline message when a schedule task has no name.
 - Adapt bottom notices to light and dark themes and fade them out automatically.
 
-[English report](UPDATE-7.1.1-local.1.6.1.md).
+[English report](releases/UPDATE-7.1.1-local.1.6.1.md).
 
 ## 7.1.1-local.1.6.0 · 2026-10-29
 
@@ -30,7 +37,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Align schedule typography with the unchanged sidebar.
 - Display short focus in seconds and add the due-next-week shortcut.
 
-[English report](UPDATE-7.1.1-local.1.6.0.md).
+[English report](releases/UPDATE-7.1.1-local.1.6.0.md).
 
 ## 7.1.1-local.1.5.4 · 2026-10-28
 
@@ -39,7 +46,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Restore the default system list order while preserving hidden states and custom-list data.
 - Remove the unused NAME browser cookie and read usernames from local storage.
 
-[English report](UPDATE-7.1.1-local.1.5.4.md).
+[English report](releases/UPDATE-7.1.1-local.1.5.4.md).
 
 ## 7.1.1-local.1.5.2 · 2026-10-28
 
@@ -47,7 +54,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Improve background-audio handoff between windows; explain the fallback without Web Locks while retaining previews and completion sounds.
 - Save local names and avatars through the data service and report failed writes.
 
-[English report](UPDATE-7.1.1-local.1.5.2.md).
+[English report](releases/UPDATE-7.1.1-local.1.5.2.md).
 
 ## 7.1.1-local.1.5.0 · 2026-10-27
 
@@ -56,7 +63,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Fix the extra scrollbar in list management.
 - Improve local network compatibility for reused same-origin requests.
 
-[English report](UPDATE-7.1.1-local.1.5.0.md).
+[English report](releases/UPDATE-7.1.1-local.1.5.0.md).
 
 ## 7.1.1-local.1.4.3 · 2026-10-26
 
@@ -65,7 +72,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Keep progressive startup and real progress, show the workspace when ready, and retry failed loads.
 - Improve cross-tab verification and provide portable packages with SHA256 verification.
 
-[English report](UPDATE-7.1.1-local.1.4.3.md).
+[English report](releases/UPDATE-7.1.1-local.1.4.3.md).
 
 ## 7.1.1-local.1.4.1 · 2026-10-26
 
@@ -73,7 +80,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Reuse Chinese and English catalogs, load other locales asynchronously, and retry long or failed loads.
 - Use startup feedback with dark appearance, narrow screens, reduced motion and a no-JavaScript explanation.
 
-[English report](UPDATE-7.1.1-local.1.4.1.md).
+[English report](releases/UPDATE-7.1.1-local.1.4.1.md).
 
 ## 7.1.1-local.1.4.0 · 2026-10-25
 
@@ -81,7 +88,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Use English local dialogs, errors, release notes and documentation, with readable fallbacks for missing translations.
 - Enable or test desktop notifications explicitly, and clarify the offline scope and group/forest design.
 
-[English report](UPDATE-7.1.1-local.1.4.0.md).
+[English report](releases/UPDATE-7.1.1-local.1.4.0.md).
 
 ## 7.1.1-local.1.3.2 · 2026-10-25
 
@@ -89,7 +96,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Recover interrupted theme changes and roll back failed writes without mixing image and activation settings.
 - Centralize open engineering and verification work, removing completed and duplicate entries.
 
-[English report](UPDATE-7.1.1-local.1.3.2.md).
+[English report](releases/UPDATE-7.1.1-local.1.3.2.md).
 
 ## 7.1.1-local.1.3.1 · 2026-10-24
 
@@ -97,7 +104,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Classic backgrounds, checkmarks and borders update together; returning to the previous classic theme works.
 - Image uploads respect the latest selection, and deleting an active custom theme restores Leaf.
 
-[English report](UPDATE-7.1.1-local.1.3.1.md).
+[English report](releases/UPDATE-7.1.1-local.1.3.1.md).
 
 ## 7.1.1-local.1.3.0 · 2026-10-24
 
@@ -105,7 +112,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Review record counts and sizes before export, with an explicit option to omit wallpapers.
 - Protect concurrent imports, resets and interrupted recovery; automatic safety backups remain complete.
 
-[English report](UPDATE-7.1.1-local.1.3.0.md).
+[English report](releases/UPDATE-7.1.1-local.1.3.0.md).
 
 ## 7.1.1-local.1.2.3 · 2026-10-22
 
@@ -114,7 +121,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Keep headings fixed and support small windows, zoom, mouse and keyboard interaction.
 - Consolidate the two historical patch.1 phases and documentation links.
 
-[English report](UPDATE-7.1.1-local.1.2.3.md).
+[English report](releases/UPDATE-7.1.1-local.1.2.3.md).
 
 ## 7.1.1-local.1.2.1 · 2026-10-22
 
@@ -122,7 +129,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Include maintenance and historical documents in portable archives and correct their links.
 - Keep existing tasks, focus records, settings and the default address.
 
-[English report](UPDATE-7.1.1-local.1.2.1.md).
+[English report](releases/UPDATE-7.1.1-local.1.2.1.md).
 
 ## 7.1.1-local.1.2.0 · 2026-10-21
 
@@ -130,14 +137,14 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Download ZIP or tar.gz packages and run with Node.js; application dependencies do not need installation.
 - Keep the same browser, hostname and port to retain existing local data.
 
-[English report](UPDATE-7.1.1-local.1.2.0.md).
+[English report](releases/UPDATE-7.1.1-local.1.2.0.md).
 
 ## 7.1.1-local.1.1.2 · 2026-10-07
 
 - Handle original focus records safely when rendering task progress.
 - Ignore repeated completion clicks while the first save is in progress.
 
-[English report](UPDATE-7.1.1-local.1.1.2.md).
+[English report](releases/UPDATE-7.1.1-local.1.1.2.md).
 
 ## 7.1.1-local.1.1.1 · 2026-10-04
 
@@ -147,7 +154,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Reset to the local user and default system lists, including recovery of missing navigation lists.
 - Keep a complete safety backup, five-second confirmation and rollback on failure.
 
-[English report](UPDATE-7.1.1-local.1.1.1.md).
+[English report](releases/UPDATE-7.1.1-local.1.1.1.md).
 
 ## 7.1.1-local.1.1.0 · 2026-10-03
 
@@ -157,7 +164,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Keep timer stop, task detachment, background recovery and rollback fixes.
 - Show both the official base version and the local version.
 
-[English report](UPDATE-7.1.1-local.1.1.0.md).
+[English report](releases/UPDATE-7.1.1-local.1.1.0.md).
 
 ## 7.1.1-patch.1 · 2026-10-03
 
@@ -166,7 +173,7 @@ Current application: **7.1.1-local.1.7.3**, author Lexible.
 - Fix stale elapsed time after stopping and incorrect task cancellation or switching.
 - Validate complete backups, recover interrupted imports, and clean up notifications, audio and subscriptions.
 
-[English report](UPDATE-7.1.1-patch.1.md).
+[English report](releases/UPDATE-7.1.1-patch.1.md).
 
 ## Repository provenance
 

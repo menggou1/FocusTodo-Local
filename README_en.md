@@ -27,8 +27,6 @@ Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). 
 
 Pages deploys automatically from `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
 
-Worktree version `1.6.0` restores the unchanged reference sidebar and adjusts only schedule typography, preserving native controls and rounded selection. Regression checks guard unchanged regions. Version 1.6.0 has a tag but no Release; 1.6.1 refines schedule validation and bottom notices. See the [1.6.0 report](docs/en/UPDATE-7.1.1-local.1.6.0.md) and [1.6.1 report](docs/en/UPDATE-7.1.1-local.1.6.1.md).
-
 Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
 
 All systems: `node scripts/start.cjs` or `npm start`. The default browser opens after the server starts. Use `node scripts/start.cjs --no-browser --port 5511` for headless use or a different port; with npm, use `npm start -- --no-browser --port 5511`.
@@ -62,7 +60,7 @@ http://127.0.0.1:5500/index.html
 - 🌐 Complete Simplified Chinese and English local UI, with system-selected existing partial translations and readable English fallbacks
 - 🔔 Explicit desktop notification permission and test controls
 
-Focus forest restores the original interface and sunlight collection locally, without a daily collection limit. Collection follows the original flight animation and respects reduced motion. Enable it under Settings → General. Bronze, silver and gold achievements award sunlight once, based on saved focus time, completed tasks and local dates on which focus records end. Groups and online rankings remain excluded. See the [1.7.3 report](docs/en/UPDATE-7.1.1-local.1.7.3.md).
+Focus forest restores the original interface and sunlight collection locally, without a daily collection limit. Collection follows the original flight animation and respects reduced motion. Enable it under Settings → General. Bronze, silver and gold achievements award sunlight once, based on saved focus time, completed tasks and local dates on which focus records end. Groups and online rankings remain excluded.
 
 ## Language and notifications
 
@@ -106,14 +104,13 @@ The application guide, maintenance, architecture, backlog and release documentat
 
 | Goal | Start here |
 |---|---|
+| Tasks, focus, calendar and backups | [User guide](docs/en/GUIDE.md) |
 | Changes, release evidence and historical reports | [Changelog](docs/en/CHANGELOG.md) |
 | Development, tests and version/release procedure | [Maintenance guide](docs/en/MAINTENANCE.md) |
 | Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.7.3`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
-
-Version 1.2.1 fixed a cross-tab initialization race exposed by intermittent macOS acceptance failures. The [English backlog](docs/en/BACKLOG.md) mirrors the canonical open-work list with the same item IDs.
+Current application: `7.1.1-local.1.7.4`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 ## License
 

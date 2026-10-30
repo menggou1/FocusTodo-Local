@@ -510,12 +510,20 @@ const server = http.createServer((request, response) => {
             assert((await page.locator('[class*="AboutSettings-root"]').innerText()).includes(releaseVersion));
             assert((await page.locator('#lexible-about-info-row').innerText()).includes(release.author + ' · ' + release.date));
             assert((await page.locator('#lexible-about-info-row').innerText()).includes('官方 ' + release.officialVersion + ' · 本地 ' + release.localVersion));
-            const repository = page.locator('#lexible-about-info-row a');
+            const repository = page.locator('#lexible-about-info-row .focus-repository-link');
+            const guide = page.locator('#lexible-about-info-row .focus-guide-link');
             assert.equal(await repository.getAttribute('href'), 'https://github.com/menggou1/FocusTodo-Local');
             assert.equal(await repository.getAttribute('rel'), 'noopener noreferrer');
             assert.equal(await repository.getAttribute('title'), 'https://github.com/menggou1/FocusTodo-Local');
             assert.equal(await repository.locator('img').getAttribute('src'), 'img/github.svg');
             assert.equal(await repository.locator('img').getAttribute('alt'), 'GitHub');
+            assert.equal(await guide.getAttribute('href'), 'https://github.com/menggou1/FocusTodo-Local/blob/main/docs/GUIDE.md');
+            assert.equal(await guide.getAttribute('target'), '_blank');
+            assert.equal(await guide.getAttribute('rel'), 'noopener noreferrer');
+            assert.equal(await guide.innerText(), '使用教程');
+            await context.route('https://github.com/menggou1/FocusTodo-Local/blob/main/docs/GUIDE.md', route => route.fulfill({ contentType: 'text/html', body: '<title>Guide link acceptance</title>' }));
+            const guideOpened = page.waitForEvent('popup'); await guide.click(); const guidePopup = await guideOpened;
+            await guidePopup.waitForLoadState(); assert.equal(guidePopup.url(), 'https://github.com/menggou1/FocusTodo-Local/blob/main/docs/GUIDE.md'); await guidePopup.close();
             assert.doesNotMatch(await page.locator('[class*="AboutSettings-root"]').innerText(), /给予好评|立即评分|更新内容/);
             assert.equal(await page.locator('.lexible-release-notes').count(), 0);
             await page.screenshot({ path: path.join(evidence, 'about.png'), fullPage: true });
@@ -523,6 +531,17 @@ const server = http.createServer((request, response) => {
             const opened = page.waitForEvent('popup'); await repository.click(); const popup = await opened;
             await popup.waitForLoadState(); assert.equal(popup.url(), 'https://github.com/menggou1/FocusTodo-Local'); await popup.close();
         }));
+        await check('About opens the English guide for English users', () => app(async (page, context) => {
+            await page.mouse.click(1255, 25);
+            await page.getByText('About', { exact: true }).click();
+            const guide = page.locator('#lexible-about-info-row .focus-guide-link');
+            const url = 'https://github.com/menggou1/FocusTodo-Local/blob/main/docs/en/GUIDE.md';
+            assert.equal(await guide.innerText(), 'User guide');
+            assert.equal(await guide.getAttribute('href'), url);
+            await context.route(url, route => route.fulfill({ contentType: 'text/html', body: '<title>User guide</title>' }));
+            const opened = page.waitForEvent('popup'); await guide.click(); const popup = await opened;
+            await popup.waitForLoadState(); assert.equal(popup.url(), url); await popup.close();
+        }, null, url, 'en-US'));
         await check('notification bell contains update details and preserves task reminders', () => app(async page => {
             const input = page.getByPlaceholder(/添加一个任务/); await input.fill('原任务提醒保留'); await input.press('Enter');
             await page.waitForFunction(async () => (await window.FocusLocalData.snapshot()).indexedDB.Task.length === 1);

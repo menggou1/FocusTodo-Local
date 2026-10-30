@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.3`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.4`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -100,6 +100,10 @@ Add the newest Chinese/English user-facing update and report to `release.json`, 
 Work branches stay local. Merge the verified work into the clean primary main worktree, then push main; do not push a work branch merely to trigger CI. Fetch and resolve divergence without force-pushing. Create a new annotated tag from the merged main commit; do not overwrite an old tag.
 
 The workflow tests Windows/macOS/Linux × Node 22/24. Node 24 also runs browser and extracted-package checks. A version tag publishes ZIP, tar.gz and SHA256SUMS only after all tests, version matching and main ancestry pass. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
+
+## Documentation layout
+
+The user guides are `docs/GUIDE.md` and `docs/en/GUIDE.md`; shared screenshots live in `docs/guide-images/` and ship in portable archives. Chinese and English release reports are in `docs/releases/` and `docs/en/releases/`. Old report paths remain as links to their archived copies. When moving documents, update relative links, release metadata, generators and package contents, and check paths and anchors. Existing English reports are preserved by the generator.
 
 ## GitHub Pages
 

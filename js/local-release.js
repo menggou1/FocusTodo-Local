@@ -3,11 +3,26 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.7.3",
+    "localVersion": "1.7.4",
     "author": "Lexible",
     "date": "2026-10-30",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.7.4",
+            "date": "2026-10-30",
+            "title": "使用教程与文档整理",
+            "items": [
+                "关于页新增使用教程入口，介绍任务、专注、日程和数据备份。",
+                "整理中英文文档和历史报告目录，保留旧报告链接。"
+            ],
+            "titleEn": "User guide and documentation organization",
+            "itemsEn": [
+                "Open the user guide from About for tasks, focus, schedules and backups.",
+                "Organize Chinese and English documentation and release reports while preserving old report links."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.7.4.md"
+        },
         {
             "version": "7.1.1-local.1.7.3",
             "date": "2026-10-30",
@@ -31,7 +46,7 @@
                 "Show task reminders before release history and clear read or completed reminder badges while retaining release notifications.",
                 "Request optional browser storage persistence in the background without blocking startup."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.7.3.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.7.3.md"
         },
         {
             "version": "7.1.1-local.1.6.1",
@@ -46,7 +61,7 @@
                 "Show an inline message when a schedule task has no name.",
                 "Adapt bottom notices to light and dark themes and fade them out automatically."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.6.1.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.6.1.md"
         },
         {
             "version": "7.1.1-local.1.6.0",
@@ -65,7 +80,7 @@
                 "Align schedule typography with the unchanged sidebar.",
                 "Display short focus in seconds and add the due-next-week shortcut."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.6.0.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.6.0.md"
         },
         {
             "version": "7.1.1-local.1.5.4",
@@ -84,7 +99,7 @@
                 "Restore the default system list order while preserving hidden states and custom-list data.",
                 "Remove the unused NAME browser cookie and read usernames from local storage."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.5.4.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.5.4.md"
         },
         {
             "version": "7.1.1-local.1.5.2",
@@ -101,7 +116,7 @@
                 "Improve background-audio handoff between windows; explain the fallback without Web Locks while retaining previews and completion sounds.",
                 "Save local names and avatars through the data service and report failed writes."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.5.2.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.5.2.md"
         },
         {
             "version": "7.1.1-local.1.5.0",
@@ -120,7 +135,7 @@
                 "Fix the extra scrollbar in list management.",
                 "Improve local network compatibility for reused same-origin requests."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.5.0.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.5.0.md"
         },
         {
             "version": "7.1.1-local.1.4.3",
@@ -139,7 +154,7 @@
                 "Keep progressive startup and real progress, show the workspace when ready, and retry failed loads.",
                 "Improve cross-tab verification and provide portable packages with SHA256 verification."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.4.3.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.4.3.md"
         },
         {
             "version": "7.1.1-local.1.4.1",
@@ -156,7 +171,7 @@
                 "Reuse Chinese and English catalogs, load other locales asynchronously, and retry long or failed loads.",
                 "Use startup feedback with dark appearance, narrow screens, reduced motion and a no-JavaScript explanation."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.4.1.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.4.1.md"
         },
         {
             "version": "7.1.1-local.1.4.0",
@@ -173,7 +188,7 @@
                 "Use English local dialogs, errors, release notes and documentation, with readable fallbacks for missing translations.",
                 "Enable or test desktop notifications explicitly, and clarify the offline scope and group/forest design."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.4.0.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.4.0.md"
         },
         {
             "version": "7.1.1-local.1.3.2",
@@ -184,7 +199,7 @@
                 "主题设置增加失败回滚和启动恢复，避免图片、激活状态与主题名称写入不一致。",
                 "统一维护文档中的未完成工作与验收，清理已完成旧项和重复计划。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.3.2.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.3.2.md",
             "titleEn": "Bing wallpaper cache and theme recovery",
             "itemsEn": [
                 "Switch to a cached Bing wallpaper immediately and refresh expired images in the background. Closing settings does not cancel the selection.",
@@ -201,7 +216,7 @@
                 "经典主题切换立即同步背景、红色对钩和粉色边框，修复无法切回刚才经典主题的问题。",
                 "本地上传遵循最新选择；删除正在使用的本地主题后正确恢复默认主题。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.3.1.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.3.1.md",
             "titleEn": "Theme selection and daily wallpaper fixes",
             "itemsEn": [
                 "Bing downloads and automatic refreshes no longer override a later theme choice.",
@@ -218,7 +233,7 @@
                 "导出前查看各类数据体积和记录数，可选择是否包含壁纸；导入前明确备份范围。",
                 "加强多标签页并发导入、删除和中断恢复保护，自动安全备份始终保留完整内容。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.3.0.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.3.0.md",
             "titleEn": "Compressed backups and multi-tab recovery",
             "itemsEn": [
                 "Create lossless Gzip backups, retain plain JSON exports and import older JSON backups.",
@@ -236,7 +251,7 @@
                 "保留固定标题，适配较小窗口及页面缩放，通知详情继续支持鼠标和键盘打开。",
                 "合并早期 patch.1 的两阶段报告，统一历史文档入口。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.2.3.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.2.3.md",
             "titleEn": "Notification panel layout fixes",
             "itemsEn": [
                 "Updates and reminders share a scroll area without a fixed empty spacer.",
@@ -254,7 +269,7 @@
                 "便携包补齐维护与历史文档，统一文档入口并修正内部链接。",
                 "现有任务、专注记录和设置继续保留，默认访问地址不变。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.2.1.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.2.1.md",
             "titleEn": "Multi-tab initialization fix",
             "itemsEn": [
                 "Prevent lost focus-record refresh events while another tab is still initializing.",
@@ -271,7 +286,7 @@
                 "提供 ZIP 和 tar.gz 便携包，解压并安装 Node.js 后即可运行，无需安装应用依赖。",
                 "默认访问地址保持不变；升级时使用原有浏览器、主机名和端口即可继续使用本地数据。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.2.0.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.2.0.md",
             "titleEn": "Cross-platform launcher and portable packages",
             "itemsEn": [
                 "Use a common launcher on Windows, macOS and Linux, with browser opening, custom ports and headless mode.",
@@ -287,7 +302,7 @@
                 "修复完成任务或刷新番茄记录时可能出现的白屏与数字格式化报错。",
                 "快速重复点击完成按钮只处理一次，避免重复完成任务。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.1.2.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.1.2.md",
             "titleEn": "Task completion blank-page fix",
             "itemsEn": [
                 "Handle original focus records safely when rendering task progress.",
@@ -305,7 +320,7 @@
                 "删除数据后恢复本地用户及默认系统清单，修复白屏和旧版空清单。",
                 "保留删除前完整备份、等待 5 秒确认和失败回滚。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.1.1.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.1.1.md",
             "titleEn": "Dark dialogs, focus records and reset fixes",
             "itemsEn": [
                 "Use the selected light or dark appearance for local notifications and dialogs.",
@@ -326,7 +341,7 @@
                 "保留已完成的停止、取消任务、后台恢复及数据回滚修复。",
                 "版本保留官方 7.1.1，同时标明本地修补版本，方便识别后续更新。"
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.1.0.md",
+            "report": "docs/releases/UPDATE-7.1.1-local.1.1.0.md",
             "titleEn": "Local notifications and data management",
             "itemsEn": [
                 "Read release details from the notification bell.",
@@ -346,7 +361,7 @@
                 "修复停止后旧时长恢复、叉号无法取消任务及任务切换问题。",
                 "完整备份、导入校验与中断恢复，补齐通知、音频和订阅清理。"
             ],
-            "report": "docs/UPDATE-7.1.1-patch.1.md",
+            "report": "docs/releases/UPDATE-7.1.1-patch.1.md",
             "titleEn": "Timer recovery and durable local data",
             "itemsEn": [
                 "Recover complete historical focus blocks and retain the remaining partial work after confirmation.",
@@ -356,7 +371,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.7.3",
+    "version": "7.1.1-local.1.7.4",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

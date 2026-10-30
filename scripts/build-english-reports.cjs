@@ -22,13 +22,13 @@ const notes={
  '1.1.0':'Release metadata is generated from release.json. The bell renders updates beside existing reminders and persists read state only after opening the newest details. About shows official/local versions, author and GitHub. Standalone dialogs trap focus, close on Escape and suppress underlying shortcuts. Data deletion uses the local service directly, with no password dialog and no premature success. The initial report was later organized and committed without a new release tag.',
  'patch.1':'The first two local patch phases established pure timer transitions, durable sessions and recoverable imports. Complete focus blocks retain historical boundaries; partial work is preserved and interrupted time requires confirmation. Records and cursor commit together and retries do not duplicate records. Stop/detach/mode changes cannot resurrect stale elapsed time. Full backups include business tables, settings and timer snapshots; validation rejects settings-only replacement. Imported running snapshots become recovery, and settings rollback is journaled. Cross-tab refresh, event cleanup, audio resumption and an independent audio Web Lock were added. The loopback server gained correct single audio ranges and failure reporting. Later releases supersede the original temporary status and old unfinished lists.'
 };
-fs.mkdirSync('docs/en',{recursive:true});
+fs.mkdirSync('docs/en/releases',{recursive:true});
 let changelog='# Changelog\n\n[Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)\n\nCurrent application: **'+config.officialVersion+'-local.'+config.localVersion+'**, author '+config.author+'.\n';
 for(const u of config.updates){
  const local=u.version.replace('7.1.1-local.','').replace('7.1.1-patch.1','patch.1');
  const name=path.basename(u.report), original=fs.existsSync(u.report)?fs.readFileSync(u.report,'utf8'):'';
  const links=[...new Set([...original.matchAll(/\]\((https?:[^)\s]+)\)/g)].map(x=>x[1]))];
- let body='# '+u.version+' — '+u.titleEn+'\n\n[Changelog](CHANGELOG.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)\n\nDate: '+u.date+'. Author: '+config.author+'.\n\n## Delivered behavior\n\n'+u.itemsEn.map(s=>'- '+s).join('\n')+'\n\n## Technical and verification account\n\n'+(notes[local]||'See the shipped behavior above and the linked public evidence.')+'\n';
+ let body='# '+u.version+' — '+u.titleEn+'\n\n[Changelog](../CHANGELOG.md) · [Maintenance](../MAINTENANCE.md) · [Backlog](../BACKLOG.md)\n\nDate: '+u.date+'. Author: '+config.author+'.\n\n## Delivered behavior\n\n'+u.itemsEn.map(s=>'- '+s).join('\n')+'\n\n## Technical and verification account\n\n'+(notes[local]||'See the shipped behavior above and the linked public evidence.')+'\n';
  if(local==='1.4.1'){
  const perf=JSON.parse(fs.readFileSync('docs/acceptance/startup-performance.json'));
  body+='\n## Local cold-start comparison\n\n| Revision | First contentful paint (ms) | Workspace DOM/CSS ready (ms) |\n|---|---:|---:|\n'+perf.results.map(r=>'| '+r.mode+' | '+r.firstContentfulPaintMs+' | '+r.workspaceVisibleMs+' |').join('\n')+'\n\nGenerated empty browser data and the project subpath were used. These are local synthetic-network observations, not a live Pages speed guarantee.\n';
@@ -39,9 +39,9 @@ for(const u of config.updates){
  for(const r of perf.results)body+='| '+r.profile+' | '+r.sourceBytes+' | '+r.compressedBytes+' | '+(r.stages.exportSnapshotMs??'not seeded')+' | '+r.stages.encodeGzipMs+' | '+r.stages.decodeGzipMs+' | '+r.stages.validateBusinessMs+' | '+r.stages.restoreMs+' | '+(r.restored?'restored, fidelity checked':'quota refusal, rollback checked')+' |\n';
  body+='\nThe 50 MB task/history sample restored in about 14.7 seconds, with a 3.24-second observed main-thread gap and about 611 MB sampled JS heap. The 50 MB image failure sample observed about 1,040 MB JS heap. These exclude native/Blob/process memory and can miss blocked allocation peaks. Image-heavy 10/50 MB cases could not be seeded into localStorage; their encoding measurements came from generated objects, not successful database exports.\n';
  }
- body+='\n## Evidence\n\n'+(links.length?links.map((url,i)=>'- [Public evidence '+(i+1)+']('+url+')').join('\n')+'\n':'The release behavior and commands are recorded in the repository history.\n')+'\n[Original Chinese report](../'+name+'). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.\n';
- if(local===config.localVersion||!fs.existsSync('docs/en/'+name))fs.writeFileSync('docs/en/'+name,body);
- changelog+='\n## '+u.version+' · '+u.date+'\n\n'+u.itemsEn.map(s=>'- '+s).join('\n')+'\n\n[English report]('+name+').\n';
+ body+='\n## Evidence\n\n'+(links.length?links.map((url,i)=>'- [Public evidence '+(i+1)+']('+url+')').join('\n')+'\n':'The release behavior and commands are recorded in the repository history.\n')+'\n[Original Chinese report](../../releases/'+name+'). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.\n';
+ if(!fs.existsSync('docs/en/releases/'+name))fs.writeFileSync('docs/en/releases/'+name,body);
+ changelog+='\n## '+u.version+' · '+u.date+'\n\n'+u.itemsEn.map(s=>'- '+s).join('\n')+'\n\n[English report](releases/'+name+').\n';
 }
 changelog+='\n## Repository provenance\n\nThe repository is maintained independently. The original upstream 7.1.1 history remains on upstream/7.1.1; main keeps the complete project and the official Pages workflow publishes filtered static assets. Read Maintenance for branch, tag and publishing rules.\n';
 fs.writeFileSync('docs/en/CHANGELOG.md',changelog);

@@ -6,7 +6,8 @@ All current user and maintenance guidance is available here. Historical English 
 
 | Topic | Document |
 |---|---|
-| Install, run, choose a language, back up data | [Application guide](../../README_en.md) |
+| Install and run | [Application guide](../../README_en.md) |
+| Tasks, timer, calendar and backups | [User guide](GUIDE.md) |
 | Develop, diagnose and publish | [Maintenance](MAINTENANCE.md) |
 | Modules, persistence and integration | [Architecture](ARCHITECTURE.md) |
 | Release history | [Changelog](CHANGELOG.md) |

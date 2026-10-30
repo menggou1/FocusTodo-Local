@@ -137,7 +137,9 @@
             h('td', { className: 'focus-about-value' }, h('div', null, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('官方 '):'官方 ') + release.officialVersion + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' · 本地 '):' · 本地 ') + release.localVersion),
                 h('div', null, release.author + ' · ' + release.date),
                 h('a', { className: 'focus-repository-link', href: release.repository, title: release.repository, 'aria-label': (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('GitHub 仓库：'):'GitHub 仓库：') + new URL(release.repository).pathname.slice(1), target: '_blank', rel: 'noopener noreferrer', onClick: event => event.stopPropagation() },
-                    h('img', { src: 'img/github.svg', alt: 'GitHub', width: 24, height: 24 }))));
+                    h('img', { src: 'img/github.svg', alt: 'GitHub', width: 24, height: 24 })),
+                h('a', { className: 'focus-guide-link', href: release.repository + '/blob/main/docs/' + (globalThis.FocusI18n && !globalThis.FocusI18n.locale.startsWith('zh') ? 'en/' : '') + 'GUIDE.md', target: '_blank', rel: 'noopener noreferrer', onClick: event => event.stopPropagation() },
+                    (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('使用教程'):'使用教程'))));
     }
 
     function confirmReset() {

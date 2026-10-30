@@ -269,5 +269,6 @@
   "在 30 个自然日留下专注记录": "Record focus on 30 calendar days",
   "任务到时提醒": "Task reminders",
   "提醒已读状态保存失败：": "Could not save read reminders: ",
-  "提醒读取失败：": "Could not load reminders: "
+  "提醒读取失败：": "Could not load reminders: ",
+  "使用教程": "User guide"
 }

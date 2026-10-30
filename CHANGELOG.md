@@ -2,9 +2,16 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前版本 **7.1.1-local.1.7.3** · 作者 **Lexible**。
+当前版本 **7.1.1-local.1.7.4** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
+
+## 7.1.1-local.1.7.4 · 2026-10-30
+
+- 关于页新增使用教程入口，介绍任务、专注、日程和备份。
+- 整理中英文文档和历史报告目录，保留旧报告链接。
+
+[更新报告](docs/releases/UPDATE-7.1.1-local.1.7.4.md)。
 
 ## 7.1.1-local.1.7.3 · 2026-10-30
 
@@ -19,14 +26,14 @@
 - 可选存储持久化权限在后台请求，不阻塞启动；保留清单启动失败诊断。
 - 修正成就奖励验收的自动同步竞争；发布要求 main、标签测试和 Pages 全部成功。
 
-[更新报告](docs/UPDATE-7.1.1-local.1.7.3.md)。
+[更新报告](docs/releases/UPDATE-7.1.1-local.1.7.3.md)。
 
 ## 7.1.1-local.1.6.1 · 2026-10-29
 
 - 优化日程空任务名称提示和底部提示样式，适配浅色与深色主题。
 - 底部提示自动渐隐。
 
-[更新报告](docs/UPDATE-7.1.1-local.1.6.1.md)。
+[更新报告](docs/releases/UPDATE-7.1.1-local.1.6.1.md)。
 
 ## 7.1.1-local.1.6.0 · 2026-10-29
 
@@ -35,7 +42,7 @@
 - 日程文字以原侧边栏为基准调整，其他区域保持原样。
 - 短专注记录显示秒数，新增下周到期快捷操作。
 
-[最终变化与验证报告](docs/UPDATE-7.1.1-local.1.6.0.md)。1.6.0 补充版本 Tag，不创建 Release。
+[最终变化与验证报告](docs/releases/UPDATE-7.1.1-local.1.6.0.md)。1.6.0 补充版本 Tag，不创建 Release。
 
 ## 7.1.1-local.1.5.4 · 2026-10-28
 
@@ -44,7 +51,7 @@
 - 新增恢复系统清单默认排序，保留隐藏状态及其他清单数据。
 - 清理不再使用的 NAME Cookie，保留本地用户名并停用旧 Cookie 写入。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.4) · [报告](docs/UPDATE-7.1.1-local.1.5.4.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.4) · [报告](docs/releases/UPDATE-7.1.1-local.1.5.4.md)。
 
 ## 7.1.1-local.1.5.2 · 2026-10-28
 
@@ -54,7 +61,7 @@
 - 后续提交统一使用 Conventional Commits 格式。
 - 保留未完成发行的 1.5.1 标签，修复 CI 原生拖动验收挂起后以 1.5.2 正式发行。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.2) · [中文报告](docs/UPDATE-7.1.1-local.1.5.2.md) · [English](docs/en/UPDATE-7.1.1-local.1.5.2.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.2) · [中文报告](docs/releases/UPDATE-7.1.1-local.1.5.2.md) · [English](docs/en/releases/UPDATE-7.1.1-local.1.5.2.md)。
 
 ## 7.1.1-local.1.5.0 · 2026-10-27
 
@@ -63,7 +70,7 @@
 - 设置中的系统清单和自定义清单分别支持拖动与键盘排序。
 - 修复清单管理双滚动条，改善复用请求的同源兼容。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.0) · [中文报告](docs/UPDATE-7.1.1-local.1.5.0.md) · [English](docs/en/UPDATE-7.1.1-local.1.5.0.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.5.0) · [中文报告](docs/releases/UPDATE-7.1.1-local.1.5.0.md) · [English](docs/en/releases/UPDATE-7.1.1-local.1.5.0.md)。
 
 ## 7.1.1-local.1.4.3 · 2026-10-26
 
@@ -71,14 +78,14 @@
 - 修正跨标签验收的回拨时间注入竞态，覆盖实际广播、初始化和通知。
 - 1.4.2 为失败版本，原 Tag 保留，其内容与修复统一记录在本版。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.3) · [中文报告](docs/UPDATE-7.1.1-local.1.4.3.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.3.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.3) · [中文报告](docs/releases/UPDATE-7.1.1-local.1.4.3.md) · [English](docs/en/releases/UPDATE-7.1.1-local.1.4.3.md)。
 
 ## 7.1.1-local.1.4.1 · 2026-10-26
 
 - 首次加载先显示骨架与真实进度，资源就绪后显示应用。
 - 语言读取异步化，增加长等待、失败重试与外观适配。
 
-[统一版本记录](docs/UPDATE-7.1.1-local.1.4.1.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.1.md)。
+[统一版本记录](docs/releases/UPDATE-7.1.1-local.1.4.1.md) · [English](docs/en/releases/UPDATE-7.1.1-local.1.4.1.md)。
 
 ## 7.1.1-local.1.4.0 · 2026-10-25
 
@@ -86,7 +93,7 @@
 - 完成本地界面、错误、历史更新与文档英文适配；其他语言按系统选择，缺失文案回退可读语言而非键名。
 - 明确离线版小组/排名/旧森林排除范围，个人成长方案统一收录在待办文档。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.0) · [中文报告](docs/UPDATE-7.1.1-local.1.4.0.md) · [English](docs/en/UPDATE-7.1.1-local.1.4.0.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.4.0) · [中文报告](docs/releases/UPDATE-7.1.1-local.1.4.0.md) · [English](docs/en/releases/UPDATE-7.1.1-local.1.4.0.md)。
 
 ## 7.1.1-local.1.3.2 · 2026-10-25
 
@@ -94,7 +101,7 @@
 - 主题设置新增单次操作写入回滚、启动恢复及备份隔离。
 - 将各文档未完成工程、验收与候选计划归并至唯一 [统一清单](docs/BACKLOG.md)，清除已完成旧待办。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.2) · [详细报告](docs/UPDATE-7.1.1-local.1.3.2.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.2) · [详细报告](docs/releases/UPDATE-7.1.1-local.1.3.2.md)。
 
 ## 7.1.1-local.1.3.1 · 2026-10-24
 
@@ -102,7 +109,7 @@
 - 经典背景、红勾与粉框立即同步，支持经典/本地主题反复往返；删除当前本地主题后正确恢复 Leaf。
 - 删除 1.3.0 计划文档，将未完成工程统一移至 [BACKLOG.md](docs/BACKLOG.md)；保留 Actions，继续排除网站与便携包中的开发目录。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.1) · [详细修复报告](docs/UPDATE-7.1.1-local.1.3.1.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.1) · [详细修复报告](docs/releases/UPDATE-7.1.1-local.1.3.1.md)。
 
 ## 7.1.1-local.1.3.0 · 2026-10-24
 
@@ -111,7 +118,7 @@
 - 加强无 Web Locks 的多页维护归属、并发导入/删除与中断恢复，自动安全备份始终完整。
 - 数据库仍为 v3，主题图片存储方式未改变。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.0) · [实现、容量测量与发布验收](docs/UPDATE-7.1.1-local.1.3.0.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.3.0) · [实现、容量测量与发布验收](docs/releases/UPDATE-7.1.1-local.1.3.0.md)。
 
 ## 7.1.1-local.1.2.3 · 2026-10-22
 
@@ -121,7 +128,7 @@
 - 早期 patch.1 的第一、第二阶段合并为同一版本报告，保留阶段内容并统一元数据和链接。
 - 同步 Windows、macOS、Linux 便携包与 GitHub Pages。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.3) · [完整修复、验收与发布报告](docs/UPDATE-7.1.1-local.1.2.3.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.3) · [完整修复、验收与发布报告](docs/releases/UPDATE-7.1.1-local.1.2.3.md)。
 
 ## 7.1.1-local.1.2.1 · 2026-10-22
 
@@ -130,7 +137,7 @@
 - 按授权使用 macOS 临时测试分支，完成后删除；发布恢复三平台 Node.js 22/24 门禁。
 - 将已整理的文档和补齐历史报告、校验文档链接的便携包随新版本交付。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.1) · [完整修复、验收与发布报告](docs/UPDATE-7.1.1-local.1.2.1.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.1) · [完整修复、验收与发布报告](docs/releases/UPDATE-7.1.1-local.1.2.1.md)。
 
 ## 2026-10-22 仓库整理
 
@@ -151,7 +158,7 @@
 - 推送版本号 Tag 后，全部检查通过才发布 ZIP、tar.gz 及 SHA256；发布包运行无需 npm/Git。
 - 元信息生成支持 `origin`，同步锁文件版本；Tag 使用 `1.2.0`。
 
-[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.0) · [完整交付与验收](docs/UPDATE-7.1.1-local.1.2.0.md)。
+[下载 Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.2.0) · [完整交付与验收](docs/releases/UPDATE-7.1.1-local.1.2.0.md)。
 
 ## 7.1.1-local.1.1.2
 
@@ -159,7 +166,7 @@
 - 完成任务处理期间拦截快速重复点击，列表点击锁等待保存完成再释放。
 - 新增原始记录渲染及列表、计时器各连续点击十次的浏览器回归。
 
-详细报告：[UPDATE-7.1.1-local.1.1.2.md](docs/UPDATE-7.1.1-local.1.1.2.md)。
+详细报告：[UPDATE-7.1.1-local.1.1.2.md](docs/releases/UPDATE-7.1.1-local.1.1.2.md)。
 
 ## 7.1.1-local.1.1.1
 
@@ -169,7 +176,7 @@
 - 删除数据恢复本地用户和 15 个默认系统清单，修复白屏；启动修复旧版缺失清单。
 - 保留删除前完整备份、5 秒确认、事务回滚及历史数据兼容。
 
-详细报告：[UPDATE-7.1.1-local.1.1.1.md](docs/UPDATE-7.1.1-local.1.1.1.md)。
+详细报告：[UPDATE-7.1.1-local.1.1.1.md](docs/releases/UPDATE-7.1.1-local.1.1.1.md)。
 
 ## 7.1.1-local.1.1.0
 
@@ -179,7 +186,7 @@
 - 统一版本配置和部分维护代码，官方 7.1.1 固定，后续本地版本按三段数字递增。
 - 此前计时停止/取消、后台恢复与数据回滚修复继续通过；总计 **68 项自动验收通过**。
 
-历史报告：[UPDATE-7.1.1-local.1.1.0.md](docs/UPDATE-7.1.1-local.1.1.0.md)。
+历史报告：[UPDATE-7.1.1-local.1.1.0.md](docs/releases/UPDATE-7.1.1-local.1.1.0.md)。
 
 同版本交付整理：补充 README、架构与维护指南；用户更新窗口移除 Markdown 报告入口，报告留在仓库文档。
 
@@ -211,4 +218,4 @@
 
 本轮没有修改版本号或关于页更新内容。
 
-详细内容：[7.1.1-patch.1 更新与验收报告](docs/UPDATE-7.1.1-patch.1.md)（含第一、第二阶段）。
+详细内容：[7.1.1-patch.1 更新与验收报告](docs/releases/UPDATE-7.1.1-patch.1.md)（含第一、第二阶段）。

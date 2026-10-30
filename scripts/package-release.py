@@ -34,6 +34,7 @@ def build(output, tag=None):
     files.extend(ROOT / update['report'] for update in config['updates'])
     # Include linked historical Markdown too; omit acceptance data/screenshots.
     files.extend((ROOT / 'docs').rglob('*.md'))
+    files.extend(p for p in (ROOT / 'docs' / 'guide-images').rglob('*') if p.is_file())
     files.append(ROOT / 'ARCHITECTURE.md')
     files = sorted(set(files))
     output.mkdir(parents=True, exist_ok=True)
