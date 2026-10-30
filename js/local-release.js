@@ -3,27 +3,29 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.7.0",
+    "localVersion": "1.7.1",
     "author": "Lexible",
-    "date": "2026-10-29",
+    "date": "2026-10-30",
     "repositoryRemote": "Focustodo-local",
     "updates": [
         {
-            "version": "7.1.1-local.1.7.0",
-            "date": "2026-10-29",
+            "version": "7.1.1-local.1.7.1",
+            "date": "2026-10-30",
             "title": "本地专注森林与成就",
             "items": [
                 "恢复原版专注森林、阳光收取和详细攻略，森林数据保存在本机。",
                 "新增铜、银、金三档本地成就，达成后直接获得阳光奖励。",
-                "取消每日阳光收取上限，修复连续收取与位置刷新。"
+                "取消每日阳光收取上限，修复连续收取与位置刷新。",
+                "修复网页标签图标，并突出圆形成就入口。"
             ],
             "titleEn": "Local Focus forest and achievements",
             "itemsEn": [
                 "Restore the original Focus forest, sunlight collection and detailed guide, with local storage.",
                 "Earn bronze, silver and gold local achievements with immediate sunlight rewards.",
-                "Remove the daily collection limit and fix sunlight collection and position refresh."
+                "Remove the daily collection limit and fix sunlight collection and position refresh.",
+                "Fix the browser tab icon and make the achievements entry a prominent circular button."
             ],
-            "report": "docs/UPDATE-7.1.1-local.1.7.0.md"
+            "report": "docs/UPDATE-7.1.1-local.1.7.1.md"
         },
         {
             "version": "7.1.1-local.1.6.1",
@@ -348,7 +350,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.7.0",
+    "version": "7.1.1-local.1.7.1",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

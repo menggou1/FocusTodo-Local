@@ -669,3 +669,6 @@ body.focus-schedule-quick-open #project-selection-popover { z-index:50010; }
 .focus-achievements .focus-achievement-text small { color: var(--text-desc); font-size: 11px; line-height: 1.35; }
 .focus-achievements .focus-achievement-trophy.is-locked { filter: grayscale(1); opacity: .3; }
 .focus-achievements .RankingList-pomodoroTime-TN_nv { font-size: 14px; white-space: nowrap; }
+
+/* Match the existing round forest guide entry. */
+.focus-achievement-button { width: 36px; height: 36px; margin: 6px; border-radius: 50%; background: #54b4f3; border: 3px solid #287eb9; padding: 5px; }

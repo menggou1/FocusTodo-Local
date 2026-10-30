@@ -86,8 +86,9 @@ if (!forestMountText.includes('localAchievementRefresh')) replace(forestMount.va
 const forestRender=method(1181,'render');let buttonGroup;
 walk(forestRender.value,node=>{if(node.type==='CallExpression'&&node.arguments[0]?.value==='div'&&node.arguments[1]?.properties?.some(p=>p.key?.name==='className'&&source.slice(p.value.start,p.value.end)==='g.default.buttonGroup'))buttonGroup=node});
 if(!buttonGroup)throw Error('Forest button boundary changed');
-if(buttonGroup.arguments[2]?.type==='Literal'&&buttonGroup.arguments[2].value===null)replace(buttonGroup.arguments[2],'m.default.createElement("img",{draggable:"false",src:"img/forest-badge.png",className:g.default.imageButton,title:window.FocusI18n.text("成就"),alt:window.FocusI18n.text("成就"),onClick:function(){return e.props.openDrawer("ranking")}})');
-else if(!source.slice(buttonGroup.start,buttonGroup.end).includes('img/forest-badge.png'))throw Error('Forest achievement button changed');
+if(buttonGroup.arguments[2]?.type==='Literal'&&buttonGroup.arguments[2].value===null)replace(buttonGroup.arguments[2],'m.default.createElement("img",{draggable:"false",src:"img/forest-badge.png",className:g.default.imageButton+" focus-achievement-button",title:window.FocusI18n.text("成就"),alt:window.FocusI18n.text("成就"),onClick:function(){return e.props.openDrawer("ranking")}})');
+else if(source.slice(buttonGroup.arguments[2].start,buttonGroup.arguments[2].end).includes('img/forest-badge.png')){const old=source.slice(buttonGroup.arguments[2].start,buttonGroup.arguments[2].end);if(!old.includes('focus-achievement-button'))replace(buttonGroup.arguments[2],old.replace('className:g.default.imageButton,','className:g.default.imageButton+" focus-achievement-button",'));}
+else throw Error('Forest achievement button changed');
 method(1190,'renderContent','function(){var e=this.props.type;return"guide"===e?l.default.createElement(c.default,null):"ranking"===e?window.FocusAchievements.render(l.default,n(1463)):null}');
 // Task writes notify only after the existing IndexedDB transaction commits.
 const taskUpdate=method(23,'updateTask'),taskUpdateText=source.slice(taskUpdate.value.start,taskUpdate.value.end);

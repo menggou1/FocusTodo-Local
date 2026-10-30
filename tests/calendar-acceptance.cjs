@@ -120,7 +120,7 @@ fs.mkdirSync(evidence, { recursive: true });
             assert.equal(await page.evaluate(value => new Date(value).getHours(), task.deadline), 23);
             await page.evaluate(data => FocusLocalData.replace(data, { backup: false }), data);
             await page.reload(); await ready(page); if (!(await blocks(page).count())) await calendar(page);
-            assert.equal(await blocks(page).count(), 3);
+            await page.waitForFunction(() => document.querySelectorAll('.focus-calendar-event:not(.focus-calendar-preview)').length === 3);
             assert.equal((await snapshot(page)).indexedDB.Task.filter(row => row.id === task.id).length, 1);
             await page.screenshot({ path: path.join(evidence, 'calendar-1.7.1.png') });
         });
