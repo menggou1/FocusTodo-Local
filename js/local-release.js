@@ -3,11 +3,28 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.7.4",
+    "localVersion": "1.7.5",
     "author": "Lexible",
     "date": "2026-10-30",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.7.5",
+            "date": "2026-10-30",
+            "title": "教程、文档整理与验收诊断",
+            "items": [
+                "关于页新增中英文使用教程，介绍任务、专注、日程与备份。",
+                "整理版本报告和文档链接，保留旧报告入口。",
+                "改进启动验收失败时的页面和请求诊断。"
+            ],
+            "titleEn": "User guide, documentation and acceptance diagnostics",
+            "itemsEn": [
+                "Open the Chinese or English guide from About for tasks, focus, schedules and backups.",
+                "Organize release reports and document links while keeping old report entry points.",
+                "Capture page and request diagnostics when startup acceptance fails."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.7.5.md"
+        },
         {
             "version": "7.1.1-local.1.7.4",
             "date": "2026-10-30",
@@ -371,7 +388,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.7.4",
+    "version": "7.1.1-local.1.7.5",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

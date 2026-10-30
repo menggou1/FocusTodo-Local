@@ -22,21 +22,36 @@ function gate() {
         const started = Date.now();
         const context = await browser.newContext({ locale: 'zh-CN', timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 800 }, ...options });
         await context.route('**/*', route => route.request().url().startsWith(origin) ? route.continue() : route.abort());
-        const page = await context.newPage(), errors = [];
+        const page = await context.newPage(), errors = [], requests = [], failedRequests = [];
         page.on('pageerror', error => errors.push(error.message));
+        page.on('request', request => requests.push(new URL(request.url()).pathname));
+        page.on('requestfailed', request => failedRequests.push({ path: new URL(request.url()).pathname, failure: request.failure()?.errorText }));
+        async function captureFailure() {
+            // Bound diagnostics so an unresponsive renderer cannot stall the suite.
+            const timeout = new Promise(resolve => setTimeout(() => resolve({ unavailable: 'diagnostic timed out' }), 2000));
+            const state = await Promise.race([page.evaluate(() => {
+                const screen = document.querySelector('#focus-startup'), status = document.querySelector('#focus-startup-status');
+                return { url: location.href, readyState: document.readyState, className: document.documentElement.className,
+                    screenPresent: !!screen, statusPresent: !!status, statusDisplay: status ? getComputedStyle(status).display : null,
+                    statusVisibility: status ? getComputedStyle(status).visibility : null, rootChildren: document.querySelector('#root')?.children.length };
+            }).catch(error => ({ unavailable: error.message })), timeout]);
+            await Promise.race([page.screenshot({ path: path.join(evidence, 'startup-failure.png'), timeout: 2000 }).catch(() => {}), timeout]);
+            return { state, requests: [...requests], failedRequests: [...failedRequests], pageErrors: [...errors] };
+        }
         try {
-            const measurements = await body(page, context);
+            const measurements = await body(page, context, captureFailure);
             if (!options.expectedErrors) assert.deepEqual(errors, []);
             results.push({ name, passed: true, ms: Date.now() - started, ...measurements });
             console.log('PASS ' + name);
         } catch (error) {
-            results.push({ name, passed: false, error: error.stack });
+            const diagnostics = error.startupDiagnostics || await captureFailure();
+            results.push({ name, passed: false, error: error.stack, ...diagnostics });
             console.error('FAIL ' + name + ': ' + error.stack);
         } finally { await context.close(); }
     }
     const ready = page => page.waitForFunction(() => !document.getElementById('focus-startup') && document.querySelector('#root').firstElementChild && !document.documentElement.classList.contains('focus-starting'));
     try {
-        await scenario('first screen paints while CSS and scripts are pending; scripts download in parallel', async page => {
+        await scenario('first screen paints while CSS and scripts are pending; scripts download in parallel', async (page, context, captureFailure) => {
             const css = gate(), catalog = gate(), main = gate(), requested = new Set();
             page.on('request', request => requested.add(new URL(request.url()).pathname));
             await page.route('**/main.css?*', async route => { await css.promise; await route.continue(); });
@@ -60,6 +75,10 @@ function gate() {
                 await ready(page);
                 await page.screenshot({ path: path.join(evidence, 'startup-ready.png') });
                 return { firstContentfulPaintMs, completedWhileMainPending, totalSteps };
+            } catch (error) {
+                // Capture before releasing the deliberately held resource requests.
+                error.startupDiagnostics = await captureFailure();
+                throw error;
             } finally { css.release(); catalog.release(); main.release(); }
         });
         await scenario('mounted application waits for critical CSS without exposing an unstyled screen', async page => {

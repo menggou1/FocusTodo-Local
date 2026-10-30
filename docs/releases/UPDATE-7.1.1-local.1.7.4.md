@@ -14,3 +14,5 @@
 ## 验收与发布
 
 本地执行 `npm run build:release`、`npm test`、`npm run check`，Node 测试 60 项通过、1 项平台跳过；隔离浏览器筛选验收中英文关于页及教程跳转，均通过。检查 Markdown 相对文件和标题锚点；发布门禁测试 3 项通过。ZIP 与 tar.gz 在含空格和中文的临时目录解压，文档链接、启动与标签不匹配拒绝检查通过。跨平台全量测试、Pages 和发布由 GitHub Actions 执行，结果以工作流记录为准。历史报告保留各自当时的行为与证据，当前规范见维护指南。
+
+1.7.4 的 [main 工作流](https://github.com/menggou1/FocusTodo-Local/actions/runs/41016504396)中，Windows Node 24 首屏用例等待启动状态可见超时；其余五组与 Pages 成功。没有该次失败的页面状态证据，原因未能确定；未创建 1.7.4 标签或 Release。后续使用 1.7.5 并补充诊断。

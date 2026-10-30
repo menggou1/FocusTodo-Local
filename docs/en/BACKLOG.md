@@ -27,6 +27,7 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 | V04 | P2 | Real notifications and audio | Actual permission states, operating-system display, every sound/white-noise track, autoplay restrictions, visible multi-window playback and owner termination. Stub calls are not physical display/listening evidence. |
 | V05 | P2 | Bing failures and cross-day refresh | Real source failure, timeout, redirect boundaries and expired/cross-day cache updates. |
 | V06 | P2 | Manual backup and desktop-launch experience | Blocked/cancelled downloads, human confirmation of saved files and file-picker restore; Windows double-click, visible default browser, Python fallback and failure messages. Automated saved-file restore and cross-platform launch already exist. |
+| V08 | P2 | Investigate intermittent Windows startup acceptance timeout | The 1.7.4 main run timed out waiting for the startup status without page-state evidence. Version 1.7.5 captures state, requests and screenshots on failure; diagnose a recurrence from that evidence rather than treating a successful rerun as proof of cause. |
 | V07 | P2 | Long-lived databases and very large recovery | Isolated evidence from long-lived data, many recovered records and broadcasts. Generated capacity measurements already exist; never commit private backups or images. |
 
 ## Other proposals

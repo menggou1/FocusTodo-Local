@@ -13,3 +13,5 @@ Date: 2026-10-30. Author: Lexible.
 ## Verification and release
 
 Local release generation and syntax checks passed; Node tests passed 60 with one platform skip. Filtered browser checks passed for Chinese and English About links. Relative document paths and heading anchors were checked, and three release-gate tests passed. Both archives passed extracted-document links and startup checks in a temporary path with spaces and Chinese characters; a mismatched tag was rejected. GitHub Actions supplies the full cross-platform tests, Pages and release gate. Historical reports retain their original facts and evidence; Maintenance describes current procedures.
+
+The [1.7.4 main run](https://github.com/menggou1/FocusTodo-Local/actions/runs/41016504396) timed out waiting for the startup status on Windows Node 24; the other five matrix jobs and Pages succeeded. The page state was not captured, so the cause is unknown. No 1.7.4 tag or Release was created. Version 1.7.5 adds diagnostics.
