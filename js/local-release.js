@@ -26,55 +26,6 @@
             "report": "docs/releases/UPDATE-7.1.1-local.1.7.11.md"
         },
         {
-            "version": "7.1.1-local.1.7.6",
-            "date": "2026-10-30",
-            "title": "教程、文档与启动验收改进",
-            "items": [
-                "关于页新增中英文图文教程，覆盖任务、计时、日程和备份。",
-                "整理版本报告与文档导航，保留历史链接。",
-                "改进启动验收请求处理与失败恢复检查。"
-            ],
-            "titleEn": "User guide, documentation and startup verification",
-            "itemsEn": [
-                "Open the illustrated Chinese or English guide from About.",
-                "Organize release reports and documentation while preserving historical links.",
-                "Improve startup test request handling and failed-resource recovery coverage."
-            ],
-            "report": "docs/releases/UPDATE-7.1.1-local.1.7.6.md"
-        },
-        {
-            "version": "7.1.1-local.1.7.5",
-            "date": "2026-10-30",
-            "title": "教程、文档整理与验收诊断",
-            "items": [
-                "关于页新增中英文使用教程，介绍任务、专注、日程与备份。",
-                "整理版本报告和文档链接，保留旧报告入口。",
-                "改进启动验收失败时的页面和请求诊断。"
-            ],
-            "titleEn": "User guide, documentation and acceptance diagnostics",
-            "itemsEn": [
-                "Open the Chinese or English guide from About for tasks, focus, schedules and backups.",
-                "Organize release reports and document links while keeping old report entry points.",
-                "Capture page and request diagnostics when startup acceptance fails."
-            ],
-            "report": "docs/releases/UPDATE-7.1.1-local.1.7.5.md"
-        },
-        {
-            "version": "7.1.1-local.1.7.4",
-            "date": "2026-10-30",
-            "title": "使用教程与文档整理",
-            "items": [
-                "关于页新增使用教程入口，介绍任务、专注、日程和数据备份。",
-                "整理中英文文档和历史报告目录，保留旧报告链接。"
-            ],
-            "titleEn": "User guide and documentation organization",
-            "itemsEn": [
-                "Open the user guide from About for tasks, focus, schedules and backups.",
-                "Organize Chinese and English documentation and release reports while preserving old report links."
-            ],
-            "report": "docs/releases/UPDATE-7.1.1-local.1.7.4.md"
-        },
-        {
             "version": "7.1.1-local.1.7.3",
             "date": "2026-10-30",
             "title": "本地专注森林、成就与任务提醒",

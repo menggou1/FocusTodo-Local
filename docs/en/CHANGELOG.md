@@ -12,29 +12,6 @@ Current application: **7.1.1-local.1.7.11**, author Lexible.
 
 [English report](releases/UPDATE-7.1.1-local.1.7.11.md).
 
-## 7.1.1-local.1.7.6 · 2026-10-30
-
-- Open the illustrated Chinese or English guide from About.
-- Organize release reports and documentation while preserving historical links.
-- Improve startup test request handling and failed-resource recovery coverage.
-
-[English report](releases/UPDATE-7.1.1-local.1.7.6.md).
-
-## 7.1.1-local.1.7.5 · 2026-10-30
-
-- Open the Chinese or English guide from About for tasks, focus, schedules and backups.
-- Organize release reports and document links while keeping old report entry points.
-- Capture page and request diagnostics when startup acceptance fails.
-
-[English report](releases/UPDATE-7.1.1-local.1.7.5.md).
-
-## 7.1.1-local.1.7.4 · 2026-10-30
-
-- Open the user guide from About for tasks, focus, schedules and backups.
-- Organize Chinese and English documentation and release reports while preserving old report links.
-
-[English report](releases/UPDATE-7.1.1-local.1.7.4.md).
-
 ## 7.1.1-local.1.7.3 · 2026-10-30
 
 - Restore the original Focus forest, sunlight collection and detailed guide, with local storage.
