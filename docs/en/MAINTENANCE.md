@@ -91,12 +91,9 @@ python tests/package-smoke.py
 
 ## Version and release
 
-The formal-release retention rule covers the entire 1.7 series and future releases. Versions through 1.6 retain their original reports and rules. Historical files mistakenly removed in this task were restored from Git; do not reclassify or remove them for failing the new policy. New links point directly into releases directories.
+Formal retention rules cover the entire 1.7 series and future releases. Versions through 1.6 retain their original rules. A formal version must be merged and pushed to main, deployed to Pages, pass all main/tag platform checks for the same commit and publish a Release. Failed candidates require a version increment before repair; consolidate useful changes into the successful successor and remove standalone failed reports and entries. Preserve pushed tags without replacement.
 
-For the remaining candidates in this task and future releases, merge and push main, deploy Pages and pass every main/tag platform workflow for the same commit, then publish a Release before retaining independent formal reports. Reports may be staged for candidate testing and packaging. A failed candidate requires a version increment before further repair; remove its report and update entry, migrating useful content and evidence to its successor. An existing Release with a failed required workflow is not formal. This applies to failed candidate 1.7.10, whose immutable tag remains, without revisiting versions through 1.6. Do not substitute rerunning a failed version for incrementing it. Open work stays in Backlog.
-
-The disposable Windows Node 24 CI runner expands its ephemeral TCP pool and records port ranges and connection counts before and after full browser acceptance. This changes neither the user's computer nor the test matrix/assertions; see ci.yml and scripts/windows-ci-network.ps1.
-
+Reports describe initial problems, final behavior and final validation evidence. Omit attempt-by-attempt narratives, temporary fixes and documentation-edit history. Open work belongs only in Backlog. New links point directly to archived reports. Windows CI network configuration applies only to disposable runners and retains the complete test matrix and assertions.
 
 Each new repair release increments the third local-version component. Preserve already-pushed failed tags; publish the corrected commit under the next patch version. Version reports follow the actual task scope, and failed 1.4.2 content is consolidated into 1.4.3.
 
@@ -148,4 +145,3 @@ Declare the target, reference and permitted properties before editing. A referen
 
 Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Publication requires the same commit's main tests, tag tests and Pages deployment to succeed. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
 
-Scope correction: the retention policy covers the entire 1.7 series and future releases. Keep successful 1.7.3 and 1.7.11 reports; 1.7.0–1.7.2 remain consolidated in 1.7.3, and 1.7.4–1.7.10 in 1.7.11. Versions through 1.6 are not revisited. This supersedes broader historical exemptions above.
