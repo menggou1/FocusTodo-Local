@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.5**, author Lexible.
+Current application: **7.1.1-local.1.7.6**, author Lexible.
+
+## 7.1.1-local.1.7.6 · 2026-10-30
+
+- Open the illustrated Chinese or English guide from About.
+- Organize release reports and documentation while preserving historical links.
+- Improve startup test request handling and failed-resource recovery coverage.
+
+[English report](releases/UPDATE-7.1.1-local.1.7.6.md).
 
 ## 7.1.1-local.1.7.5 · 2026-10-30
 

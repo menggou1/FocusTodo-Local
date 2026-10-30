@@ -21,7 +21,9 @@ function gate() {
     async function scenario(name, body, options = {}) {
         const started = Date.now();
         const context = await browser.newContext({ locale: 'zh-CN', timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 800 }, ...options });
-        await context.route('**/*', route => route.request().url().startsWith(origin) ? route.continue() : route.abort());
+        // Intercept only external requests; same-origin assets use the real server
+        // without an extra CDP round trip for every concurrent resource.
+        await context.route(url => url.origin !== origin, route => route.abort());
         const page = await context.newPage(), errors = [], requests = [], failedRequests = [];
         page.on('pageerror', error => errors.push(error.message));
         page.on('request', request => requests.push(new URL(request.url()).pathname));
@@ -93,7 +95,7 @@ function gate() {
                 assert.equal(await page.locator('#root').evaluate(node => getComputedStyle(node).visibility), 'visible');
             } finally { css.release(); }
         });
-        await scenario('workspace appears before optional images and fonts; Chinese needs no language requests', async page => {
+        await scenario('workspace appears before optional images and fonts; Chinese needs no language requests', async (page, context, captureFailure) => {
             const optional = gate(), languageRequests = [], optionalRequests = [];
             page.on('request', request => { if (new URL(request.url()).pathname.startsWith('/i18n/')) languageRequests.push(request.url()); });
             await page.route(/\/(img|font)\//, async route => { optionalRequests.push(route.request().url()); await optional.promise; await route.abort(); });
@@ -103,6 +105,9 @@ function gate() {
                 assert.deepEqual(languageRequests, []);
                 assert.equal(await page.locator('#root').getAttribute('aria-busy'), null);
                 return { optionalRequestsStillPending: optionalRequests.length, languageRequests: languageRequests.length };
+            } catch (error) {
+                error.startupDiagnostics = await captureFailure();
+                throw error;
             } finally { optional.release(); }
         });
         for(const pending of ['persisted','persist','reject'])await scenario('optional storage persistence does not block startup: '+pending,async page=>{
@@ -131,6 +136,17 @@ function gate() {
             await ready(page);
             assert.equal(await page.evaluate(() => localStorage.getItem('startup-test-preserve')), 'saved');
         });
+        await scenario('failed local UI module offers retry and preserves saved settings', async page => {
+            let first = true;
+            await page.addInitScript(() => localStorage.setItem('startup-test-preserve', 'saved'));
+            await page.route('**/js/local-app-ui.js?*', route => { if (first) { first = false; return route.abort(); } return route.continue(); });
+            await page.goto(origin, { waitUntil: 'domcontentloaded' });
+            await page.locator('#focus-startup[data-state="error"]').waitFor();
+            assert(await page.locator('#focus-startup-retry').isVisible());
+            await page.locator('#focus-startup-retry').click();
+            await ready(page);
+            assert.equal(await page.evaluate(() => localStorage.getItem('startup-test-preserve')), 'saved');
+        }, { expectedErrors: true });
         await scenario('stylesheet failures retain a visible recovery action', async page => {
             await page.route('**/main.css?*', route => route.abort());
             await page.goto(origin, { waitUntil: 'domcontentloaded' });

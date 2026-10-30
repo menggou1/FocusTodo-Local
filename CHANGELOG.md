@@ -2,15 +2,21 @@
 
 [返回首页](README.md) · [开发维护指南](docs/MAINTENANCE.md) · [架构说明](ARCHITECTURE.md)
 
-当前版本 **7.1.1-local.1.7.5** · 作者 **Lexible**。
+当前版本 **7.1.1-local.1.7.6** · 作者 **Lexible**。
 
 本页统一列出版本变化和报告入口。开发和发布步骤见维护指南；未完成工程、验收与未来计划只见[统一待办与验收](docs/BACKLOG.md)。历史报告保留实际交付、测试和发布证据。
+
+## 7.1.1-local.1.7.6 · 2026-10-30
+
+- 延续教程及文档整理；减少启动测试对同源请求的不必要拦截，验证关键模块失败后的恢复。
+
+[更新报告](docs/releases/UPDATE-7.1.1-local.1.7.6.md)。
 
 ## 7.1.1-local.1.7.5 · 2026-10-30
 
 - 延续教程及文档整理，并补充启动验收失败时的页面和请求诊断。
 
-[更新报告](docs/releases/UPDATE-7.1.1-local.1.7.5.md)。
+[候选版本报告](docs/releases/UPDATE-7.1.1-local.1.7.5.md)。main Windows 启动验收失败，未创建标签或 Release。
 
 ## 7.1.1-local.1.7.4 · 2026-10-30
 

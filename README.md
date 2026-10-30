@@ -2,7 +2,7 @@
 
 FocusTodo 专注清单 - 浏览器本地版
 
-官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.7.5** · 作者 **Lexible** · [English](README_en.md)
+官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.7.6** · 作者 **Lexible** · [English](README_en.md)
 
 ## 项目说明
 

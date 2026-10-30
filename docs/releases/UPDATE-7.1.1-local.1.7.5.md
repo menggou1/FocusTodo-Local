@@ -14,3 +14,5 @@
 1.7.4 main 的 Windows Node 24 首屏断言等待状态可见超时；其他五组和 Pages 成功。日志没有页面现场，不能确定根因，也未创建 1.7.4 标签。新增诊断用于下次故障取证；跨平台测试和发布结果以本版本 GitHub Actions 为准。
 
 本地执行版本生成、语法检查和 Node 测试（60 项通过、1 项平台跳过）；17 项启动检查及中英文关于页筛选验收通过。受控注入一次失败，确认释放阻塞请求前保存页面状态、请求和截图。
+
+[1.7.5 main 工作流](https://github.com/menggou1/FocusTodo-Local/actions/runs/41017501174)在 Windows 的另一项启动测试中未能挂载。采集到 `/js/local-app-ui.js` 请求 `net::ERR_NO_BUFFER_SPACE` 和后续模块缺失异常；其余五组及 Pages 成功。此证据不能确定 1.7.4 的根因。未创建 1.7.5 标签或 Release。
