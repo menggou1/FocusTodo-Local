@@ -110,7 +110,7 @@ The application guide, maintenance, architecture, backlog and release documentat
 | Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.7.10`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.7.11`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 ## License
 

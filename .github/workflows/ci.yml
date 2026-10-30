@@ -50,11 +50,19 @@ jobs:
       - name: Install browser
         if: matrix.node == '24'
         run: npx playwright install --with-deps chromium
+      - name: Prepare Windows TCP resources for full browser acceptance
+        if: runner.os == 'Windows' && matrix.node == '24'
+        shell: pwsh
+        run: ./scripts/windows-ci-network.ps1 -Configure -Phase before
       - name: Browser acceptance
         if: matrix.node == '24'
         run: npm run test:browser
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
+      - name: Record Windows TCP resources after browser acceptance
+        if: always() && runner.os == 'Windows' && matrix.node == '24'
+        shell: pwsh
+        run: ./scripts/windows-ci-network.ps1 -Phase after
       - name: Package runtime
         if: matrix.node == '24'
         run: |

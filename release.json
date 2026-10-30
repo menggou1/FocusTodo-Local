@@ -1,26 +1,75 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.7.10",
+  "localVersion": "1.7.11",
   "author": "Lexible",
   "date": "2026-10-30",
   "repositoryRemote": "Focustodo-local",
   "updates": [
     {
-      "version": "7.1.1-local.1.7.10",
+      "version": "7.1.1-local.1.7.11",
       "date": "2026-10-30",
-      "title": "发布稳定性修复与文档归并",
+      "title": "Windows 发布环境修复与维护规则",
       "items": [
-        "关于页提供中英文图文教程，覆盖任务、计时、日程、森林和备份。",
-        "修复取消资源下载后文件流未关闭的问题，完善启动失败诊断。",
-        "合并未正式发布版本的更新与技术记录，统一文档链接和正式发布规则。"
+        "关于页提供中英文图文教程，覆盖任务、计时、日程和备份。",
+        "修复取消资源下载后的文件流清理，改善 Windows 发布验收环境与失败诊断。",
+        "完善后续正式版本留档规则，保留历史版本原有文档和记录。"
       ],
-      "titleEn": "Release stability and consolidated documentation",
+      "titleEn": "Windows release environment and maintenance rules",
       "itemsEn": [
-        "Open illustrated Chinese and English guides from About for tasks, focus, schedules, forest and backups.",
-        "Close file streams when resource downloads are cancelled and retain startup failure diagnostics.",
-        "Consolidate unpublished changes and technical records, with consistent documentation links and release rules."
+        "Open illustrated Chinese and English guides from About.",
+        "Close streams after cancelled downloads and improve Windows release acceptance resources and failure diagnostics.",
+        "Apply formal release documentation rules prospectively, preserving existing historical records."
       ],
-      "report": "docs/releases/UPDATE-7.1.1-local.1.7.10.md"
+      "report": "docs/releases/UPDATE-7.1.1-local.1.7.11.md"
+    },
+    {
+      "version": "7.1.1-local.1.7.6",
+      "date": "2026-10-30",
+      "title": "教程、文档与启动验收改进",
+      "items": [
+        "关于页新增中英文图文教程，覆盖任务、计时、日程和备份。",
+        "整理版本报告与文档导航，保留历史链接。",
+        "改进启动验收请求处理与失败恢复检查。"
+      ],
+      "titleEn": "User guide, documentation and startup verification",
+      "itemsEn": [
+        "Open the illustrated Chinese or English guide from About.",
+        "Organize release reports and documentation while preserving historical links.",
+        "Improve startup test request handling and failed-resource recovery coverage."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.7.6.md"
+    },
+    {
+      "version": "7.1.1-local.1.7.5",
+      "date": "2026-10-30",
+      "title": "教程、文档整理与验收诊断",
+      "items": [
+        "关于页新增中英文使用教程，介绍任务、专注、日程与备份。",
+        "整理版本报告和文档链接，保留旧报告入口。",
+        "改进启动验收失败时的页面和请求诊断。"
+      ],
+      "titleEn": "User guide, documentation and acceptance diagnostics",
+      "itemsEn": [
+        "Open the Chinese or English guide from About for tasks, focus, schedules and backups.",
+        "Organize release reports and document links while keeping old report entry points.",
+        "Capture page and request diagnostics when startup acceptance fails."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.7.5.md"
+    },
+    {
+      "version": "7.1.1-local.1.7.4",
+      "date": "2026-10-30",
+      "title": "使用教程与文档整理",
+      "items": [
+        "关于页新增使用教程入口，介绍任务、专注、日程和数据备份。",
+        "整理中英文文档和历史报告目录，保留旧报告链接。"
+      ],
+      "titleEn": "User guide and documentation organization",
+      "itemsEn": [
+        "Open the user guide from About for tasks, focus, schedules and backups.",
+        "Organize Chinese and English documentation and release reports while preserving old report links."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.7.4.md"
     },
     {
       "version": "7.1.1-local.1.7.3",
@@ -63,6 +112,25 @@
       "report": "docs/releases/UPDATE-7.1.1-local.1.6.1.md"
     },
     {
+      "version": "7.1.1-local.1.6.0",
+      "date": "2026-10-29",
+      "title": "本地日程与官方 7.2.2 兼容功能",
+      "items": [
+        "日程支持拖选创建任务、重叠布局、原生日期及番茄清单控件。",
+        "日程作为系统清单支持排序隐藏，月视图支持滚动和查看记录。",
+        "日程文字以原侧边栏为基准调整，其他区域保持原样。",
+        "短专注记录显示秒数，新增下周到期快捷操作。"
+      ],
+      "titleEn": "Local schedule and compatible 7.2.2 features",
+      "itemsEn": [
+        "Create tasks by selecting schedule time, with overlap layout and native date, pomodoro and project controls.",
+        "Manage Schedule as a sortable, hideable list and scroll the month view.",
+        "Align schedule typography with the unchanged sidebar.",
+        "Display short focus in seconds and add the due-next-week shortcut."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.6.0.md"
+    },
+    {
       "version": "7.1.1-local.1.5.4",
       "date": "2026-10-28",
       "title": "系统清单排序与用户名存储修复",
@@ -99,6 +167,25 @@
       "report": "docs/releases/UPDATE-7.1.1-local.1.5.2.md"
     },
     {
+      "version": "7.1.1-local.1.5.0",
+      "date": "2026-10-27",
+      "title": "字体、清单排序与滚动修复",
+      "items": [
+        "英文附带字体加载完成后自动应用，恢复组件各自的字体样式。",
+        "设置中的系统清单与自定义清单分别支持拖动和键盘排序，并保存顺序。",
+        "修复清单管理底部出现双滚动条的问题。",
+        "改善本地网络兼容，修复复用请求时的同源访问。"
+      ],
+      "titleEn": "Fonts, list ordering and scrolling fixes",
+      "itemsEn": [
+        "Apply the bundled English font when ready while retaining individual component fonts.",
+        "Reorder system and custom lists separately by dragging or keyboard; the order is saved.",
+        "Fix the extra scrollbar in list management.",
+        "Improve local network compatibility for reused same-origin requests."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.5.0.md"
+    },
+    {
       "version": "7.1.1-local.1.4.3",
       "date": "2026-10-26",
       "title": "语言字体、功能整合与发布验收修复",
@@ -116,6 +203,23 @@
         "Improve cross-tab verification and provide portable packages with SHA256 verification."
       ],
       "report": "docs/releases/UPDATE-7.1.1-local.1.4.3.md"
+    },
+    {
+      "version": "7.1.1-local.1.4.1",
+      "date": "2026-10-26",
+      "title": "渐进启动与加载反馈",
+      "items": [
+        "启动先显示轻量骨架与真实步骤进度，核心界面就绪后进入。",
+        "中英文复用已有词库，其他语言异步读取，长等待或失败时可重试。",
+        "启动反馈支持深色、窄屏、减少动态效果与无 JavaScript 提示。"
+      ],
+      "titleEn": "Progressive startup and loading feedback",
+      "itemsEn": [
+        "See a lightweight first screen and real step progress, then enter when the core workspace is ready.",
+        "Reuse Chinese and English catalogs, load other locales asynchronously, and retry long or failed loads.",
+        "Use startup feedback with dark appearance, narrow screens, reduced motion and a no-JavaScript explanation."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.4.1.md"
     },
     {
       "version": "7.1.1-local.1.4.0",
@@ -169,6 +273,23 @@
       ]
     },
     {
+      "version": "7.1.1-local.1.3.0",
+      "date": "2026-10-24",
+      "title": "压缩备份与多标签页恢复保护",
+      "items": [
+        "默认生成无损 Gzip 备份，保留普通 JSON 导出并兼容旧版 JSON 导入。",
+        "导出前查看各类数据体积和记录数，可选择是否包含壁纸；导入前明确备份范围。",
+        "加强多标签页并发导入、删除和中断恢复保护，自动安全备份始终保留完整内容。"
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.3.0.md",
+      "titleEn": "Compressed backups and multi-tab recovery",
+      "itemsEn": [
+        "Create lossless Gzip backups, retain plain JSON exports and import older JSON backups.",
+        "Review record counts and sizes before export, with an explicit option to omit wallpapers.",
+        "Protect concurrent imports, resets and interrupted recovery; automatic safety backups remain complete."
+      ]
+    },
+    {
       "version": "7.1.1-local.1.2.3",
       "date": "2026-10-22",
       "title": "通知面板布局修复",
@@ -219,6 +340,82 @@
         "Use a common launcher on Windows, macOS and Linux, with browser opening, custom ports and headless mode.",
         "Download ZIP or tar.gz packages and run with Node.js; application dependencies do not need installation.",
         "Keep the same browser, hostname and port to retain existing local data."
+      ]
+    },
+    {
+      "version": "7.1.1-local.1.1.2",
+      "date": "2026-10-07",
+      "title": "完成任务白屏修复",
+      "items": [
+        "修复完成任务或刷新番茄记录时可能出现的白屏与数字格式化报错。",
+        "快速重复点击完成按钮只处理一次，避免重复完成任务。"
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.1.2.md",
+      "titleEn": "Task completion blank-page fix",
+      "itemsEn": [
+        "Handle original focus records safely when rendering task progress.",
+        "Ignore repeated completion clicks while the first save is in progress."
+      ]
+    },
+    {
+      "version": "7.1.1-local.1.1.1",
+      "date": "2026-10-04",
+      "title": "深色通知、专注记录与数据重置修复",
+      "items": [
+        "通知列表、更新详情及本地提示跟随外观的浅色、深色设置。",
+        "不足 25 秒的专注不计入历史，短暂停后继续可累计有效时间。",
+        "账号导出、导入改为协调的按钮样式，支持键盘操作。",
+        "删除数据后恢复本地用户及默认系统清单，修复白屏和旧版空清单。",
+        "保留删除前完整备份、等待 5 秒确认和失败回滚。"
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.1.1.md",
+      "titleEn": "Dark dialogs, focus records and reset fixes",
+      "itemsEn": [
+        "Use the selected light or dark appearance for local notifications and dialogs.",
+        "Exclude focus shorter than 25 seconds; valid work can accumulate across short pauses.",
+        "Coordinate export and import buttons and support keyboard interaction.",
+        "Reset to the local user and default system lists, including recovery of missing navigation lists.",
+        "Keep a complete safety backup, five-second confirmation and rollback on failure."
+      ]
+    },
+    {
+      "version": "7.1.1-local.1.1.0",
+      "date": "2026-10-03",
+      "title": "通知中心与本地数据管理更新",
+      "items": [
+        "更新内容迁入右上角通知铃铛，点击条目查看详情。",
+        "关于页移除好评入口，增加 GitHub 仓库链接。",
+        "修复删除数据流程：无需密码，等待 5 秒后确认，保存完整备份后重置。",
+        "保留已完成的停止、取消任务、后台恢复及数据回滚修复。",
+        "版本保留官方 7.1.1，同时标明本地修补版本，方便识别后续更新。"
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.1.0.md",
+      "titleEn": "Local notifications and data management",
+      "itemsEn": [
+        "Read release details from the notification bell.",
+        "Replace rating links with the local GitHub repository link.",
+        "Reset data without a password after five-second confirmation, with a complete safety backup.",
+        "Keep timer stop, task detachment, background recovery and rollback fixes.",
+        "Show both the official base version and the local version."
+      ]
+    },
+    {
+      "version": "7.1.1-patch.1",
+      "date": "2026-10-03",
+      "title": "计时恢复与数据安全修补",
+      "items": [
+        "后台恢复按实际时间补记全部完整番茄，保存尾数并确认中断时间。",
+        "计时会话持久化，记录与进度一起提交，失败回滚并防止重复记录。",
+        "修复停止后旧时长恢复、叉号无法取消任务及任务切换问题。",
+        "完整备份、导入校验与中断恢复，补齐通知、音频和订阅清理。"
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-patch.1.md",
+      "titleEn": "Timer recovery and durable local data",
+      "itemsEn": [
+        "Recover complete historical focus blocks and retain the remaining partial work after confirmation.",
+        "Persist timer sessions and commit records and progress together without duplicates.",
+        "Fix stale elapsed time after stopping and incorrect task cancellation or switching.",
+        "Validate complete backups, recover interrupted imports, and clean up notifications, audio and subscriptions."
       ]
     }
   ]

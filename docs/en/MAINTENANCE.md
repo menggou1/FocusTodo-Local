@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.10`, author Lexible. Version 1.6.0 has a tag but no Release; its useful history is consolidated into the latest report. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.11`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -91,13 +91,18 @@ python tests/package-smoke.py
 
 ## Version and release
 
-Every candidate must be merged into main, pushed, deployed to Pages and published as a Release after the same commit passes all main and tag platform tests. Only versions with every required workflow successful and an actual published Release may retain independent Chinese/English release reports and formal update entries. An existing Release with a failed required workflow (such as 1.7.0) is not a formal version.
+The new formal-release retention rule is prospective, without retroactive effect. Keep historical release/candidate reports, old entry points and update entries under their original rules. Historical files mistakenly removed in this task were restored from Git; do not reclassify or remove them for failing the new policy. New links point directly into releases directories.
 
-Reports may be staged with candidate commits for testing and packaging. If any workflow fails, increment the patch version before further repair; remove the failed candidate reports and update entry, migrating useful changes, evidence and failure reasons to the successor. Do not retain standalone 1.7.4/1.7.5/1.7.6/1.7.7/1.7.8/1.7.9 reports or reports for other historical versions without complete release qualification. Remove obsolete instructions and redirect pages; update all repository links, generators and package contents. Unfinished work belongs only in Backlog. Preserve pushed tags without replacing or reusing them. If a failed version already has a Release, withdraw its formal publication and migrate its content. Do not substitute a rerun under the failed version for the required increment. Preserve successful historical reports and published Git history.
+For the remaining candidates in this task and future releases, merge and push main, deploy Pages and pass every main/tag platform workflow for the same commit, then publish a Release before retaining independent formal reports. Reports may be staged for candidate testing and packaging. A failed candidate requires a version increment before further repair; remove its report and update entry, migrating useful content and evidence to its successor. An existing Release with a failed required workflow is not formal. This applies to failed candidate 1.7.10, whose immutable tag remains, without revisiting older versions. Do not substitute rerunning a failed version for incrementing it. Open work stays in Backlog.
+
+The disposable Windows Node 24 CI runner expands its ephemeral TCP pool and records port ranges and connection counts before and after full browser acceptance. This changes neither the user's computer nor the test matrix/assertions; see ci.yml and scripts/windows-ci-network.ps1.
+
+
+Each new repair release increments the third local-version component. Preserve already-pushed failed tags; publish the corrected commit under the next patch version. Version reports follow the actual task scope, and failed 1.4.2 content is consolidated into 1.4.3.
 
 The official base remains 7.1.1. Full version: `7.1.1-local.<major>.<minor>.<patch>`; the annotated Git tag uses only the local version, for example `1.4.0`. The database version and legacy settings marker `Version=6.5` are separate and must not be renamed to match the product version.
 
-Add the newest Chinese/English user-facing update and report to `release.json`, retaining only qualified formal history; remove failed/unpublished entries after migrating their content. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
+Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 
 Work branches stay local. Merge the verified work into the clean primary main worktree, then push main; do not push a work branch merely to trigger CI. Fetch and resolve divergence without force-pushing. Create a new annotated tag from the merged main commit; do not overwrite an old tag.
 
@@ -105,7 +110,7 @@ The workflow tests Windows/macOS/Linux × Node 22/24. Node 24 also runs browser 
 
 ## Documentation layout
 
-The user guides are `docs/GUIDE.md` and `docs/en/GUIDE.md`; shared screenshots live in `docs/guide-images/` and ship in portable archives. Chinese and English release reports are in `docs/releases/` and `docs/en/releases/`. Remove obsolete report redirect pages and update repository links directly to retained reports. Unpublished historical content belongs in a successor report. When moving documents, update relative links, release metadata, generators and package contents, and check paths and anchors. Existing English reports are preserved by the generator.
+The user guides are `docs/GUIDE.md` and `docs/en/GUIDE.md`; shared screenshots live in `docs/guide-images/` and ship in portable archives. Chinese and English release reports are in `docs/releases/` and `docs/en/releases/`. Old report paths remain as links to their archived copies. When moving documents, update relative links, release metadata, generators and package contents, and check paths and anchors. Existing English reports are preserved by the generator.
 
 ## GitHub Pages
 
@@ -129,7 +134,7 @@ To redeploy, run **Deploy GitHub Pages** on main in Actions. The build script no
 
 ## Startup feedback and performance sampling
 
-After editing `startup.css` or `js/local-startup.js`, run `npm run build:release` to regenerate the inlined first screen. `node tests/startup-acceptance.cjs` runs the startup/font cases; the full `npm run test:browser` includes them. For an optional cold-start comparison, run `node tests/startup-performance.cjs <verified baseline commit>`. It uses isolated data and the project subpath, 150 ms synthetic latency and 200 KiB/s download throughput, aborting optional images/fonts equally. The JSON evidence is not a live Pages speed guarantee or a CI timing threshold.
+After editing `startup.css` or `js/local-startup.js`, run `npm run build:release` to regenerate the inlined first screen. `node tests/startup-acceptance.cjs` runs the fourteen startup/font cases; the full `npm run test:browser` includes them. For an optional cold-start comparison, run `node tests/startup-performance.cjs <verified baseline commit>`. It uses isolated data and the project subpath, 150 ms synthetic latency and 200 KiB/s download throughput, aborting optional images/fonts equally. The JSON evidence is not a live Pages speed guarantee or a CI timing threshold.
 
 List management component integration is maintained by `node scripts/revise-project-management.cjs`.
 
@@ -141,4 +146,4 @@ Use Conventional Commits for future commits: `type(optional-scope): short descri
 
 Declare the target, reference and permitted properties before editing. A reference sidebar, search and username must retain their font family, size, weight, line height, geometry and interactions. Scope schedule rules to its own root; preserve native picker styling. Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Freeze independent computed-style evidence (current fixture: tests/fixtures/sidebar-typography-cfd6449.json); do not regenerate it from the implementation. Test both target appearance and unchanged regions, including a deliberately injected regression that the guard must reject. Baseline changes require explicit user authorization and independent evidence. Prefer a local inverse patch when correcting scope violations. Passing test counts do not replace visual acceptance.
 
-Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report. Tag 1.7.6 is also preserved, with its content consolidated into 1.7.10. None of these failed candidates retains a standalone report or formal Release. Publication requires the same commit's main tests, tag tests and Pages deployment to succeed. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
+Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Publication requires the same commit's main tests, tag tests and Pages deployment to succeed. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.

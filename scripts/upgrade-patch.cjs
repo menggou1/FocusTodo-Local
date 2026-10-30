@@ -14,7 +14,7 @@ s = s.replace("'<div style=\"margin-top:4px;color:#666;\">本地学习版，请�
                 '<li>防止重复写入，修复暂停、跨日和任务切换计时。</li>',
                 '<li>完整备份与原子导入，失败回滚，避免启动误删数据。</li>',
                 '<li>修复主题保存失败提示，收紧外部请求范围。</li></ul>',
-                '<a href="docs/releases/UPDATE-7.1.1-local.1.7.10.md" target="_blank" rel="noopener">查看详细更新与验收报告（Markdown）</a></details>',`);
+                '<a href="docs/releases/UPDATE-7.1.1-local.1.7.11.md" target="_blank" rel="noopener">查看详细更新与验收报告（Markdown）</a></details>',`);
 between('    function _isWhitelisted(u) {', '    // 拦截 XMLHttpRequest', `    function _isWhitelisted(input) {
         try {
             var url = new URL(input instanceof Request ? input.url : String(input), location.href);

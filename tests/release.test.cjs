@@ -37,13 +37,15 @@ test('every maintenance report and the local repository icon are available', () 
     assert(read('img/github.svg').includes('<svg'));
 });
 
-test('report directories contain only declared releases, without obsolete redirects', () => {
+test('report directories match metadata and historical entry points remain valid', () => {
     const expected = config.updates.map(update => path.basename(update.report)).sort();
     for (const directory of ['docs/releases', 'docs/en/releases']) {
         assert.deepEqual(fs.readdirSync(path.join(root, directory)).filter(name => name.endsWith('.md')).sort(), expected);
     }
     for (const directory of ['docs', 'docs/en']) {
-        assert.deepEqual(fs.readdirSync(path.join(root, directory)).filter(name => name.startsWith('UPDATE-')), []);
+        for (const name of fs.readdirSync(path.join(root, directory)).filter(name => name.startsWith('UPDATE-'))) {
+            assert(fs.existsSync(path.join(root, directory, 'releases', name)), name + ' historical destination');
+        }
     }
 });
 

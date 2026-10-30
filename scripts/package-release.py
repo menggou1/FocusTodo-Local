@@ -32,11 +32,8 @@ def build(output, tag=None):
     for directory in ('js', 'audio', 'font', 'i18n', 'img'):
         files.extend(p for p in (ROOT / directory).rglob('*') if p.is_file())
     files.extend(ROOT / update['report'] for update in config['updates'])
-    # Only declared release reports ship; obsolete candidates/redirects cannot
-    # silently re-enter archives through an unrestricted recursive Markdown glob.
-    files.extend(ROOT / 'docs/en/releases' / Path(update['report']).name for update in config['updates'])
-    files.extend((ROOT / 'docs').glob('*.md'))
-    files.extend((ROOT / 'docs/en').glob('*.md'))
+    # Preserve historical reports and entry points; the new policy is prospective.
+    files.extend((ROOT / 'docs').rglob('*.md'))
     files.extend(p for p in (ROOT / 'docs' / 'guide-images').rglob('*') if p.is_file())
     files.append(ROOT / 'ARCHITECTURE.md')
     files = sorted(set(files))
