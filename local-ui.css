@@ -35,12 +35,12 @@
 .focus-project-reset {
     flex:none;
     padding:5px 9px;
-    border:1px solid var(--border);
+
     border-radius:5px;
-    background:var(--bg-popup);
-    color:var(--text-title);
+
+
     font:12px/1.5 var(--focus-ui-font);
-    cursor:pointer;
+
 }
 
 .focus-project-reset:disabled { opacity:.5; cursor:wait; }
@@ -233,11 +233,11 @@
 }
 
 .focus-recovery-actions button {
-    cursor:pointer;
-    border:1px solid var(--border);
+
+
     border-radius:7px;
-    background:var(--bg-popup);
-    color:var(--text-title);
+
+
     padding:10px 14px
 }
 
@@ -453,12 +453,12 @@
 }
 
 .focus-app-actions button {
-    border:1px solid var(--border);
-    background:var(--bg-popup);
+
+
     border-radius:7px;
     padding:9px 16px;
-    cursor:pointer;
-    color:var(--text-title);
+
+
     font:14px/1.5 var(--focus-ui-font)
 }
 
@@ -485,14 +485,14 @@
     height:30px;
     padding:0 16px;
     margin-right:8px;
-    border:1px solid var(--border);
+
     border-radius:6px;
-    background:var(--bg-popup);
-    color:var(--text-title);
+
+
     font-size:12px;
     line-height:28px;
     font-family:inherit;
-    cursor:pointer;
+
 }
 
 #lexible-import-btn {
@@ -513,8 +513,6 @@
 .focus-local-general h3 { margin:0 0 16px; font-size:16px; }
 .focus-local-general h4 { margin:20px 0 6px; font-size:14px; }
 .focus-local-general p { color:var(--text-desc); font-size:13px; line-height:1.6; margin:8px 0; }
-.focus-local-general select { margin-left:18px; padding:6px 12px; color:var(--text-title); background:var(--bg-popup); border:1px solid var(--border); border-radius:6px; max-width:100%; }
-
 .focus-backup-dialog {
     overflow-wrap:anywhere;
 }
@@ -691,6 +689,3 @@ body.focus-schedule-quick-open #project-selection-popover { z-index:50010; }
 .focus-achievements .focus-achievement-text small { color: var(--text-desc); font-size: 11px; line-height: 1.35; }
 .focus-achievements .focus-achievement-trophy.is-locked { filter: grayscale(1); opacity: .3; }
 .focus-achievements .RankingList-pomodoroTime-TN_nv { font-size: 14px; white-space: nowrap; }
-
-/* Match the existing round forest guide entry. */
-.focus-achievement-button { width: 36px; height: 36px; margin: 6px; border-radius: 50%; background: #54b4f3; border: 3px solid #287eb9; padding: 5px; }

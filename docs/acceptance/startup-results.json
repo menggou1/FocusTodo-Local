@@ -1,96 +1,96 @@
 {
-  "version": "7.1.1-local.1.7.12",
+  "version": "7.1.1-local.1.8.0",
   "results": [
     {
       "name": "first screen paints while CSS and scripts are pending; scripts download in parallel",
       "passed": true,
-      "ms": 1935,
-      "firstContentfulPaintMs": 468,
-      "completedWhileMainPending": 16,
-      "totalSteps": 18
+      "ms": 2277,
+      "firstContentfulPaintMs": 668,
+      "completedWhileMainPending": 17,
+      "totalSteps": 19
     },
     {
       "name": "mounted application waits for critical CSS without exposing an unstyled screen",
       "passed": true,
-      "ms": 983
+      "ms": 1156
     },
     {
       "name": "workspace appears before optional images and fonts; Chinese needs no language requests",
       "passed": true,
-      "ms": 845,
+      "ms": 930,
       "optionalRequestsStillPending": 30,
       "languageRequests": 0
     },
     {
       "name": "optional storage persistence does not block startup: persisted",
       "passed": true,
-      "ms": 972,
+      "ms": 1019,
       "permissionPendingWhileMounted": true,
       "singleAttempt": true
     },
     {
       "name": "optional storage persistence does not block startup: persist",
       "passed": true,
-      "ms": 906,
+      "ms": 1176,
       "permissionPendingWhileMounted": true,
       "singleAttempt": true
     },
     {
       "name": "optional storage persistence does not block startup: reject",
       "passed": true,
-      "ms": 1006,
+      "ms": 1039,
       "permissionPendingWhileMounted": false,
       "singleAttempt": true
     },
     {
       "name": "failed application download offers retry and preserves saved settings",
       "passed": true,
-      "ms": 1094
+      "ms": 1083
     },
     {
       "name": "failed local UI module offers retry and preserves saved settings",
       "passed": true,
-      "ms": 1153
+      "ms": 1250
     },
     {
       "name": "stylesheet failures retain a visible recovery action",
       "passed": true,
-      "ms": 849
+      "ms": 907
     },
     {
       "name": "initialization exceptions retain retry instead of a permanent blank screen",
       "passed": true,
-      "ms": 618
+      "ms": 522
     },
     {
       "name": "failed data recovery retains the loading screen and retry without clearing settings",
       "passed": true,
-      "ms": 816
+      "ms": 866
     },
     {
       "name": "long waits show an explanation without inventing progress",
       "passed": true,
-      "ms": 807
+      "ms": 917
     },
     {
       "name": "saved English, dark appearance, narrow screens and reduced motion work before assets load",
       "passed": true,
-      "ms": 894
+      "ms": 827
     },
     {
       "name": "existing system-selected locales load asynchronously with an immediate first screen",
       "passed": true,
-      "ms": 773
+      "ms": 1079
     },
     {
       "name": "failed optional language files finish asynchronously with readable English fallback",
       "passed": true,
-      "ms": 938
+      "ms": 853
     },
     {
       "name": "Chinese workspace appears before bundled fonts and swaps to Noto when they finish",
       "passed": true,
-      "ms": 1382,
+      "ms": 1460,
       "bundledFontRequests": 3,
       "renderedFonts": [
         "Noto Sans SC"
@@ -99,7 +99,7 @@
     {
       "name": "English swaps to bundled western font without downloading CJK fonts",
       "passed": true,
-      "ms": 1246,
+      "ms": 1279,
       "renderedFonts": [
         "Noto Sans"
       ],
@@ -108,7 +108,7 @@
     {
       "name": "disabled JavaScript keeps a readable explanation",
       "passed": true,
-      "ms": 444
+      "ms": 573
     }
   ]
 }

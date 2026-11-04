@@ -2,7 +2,16 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.12**, author Lexible.
+Current application: **7.1.1-local.1.8.0**, author Lexible.
+
+## 7.1.1-local.1.8.0 · 2026-11-04
+
+- Refresh the forest badge as sunlight matures, expires or changes, without opening the forest.
+- Collect available sunlight with a hand button sharing the achievement and guide button style.
+- Audit all styles and reuse button, switch, pomodoro, date and dropdown controls, matching the language menu to other settings.
+- Adopt independent three-part application versions starting with 2.0.0 and provide a practical implementation plan; 1.8.0 retains the current format.
+
+[English report](releases/UPDATE-7.1.1-local.1.8.0.md).
 
 ## 7.1.1-local.1.7.12 · 2026-11-04
 

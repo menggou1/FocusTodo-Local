@@ -8,6 +8,7 @@ All current user and maintenance guidance is available here. Historical English 
 |---|---|
 | Install and run | [Application guide](../../README_en.md) |
 | Tasks, timer, calendar and backups | [User guide](GUIDE.md) |
+| 2.0.0 scope, stages and release criteria | [2.0.0 plan](plan/2.0.0.md) |
 | Develop, diagnose and publish | [Maintenance](MAINTENANCE.md) |
 | Modules, persistence and integration | [Architecture](ARCHITECTURE.md) |
 | Release history | [Changelog](CHANGELOG.md) |

@@ -1,0 +1,21 @@
+{
+  "baseline": "9d39be5; isolated Edge, deviceScaleFactor=1, before shared-controls refactor",
+  "results": [
+    {
+      "name": "zh-CN-light",
+      "passed": true
+    },
+    {
+      "name": "zh-CN-dark",
+      "passed": true
+    },
+    {
+      "name": "en-light",
+      "passed": true
+    },
+    {
+      "name": "en-dark",
+      "passed": true
+    }
+  ]
+}

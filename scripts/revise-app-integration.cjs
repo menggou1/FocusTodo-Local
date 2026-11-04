@@ -87,21 +87,24 @@ for(const [name,before,after] of [['getPomodoroRewards','this.POMODOROMULTIPERRE
     if(text.includes(before))replace(target.value,text.replace(before,after));
     else if(!text.includes(after))throw Error('Forest badge boundary changed: '+name);
 }
-method(1181,'componentDidMount','function(){var e=this;this.localAchievementRefresh=function(){e.setState(e.loadLocalForestState)};window.addEventListener("focus-local-achievements-changed",this.localAchievementRefresh);try{w.default.shared.setDailyLaunchReward()}catch(error){window.FocusLocal.notice(error.message)}window.FocusForest.mount(this)}');
+method(1181,'componentDidMount','function(){var e=this;this.localAchievementRefresh=function(){e.setState(e.loadLocalForestState)};window.addEventListener("focus-local-achievements-changed",this.localAchievementRefresh);try{w.default.shared.setDailyLaunchReward()}catch(error){window.FocusLocal.notice(error.message)}window.FocusForest.mount(this,w.default.shared)}');
 // Reuse the original forest drawer and ranking styles for offline achievements.
-const forestRender=method(1181,'render');let buttonGroup;
-walk(forestRender.value,node=>{if(node.type==='CallExpression'&&node.arguments[0]?.value==='div'&&node.arguments[1]?.properties?.some(p=>p.key?.name==='className'&&source.slice(p.value.start,p.value.end)==='g.default.buttonGroup'))buttonGroup=node});
-if(!buttonGroup)throw Error('Forest button boundary changed');
-if(buttonGroup.arguments[2]?.type==='Literal'&&buttonGroup.arguments[2].value===null)replace(buttonGroup.arguments[2],'m.default.createElement("img",{draggable:"false",src:"img/forest-badge.png",className:g.default.imageButton+" focus-achievement-button",title:window.FocusI18n.text("成就"),alt:window.FocusI18n.text("成就"),onClick:function(){return e.props.openDrawer("ranking")}})');
-else if(source.slice(buttonGroup.arguments[2].start,buttonGroup.arguments[2].end).includes('img/forest-badge.png')){const old=source.slice(buttonGroup.arguments[2].start,buttonGroup.arguments[2].end);if(!old.includes('focus-achievement-button'))replace(buttonGroup.arguments[2],old.replace('className:g.default.imageButton,','className:g.default.imageButton+" focus-achievement-button",'));}
-else throw Error('Forest achievement button changed');
+const forestRender=method(1181,'render');let buttonGroup,sharedActions;
+walk(forestRender.value,node=>{
+    if(node.type==='CallExpression'&&node.arguments[0]?.value==='div'&&node.arguments[1]?.properties?.some(p=>p.key?.name==='className'&&source.slice(p.value.start,p.value.end)==='g.default.buttonGroup'))buttonGroup=node;
+    if(node.type==='CallExpression'&&source.slice(node.callee.start,node.callee.end)==='window.FocusForest.renderActions')sharedActions=node;
+});
+if(buttonGroup)replace(buttonGroup,'window.FocusForest.renderActions(m.default,this,g.default)');
+else if(!sharedActions)throw Error('Forest button boundary changed');
 method(1190,'renderContent','function(){var e=this.props.type;return"guide"===e?l.default.createElement(c.default,null):"ranking"===e?window.FocusAchievements.render(l.default,n(1463)):null}');
 // Task writes notify only after the existing IndexedDB transaction commits.
 const taskUpdate=method(23,'updateTask'),taskUpdateText=source.slice(taskUpdate.value.start,taskUpdate.value.end);
 if(!taskUpdateText.includes('focus-local-achievements-input')){if(!taskUpdateText.includes('r.onsuccess='))throw Error('Task update boundary changed');replace(taskUpdate.value,taskUpdateText.replace('r.onsuccess=', 'r.transaction.addEventListener("complete",function(){window.dispatchEvent(new Event("focus-local-achievements-input"))});r.onsuccess='));}
 method(1181,'componentWillUnmount','function(){window.FocusForest.unmount(this);window.removeEventListener("focus-local-achievements-changed",this.localAchievementRefresh);M.default.shared.off(M.default.Event.USERINFO_CHANGED,this.refresh)}');
 
-assignment(821,'onWindowsFocused','function(){}');
+assignment(821,'onWindowsFocused','function(){window.FocusForest.refreshHeader(d)}');
+assignment(821,'updateForestIconBadge','function(){window.FocusForest.refreshHeader(d)}');
+assignment(821,'refreshForest','function(){d.setState({forestEnabled:h.default.shared.forestEnabled},function(){window.FocusForest.refreshHeader(d)})}');
 const about = method(1147, 'render');
 let versionRow, versionText, rating;
 walk(about.value, node => {
@@ -161,12 +164,13 @@ walk(header.value, node => {
     }
 });
 const mount = method(821, 'componentDidMount');
-replace(mount.value,'function(){window.FocusLocalReady.then(function(){if(h.default.shared.forestEnabled)P.default.shared.setDailyLaunchReward()}).catch(function(e){window.FocusLocal.notice(e.message)});this.localReleaseDispose=window.FocusAppUI.attachHeader(this,function(){C.default.shared.start("Notification"+(S.default.shared.isWin7?".ogg":".m4a"))})}');
+replace(mount.value,'function(){this.localForestDispose=window.FocusForest.attachHeader(this,P.default.shared);this.localReleaseDispose=window.FocusAppUI.attachHeader(this,function(){C.default.shared.start("Notification"+(S.default.shared.isWin7?".ogg":".m4a"))})}');
 const headerModuleText = source.slice(modules[821].start, modules[821].end);
 if (headerModuleText.includes('key:"componentWillUnmount"')) {
     const unmount = method(821, 'componentWillUnmount');
-    if (source.slice(unmount.value.start, unmount.value.end) !== 'function(){if(this.localReleaseDispose)this.localReleaseDispose()}') throw new Error('Header unmount has other behavior; preserve it before revising.');
+    if (!['function(){if(this.localReleaseDispose)this.localReleaseDispose()}','function(){if(this.localReleaseDispose)this.localReleaseDispose();if(this.localForestDispose)this.localForestDispose()}'].includes(source.slice(unmount.value.start, unmount.value.end))) throw new Error('Header unmount has other behavior; preserve it before revising.');
+    replace(unmount.value,'function(){if(this.localReleaseDispose)this.localReleaseDispose();if(this.localForestDispose)this.localForestDispose()}');
 }
-else bundle.edits.push({ start: mount.node.start, end: mount.node.start, code: '{key:"componentWillUnmount",value:function(){if(this.localReleaseDispose)this.localReleaseDispose()}},' });
+else bundle.edits.push({ start: mount.node.start, end: mount.node.start, code: '{key:"componentWillUnmount",value:function(){if(this.localReleaseDispose)this.localReleaseDispose();if(this.localForestDispose)this.localForestDispose()}},' });
 bundle.save();
 console.log('Updated About, notification release entries and local reset entry points.');

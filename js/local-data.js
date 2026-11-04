@@ -606,7 +606,9 @@
     function forestSet(name,value) {
         if (maintenance || invalidated) throw new Error(root.FocusI18n.text('本地数据维护中，请等待完成后刷新。'));
         if (!FOREST_FIELDS.includes(name)) throw new Error('Invalid forest field');
-        const state=forestState();state.fields[name]=String(value);localStorage.setItem(FOREST_KEY,JSON.stringify(state));
+        const state=forestState(),stored=String(value);if(state.fields[name]===stored)return;
+        state.fields[name]=stored;localStorage.setItem(FOREST_KEY,JSON.stringify(state));
+        root.dispatchEvent(new Event('focus-local-forest-changed'));
     }
     async function collectForest(item) {
         return exclusive(()=>maintenanceLock(async()=>{
@@ -627,6 +629,7 @@
             }
             const credit=points;fields.Sunlight=String((Number(fields.Sunlight)||0)+credit);
             localStorage.setItem(FOREST_KEY,JSON.stringify(state));
+            root.dispatchEvent(new Event('focus-local-forest-changed'));
             return {collected:true,totalPoints:Number(fields.Sunlight)};
         }));
     }

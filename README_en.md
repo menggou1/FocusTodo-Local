@@ -105,12 +105,13 @@ The application guide, maintenance, architecture, backlog and release documentat
 | Goal | Start here |
 |---|---|
 | Tasks, focus, calendar and backups | [User guide](docs/en/GUIDE.md) |
+| 2.0.0 scope, implementation order and acceptance | [2.0.0 plan](docs/en/plan/2.0.0.md) |
 | Changes, release evidence and historical reports | [Changelog](docs/en/CHANGELOG.md) |
 | Development, tests and version/release procedure | [Maintenance guide](docs/en/MAINTENANCE.md) |
 | Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.7.12`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.8.0`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 ## License
 

@@ -17,6 +17,7 @@ Updated 2026-11-04. This is the English view of the same canonical item IDs, not
 | E14 | P2 | Wallpaper redirect boundaries | Direct image addresses now require HTTPS and an exact Bing hostname, but XHR/Image may still follow redirects. CSP provides additional destination restrictions. Evaluate redirect-rejecting requests and Blob rendering with cross-origin, timeout and fallback acceptance. |
 | E15 | P3 | Local server file-open race | Node real-path checks reject external/private symlink targets, but resolution and opening are separate. Evaluate cross-platform handle-based constraints for local attackers able to mutate the runtime directory. The Python fallback lacks equivalent protections. |
 | E11 | P2 | Separate browser mini-timer window | Keep the existing in-page floating timer this round. Detect Document Picture-in-Picture and bridge the existing timer state/commands; fall back when unavailable. Do not promise native always-on-top behavior from a normal popup. |
+| E16 | P1 | Implement independent 2.0.0 versioning and compatibility | Starting with 2.0.0, application versions and tags will use independent three-part versions; 7.1.1 remains provenance metadata only. Update metadata, generators, old/new parsing, history, packaging and deployment gates together. Verify old backups, notification reads and cache continuity without resetting data. This 1.8.0 release retains the old format. See the [2.0.0 plan](plan/2.0.0.md) for implementation order and acceptance criteria. |
 
 ## Outstanding real-environment verification
 
@@ -53,4 +54,4 @@ Use isolated known 23:50–00:20 spans, pauses and different task/subtask associ
 
 ## Maintenance rule
 
-Add new open work, unfinished verification or future plans only to the canonical backlog and keep this translation aligned. Remove completed items after evidence exists, writing results into the corresponding release report. Preserve actual historical failures and measurements, but do not turn a past candidate failure into a current defect or repeat successful checks instead of collecting missing real-environment evidence.
+Add new open work, unfinished verification and future-plan task status only to the canonical backlog and keep this translation aligned. `docs/plan/` may record stable goals, stage dependencies and acceptance criteria, referencing these IDs without duplicating progress. Remove completed items after evidence exists, writing results into the corresponding release report. Preserve actual historical failures and measurements, but do not turn a past candidate failure into a current defect or repeat successful checks instead of collecting missing real-environment evidence.

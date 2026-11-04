@@ -1,0 +1,1101 @@
+{
+  "source": "9d39be5; isolated Edge, deviceScaleFactor=1, before shared-controls refactor",
+  "cases": {
+    "zh-CN-light": {
+      "1024": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.328px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.6719px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(245, 245, 245)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(239, 239, 242)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          }
+        }
+      },
+      "1280": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.328px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.6719px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(245, 245, 245)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(239, 239, 242)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          }
+        }
+      },
+      "switch": {
+        "track": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "18px",
+          "width": "36px",
+          "padding": "0px",
+          "borderRadius": "9px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(253, 85, 83)",
+          "color": "rgb(82, 82, 82)"
+        },
+        "handle": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "14px",
+          "width": "14px",
+          "padding": "0px",
+          "borderRadius": "50%",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(82, 82, 82)"
+        }
+      },
+      "select": {
+        "control": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "30px",
+          "width": "200px",
+          "padding": "0px",
+          "borderRadius": "6px",
+          "borderWidth": "1px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(82, 82, 82)"
+        },
+        "value": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "20px",
+          "width": "43.5469px",
+          "padding": "0px",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(82, 82, 82)"
+        }
+      }
+    },
+    "zh-CN-dark": {
+      "1024": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.328px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.6719px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(26, 26, 32)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(47, 47, 52)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(36, 36, 42)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          }
+        }
+      },
+      "1280": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.328px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.6719px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(26, 26, 32)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(47, 47, 52)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(36, 36, 42)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          }
+        }
+      },
+      "switch": {
+        "track": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "18px",
+          "width": "36px",
+          "padding": "0px",
+          "borderRadius": "9px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(253, 85, 83)",
+          "color": "rgb(232, 232, 235)"
+        },
+        "handle": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "14px",
+          "width": "14px",
+          "padding": "0px",
+          "borderRadius": "50%",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(232, 232, 235)"
+        }
+      },
+      "select": {
+        "control": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "30px",
+          "width": "200px",
+          "padding": "0px",
+          "borderRadius": "6px",
+          "borderWidth": "1px",
+          "backgroundColor": "rgb(26, 26, 32)",
+          "color": "rgb(232, 232, 235)"
+        },
+        "value": {
+          "fontSize": "14px",
+          "fontFamily": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "20px",
+          "width": "43.5469px",
+          "padding": "0px",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(232, 232, 235)"
+        }
+      }
+    },
+    "en-light": {
+      "1024": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.125px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.875px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(245, 245, 245)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(239, 239, 242)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          }
+        }
+      },
+      "1280": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.125px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.875px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(174, 174, 174)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(255, 255, 255)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(245, 245, 245)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(239, 239, 242)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(82, 82, 82)"
+          }
+        }
+      },
+      "switch": {
+        "track": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "18px",
+          "width": "36px",
+          "padding": "0px",
+          "borderRadius": "9px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(253, 85, 83)",
+          "color": "rgb(82, 82, 82)"
+        },
+        "handle": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "14px",
+          "width": "14px",
+          "padding": "0px",
+          "borderRadius": "50%",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(82, 82, 82)"
+        }
+      },
+      "select": {
+        "control": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "30px",
+          "width": "200px",
+          "padding": "0px",
+          "borderRadius": "6px",
+          "borderWidth": "1px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(82, 82, 82)"
+        },
+        "value": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "20px",
+          "width": "72.9375px",
+          "padding": "0px",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(82, 82, 82)"
+        }
+      }
+    },
+    "en-dark": {
+      "1024": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.125px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.875px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(26, 26, 32)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(47, 47, 52)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(36, 36, 42)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          }
+        }
+      },
+      "1280": {
+        "sidebar": {
+          ".ProjectItem-name-3IyjO": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "180.125px",
+            "padding": "0px 0px 0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-estimatedTime-1FiA2": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "33px",
+            "padding": "1px 14px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-taskQuantity-2TAGR": {
+            "fontSize": "12px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "33px",
+            "height": "34px",
+            "width": "16.875px",
+            "padding": "1px 10px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(143, 143, 145)"
+          },
+          ".ProjectItem-root-1iGkr": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "38px",
+            "width": "280px",
+            "padding": "0px 8px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(26, 26, 32)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".ProjectItem-content-2_ONW": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "36px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "1px",
+            "backgroundColor": "rgb(47, 47, 52)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchContainer-33crx": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "34px",
+            "width": "264px",
+            "padding": "0px",
+            "borderRadius": "6px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgb(36, 36, 42)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".SearchItem-searchInput-a6ypV": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "height": "20px",
+            "width": "218px",
+            "padding": "0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          },
+          ".HomeHeader-username-2_ExH": {
+            "fontSize": "14px",
+            "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+            "fontWeight": "400",
+            "lineHeight": "50px",
+            "height": "auto",
+            "width": "auto",
+            "padding": "1px 0px 0px",
+            "borderRadius": "0px",
+            "borderWidth": "0px",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "color": "rgb(232, 232, 235)"
+          }
+        }
+      },
+      "switch": {
+        "track": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "18px",
+          "width": "36px",
+          "padding": "0px",
+          "borderRadius": "9px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(253, 85, 83)",
+          "color": "rgb(232, 232, 235)"
+        },
+        "handle": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "14px",
+          "width": "14px",
+          "padding": "0px",
+          "borderRadius": "50%",
+          "borderWidth": "0px",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "color": "rgb(232, 232, 235)"
+        }
+      },
+      "select": {
+        "control": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "30px",
+          "width": "200px",
+          "padding": "0px",
+          "borderRadius": "6px",
+          "borderWidth": "1px",
+          "backgroundColor": "rgb(26, 26, 32)",
+          "color": "rgb(232, 232, 235)"
+        },
+        "value": {
+          "fontSize": "14px",
+          "fontFamily": "\"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "fontWeight": "400",
+          "lineHeight": "20px",
+          "height": "20px",
+          "width": "72.9375px",
+          "padding": "0px",
+          "borderRadius": "0px",
+          "borderWidth": "0px",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "color": "rgb(232, 232, 235)"
+        }
+      }
+    }
+  }
+}

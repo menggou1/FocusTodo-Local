@@ -23,17 +23,18 @@ def build(output, tag=None):
         raise ValueError('Run npm run build:release before packaging')
     # Explicit runtime allowlist: no credentials, dependencies, screenshots or Git state.
     files = [ROOT / name for name in (
-        'index.html', 'patch.js', 'main.css', 'local-ui.css', 'purchase.html',
+        'index.html', 'patch.js', 'main.css', 'local-ui.css', 'local-controls.css', 'purchase.html',
         'purchase.css', 'reset-password.html', 'resetpassword.css', 'favicon.ico',
         '8fzlr-o0m4w-001.ico', 'package.json', 'release.json', 'LICENSE',
-        'README.md', 'README_en.md', 'CHANGELOG.md', 'FOCUSTODO-新时代设计纲领.md', 'start.ps1', 'start.sh',
+        'README.md', 'README_en.md', 'CHANGELOG.md', 'start.ps1', 'start.sh',
         '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs',
     )]
     for directory in ('js', 'audio', 'font', 'i18n', 'img'):
         files.extend(p for p in (ROOT / directory).rglob('*') if p.is_file())
     files.extend(ROOT / update['report'] for update in config['updates'])
     # Preserve historical reports and entry points; the new policy is prospective.
-    files.extend((ROOT / 'docs').rglob('*.md'))
+    files.extend(p for p in (ROOT / 'docs').rglob('*.md')
+                 if 'design-theory' not in p.relative_to(ROOT / 'docs').parts)
     files.extend(p for p in (ROOT / 'docs' / 'guide-images').rglob('*') if p.is_file())
     files.append(ROOT / 'ARCHITECTURE.md')
     files = sorted(set(files))

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 os.environ.setdefault('GIT_TERMINAL_PROMPT', '0')
 os.environ.setdefault('GCM_INTERACTIVE', 'never')
 RUNTIME_PATHS = (
-    'index.html', 'patch.js', 'main.css', 'local-ui.css', 'purchase.html',
+    'index.html', 'patch.js', 'main.css', 'local-controls.css', 'local-ui.css', 'purchase.html',
     'purchase.css', 'reset-password.html', 'resetpassword.css', 'favicon.ico',
     '8fzlr-o0m4w-001.ico', 'release.json', 'LICENSE',
     'js', 'audio', 'font', 'i18n', 'img',
@@ -41,7 +41,7 @@ def build(ref='main', output=Path('dist/pages')):
         if kind != b'blob' or mode not in (b'100644', b'100755'):
             raise ValueError('Only regular static files may be published')
         names.append(name.decode('utf-8'))
-    for required in ('index.html', 'js/main.js', 'js/local-release.js', 'js/local-data.js',
+    for required in ('index.html', 'main.css', 'local-controls.css', 'local-ui.css', 'js/main.js', 'js/local-release.js', 'js/local-data.js',
                      'js/local-timer-core.js', 'js/local-timer-ui.js', 'js/local-app-ui.js', 'js/local-backup.js', 'js/local-theme-storage.js',
                      'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js',
                      'js/local-network.js'):

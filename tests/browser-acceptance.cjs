@@ -178,11 +178,12 @@ const server = http.createServer((request, response) => {
         }));
         await check('language settings switch to complete English and notifications are opt-in', () => app(async page => {
             await page.mouse.click(1255,25); await page.getByText('通用',{exact:true}).click();
-            assert.deepEqual(await page.locator('#focus-language option').evaluateAll(nodes=>nodes.map(x=>x.value)),['auto','zh-CN','en']);
-            const loaded=page.waitForEvent('load');await page.locator('#focus-language').selectOption('en');await loaded;
+            await page.locator('#focus-language .focus-ui-select__control').click();
+            assert.deepEqual(await page.locator('#focus-language .focus-ui-select__option').allTextContents(),['跟随系统','简体中文','English']);
+            const loaded=page.waitForEvent('load');await page.locator('#focus-language .focus-ui-select__option').getByText('English',{exact:true}).click();await loaded;
             await page.waitForFunction(()=>window.__acceptanceTimer);
             await page.mouse.click(1255,25);await page.getByText('General',{exact:true}).click();
-            assert.equal(await page.locator('#focus-language').inputValue(),'en');
+            assert.equal(await page.locator('#focus-language .focus-ui-select__single-value').innerText(),'English');
             assert.equal(await page.evaluate(()=>window.__permissionRequests),0);
             await page.getByRole('button',{name:'Enable notifications',exact:true}).click();
             assert.equal(await page.evaluate(()=>window.__permissionRequests),1);
@@ -214,8 +215,9 @@ const server = http.createServer((request, response) => {
             assert.equal(await page.evaluate(()=>window.FocusI18n.locale),'fr');
             await page.mouse.click(1255,25);
             await page.locator('[class*="Settings-menuName"]').filter({hasText:/Général|General/}).click();
-            assert.equal(await page.locator('#focus-language').inputValue(),'auto');
-            assert.equal(await page.locator('#focus-language option[value="fr"]').count(),0);
+            assert.equal(await page.locator('#focus-language .focus-ui-select__single-value').innerText(),'Follow system');
+            await page.locator('#focus-language .focus-ui-select__control').click();
+            assert.equal(await page.locator('#focus-language .focus-ui-select__option').filter({hasText:/français|French/i}).count(),0);
         },null,url,'fr-CA'));
         await check('theme journal recovers before rendering and is excluded from backups', () => app(async page => {
             assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'Ocean');

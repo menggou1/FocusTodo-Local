@@ -2,7 +2,9 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.12`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.8.0`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
+
+Design-theory documents are for entertainment only and are not development rules. Unless the user explicitly requests it, models must not read, consult or modify those documents. Development follows user requirements, code evidence and this maintenance guide.
 
 ## Start development
 
@@ -30,6 +32,7 @@ Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by b
 | `i18n/local-en.json` | English translations for local UI and errors |
 | `js/local-i18n-catalog.js` | Generated complete fallback catalog; do not edit directly |
 | `js/local-settings-ui.js` | General language controls and explicit notification permission/test controls |
+| `local-controls.css` | Shared control atoms across the application: existing button, switch, tomato icon, date-picker and menu visuals; feature layout remains in its owning module |
 | `release.json` | Human-edited version, author, dates and Chinese/English release notes |
 | `patch.js` | Ordered, idempotent installation of identity, network, backup UI, settings and themes through their owning feature services |
 | `local-network.js` | Same-origin/Bing policy and reachable legacy account XHR behavior; preserve real profile edits |
@@ -41,6 +44,7 @@ Change legacy integration through the checked AST scripts, then retain both scri
 ```bash
 node scripts/revise-timer-integration.cjs
 node scripts/revise-app-integration.cjs
+node scripts/revise-controls-integration.cjs
 node scripts/revise-pomodoro-rendering.cjs
 node scripts/revise-project-management.cjs
 node scripts/revise-local-profile.cjs
@@ -53,6 +57,19 @@ The shared bundle editor checks the known 1,484-module structure, unique boundar
 
 
 Module ownership follows features. Reuse the existing data, backup, settings and theme APIs before adding another compatibility file; reducing line count alone does not complete a refactor.
+
+### Style ownership and reuse
+
+| Source | Responsibility |
+|---|---|
+| `main.css` | Legacy feature layout, typography, themes and vendor foundations across sidebar, tasks, timers, calendar, statistics and other application areas |
+| `local-controls.css` | Shared buttons, icon buttons, settings rows, menus, date pickers/popovers, tomato icons and text truncation; legacy class aliases share declarations while preserving specificity and required exceptions |
+| `local-ui.css` | Local feature layout and interaction states; common button borders, backgrounds, colors and cursors belong to controls |
+| `FocusSettings.selectStyles()` / `switchProps()` | Shared selects for Pomodoro, Appearance and language; shared switch parameters for Pomodoro and General settings. Read current theme colors when used |
+| `startup.css` | Independent inlined first screen, without application-control or external-font dependencies |
+| `purchase.css` / `resetpassword.css` | Original standalone-page layout; no local application theme variables, retaining existing isolation of legacy account networking |
+
+Reuse an existing atom or compatibility alias before adding a control; retain feature layout in its owning module. Run `revise-controls-integration.cjs` after `revise-app-integration.cjs` and verify idempotence. A new root runtime stylesheet must be included in HTML, portable archives and the Pages allowlist.
 
 ## Data rules
 
@@ -101,7 +118,9 @@ Reports describe initial problems, final behavior and final validation evidence.
 
 Each new repair release increments the third local-version component. Preserve already-pushed failed tags; publish the corrected commit under the next patch version. Version reports follow the actual task scope, and failed 1.4.2 content is consolidated into 1.4.3.
 
-The official base remains 7.1.1. Full version: `7.1.1-local.<major>.<minor>.<patch>`; the annotated Git tag uses only the local version, for example `1.4.0`. The database version and legacy settings marker `Version=6.5` are separate and must not be renamed to match the product version.
+The 1.x series, including this 1.8.0 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
+
+**Version 1.8.0 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
 
 Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 
@@ -112,6 +131,8 @@ The workflow tests Windows/macOS/Linux × Node 22/24. Node 24 also runs browser 
 ## Documentation layout
 
 The user guides are `docs/GUIDE.md` and `docs/en/GUIDE.md`; shared screenshots live in `docs/guide-images/` and ship in portable archives. Chinese and English release reports are in `docs/releases/` and `docs/en/releases/`. Old redirect pages are removed; links point directly to archived reports. When moving documents, update relative links, release metadata, generators and package contents, and check paths and anchors. Existing English reports are preserved by the generator.
+
+Engineering version plans live in `docs/plan/`, mirrored in `docs/en/plan/`, and record scope, priority, implementation order and acceptance criteria. Backlog alone tracks task status. Engineering documents and entertainment design-theory documents stay separate without cross-links; theory documents do not generate contributing guides or development requirements. Entertainment theory is excluded from portable runtime packages; all documentation stays out of the Pages runtime artifact.
 
 ## GitHub Pages
 
@@ -143,9 +164,11 @@ List management component integration is maintained by `node scripts/revise-proj
 
 Use Conventional Commits for future commits: `type(optional-scope): short description`. Use `fix:` for repairs, `feat:` for new features, and `docs:`, `refactor:`, `test:` or `chore:` for their respective changes. Preserve published history.
 
-## Visual scope and unchanged regions
+## Full-application style refactoring and visual acceptance
 
-Declare the target, reference and permitted properties before editing. A reference sidebar, search and username must retain their font family, size, weight, line height, geometry and interactions. Scope schedule rules to its own root; preserve native picker styling. Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Freeze independent computed-style evidence (current fixture: tests/fixtures/sidebar-typography-cfd6449.json); do not regenerate it from the implementation. Test both target appearance and unchanged regions, including a deliberately injected regression that the guard must reject. Baseline changes require explicit user authorization and independent evidence. Prefer a local inverse patch when correcting scope violations. Passing test counts do not replace visual acceptance.
+Declare the refactoring scope, reference and intended visual changes before editing. **The 1.8.0 refactor covers all styles**, including sidebar, settings, timer, calendar, forest and other pages; there are no excluded target regions. Selectors, ownership and reuse may change while visuals and interactions remain stable by default. Explicit changes such as the language menu and collect-all action have their own acceptance criteria. Refactoring CSS organization does not require changing typography or layout.
+
+Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Keep independent computed-style evidence and deliberately injected regression checks covering geometry, clipping, popovers, keyboard input and control states. The existing sidebar fixture `tests/fixtures/sidebar-typography-cfd6449.json` remains visual regression evidence, not a freeze on CSS files or selector ownership. Future visual baseline changes need clear requirements and independent evidence; local feature changes should constrain their effects. Correct regressions locally while preserving useful changes. Passing test counts do not replace visual acceptance.
 
 Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Publication requires the same commit's main tests, tag tests and Pages deployment to succeed. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
 

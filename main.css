@@ -136,9 +136,8 @@ body { font-family:var(--focus-ui-font); }
 
 .NotificationDialog-item-2GTZU {
     border-bottom: 1px solid var(--split);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding: 8px 0;
     color: var(--text-title)
 }
@@ -150,9 +149,8 @@ body { font-family:var(--focus-ui-font); }
 }
 
 .NotificationDialog-content-13__Q {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: var(--text-title)
 }
 
@@ -288,10 +286,6 @@ body { font-family:var(--focus-ui-font); }
 .HomeHeader-setting-3WzPf {
 
 }
-
-
-
-
 
 .ScrollView-root-1KhMW {
     overflow-y: auto;
@@ -533,98 +527,7 @@ body { font-family:var(--focus-ui-font); }
     background-size: 24px 24px;
 }
 
-
-.InputUL-root-3ux3Z {
-    border-radius: 6px;
-    overflow: hidden;
-    position: relative;
-}
-
-.InputUL-options-1tHVO {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    height: 150px;
-    padding-left: 6px;
-    background-color: var(--bg-item-selected-popup);
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0) rgba(0, 0, 0, 0);
-}
-
-.InputUL-options-1tHVO::-webkit-scrollbar
-{
-    width: 6px;
-    height: 8px;
-    background-color: rgba(0, 0, 0, 0);
-    -ms-overflow-style: -ms-autohiding-scrollbar;
-}
-
-/*定义滚动条轨道 内阴影+圆角*/
-.InputUL-options-1tHVO::-webkit-scrollbar-track
-{
-    /*-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);*/
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0);
-}
-
-/*定义滑块 内阴影+圆角*/
-.InputUL-options-1tHVO::-webkit-scrollbar-thumb
-{
-    border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0);
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0);
-}
-
-.InputUL-options-1tHVO.InputUL-showScrollBar-edrPO::-webkit-scrollbar-thumb {
-    background-color: rgba(174, 174, 174, 0.5);
-}
-
-.InputUL-options-1tHVO.InputUL-highlight-2l4Ze::-webkit-scrollbar-thumb {
-    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-}
-
-.InputUL-options-1tHVO.InputUL-showScrollBar-edrPO {
-    scrollbar-color: rgba(174, 174, 174, 0.5) rgba(0, 0, 0, 0);
-}
-
-.InputUL-options-1tHVO.InputUL-highlight-2l4Ze {
-    scrollbar-color: rgba(0,0,0,.3) rgba(0, 0, 0, 0);
-}
-
-.InputUL-option-2EZeP {
-    border-radius: 6px;
-    overflow: hidden;
-    height: 30px;
-    line-height: 30px;
-    font-size: 14px;
-    width: 100%;
-    color: var(--text-title);
-}
-
-.InputUL-option-2EZeP:hover {
-    background-color: var(--bg-hover-pomodoro-selector);
-}
-
-.InputUL-placeholder-1SAKg:hover {
-    background-color: #ffffff00;
-}
-
-.InputUL-btmIndicator-3S63b,
-.InputUL-topIndicator-JuoQ6 {
-    position: absolute;
-    left: 34%;
-    width: 32%;
-    height: 1px;
-    background-color: var(--text-desc);
-    opacity: 30%;
-}
-
-.InputUL-topIndicator-JuoQ6 {
-    top: 59px;
-}
-
-.InputUL-btmIndicator-3S63b {
-    top: 90px;
-}.PriorityInput-root--yJmX {
+.PriorityInput-root--yJmX {
     padding: 8px 0 8px;
 }
 
@@ -658,9 +561,8 @@ body { font-family:var(--focus-ui-font); }
 .PriorityInput-title-1YnEf {
     padding-left: 6px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: var(--text-title);
 }
 
@@ -780,9 +682,8 @@ body { font-family:var(--focus-ui-font); }
     flex-shrink: 1;
     padding-left: 8px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding-top: 0px;
     line-height: 33px;
     color: var(--text-title);
@@ -1181,9 +1082,8 @@ body { font-family:var(--focus-ui-font); }
     line-height: 40px;
     font-size: 22px;
     font-weight: 500;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding-right: 8px;
 }
 
@@ -1691,9 +1591,8 @@ body { font-family:var(--focus-ui-font); }
     flex-shrink: 1;
     color: var(--text-desc);
     padding-left: 8px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .RepetitionItem-value-2lsSq {
@@ -1838,9 +1737,8 @@ body { font-family:var(--focus-ui-font); }
     color: var(--text-desc);
     padding-left: 8px;
     width: 100px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .ProjectItem-value-2PBK0 {
@@ -1848,9 +1746,8 @@ body { font-family:var(--focus-ui-font); }
     height: 100%;
     line-height: 100%;
     text-align: right;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }.TaskPriorityMenuItem-root-lS8Om {
     height: 51px;
     padding: 0 24px 0 16px;
@@ -2226,8 +2123,6 @@ body { font-family:var(--focus-ui-font); }
     text-decoration: line-through;
 }
 
-
-
 .TaskItem-morePomodoros-rPhT6,
 .TaskItem-lessPomodoros-1C60D {
     margin-top: 3px;
@@ -2280,18 +2175,6 @@ body { font-family:var(--focus-ui-font); }
     color: var(--theme-red);
 }
 
-.TaskItem-actualPomodoro-2mUH6,
-.TaskItem-estimatedPomodoro-37ziA {
-    display: inline-block;
-    vertical-align: top;
-    height: 12px;
-    width: 12px;
-    background-size: 12px 12px;
-    background-repeat: no-repeat;
-    background-position: top;
-    /*margin-bottom: 6px;*/
-    margin-top: 1px;
-}
 
 .TaskItem-actualPomodoro-2mUH6 {
     background-image: url(img/task-pomo-actual.png);
@@ -2316,9 +2199,8 @@ body { font-family:var(--focus-ui-font); }
 .ProjectBlankItem-name-3LE9t {
     width: 235px;
     text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding: 1px 24px 0 10px;
     height: 34px;
     line-height: 33px;
@@ -2465,8 +2347,6 @@ body { font-family:var(--focus-ui-font); }
     vertical-align: top;
     margin-top: 2px;
 }
-
-
 
 .Settings-content-2P-hz {
     flex: 1;
@@ -2681,9 +2561,8 @@ body { font-family:var(--focus-ui-font); }
 
 .FloatTimer-taskName-1zU28 {
     line-height: 50px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .FloatTimer-actions-YG_w6 {
@@ -2821,9 +2700,8 @@ body { font-family:var(--focus-ui-font); }
 .AccountSettings-account-l0zTo {
     flex: 0 1 auto;
     min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     margin-right: 8px;
     height: 48px;
     line-height: 48px;
@@ -3064,9 +2942,8 @@ body { font-family:var(--focus-ui-font); }
     flex: 1;
     max-width: 100%;
     margin: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     font-weight: normal;
 }
 
@@ -3194,9 +3071,8 @@ body { font-family:var(--focus-ui-font); }
     display: inline-block;
     height: 100%;
     width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
     font-size: 14px;
     font-weight: normal;
 }
@@ -3256,8 +3132,6 @@ body { font-family:var(--focus-ui-font); }
     border: 1px solid var(--border);
 }
 
-
-
 .ChangeAccountDialog-errorMsg-1JwLe {
     position: relative;
     margin-top: 0;
@@ -3273,9 +3147,8 @@ body { font-family:var(--focus-ui-font); }
     display: inline-block;
     -webkit-transform-origin: left;
             transform-origin: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     margin-left: 12px;
     width: 318px;
 }
@@ -3307,9 +3180,8 @@ body { font-family:var(--focus-ui-font); }
     display: inline-block;
     height: 100%;
     width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
     font-size: 1em;
     font-weight: normal;
 }
@@ -3384,8 +3256,6 @@ body { font-family:var(--focus-ui-font); }
     border: 1px solid var(--border);
 }
 
-
-
 .ChangePasswordDialog-errorMsg-1V4kS {
     position: relative;
     margin-top: 0;
@@ -3401,9 +3271,8 @@ body { font-family:var(--focus-ui-font); }
     display: inline-block;
     -webkit-transform-origin: left;
             transform-origin: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     margin-left: 12px;
     width: 258px;
 }
@@ -3599,8 +3468,6 @@ body { font-family:var(--focus-ui-font); }
     width: 45px;
     height: 45px;
 }
-
-
 
 .Subscription-originalCost-1xkVQ {
     color: rgba(255, 255, 255, 0.6);
@@ -3970,9 +3837,8 @@ body { font-family:var(--focus-ui-font); }
 .RankingList-userRow-1jx3a .RankingList-userInfo-2ke5g .RankingList-name-16S9y {
     font-size: 14px;
     max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
 }
 
 .RankingList-userRow-1jx3a .RankingList-pomodoroTime-TN_nv {
@@ -4081,9 +3947,8 @@ body { font-family:var(--focus-ui-font); }
 .RankingList-selfRowUserInfo-11rTk .RankingList-userName-3Myq8 {
     font-size: 14px;
     max-width: 100px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
 }
 
 
@@ -4756,9 +4621,8 @@ body { font-family:var(--focus-ui-font); }
     /*font-weight: bold;*/
     color: var(--text-title);
     margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+
 }
 
 .GroupList-groupMeta-1hyfk {
@@ -4798,9 +4662,8 @@ body { font-family:var(--focus-ui-font); }
     color: var(--text-desc);
     margin-top: 4px;
     line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+
     /*opacity: 0.8;*/
 }
 
@@ -4951,8 +4814,6 @@ body { font-family:var(--focus-ui-font); }
     border: 1px solid var(--border);
 }
 
-
-
 .PasswordConfirmDialog-errorMsg-2YRnu {
     position: relative;
     margin-top: 0;
@@ -4968,9 +4829,8 @@ body { font-family:var(--focus-ui-font); }
     display: inline-block;
     -webkit-transform-origin: left;
             transform-origin: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     margin-left: 12px;
     width: 258px;
 }
@@ -6347,17 +6207,15 @@ body { font-family:var(--focus-ui-font); }
     /*font-weight: 500;*/
     color: var(--text-title);
     /*margin-bottom: 4px;*/
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+
 }
 
 .GroupDrawer-userLastActive-2IX8h {
     font-size: 12px;
     color: var(--text-desc);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+
 }
 
 .GroupDrawer-removeUserBtn-3C2n5 {
@@ -6402,9 +6260,8 @@ body { font-family:var(--focus-ui-font); }
 }
 
 .ContextMenuItem-title-2dAnd {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: var(--text-title);
 }
 
@@ -6695,9 +6552,8 @@ body { font-family:var(--focus-ui-font); }
     text-align: left;
     padding-left: 12px;
     padding-top: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .FolderEditer-checkedIcon-1MRV2 {
@@ -7058,9 +6914,8 @@ body { font-family:var(--focus-ui-font); }
     flex-shrink: 1;
     color: var(--text-desc);
     padding-left: 8px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .PomodoroItem-value-2UABE {
@@ -7604,9 +7459,8 @@ body { font-family:var(--focus-ui-font); }
     padding-left: 12px;
     padding-right: 8px;
     padding-top: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .TagSelector-indicator-1lRsV {
@@ -7668,9 +7522,8 @@ body { font-family:var(--focus-ui-font); }
     color: var(--text-desc);
     padding-left: 8px;
     width: 100px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .StartTimeItem-value-2ILft {
@@ -7678,9 +7531,8 @@ body { font-family:var(--focus-ui-font); }
     height: 100%;
     line-height: 100%;
     text-align: right;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }.TagAdd-root-2Akbf {
     display: inline-block;
     height: 20px;
@@ -7734,9 +7586,8 @@ body { font-family:var(--focus-ui-font); }
     color: var(--text-desc);
     padding-left: 8px;
     width: 100px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .TaskItem-value-s0BeD {
@@ -7744,9 +7595,8 @@ body { font-family:var(--focus-ui-font); }
     height: 100%;
     line-height: 100%;
     text-align: right;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .TaskItem-delete-1NiV8 {
@@ -7835,9 +7685,8 @@ body { font-family:var(--focus-ui-font); }
     line-height: 42px;
     font-size: 14px;
     text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
     padding: 0px 16px 0 16px;
 }
 
@@ -7864,9 +7713,8 @@ body { font-family:var(--focus-ui-font); }
 }
 
 .TaskInput-name-3eMac {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .TaskInput-checkedIcon-ypoQu {
@@ -7931,9 +7779,8 @@ body { font-family:var(--focus-ui-font); }
 .ProjectSelection-name-tEUHh {
     flex-grow: 1;
     padding-left: 12px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: var(--text-title);
 }
 
@@ -7974,9 +7821,8 @@ body { font-family:var(--focus-ui-font); }
     text-align: left;
     padding-left: 16px;
     padding-top: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .IntervalInput-checkedIcon-3eJGL {
@@ -8037,9 +7883,8 @@ body { font-family:var(--focus-ui-font); }
     vertical-align: middle;
     height: 20px;
     line-height: 20px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: var(--text-desc);
     font-size: 12px;
     margin-top: 2px;
@@ -8048,9 +7893,8 @@ body { font-family:var(--focus-ui-font); }
 .StatisticsRegion-value-2-Ibc {
     height: 36px;
     line-height: 36px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     text-align: center;
     vertical-align: middle;
 }
@@ -8174,9 +8018,8 @@ body { font-family:var(--focus-ui-font); }
 .Tag-title-1tzBL {
     display: inline-block;
     max-width: 248px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     height: 20px;
     line-height: 20px;
 }
@@ -8229,9 +8072,8 @@ body { font-family:var(--focus-ui-font); }
 .ProjectInput-name-1H1QN {
     flex-grow: 1;
     padding-left: 12px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: var(--text-title);
 }
 
@@ -8316,9 +8158,8 @@ body { font-family:var(--focus-ui-font); }
 .HistoryTaskItem-name-D-VRY {
     border-radius: 4px;
     height: 20px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding-top: 1px;
 }
 
@@ -8457,9 +8298,8 @@ body { font-family:var(--focus-ui-font); }
 
 .HistoryPomodoroItem-name-3a_ch {
     height: 20px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding-top: 1px;
 }
 
@@ -8467,8 +8307,6 @@ body { font-family:var(--focus-ui-font); }
     color: var(--text-desc);
     font-size: 12px;
 }
-
-
 
 .CalendarMonthView-root-36TzS {
     display: flex;
@@ -8661,9 +8499,8 @@ body { font-family:var(--focus-ui-font); }
 .CalendarTaskListPopover-itemLabel-2xdBL {
     flex: 1;
     min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+
 }
 
 .CalendarTaskListPopover-checkedIcon-3CUGM {
@@ -8943,9 +8780,8 @@ body { font-family:var(--focus-ui-font); }
 
 .CalendarView-taskListName-UHQVI {
     max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
 }
 
 .CalendarView-taskListArrow-12rWD {
@@ -9048,9 +8884,8 @@ body { font-family:var(--focus-ui-font); }
     padding-left: 12px;
     padding-right: 8px;
     padding-top: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .TagContextMenuSelector-checked-Rn6TF {
@@ -9963,9 +9798,8 @@ body { font-family:var(--focus-ui-font); }
 
 .FullscreenTimer-menuTitle-1RGjX {
     text-align: center;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     color: rgba(255, 255, 255, 0.6);
     font-size: 14px;
     margin-top: -6px;
@@ -10000,9 +9834,8 @@ body { font-family:var(--focus-ui-font); }
     color: var(--text-desc);
     text-align: center;
     padding: 0 24px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
 }
 
 .FullscreenTimer-task-WwZAH {
@@ -10047,9 +9880,8 @@ body { font-family:var(--focus-ui-font); }
 .FullscreenTimer-name-1FbHt {
     max-width: 352px;
     height: 20px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     padding-top: 1px;
 }
 
@@ -10253,20 +10085,8 @@ body { font-family:var(--focus-ui-font); }
 .FullscreenTimer-actionTitleWithoutIcon-1_hrX {
     margin-left: 24px;
 }
-.Pomodoro-pomodoro-3iw6I {
-    display: inline-block;
-    /*margin-left: 2px;*/
-    width: 12px;
-    height: 12px;
-    vertical-align: top;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 12px 12px;
-}
 
-.Pomodoro-pomodoro-3iw6I:first-child {
-    margin-left: 0;
-}.WhiteNoiseSelector-root-3UJm4 {
+.WhiteNoiseSelector-root-3UJm4 {
     position: absolute;
     width: 312px;
     border-radius: 10px;
@@ -10347,9 +10167,8 @@ body { font-family:var(--focus-ui-font); }
 .WhiteNoiseSelector-name-2aoVn {
     color: var(--text-title);
     flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
 }
 
 
@@ -10456,9 +10275,8 @@ body { font-family:var(--focus-ui-font); }
     font-size: 14px;
     font-weight: 500;
     color: var(--text-title);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+
 }
 
 .CalendarTaskList-stateText-12hNg {
@@ -10868,17 +10686,6 @@ body { font-family:var(--focus-ui-font); }
     color: var(--theme-red);
 }
 
-.TodayTaskItem-actualPomodoro-2WrZO,
-.TodayTaskItem-estimatedPomodoro-1hO-K {
-    display: inline-block;
-    vertical-align: top;
-    height: 12px;
-    width: 12px;
-    background-size: 12px 12px;
-    background-repeat: no-repeat;
-    background-position: top;
-    margin-top: 1px;
-}
 
 .TodayTaskItem-actualPomodoro-2WrZO {
     background-image: url(img/task-pomo-actual.png);
@@ -11011,8 +10818,6 @@ body { font-family:var(--focus-ui-font); }
     background-position: center;
     background-repeat: no-repeat;
 }
-
-
 
 .TodaySubtaskItem-root-1HxdW {
     display: flex;
@@ -11225,9 +11030,8 @@ body { font-family:var(--focus-ui-font); }
     line-height: 24px;
     font-size: 14px;
     font-weight: bold;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
+
+
 }
 
 .ProjectChart-granularity-2U1ih {
@@ -11362,9 +11166,8 @@ body { font-family:var(--focus-ui-font); }
     margin-top: 4px;
     height: 52px;
     padding: 8px 8px 0px 8px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     background-color: var(--bg-item);
     border-radius: 6px;
 }
@@ -11374,9 +11177,8 @@ body { font-family:var(--focus-ui-font); }
 
 .ProjectChart-name-w2Xw_ {
     height: 20px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
     font-size: 12px;
 
     max-width: 250px;
@@ -11439,9 +11241,8 @@ body { font-family:var(--focus-ui-font); }
 }
 
 .TimerModeSelector-name-2T2it {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
     font-size: 16px;
     font-weight: 500;
 }
@@ -11924,9 +11725,8 @@ body { font-family:var(--focus-ui-font); }
     line-height: 24px;
     font-size: 14px;
     font-weight: bold;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+
+
 }
 
 .DailyGoal-operation-3aajE {
@@ -12082,8 +11882,6 @@ body { font-family:var(--focus-ui-font); }
     height: 292px;
     overflow-y: scroll;
 }
-
-
 
 .ReviewChart-timelineCanvas-IBeJf,
 .ReviewChart-pomodoroCanvas-3aADk {
@@ -12266,9 +12064,8 @@ body { font-family:var(--focus-ui-font); }
     line-height: 24px;
     font-size: 14px;
     font-weight: bold;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+
+
 }
 
 .FocusTime-operation-1dfqw {
@@ -12362,8 +12159,6 @@ body { font-family:var(--focus-ui-font); }
     height: 236px;
 }
 
-
-
 .FocusTime-textWidth-XKczm {
     position: absolute;
     top: -20px;
@@ -12380,9 +12175,8 @@ body { font-family:var(--focus-ui-font); }
     padding: 0 16px 0 16px;
     min-width: 120px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
     font-size: 14px;
     color: var(--text-title);
 }
@@ -12484,9 +12278,8 @@ body { font-family:var(--focus-ui-font); }
 }
 
 .FocusTimeItem-title-3uoQ3 {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+
     font-size: 12px;
     height: 15px;
 }
@@ -12545,17 +12338,14 @@ body { font-family:var(--focus-ui-font); }
     padding-left: 12px;
     padding-right: 12px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .CustomProjectItem-name-26Eoi.CustomProjectItem-hidden-25nUv {
     color: var(--text-desc);
     text-decoration: line-through;
 }
-
-
 
 .CustomProjectItem-hide-19rOt {
     width: 20px;
@@ -12591,9 +12381,8 @@ body { font-family:var(--focus-ui-font); }
     line-height: 24px;
     font-size: 14px;
     font-weight: bold;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
+
+
 }
 
 .BarChart-preAndNext-2kq0q {
@@ -12705,9 +12494,8 @@ body { font-family:var(--focus-ui-font); }
     padding-left: 5px;
     padding-right: 12px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+
+
 }
 
 .PresetProjectItem-name-3IRW_.PresetProjectItem-hidden-3cfHE {
@@ -19383,7 +19171,9 @@ button.close {
   .hidden-print {
     display: none !important;
   }
-}@font-face{font-family:'HelveticaNeue-Light';src:url(font/HelveticaNeueLight.otf);font-weight:100;font-style:normal;font-display:swap}@font-face{font-family:'impact';src:url(font/impact.otf);font-style:normal;font-weight:300;font-display:swap}@font-face{font-family:'DINCond';src:url(font/DINCond-Medium.otf);font-weight:300;font-style:normal;font-display:swap}@font-face{font-family:'DINCond-Black';src:url(font/DINCond-Black.otf);font-weight:300;font-style:normal;font-display:swap}*{padding:0;margin:0;box-sizing:border-box;cursor:default}ul{margin:0}li{list-style:none}html{font-size:14px;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;height:100%;width:100%;min-height:570px;min-width:1000px;-ms-overflow-style:none}body{font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","PingFang SC","Microsoft YaHei","Noto Sans SC","Helvetica Neue",Helvetica,Arial,sans-serif;font-synthesis:none;font-size:1em;height:100%;width:100%}html[lang^="zh-Hant"] body,html[lang^="zh-TW"] body,html[lang^="zh-HK"] body,html[lang^="zh-MO"] body,body:lang(zh-Hant),body:lang(zh-TW),body:lang(zh-HK),body:lang(zh-MO){font-family:"Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang TC", "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Helvetica Neue", Helvetica, Arial, sans-serif}.small-font{font-size:12px}.larger1-font{font-size:16px}*::-webkit-input-placeholder{color:#aeaeae;font-size:12px;line-height:20px}::-webkit-scrollbar{width:6px;height:8px;background-color:rgba(0,0,0,0)}::-webkit-scrollbar-track{border-radius:10px;background-color:rgba(0,0,0,0)}::-webkit-scrollbar-thumb{border-radius:10px;-webkit-box-shadow:inset 0 0 6px rgba(0,0,0,0.3);background-color:var(--shadow-popup)}main{height:100%;width:100%;position:relative;padding-top:50px;overflow:hidden}.datepicker{margin:0 auto;width:220px;height:220px;text-align:center;padding-top:4px;font-size:12px}.datepicker table{width:100%;height:100%;border-collapse:separate}.datepicker table thead tr{font-weight:normal;color:var(--text-title)}.datepicker table thead tr th{text-align:center;font-weight:normal;color:var(--text-title)}.datepicker table>tbody>tr>td,.datepicker table>thead>tr>th{padding:0}.datepicker table thead tr:first-child{height:0}.datepicker table thead tr:last-child{height:42px}.datepicker table thead tr:last-child th{color:#999;font-size:0.8333em;font-weight:normal}.datepicker .day{cursor:pointer;width:31px;height:25px;line-height:26px;color:var(--text-title);padding:0}.datepicker .day.disabled{cursor:default}.datepicker .day.old,.datepicker .day.new{color:var(--text-desc)}.datepicker .day.today{color:var(--theme-red)}.datepicker .day.active{color:#fff;background-repeat:no-repeat;background-position:center;background-size:24px 24px;background-image:url(img/calendar-day-active.png)}.datepicker .prev{text-indent:-9999px;line-height:24px;background-position:center;background-repeat:no-repeat;background-size:24px 24px;background-image:url(img/calendar-month-prev.png)}.datepicker .next{text-indent:-9999px;line-height:24px;background-position:center;background-repeat:no-repeat;background-size:24px 24px;background-image:url(img/calendar-month-next.png)}.popover-content{padding:0}.popover{border:none;box-shadow:0 0 20px 1px var(--shadow-popup);border-radius:8px;padding:0;background-color:var(--bg-popup)}.popover.bottom>.arrow:after{display:none}.popover.bottom>.arrow{border-radius:3px;border-color:var(--bg-popup) var(--bg-popup) transparent transparent;box-shadow:2px -2px 2px -2px var(--shadow-popup);border-width:7px;-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}.popover.bottom>.arrow{margin-left:-7px;top:-6px}body{--theme-red: #FD5553;--theme-red-light: #FD55531A;--split: #f4f4f4;--border: #e5e5e5;--border-input: #e5e5e5;--shadow-split: rgba(224, 224, 224, 0.5);--shadow-popup: rgba(197, 197, 197, 0.5);--bg-main: #fff;--bg-main-timer: #28282dE6;--bg-table: #f7f7fa;--bg-item: #ffffff;--bg-item-timer: #333337;--bg-even-item: #f4f4f4;--bg-popup: #fff;--bg-hover: #f5f5f5;--bg-hover-pomodoro-selector: #ebebeb;--bg-item-selected: #f5f5f5;--bg-item-selected-popup: #f5f5f5;--bg-input: #fff;--bg-search-input: #EFEFF2;--bg-popup-edge-area: rgba(0, 0, 0, 0.3);--bg-button: #F3F4F6;--bg-segment: #F3F4F6;--bg-segment-selected: #fff;--bg-project-chart-table: #fafafa;--bg-goal-circle: #F3F3F7;--bg-forest-level: #ffffffA1;--bg-group-exit: #0000001f;--text-title: #525252;--text-desc: #aeaeae;--text-estimated-pomodoro-red: #ffd9d8;--text-overdue: #dd4b39;--text-error: #eb4d45;--text-task-blue: #0091FF;--text-forest-green: #4c9d56;--text-forest-badge: #cf8a00;--timer-bgi-brightness: 1}body.dark{--theme-red: #FD5553;--theme-red-light: #FD55531A;--split: rgba(255, 255, 255, 0.08);--border: rgba(255, 255, 255, 0.18);--border-input: #393942;--shadow-split: #0e0d12;--shadow-popup: #0e0d12;--bg-main: #1a1a20;--bg-main-timer: #28282dE6;--bg-table: #0e0d12;--bg-item: #1a1a20;--bg-item-timer: #2e2e32;--bg-even-item: #222226;--bg-popup: #2d2d37;--bg-hover: rgba(255, 255, 255, 0.09);--bg-hover-pomodoro-selector: #5d5d62;--bg-item-selected: #2f2f34;--bg-item-selected-popup: #45454c;--bg-input: #24242a;--bg-search-input: #24242a;--bg-popup-edge-area: rgba(0, 0, 0, 0.63);--bg-button: #383842;--bg-segment: #26252b;--bg-segment-selected: #39383e;--bg-project-chart-table: #0f0f14;--bg-goal-circle: #0D0C10;--bg-forest-level: #ffffffA1;--bg-group-exit: #ffffff33;--text-title: #e8e8eb;--text-desc: #8f8f91;--text-estimated-pomodoro-red: #ffd9d8;--text-overdue: #dd4b39;--text-error: #eb4d45;--text-task-blue: #0091FF;--text-forest-green: #4c9d56;--text-forest-badge: #cf8a00;--timer-bgi-brightness: 0.7}.ftd-slider-track{margin-top:3px;height:4px;border-radius:2px;background-color:var(--split)}.ftd-slider-track-0{background-color:#fd5553}.ftd-slider-thumb{width:10px;height:10px;border-radius:6px;background-color:#fd5553;outline:2px solid #fff}.ftd-slider-thumb-active{outline:1px solid #fff}
+}@font-face{font-family:'HelveticaNeue-Light';src:url(font/HelveticaNeueLight.otf);font-weight:100;font-style:normal;font-display:swap}@font-face{font-family:'impact';src:url(font/impact.otf);font-style:normal;font-weight:300;font-display:swap}@font-face{font-family:'DINCond';src:url(font/DINCond-Medium.otf);font-weight:300;font-style:normal;font-display:swap}@font-face{font-family:'DINCond-Black';src:url(font/DINCond-Black.otf);font-weight:300;font-style:normal;font-display:swap}*{padding:0;margin:0;box-sizing:border-box;cursor:default}ul{margin:0}li{list-style:none}html{font-size:14px;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;height:100%;width:100%;min-height:570px;min-width:1000px;-ms-overflow-style:none}body{font-family:"Inter","Segoe UI",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Meiryo","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","PingFang SC","Microsoft YaHei","Noto Sans SC","Helvetica Neue",Helvetica,Arial,sans-serif;font-synthesis:none;font-size:1em;height:100%;width:100%}html[lang^="zh-Hant"] body,html[lang^="zh-TW"] body,html[lang^="zh-HK"] body,html[lang^="zh-MO"] body,body:lang(zh-Hant),body:lang(zh-TW),body:lang(zh-HK),body:lang(zh-MO){font-family:"Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, "PingFang TC", "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", "Helvetica Neue", Helvetica, Arial, sans-serif}.small-font{font-size:12px}.larger1-font{font-size:16px}*::-webkit-input-placeholder{color:#aeaeae;font-size:12px;line-height:20px}::-webkit-scrollbar{width:6px;height:8px;background-color:rgba(0,0,0,0)}::-webkit-scrollbar-track{border-radius:10px;background-color:rgba(0,0,0,0)}::-webkit-scrollbar-thumb{border-radius:10px;-webkit-box-shadow:inset 0 0 6px rgba(0,0,0,0.3);background-color:var(--shadow-popup)}main{height:100%;width:100%;position:relative;padding-top:50px;overflow:hidden}
+
+body{--theme-red: #FD5553;--theme-red-light: #FD55531A;--split: #f4f4f4;--border: #e5e5e5;--border-input: #e5e5e5;--shadow-split: rgba(224, 224, 224, 0.5);--shadow-popup: rgba(197, 197, 197, 0.5);--bg-main: #fff;--bg-main-timer: #28282dE6;--bg-table: #f7f7fa;--bg-item: #ffffff;--bg-item-timer: #333337;--bg-even-item: #f4f4f4;--bg-popup: #fff;--bg-hover: #f5f5f5;--bg-hover-pomodoro-selector: #ebebeb;--bg-item-selected: #f5f5f5;--bg-item-selected-popup: #f5f5f5;--bg-input: #fff;--bg-search-input: #EFEFF2;--bg-popup-edge-area: rgba(0, 0, 0, 0.3);--bg-button: #F3F4F6;--bg-segment: #F3F4F6;--bg-segment-selected: #fff;--bg-project-chart-table: #fafafa;--bg-goal-circle: #F3F3F7;--bg-forest-level: #ffffffA1;--bg-group-exit: #0000001f;--text-title: #525252;--text-desc: #aeaeae;--text-estimated-pomodoro-red: #ffd9d8;--text-overdue: #dd4b39;--text-error: #eb4d45;--text-task-blue: #0091FF;--text-forest-green: #4c9d56;--text-forest-badge: #cf8a00;--timer-bgi-brightness: 1}body.dark{--theme-red: #FD5553;--theme-red-light: #FD55531A;--split: rgba(255, 255, 255, 0.08);--border: rgba(255, 255, 255, 0.18);--border-input: #393942;--shadow-split: #0e0d12;--shadow-popup: #0e0d12;--bg-main: #1a1a20;--bg-main-timer: #28282dE6;--bg-table: #0e0d12;--bg-item: #1a1a20;--bg-item-timer: #2e2e32;--bg-even-item: #222226;--bg-popup: #2d2d37;--bg-hover: rgba(255, 255, 255, 0.09);--bg-hover-pomodoro-selector: #5d5d62;--bg-item-selected: #2f2f34;--bg-item-selected-popup: #45454c;--bg-input: #24242a;--bg-search-input: #24242a;--bg-popup-edge-area: rgba(0, 0, 0, 0.63);--bg-button: #383842;--bg-segment: #26252b;--bg-segment-selected: #39383e;--bg-project-chart-table: #0f0f14;--bg-goal-circle: #0D0C10;--bg-forest-level: #ffffffA1;--bg-group-exit: #ffffff33;--text-title: #e8e8eb;--text-desc: #8f8f91;--text-estimated-pomodoro-red: #ffd9d8;--text-overdue: #dd4b39;--text-error: #eb4d45;--text-task-blue: #0091FF;--text-forest-green: #4c9d56;--text-forest-badge: #cf8a00;--timer-bgi-brightness: 0.7}.ftd-slider-track{margin-top:3px;height:4px;border-radius:2px;background-color:var(--split)}.ftd-slider-track-0{background-color:#fd5553}.ftd-slider-thumb{width:10px;height:10px;border-radius:6px;background-color:#fd5553;outline:2px solid #fff}.ftd-slider-thumb-active{outline:1px solid #fff}
 
 /* The list itself scrolls; the containing scroll-view only clips its track. */
 .ProjectManagement-content--kCla .ScrollView-root-1KhMW { min-height: 0; }
