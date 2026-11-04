@@ -22,7 +22,7 @@ jobs:
           ref: main
       - name: Sync and commit changes
         run: |
-          cp 'FOCUSTODO-新时代设计纲领.md' docs/CONTRIBUTING.md
+          sed 's|](docs/|](|g' 'FOCUSTODO-新时代设计纲领.md' > docs/CONTRIBUTING.md
           git add docs/CONTRIBUTING.md
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'

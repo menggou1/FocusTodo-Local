@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.7.11`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
+Current worktree: `7.1.1-local.1.7.12`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposals live only in the backlog.
 
 ## Start development
 
@@ -11,6 +11,10 @@ Check `git status --short`, the current branch and `git remote -v`. Preserve unr
 Run `npm ci` to install locked development dependencies. Node.js 22+ is required; CI covers 22 and 24. Running the packaged app does not require npm dependencies. Start with `node scripts/start.cjs`, `npm start`, `sh start.sh`, or the Windows launcher. The default origin is `http://127.0.0.1:5500/index.html`. Browser data is scoped to the browser, hostname and port. There is no React source build or hot reload; refresh after editing static files.
 
 ## Source boundaries
+
+The Node server accepts only `127.0.0.1` or `localhost` Host values with valid optional ports. Custom domains are unsupported. Real-path checks reject links outside the runtime root or into hidden/private tooling paths. The Python fallback does not provide these checks.
+
+Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by backups without changing database v3. End that break and export a backup before downgrading to 1.7.11 or earlier, which does not understand this field. Work spans retain occurrence order after a clock rollback even when wall-clock ranges overlap. Imports dated before the saved cursor require confirmation without counting a negative interval.
 
 | File | Responsibility |
 |---|---|

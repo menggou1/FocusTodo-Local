@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.7.11**, author Lexible.
+Current application: **7.1.1-local.1.7.12**, author Lexible.
+
+## 7.1.1-local.1.7.12 · 2026-11-04
+
+- Restore timer backups after a system clock rollback while retaining completed focus time.
+- Keep an interrupted break paused when continuation is declined, and resume its remaining rest time.
+- Validate local server access and wallpaper addresses, and fix calendar acceptance across months.
+
+[English report](releases/UPDATE-7.1.1-local.1.7.12.md).
 
 ## 7.1.1-local.1.7.11 · 2026-10-30
 

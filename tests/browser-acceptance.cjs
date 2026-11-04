@@ -256,6 +256,26 @@ const server = http.createServer((request, response) => {
             await themeFixture(page);
             await page.evaluate(() => { const themes = JSON.parse(localStorage.getItem('lexible-custom-themes')); themes.__bing_daily__.updatedAt = Date.now(); localStorage.setItem('lexible-custom-themes', JSON.stringify(themes)); });
         }));
+        await check('Bing rejects an untrusted image URL and uses the next API before loading an image', () => app(async page => {
+            const unexpected = [];
+            page.on('request', request => { if (request.url().includes('wallpaper-untrusted')) unexpected.push(request.url()); });
+            let fallback = 0;
+            await page.route('https://bing.biturl.top/**', route => route.fulfill({ contentType: 'application/json',
+                body: JSON.stringify({ url: url + '/index.html?wallpaper-untrusted' }) }));
+            await page.route('https://www.bing.com/HPImageArchive.aspx**', route => {
+                fallback++;
+                return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ images: [{ urlbase: '/fallback-wallpaper' }] }) });
+            });
+            await page.route('https://www.bing.com/fallback-wallpaper_1920x1080.jpg', route => route.fulfill({ contentType: 'image/png',
+                headers: { 'access-control-allow-origin': '*' }, body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aL1sAAAAASUVORK5CYII=', 'base64') }));
+            await appearance(page); await page.locator('[data-theme-id="__bing_daily__"]').click();
+            await page.waitForFunction(() => localStorage.getItem('lexible-active-custom-theme') === '__bing_daily__');
+            assert.equal(fallback, 1); assert.deepEqual(unexpected, []);
+            assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /data:image/);
+        }, async page => {
+            await themeFixture(page);
+            await page.evaluate(() => { const themes = JSON.parse(localStorage.getItem('lexible-custom-themes')); delete themes.__bing_daily__; localStorage.setItem('lexible-custom-themes', JSON.stringify(themes)); });
+        }));
         await check('Bing selection survives closing settings during its first download', () => app(async page => {
             const bing = await delayedBing(page); await appearance(page);
             await page.locator('[data-theme-id="__bing_daily__"]').click(); await bing.started;
@@ -1098,6 +1118,69 @@ const server = http.createServer((request, response) => {
             await page.getByRole('button', { name: '不计入中断部分' }).click();
             await page.locator('#focus-recovery').waitFor({ state: 'detached' });
             const s = await snapshot(page); assert.equal(s.indexedDB.Pomodoro.length, 0); assert.equal(s.indexedDB.TimerSession[0].state, 'pause');
+        }));
+        await check('interrupted rest stays paused through confirmation, backup and peer-tab resume', () => app(async (page, context) => {
+            await page.evaluate(async () => {
+                const now = Date.now(), start = now - 480000, data = await FocusLocalData.snapshot();
+                let result = FocusTimerCore.reduce(null, { type: 'start', sessionId: 'rest-recovery', mode: 'countdown',
+                    config: { interval: 60, shortBreak: 600, autoBreak: true, autoWork: true } }, start);
+                result = FocusTimerCore.reduce(result.session, { type: 'tick' }, start + 70000);
+                data.indexedDB.Pomodoro = result.records;
+                data.indexedDB.TimerSession = [FocusTimerCore.reduce(result.session, { type: 'tick' }, now).session];
+                await FocusLocalData.replace(data, { backup: false });
+            });
+            await page.reload(); await page.locator('#focus-recovery').waitFor();
+            await page.locator('#focus-recovery input[type=checkbox]').uncheck();
+            await page.getByRole('button', { name: '不计入中断部分' }).click();
+            await page.locator('#focus-recovery').waitFor({ state: 'detached' });
+            const before = await snapshot(page), paused = before.indexedDB.TimerSession[0];
+            assert.equal(paused.state, 'pause'); assert.equal(paused.pausedFrom, 'rest'); assert.equal(paused.phaseElapsed, 10);
+            assert.equal(before.indexedDB.Pomodoro.reduce((n, row) => n + row.interval, 0), 60);
+            await page.evaluate(async () => {
+                const encoded = await FocusLocalBackup.encode(await FocusLocalData.snapshot(), { format: 'gzip' });
+                await FocusLocalData.replace((await FocusLocalBackup.decode(encoded.bytes)).data, { backup: false });
+            });
+            await page.reload();
+            await page.waitForFunction(() => window.__acceptanceTimer?.localTimer?.session?.state === 'pause');
+            await page.waitForTimeout(1200);
+            assert.equal((await snapshot(page)).indexedDB.TimerSession[0].phaseElapsed, 10);
+            const peer = await context.newPage(); await peer.goto(url);
+            await peer.waitForFunction(() => window.__acceptanceTimer?.localTimer?.session?.pausedFrom === 'rest');
+            await peer.evaluate(() => window.__acceptanceTimer.switchToState('work'));
+            await page.waitForFunction(() => window.__acceptanceTimer.localTimer.session.state === 'rest');
+            assert.equal(await page.evaluate(() => window.__acceptanceTimer.state.timerInfo.interval), 600);
+            const resumed = await snapshot(page);
+            assert.equal(resumed.indexedDB.TimerSession[0].pausedFrom, undefined);
+            assert.deepEqual(resumed.indexedDB.Pomodoro, before.indexedDB.Pomodoro);
+        }));
+        for (const overlap of [false, true]) await check('clock rollback backup restores ' + (overlap ? 'overlapping spans' : 'a future cursor') + ' without losing work', () => app(async page => {
+            await page.evaluate(async overlap => {
+                const start = Date.now() - 300000, data = await FocusLocalData.snapshot();
+                let session = FocusTimerCore.reduce(null, { type: 'start', sessionId: 'rollback-backup',
+                    config: { interval: 3600 } }, start).session;
+                session = FocusTimerCore.reduce(session, { type: 'tick' }, start + 120000).session;
+                if (overlap) {
+                    session = FocusTimerCore.reduce(session, { type: 'tick' }, start + 60000).session;
+                    session = FocusTimerCore.reduce(session, { type: 'resolve' }, start + 60000).session;
+                    session = FocusTimerCore.reduce(session, { type: 'tick' }, start + 90000).session;
+                }
+                data.meta.exportDate = new Date(start + (overlap ? 90000 : 60000)).toISOString();
+                data.indexedDB.TimerSession = [session];
+                const encoded = await FocusLocalBackup.encode(data, { format: 'json' });
+                await FocusLocalData.replace((await FocusLocalBackup.decode(encoded.bytes)).data, { backup: false });
+            }, overlap);
+            await page.reload(); await page.locator('#focus-recovery').waitFor();
+            const session = (await snapshot(page)).indexedDB.TimerSession[0];
+            assert.equal(session.state, 'recovery');
+            assert.equal(session.pendingRecovery.to, session.pendingRecovery.from);
+            assert.equal(await page.locator('#focus-recovery input[type=checkbox]').isChecked(), false);
+            await page.getByRole('button', { name: '不计入中断部分' }).click();
+            await page.locator('#focus-recovery').waitFor({ state: 'detached' });
+            const restored = await snapshot(page);
+            assert.equal(restored.indexedDB.TimerSession[0].state, 'pause');
+            assert.equal(restored.indexedDB.Pomodoro.reduce((n, row) => n + row.interval, 0), overlap ? 150 : 120);
+            await page.reload(); await page.waitForFunction(() => window.__acceptanceTimer?.localTimer?.session?.state === 'pause');
+            assert.deepEqual((await snapshot(page)).indexedDB.Pomodoro, restored.indexedDB.Pomodoro);
         }));
         await check('IndexedDB failure rolls records and cursor back; retry commits exactly once', () => app(async page => {
             await begin(page); await age(page, 120);

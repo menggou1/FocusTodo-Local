@@ -1,6 +1,19 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { create, JOURNAL_KEY, KEYS } = require('../js/local-theme-storage.js');
+const { create, JOURNAL_KEY, KEYS, bingImageFromResponse } = require('../js/local-theme-storage.js');
+
+test('Bing API image URLs are restricted to HTTPS on the exact Bing hosts', () => {
+    const image = 'https://www.bing.com/th?id=OHR.example_1920x1080.jpg';
+    assert.equal(bingImageFromResponse({ url: image, copyright: 'credit' }).url, image);
+    assert.equal(bingImageFromResponse({ url: 'https://th.bing.com/th/id/example.jpg' }).url, 'https://th.bing.com/th/id/example.jpg');
+    assert.equal(bingImageFromResponse({ images: [{ urlbase: '/th?id=OHR.example', copyright: 'credit' }] }).url,
+        'https://www.bing.com/th?id=OHR.example_1920x1080.jpg');
+    for (const url of ['http://www.bing.com/pic', 'https://www.bing.com.attacker.example/pic', 'https://user@www.bing.com/pic',
+        'https://www.bing.com:444/pic', 'https://attacker.example/pic', 'http://127.0.0.1:5500/index.html', '//www.bing.com/pic']) {
+        assert.equal(bingImageFromResponse({ url }), null, url);
+    }
+    assert.equal(bingImageFromResponse({ images: [{ urlbase: '@attacker.example/pic' }] }), null);
+});
 
 function storage(initial = {}, options = {}) {
     const values = new Map(Object.entries(initial));

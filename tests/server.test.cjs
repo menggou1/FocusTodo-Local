@@ -31,6 +31,16 @@ test('HEAD returns metadata with no response body', async () => {
     assert.equal(Number(res.headers['content-length']), fs.statSync(path.join(root, 'audio/alm_AlarmBeep.mp3')).size);
     assert.equal(res.headers['content-type'], 'audio/mpeg');
 });
+test('rejects non-loopback Host headers while allowing documented local names', async () => {
+    for (const host of ['attacker.example', 'localhost.attacker.example', '127.0.0.1.attacker.example', 'localhost@attacker.example', 'localhost:bad']) {
+        const res = await request('/index.html', { Host: host });
+        assert.equal(res.status, 403, host);
+        assert.equal(res.body.length, 0);
+    }
+    for (const host of ['localhost', `localhost:${server.address().port}`, `127.0.0.1:${server.address().port}`]) {
+        assert.equal((await request('/index.html', { Host: host })).status, 200, host);
+    }
+});
 
 test('cancelled font downloads close their file streams', async t => {
     const original = fs.createReadStream;
@@ -73,12 +83,32 @@ test('invalid or unsatisfiable audio ranges reject without sending the file', as
     }
 });
 test('hidden files, private tooling, traversal and writes are inaccessible', async () => {
-    for (const name of ['/.git/config', '/node_modules/acorn/package.json', '/scripts/server.cjs', '/tests/server.test.cjs', '/..%5c..%5cWindows/win.ini']) {
+    for (const name of ['/.git/config', '/node_modules/acorn/package.json', '/scripts/server.cjs', '/SCRIPTS/server.cjs', '/tests/server.test.cjs', '/..%5c..%5cWindows/win.ini']) {
         assert.equal((await request(name)).status, 403);
     }
     assert.equal((await request('/index.html', {}, 'POST')).status, 403);
     assert.equal((await request('/%zz')).status, 400);
     assert.equal((await request('/missing-file.txt')).status, 404);
+});
+test('symbolic links cannot expose files outside the root or protected paths', async t => {
+    const dir = fs.mkdtempSync(path.join(root, 'test-server-link-'));
+    const outside = fs.mkdtempSync(path.join(path.dirname(root), 'focustodo-server-'));
+    t.after(() => { fs.rmSync(dir, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); });
+    fs.writeFileSync(path.join(outside, 'private.txt'), 'private test data');
+    try {
+        // Windows junctions need no developer-mode or symlink privilege.
+        const type = process.platform === 'win32' ? 'junction' : 'dir';
+        fs.symlinkSync(outside, path.join(dir, 'outside'), type);
+        fs.symlinkSync(path.join(root, 'scripts'), path.join(dir, 'tool'), type);
+        fs.symlinkSync(path.join(root, 'img'), path.join(dir, 'images'), type);
+    } catch (error) {
+        if (['EPERM', 'EACCES', 'ENOSYS'].includes(error.code)) { t.skip('File symlinks unavailable'); return; }
+        throw error;
+    }
+    const prefix = '/' + path.basename(dir);
+    assert.equal((await request(prefix + '/outside/private.txt')).status, 403);
+    assert.equal((await request(prefix + '/tool/server.cjs')).status, 403);
+    assert.equal((await request(prefix + '/images/github.svg')).status, 200);
 });
 test('a busy port reports failure and exits instead of claiming startup succeeded', async () => {
     const child = spawn(process.execPath, [path.join(root, 'scripts/server.cjs')], { cwd: path.parse(root).root, env: { ...process.env, FOCUS_PORT: String(server.address().port) }, windowsHide: true });

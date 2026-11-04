@@ -62,7 +62,7 @@ FocusTodo 本地版以 7.1.1 为最初源码基线。此后，项目围绕本地
 
 ### 根脉相连，来源清楚
 
-本项目基于 [lamngockhuong/FocusTodo](https://github.com/lamngockhuong/focustodo) 7.1.1 发展，长期保留原作者信息、许可证和来源声明，支持 FocusTodo 官方与正版软件，坚持个人学习研究定位。`upstream/7.1.1` 归档分支及其历史长期保留，来源和归档说明见[维护指南](docs/MAINTENANCE.md#7-源码来源与原版归档)。
+本项目基于 [lamngockhuong/FocusTodo](https://github.com/lamngockhuong/focustodo) 7.1.1 发展，长期保留原作者信息、许可证和来源声明，支持 FocusTodo 官方与正版软件，坚持个人学习研究定位。`upstream/7.1.1` 归档分支及其历史长期保留，来源和归档说明见[维护指南](MAINTENANCE.md#7-源码来源与原版归档)。
 
 官方 FocusTodo 是本地版的产品根脉和重要参考。尊重来源、珍惜已有成果，是项目自主发展的应有之义。
 

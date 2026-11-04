@@ -36,6 +36,19 @@
         const error = new Error(message + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('；主题恢复日志已保留，请刷新后重试。'):'；主题恢复日志已保留，请刷新后重试。'));
         error.recoveryRequired = true; error.cause = cause; return error;
     }
+    function bingImageFromResponse(data) {
+        if (!data || typeof data !== 'object') return null;
+        let raw, copyright;
+        if (typeof data.url === 'string') { raw = data.url; copyright = data.copyright; }
+        else if (Array.isArray(data.images) && data.images[0] && typeof data.images[0].urlbase === 'string' && data.images[0].urlbase.startsWith('/')) {
+            raw = 'https://www.bing.com' + data.images[0].urlbase + '_1920x1080.jpg'; copyright = data.images[0].copyright;
+        } else return null;
+        try {
+            const url = new URL(raw);
+            if (url.protocol !== 'https:' || !['www.bing.com', 'bing.com', 'th.bing.com'].includes(url.hostname) || url.port || url.username || url.password) return null;
+            return { url: url.href, copyright: typeof copyright === 'string' ? copyright : '' };
+        } catch (_) { return null; }
+    }
     function create(ops) {
         if (!ops || !['get', 'set', 'remove'].every(name => typeof ops[name] === 'function')) throw new Error('Invalid theme storage operations.');
         const read = () => Object.fromEntries(fields.map(name => [name, ops.get(KEYS[name])]));
@@ -344,19 +357,9 @@
                     xhr.timeout = 10000;
                     xhr.onload = function() {
                         try {
-                            var data = JSON.parse(xhr.responseText);
-                            var imageUrl = null, copyright = '';
-                            if (data && data.url) {
-                                imageUrl = data.url;
-                                copyright = data.copyright || '';
-                            } else if (data && data.images && data.images.length > 0) {
-                                var urlbase = data.images[0].urlbase || '';
-                                imageUrl = 'https://www.bing.com' + urlbase + '_1920x1080.jpg';
-                                copyright = data.images[0].copyright || '';
-                            }
-                            if (imageUrl) {
-                                resolve({ url: imageUrl, copyright: copyright });
-                            } else { tryApi(idx + 1); }
+                            var result = bingImageFromResponse(JSON.parse(xhr.responseText));
+                            if (result) resolve(result);
+                            else tryApi(idx + 1);
                         } catch(e) { tryApi(idx + 1); }
                     };
                     xhr.onerror = function() { tryApi(idx + 1); };
@@ -881,5 +884,5 @@
         }).catch(function() {});
     }
 
-    return { installUI, JOURNAL_KEY, KEYS, create };
+    return { installUI, JOURNAL_KEY, KEYS, create, bingImageFromResponse };
 });

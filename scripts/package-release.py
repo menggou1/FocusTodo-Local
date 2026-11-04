@@ -26,7 +26,7 @@ def build(output, tag=None):
         'index.html', 'patch.js', 'main.css', 'local-ui.css', 'purchase.html',
         'purchase.css', 'reset-password.html', 'resetpassword.css', 'favicon.ico',
         '8fzlr-o0m4w-001.ico', 'package.json', 'release.json', 'LICENSE',
-        'README.md', 'README_en.md', 'CHANGELOG.md', 'start.ps1', 'start.sh',
+        'README.md', 'README_en.md', 'CHANGELOG.md', 'FOCUSTODO-新时代设计纲领.md', 'start.ps1', 'start.sh',
         '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs',
     )]
     for directory in ('js', 'audio', 'font', 'i18n', 'img'):

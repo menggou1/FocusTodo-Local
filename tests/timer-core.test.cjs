@@ -107,6 +107,20 @@ test('system clock rollback requests confirmation without negative duration', ()
     const fixed = core.reduce(r.session, { type: 'resolve' }, START - 60000);
     assert.equal(sum(fixed.records), 0); assert.equal(fixed.session.cursorAt, START - 60000);
 });
+test('declining continuation during an interrupted break pauses that break until resumed', () => {
+    let s = start({ mode: 'countdown', config: { interval: 60, shortBreak: 600, autoBreak: true, autoWork: true } });
+    s = core.reduce(s, { type: 'tick' }, START + 70000).session;
+    assert.equal(s.state, 'rest'); assert.equal(s.phaseElapsed, 10);
+    s = core.reduce(s, { type: 'tick' }, START + 400000).session;
+    const r = core.reduce(s, { type: 'resolve', cutoff: s.pendingRecovery.from, continue: false }, START + 400000);
+    assert.equal(r.session.state, 'pause');
+    assert.equal(core.view(r.session, START + 460000).elapse, 10);
+    assert.equal(core.view(r.session, START + 460000).interval, 600);
+    const resumed = core.reduce(r.session, { type: 'resume' }, START + 460000).session;
+    assert.equal(resumed.state, 'rest'); assert.equal(resumed.phaseElapsed, 10);
+    const later = core.reduce(resumed, { type: 'tick' }, START + 470000).session;
+    assert.equal(later.state, 'rest'); assert.equal(later.phaseElapsed, 20);
+});
 test('25 seconds is the inclusive minimum for a partial focus record', () => {
     const r = core.reduce(start(), { type: 'stop' }, START + 25000);
     assert.equal(sum(r.records), 25); assert.equal(r.session.state, 'initial');

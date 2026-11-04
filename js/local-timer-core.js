@@ -138,19 +138,21 @@
         switch (action.type) {
         case 'start':
             if (running(s)) break; // Another tab already started the shared timer.
-            if (s.state === 'pause') { s.state = 'work'; s.cursorAt = now; break; }
+            if (s.state === 'pause') { s.state = s.pausedFrom === 'rest' ? 'rest' : 'work'; delete s.pausedFrom; s.cursorAt = now; break; }
             s = create(action, now); s.state = 'work'; break;
         case 'pause':
             if (s.state === 'work') { settle(s, rows, true); s.state = 'pause'; }
+            else if (s.state === 'rest') { s.state = 'pause'; s.pausedFrom = 'rest'; }
             break;
         case 'resume':
-            if (s.state === 'pause') { s.state = 'work'; s.cursorAt = now; }
+            if (s.state === 'pause') { s.state = s.pausedFrom === 'rest' ? 'rest' : 'work'; delete s.pausedFrom; s.cursorAt = now; }
             break;
         case 'rest':
-            settle(s, rows, true); s.state = 'rest'; s.phaseElapsed = 0; s.cursorAt = now; break;
+            settle(s, rows, true); s.state = 'rest'; delete s.pausedFrom; s.phaseElapsed = 0; s.cursorAt = now; break;
         case 'stop':
         case 'mode':
             settle(s, rows, true); s.state = 'initial'; s.phaseElapsed = 0;
+            delete s.pausedFrom;
             s.totalSeconds = 0; s.recordedSeconds = 0; s.spans = []; s.cursorAt = now;
             if (action.mode) s.mode = action.mode;
             break;
@@ -160,6 +162,7 @@
         case 'detach':
             settle(s, rows, true); s.taskId = ''; s.subtaskId = '';
             s.config = settings(action.config || s.config); s.state = 'initial';
+            delete s.pausedFrom;
             s.phaseElapsed = 0; s.totalSeconds = 0; s.recordedSeconds = 0; s.spans = []; s.cursorAt = now;
             break;
         case 'configure':
@@ -177,6 +180,7 @@
             // Keep unfinished spans; confirmation time and excluded time are never counted.
             s.cursorAt = now;
             if (action.continue === false && s.state === 'work') { settle(s, rows, true); s.state = 'pause'; }
+            else if (action.continue === false && s.state === 'rest') { s.state = 'pause'; s.pausedFrom = 'rest'; }
             break;
         }
         case 'tick': break;
@@ -188,9 +192,10 @@
     }
     function view(s, now) {
         const delta = running(s) ? Math.max(0, now - s.cursorAt) / 1000 : 0;
-        const elapsed = s.state === 'initial' ? 0 : s.mode === 'countup' && s.state !== 'rest' ? s.totalSeconds + delta : s.phaseElapsed + delta;
+        const rest = s.state === 'rest' || s.state === 'waitingForRest' || (s.state === 'pause' && s.pausedFrom === 'rest');
+        const elapsed = s.state === 'initial' ? 0 : s.mode === 'countup' && !rest ? s.totalSeconds + delta : s.phaseElapsed + delta;
         return { state: s.state === 'recovery' ? 'pause' : s.state,
-            interval: s.state === 'rest' || s.state === 'waitingForRest' ? restInterval(s) : s.config.interval,
+            interval: rest ? restInterval(s) : s.config.interval,
             elapse: elapsed, startTime: now - elapsed * 1000, breakpoint: s.recordedSeconds };
     }
     return { GAP_MS, MAX_INTERVAL, MIN_FOCUS_SECONDS, create, reduce, view, pendingSeconds, settings, running };

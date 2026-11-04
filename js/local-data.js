@@ -267,15 +267,19 @@
                 !['cursorAt', 'observedAt', 'phaseElapsed', 'totalSeconds', 'recordedSeconds', 'revision', 'sequence', 'blockSequence', 'completed'].every(key => Number.isFinite(s[key]) && s[key] >= 0)) {
                 throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             }
-            let end = 0;
+            // Spans are stored in the order worked, not necessarily in wall-clock
+            // order: after a clock rollback two legitimate spans can overlap.
             s.spans.forEach(span => {
-                if (!Number.isFinite(span.start) || !Number.isFinite(span.end) || span.start < end || span.end < span.start) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话包含无效专注区间。'):'计时会话包含无效专注区间。'));
-                end = span.end;
+                if (!span || !Number.isFinite(span.start) || !Number.isFinite(span.end) || span.start < 0 || span.end < span.start) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话包含无效专注区间。'):'计时会话包含无效专注区间。'));
             });
+            if (s.pausedFrom !== undefined && (s.state !== 'pause' || s.pausedFrom !== 'rest')) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             if (s.state === 'work' || s.state === 'rest') {
                 const exportAt = Date.parse(data.meta.exportDate);
-                if (!Number.isFinite(exportAt) || exportAt < s.cursorAt) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时快照与导出日期不一致。'):'计时快照与导出日期不一致。'));
-                s.pendingRecovery = { from: s.cursorAt, to: exportAt, priorState: s.state, detectedAt: exportAt, source: 'import' };
+                if (!Number.isFinite(exportAt)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时快照与导出日期不一致。'):'计时快照与导出日期不一致。'));
+                // The system clock can move back before the next timer tick.
+                // Require confirmation but never count the backwards interval.
+                s.pendingRecovery = { from: s.cursorAt, to: Math.max(s.cursorAt, exportAt), priorState: s.state,
+                    detectedAt: exportAt, clockChanged: exportAt < s.cursorAt, source: 'import' };
                 s.state = 'recovery';
             } else if (s.state === 'recovery') {
                 const p = s.pendingRecovery;

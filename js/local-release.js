@@ -3,11 +3,28 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.7.11",
+    "localVersion": "1.7.12",
     "author": "Lexible",
-    "date": "2026-10-30",
+    "date": "2026-11-04",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.7.12",
+            "date": "2026-11-04",
+            "title": "计时恢复与本地运行可靠性修复",
+            "items": [
+                "系统时间回退后，计时备份仍可恢复，保留已专注时长。",
+                "中断休息选择不继续时保持暂停，恢复后继续剩余休息。",
+                "收紧本地服务访问和壁纸地址校验，修复跨月日程验收。"
+            ],
+            "titleEn": "Timer recovery and local runtime reliability fixes",
+            "itemsEn": [
+                "Restore timer backups after a system clock rollback while retaining completed focus time.",
+                "Keep an interrupted break paused when continuation is declined, and resume its remaining rest time.",
+                "Validate local server access and wallpaper addresses, and fix calendar acceptance across months."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.7.12.md"
+        },
         {
             "version": "7.1.1-local.1.7.11",
             "date": "2026-10-30",
@@ -373,7 +390,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.7.11",
+    "version": "7.1.1-local.1.7.12",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

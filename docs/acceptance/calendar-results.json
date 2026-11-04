@@ -1,5 +1,5 @@
 {
-  "version": "7.1.1-local.1.7.3",
+  "version": "7.1.1-local.1.7.12",
   "results": [
     {
       "name": "empty task and fading notice light",
@@ -26,7 +26,15 @@
       "passed": true
     },
     {
-      "name": "native date selection and scroll restore work across navigation and refresh",
+      "name": "native date selection and scroll restore work across navigation and refresh current date",
+      "passed": true
+    },
+    {
+      "name": "native date selection and scroll restore work across navigation and refresh 2026-12-31T12:00:00+08:00",
+      "passed": true
+    },
+    {
+      "name": "native date selection and scroll restore work across navigation and refresh 2028-01-31T12:00:00+08:00",
       "passed": true
     },
     {

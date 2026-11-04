@@ -11,7 +11,7 @@ fs.mkdirSync(evidence, { recursive: true });
     const executablePath = process.env.FOCUS_TEST_BROWSER || (!process.env.FOCUS_TEST_BUNDLED_BROWSER && ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
     const browser = await chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
     const results = [];
-    async function scenario(name, body, locale = 'zh-CN', dark = false) {
+    async function scenario(name, body, locale = 'zh-CN', dark = false, now) {
         if (process.env.FOCUS_CALENDAR_FILTER && !name.includes(process.env.FOCUS_CALENDAR_FILTER)) return;
         const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
         const errors = [], external = [], failedRequests = [];
@@ -35,6 +35,7 @@ fs.mkdirSync(evidence, { recursive: true });
         const page = await context.newPage(); page.on('pageerror', error => errors.push(error.stack));
         page.on('requestfailed', request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText }));
         try {
+            if (now) await page.clock.setFixedTime(new Date(now));
             await page.goto(url); await ready(page); await calendar(page, locale);
             await body(page, context);
             assert.deepEqual(errors, [], 'No browser errors'); assert.deepEqual(external, [], 'No external requests');
@@ -186,7 +187,13 @@ fs.mkdirSync(evidence, { recursive: true });
             await page.locator('.focus-local-notice').filter({ hasText: '该任务已完成' }).waitFor();
             assert.notEqual((await page.evaluate(() => FocusLocalData.session())).state, 'work');
         });
-        await scenario('native date selection and scroll restore work across navigation and refresh', async page => {
+        for (const now of [null, '2026-12-31T12:00:00+08:00', '2028-01-31T12:00:00+08:00']) await scenario('native date selection and scroll restore work across navigation and refresh ' + (now || 'current date'), async page => {
+            const expected = await page.evaluate(() => {
+                const date = new Date();
+                // Use the browser's local calendar, including December/year rollover.
+                const next = new Date(date.getFullYear(), date.getMonth() + 1, 2);
+                return [next.getFullYear(), String(next.getMonth() + 1).padStart(2, '0'), '02'].join('-');
+            });
             const scroll = page.locator('[class*="timelineScroll"]').first();
             await scroll.evaluate(el => { el.scrollTop = 500; el.dispatchEvent(new Event('scroll')); });
             await page.evaluate(() => window.__calendar.handleCalendarDatePicker({ stopPropagation() {} }));
@@ -194,13 +201,13 @@ fs.mkdirSync(evidence, { recursive: true });
             await page.screenshot({path:path.join(evidence,'schedule-native-date.png')});
             await datePicker.locator('.datepicker-days .next').click();
             await datePicker.locator('.datepicker-days td.day:not(.old):not(.new)').filter({hasText:/^2$/}).click();
-            await page.waitForFunction(() => window.__calendar.state.calendarDate.format('YYYY-MM-DD') === '2026-11-02');
+            await page.waitForFunction(expected => window.__calendar.state.calendarDate.format('YYYY-MM-DD') === expected, expected);
             assert.equal(await scroll.evaluate(el => el.scrollTop), 500);
             await page.reload(); await ready(page); await calendar(page);
             assert.equal(await scroll.evaluate(el => el.scrollTop), 500);
             const position = await slot(page); await page.mouse.dblclick(position.x, position.y); await page.keyboard.press('Escape');
             assert.equal(await page.locator('.focus-calendar-dialog').count(), 0);
-        });
+        }, 'zh-CN', false, now);
         await scenario('plan movement, resizing, copy/delete and failed writes keep committed data', async page => {
             await create(page, 'Move and resize', 90);
             let data = await snapshot(page);

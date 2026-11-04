@@ -2,7 +2,7 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Canonical Chinese list](../BACKLOG.md)
 
-Updated 2026-10-30. This is the English view of the same canonical item IDs, not an independent backlog. Remove completed items and record their evidence in release reports. Do not copy unfinished lists into old reports. V01 was removed after the user confirmed manual acceptance; E05 and E06 were completed in 1.4.0.
+Updated 2026-11-04. This is the English view of the same canonical item IDs, not an independent backlog. Remove completed items and record their evidence in release reports. Do not copy unfinished lists into old reports. V01 was removed after the user confirmed manual acceptance; E05 and E06 were completed in 1.4.0.
 
 ## Engineering
 
@@ -14,6 +14,8 @@ Updated 2026-10-30. This is the English view of the same canonical item IDs, not
 | E04 | P1 | Large-backup responsiveness, memory and broadcasts | Generated 1/10/50 MB measurements exist. Evaluate workers, batched reads/serialization and large recovery broadcasts from observed bottlenecks, preserving snapshot and journal semantics. |
 | E08 | P3 | Consolidate remaining legacy network behavior by feature | Identity/storage belongs to the data service; backup UI, preferences and theme UI now belong to their existing feature modules. Network retains its distinct responsibility. Local name/avatar updates now use an explicit data service with real failure reporting. Trace other legacy account/cloud callers and remove proven-dead simulated responses. Further work must reuse the owning feature service, not split files for line count. Preserve same-origin/Bing access and initialization/recovery order.  Reused XHR state and same-origin handling were corrected in 1.5.0; simulated responses still need investigation. |
 | E09 | P3 | Restore component sources and a normal build | Recover source, dependencies and configuration component by component. Preserve Redux, events and timer lifecycle; AST integration is not a complete source build. |
+| E14 | P2 | Wallpaper redirect boundaries | Direct image addresses now require HTTPS and an exact Bing hostname, but XHR/Image may still follow redirects. CSP provides additional destination restrictions. Evaluate redirect-rejecting requests and Blob rendering with cross-origin, timeout and fallback acceptance. |
+| E15 | P3 | Local server file-open race | Node real-path checks reject external/private symlink targets, but resolution and opening are separate. Evaluate cross-platform handle-based constraints for local attackers able to mutate the runtime directory. The Python fallback lacks equivalent protections. |
 | E11 | P2 | Separate browser mini-timer window | Keep the existing in-page floating timer this round. Detect Document Picture-in-Picture and bridge the existing timer state/commands; fall back when unavailable. Do not promise native always-on-top behavior from a normal popup. |
 
 ## Outstanding real-environment verification
