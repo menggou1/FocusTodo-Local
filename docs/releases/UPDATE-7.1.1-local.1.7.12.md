@@ -30,3 +30,6 @@
 - Python 3.12.14 的 3 项发布门禁测试通过，ZIP/tar.gz 均通过校验、含空格及中文路径解压、文档文件链接和无 npm/Git 依赖启动；不匹配版本 Tag 被拒绝。重复发布生成前后文件摘要一致，`git diff --check` 通过。
 
 [版本标签](https://github.com/menggou1/FocusTodo-Local/tree/1.7.12) · [Release 与校验文件](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.7.12)。正式发布由同提交 main/Tag 六个平台组合及 Pages 门禁约束。
+
+- 正式发布提交 `307415e3c73b8233d4b6072140c2b70ea699e8fe` 的 [main 六平台检查](https://github.com/menggou1/FocusTodo-Local/actions/runs/41809490597)、[Tag 六平台检查与发布](https://github.com/menggou1/FocusTodo-Local/actions/runs/41809550403)、[Pages 部署](https://github.com/menggou1/FocusTodo-Local/actions/runs/41809490603) 均成功。线上 `deployment.json` 与该提交一致，项目子路径下的隔离浏览器实际启动通过。
+- 已重新下载实际 Release 的 ZIP、tar.gz 和 `SHA256SUMS.txt`，两份附件均通过摘要、文档链接、解压和无依赖启动检查。

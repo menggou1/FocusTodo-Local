@@ -25,3 +25,7 @@ Windows / Node 24.16 / Edge: 71 of 72 Node tests passed with the POSIX-only chec
 Python 3.12.14: all three release-gate tests passed. Both archives passed checksum, extraction under spaces/Unicode, documentation-file-link and dependency-free startup checks. An unrelated tag was rejected. Repeated release generation retained identical file hashes, and `git diff --check` passed.
 
 [Version tag](https://github.com/menggou1/FocusTodo-Local/tree/1.7.12) · [Release and checksums](https://github.com/menggou1/FocusTodo-Local/releases/tag/1.7.12). Publication requires all six platform combinations for the same main/tag commit and its Pages deployment.
+
+Release commit `307415e3c73b8233d4b6072140c2b70ea699e8fe` passed all six combinations on [main](https://github.com/menggou1/FocusTodo-Local/actions/runs/41809490597) and the [tag/publication workflow](https://github.com/menggou1/FocusTodo-Local/actions/runs/41809550403), with a successful [Pages deployment](https://github.com/menggou1/FocusTodo-Local/actions/runs/41809490603). Live `deployment.json` matches this commit, and isolated browser startup under the actual project subpath passed.
+
+Both actual Release archives and `SHA256SUMS.txt` were downloaded again. Checksum, documentation-file-link, extraction and dependency-free startup checks passed for each published archive.
