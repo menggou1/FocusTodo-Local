@@ -50,9 +50,11 @@ test('report directories match metadata and historical entry points remain valid
 });
 
 test('startup feedback is inlined and independent of external assets', () => {
-    const html = read('index.html');
-    assert(html.includes('<style id="focus-startup-style">\n' + read('startup.css') + '</style>'));
-    assert(html.includes('<script id="focus-startup-code">\n' + read('js/local-startup.js') + '</script>'));
+    // Compare content even when Git checks out text with Windows line endings.
+    const readText = name => read(name).replace(/\r\n/g, '\n');
+    const html = readText('index.html');
+    assert(html.includes('<style id="focus-startup-style">\n' + readText('startup.css') + '</style>'));
+    assert(html.includes('<script id="focus-startup-code">\n' + readText('js/local-startup.js') + '</script>'));
     const assetScripts = [...html.matchAll(/<script\b[^>]*src="[^"]+"[^>]*>/g)];
     assert.equal(assetScripts.length, 15);
     for (const [tag] of assetScripts) assert.match(tag, /\bdefer\b/);

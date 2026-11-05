@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.8.1`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
+Current worktree: `7.1.1-local.1.8.2`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
 
 Design-theory documents are for entertainment only and are not development rules. Unless the user explicitly requests it, models must not read, consult or modify those documents. Development follows user requirements, code evidence and this maintenance guide.
 
@@ -118,9 +118,9 @@ Reports describe initial problems, final behavior and final validation evidence.
 
 Each new repair release increments the third local-version component. Preserve already-pushed failed tags; publish the corrected commit under the next patch version. Version reports follow the actual task scope, and failed 1.4.2 content is consolidated into 1.4.3.
 
-The 1.x series, including this 1.8.1 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
+The 1.x series, including this 1.8.2 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
 
-**Version 1.8.1 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
+**Version 1.8.2 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
 
 Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 
@@ -166,7 +166,7 @@ Use Conventional Commits for future commits: `type(optional-scope): short descri
 
 ## Full-application style refactoring and visual acceptance
 
-Declare the refactoring scope, reference and intended visual changes before editing. **The 1.8.1 refactor covers all styles**, including sidebar, settings, timer, calendar, forest and other pages; there are no excluded target regions. Selectors, ownership and reuse may change while visuals and interactions remain stable by default. Explicit changes such as the language menu and collect-all action have their own acceptance criteria. Refactoring CSS organization does not require changing typography or layout.
+Declare the refactoring scope, reference and intended visual changes before editing. **The 1.8.2 refactor covers all styles**, including sidebar, settings, timer, calendar, forest and other pages; there are no excluded target regions. Selectors, ownership and reuse may change while visuals and interactions remain stable by default. Explicit changes such as the language menu and collect-all action have their own acceptance criteria. Refactoring CSS organization does not require changing typography or layout.
 
 Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Keep independent computed-style evidence and deliberately injected regression checks covering geometry, clipping, popovers, keyboard input and control states. The existing sidebar fixture `tests/fixtures/sidebar-typography-cfd6449.json` remains visual regression evidence, not a freeze on CSS files or selector ownership. Future visual baseline changes need clear requirements and independent evidence; local feature changes should constrain their effects. Correct regressions locally while preserving useful changes. Passing test counts do not replace visual acceptance.
 

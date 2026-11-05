@@ -2,19 +2,19 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.8.1**, author Lexible.
+Current application: **7.1.1-local.1.8.2**, author Lexible.
 
-## 7.1.1-local.1.8.1 · 2026-11-05
+## 7.1.1-local.1.8.2 · 2026-11-05
 
 - Refresh the forest badge as sunlight matures, expires or changes, without opening the forest.
 - Collect available sunlight with a hand button sharing the achievement and guide button style.
 - Audit all styles and reuse button, switch, pomodoro, date and dropdown controls, matching the language menu to other settings.
-- Adopt independent three-part application versions starting with 2.0.0 and provide a practical implementation plan; 1.8.1 retains the current format.
+- Adopt independent three-part application versions starting with 2.0.0 and provide a practical implementation plan; 1.8.2 retains the current format.
 - Validate all timer snapshot break settings and automation flags before import, rejecting invalid configurations.
 - Reject request paths containing NUL bytes without terminating the local server.
 - Show Today correctly in the English schedule day header.
 
-[English report](releases/UPDATE-7.1.1-local.1.8.1.md).
+[English report](releases/UPDATE-7.1.1-local.1.8.2.md).
 
 ## 7.1.1-local.1.7.12 · 2026-11-04
 

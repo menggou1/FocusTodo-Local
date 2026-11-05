@@ -1260,6 +1260,9 @@ const server = http.createServer((request, response) => {
             assert(Array.isArray(result.backup.indexedDB.Pomodoro));
         }));
         await check('settings failure during import rolls database and settings back', () => app(async page => {
+            // The forest badge refresh persists the daily login reward after app startup.
+            // Include it in the original snapshot before checking every setting for rollback.
+            await page.waitForFunction(() => JSON.parse(FocusLocalData.forestGet('LaunchReward')).length > 0);
             const result = await page.evaluate(async () => {
                 const d = window.FocusLocalData, original = await d.snapshot(), target = structuredClone(original);
                 target.indexedDB.Task = [{ id: 'must-not-remain', name: 'temporary' }];
