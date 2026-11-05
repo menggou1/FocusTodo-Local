@@ -1,53 +1,57 @@
-"""Require the same commit's main tests and Pages deployment before publishing."""
+"""Validate the tag version and the complete, checksummed portable release assets."""
+import argparse
+import hashlib
 import json
-import os
-import time
-import urllib.request
+from pathlib import Path
+import tarfile
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
-def required_run(runs, sha):
-    matches = [run for run in runs if run['head_sha'] == sha and run['head_branch'] == 'main'
-               and run['event'] in ('push', 'workflow_dispatch')
-               and run['path'].split('@')[0] == '.github/workflows/ci.yml']
-    if not matches:
-        return None
-    run = max(matches, key=lambda item: item['id'])
-    if run['status'] != 'completed':
-        return None
-    if run['conclusion'] != 'success':
-        raise RuntimeError('Required main workflow failed: ' + run['html_url'])
-    return run
-
-
-def require_pages_deploy(run, jobs):
-    if not any(job['name'] == 'Deploy GitHub Pages' and job['status'] == 'completed'
-               and job['conclusion'] == 'success' for job in jobs):
-        raise RuntimeError('Required main workflow did not deploy Pages: ' + run['html_url'])
-
-
-def request_json(url):
-    request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
-                                                 'Accept': 'application/vnd.github+json', 'User-Agent': 'FocusTodo-release-gate'})
-    with urllib.request.urlopen(request, timeout=30) as response:
-        return json.load(response)
-
-
-def main():
-    repository, sha = os.environ['GITHUB_REPOSITORY'], os.environ['GITHUB_SHA']
-    api = 'https://api.github.com/repos/' + repository + '/actions/runs'
-    deadline = time.monotonic() + 20 * 60
-    while True:
-        run = required_run(request_json(api + '?head_sha=' + sha + '&per_page=100')['workflow_runs'], sha)
-        if run:
-            jobs = request_json(api + f"/{run['id']}/jobs?filter=latest&per_page=100")['jobs']
-            require_pages_deploy(run, jobs)
-            print('Required main tests and Pages deployment succeeded:', run['html_url'])
-            return
-        if time.monotonic() >= deadline:
-            raise TimeoutError('Required main tests / Pages deployment did not complete; Release was not created')
-        print('Waiting for this commit\'s main tests and Pages deployment...', flush=True)
-        time.sleep(15)
+def verify(tag, directory, reference=None):
+    config = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))
+    version = config['localVersion']
+    full = config['officialVersion'] + '-local.' + version
+    package = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))
+    if tag != version or package['version'] != full or config['updates'][0]['version'] != full:
+        raise ValueError('Tag and release versions do not match')
+    stem = 'FocusTodo-' + version
+    expected = {stem + '.zip', stem + '.tar.gz'}
+    lines = (directory / 'SHA256SUMS.txt').read_text(encoding='utf-8').splitlines()
+    checksums = {}
+    for line in lines:
+        digest, name = line.split('  ', 1)
+        if name in checksums:
+            raise ValueError('Duplicate checksum entry')
+        checksums[name] = digest
+    if set(checksums) != expected:
+        raise ValueError('Release archive list is incomplete')
+    for name in expected:
+        if hashlib.sha256((directory / name).read_bytes()).hexdigest() != checksums[name]:
+            raise ValueError('Archive checksum mismatch: ' + name)
+    if reference is not None:
+        # Archive timestamps can differ across builds; compare all extracted bytes instead.
+        def contents(folder):
+            with zipfile.ZipFile(folder / (stem + '.zip')) as archive:
+                zipped = {n: archive.read(n) for n in archive.namelist()}
+            with tarfile.open(folder / (stem + '.tar.gz')) as archive:
+                members = archive.getmembers()
+                if any(not m.isfile() for m in members):
+                    raise ValueError('Unexpected archive entry')
+                tarred = {m.name: archive.extractfile(m).read() for m in members}
+            if zipped != tarred or len(zipped) != len(members):
+                raise ValueError('Archive contents disagree')
+            return zipped
+        if contents(directory) != contents(reference):
+            raise ValueError('Published archives differ from tested archives')
+    print('Verified version and portable assets:', tag)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('tag')
+    parser.add_argument('directory', type=Path)
+    parser.add_argument('--reference', type=Path)
+    args = parser.parse_args()
+    verify(args.tag, args.directory, args.reference)

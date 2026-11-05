@@ -2,22 +2,27 @@ name: Test, deploy and release
 
 on:
   push:
-    branches: [main]
+    branches: ['**']
     tags: ['[0-9]*.[0-9]*.[0-9]*']
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      release_channel:
+        description: 'Release channel for a version tag (stable only after acceptance)'
+        type: choice
+        options: [prerelease, stable]
+        default: prerelease
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'latest' || github.sha }}
+  group: ${{ github.workflow }}-${{ github.ref_type == 'tag' && github.ref || format('{0}-{1}-{2}', github.event_name, github.ref, github.event_name == 'pull_request' && 'latest' || github.sha) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   preflight:
-    if: github.ref_type != 'tag'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
@@ -59,7 +64,16 @@ jobs:
       - run: npm run check
       - run: python tests/release/release-gate-test.py
       - run: python tests/release/pages-build-test.py
-      - run: python scripts/package-release.py
+      - name: Build archives and verify tag version
+        env:
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+        run: |
+          if [[ -n "$RELEASE_TAG" ]]; then
+            python scripts/package-release.py --tag "$RELEASE_TAG"
+            python scripts/verify-release-workflows.py "$RELEASE_TAG" dist
+          else
+            python scripts/package-release.py
+          fi
       - name: Check documentation and start both archives on documentation-only PRs
         if: steps.scope.outputs.full == 'false'
         run: python tests/release/package-smoke.py
@@ -72,6 +86,7 @@ jobs:
             dist/*.zip
             dist/*.tar.gz
             dist/SHA256SUMS.txt
+            dist/release-notes.md
           if-no-files-found: error
           overwrite: true
           retention-days: 1
@@ -184,12 +199,12 @@ jobs:
 
   release:
     name: Publish version tag
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [preflight, test]
+    if: github.ref_type == 'tag' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     permissions:
       contents: write
-      actions: read
     steps:
       - uses: actions/checkout@v6
         with:
@@ -197,23 +212,37 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Require a commit merged into main
-        run: git merge-base --is-ancestor HEAD origin/main
-      - name: Require successful main tests and Pages deployment
-        run: python scripts/verify-release-workflows.py
-        env:
-          GH_TOKEN: ${{ github.token }}
-      - name: Build portable archives and verify tag
-        run: python scripts/package-release.py --tag "$RELEASE_TAG"
+      - uses: actions/download-artifact@v7
+        with:
+          name: portable-test-archives
+          path: dist
+      - name: Verify tested assets, version and unchanged tag
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-      - name: Publish release and assets
-        run: >-
-          gh release create "$RELEASE_TAG"
-          dist/*.zip dist/*.tar.gz dist/SHA256SUMS.txt
-          --verify-tag --title "FocusTodo $RELEASE_TAG"
-          --notes-file dist/release-notes.md --latest
+        run: |
+          python scripts/verify-release-workflows.py "$RELEASE_TAG" dist
+          remote_sha=$(git ls-remote origin "refs/tags/$RELEASE_TAG^{}" | cut -f1)
+          if [[ -z "$remote_sha" ]]; then remote_sha=$(git ls-remote origin "refs/tags/$RELEASE_TAG" | cut -f1); fi
+          test "$remote_sha" = "$(git rev-parse HEAD)"
+      - name: Publish or explicitly promote verified release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
+          CHANNEL: ${{ github.event_name == 'workflow_dispatch' && inputs.release_channel || 'prerelease' }}
+        run: |
+          if gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/existing-release.json" 2> "$RUNNER_TEMP/release-error"; then
+            if [[ "$CHANNEL" != stable ]] || ! python -c "import json,sys; r=json.load(open(sys.argv[1])); sys.exit(not (r['prerelease'] and not r['draft']))" "$RUNNER_TEMP/existing-release.json"; then
+              echo 'Release already exists; refusing to overwrite it.'; exit 1
+            fi
+            mkdir "$RUNNER_TEMP/published-assets"
+            gh release download "$RELEASE_TAG" --dir "$RUNNER_TEMP/published-assets"
+            python scripts/verify-release-workflows.py "$RELEASE_TAG" "$RUNNER_TEMP/published-assets" --reference dist
+            gh release edit "$RELEASE_TAG" --prerelease=false --latest=false
+          else
+            if ! grep -q 'HTTP 404' "$RUNNER_TEMP/release-error"; then cat "$RUNNER_TEMP/release-error"; exit 1; fi
+            flags=(--prerelease --latest=false)
+            if [[ "$CHANNEL" == stable ]]; then flags=(--latest=false); fi
+            gh release create "$RELEASE_TAG" dist/*.zip dist/*.tar.gz dist/SHA256SUMS.txt \
+              --verify-tag --title "FocusTodo $RELEASE_TAG" --notes-file dist/release-notes.md "${flags[@]}"
+          fi
