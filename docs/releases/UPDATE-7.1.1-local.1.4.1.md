@@ -1,6 +1,6 @@
 # 7.1.1-local.1.4.1 — 渐进启动与加载反馈
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md)
 
 日期：2026-10-26（Asia/Shanghai）。作者：Lexible。本文件统一记录上一轮首次加载优化。
 

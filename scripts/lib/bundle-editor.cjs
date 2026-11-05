@@ -8,7 +8,7 @@ function walk(node, visitor) {
         else if (value && typeof value === 'object') walk(value, visitor);
     }
 }
-function load(file = 'js/main.js') {
+function load(file = require('node:path').resolve(__dirname, '../../src/js/main.js')) {
     const source = fs.readFileSync(file, 'utf8'), ast = acorn.parse(source, { ecmaVersion: 'latest' });
     let modules;
     walk(ast, node => { if (node.type === 'ArrayExpression' && node.elements.length === 1484) modules = node.elements; });

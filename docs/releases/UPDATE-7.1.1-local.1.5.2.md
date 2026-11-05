@@ -1,6 +1,6 @@
 # 7.1.1-local.1.5.2 — 清单排序反馈与本地兼容修复
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办与验收](../BACKLOG.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办与验收](../BACKLOG.md)
 
 发布日期：2026-10-28。
 

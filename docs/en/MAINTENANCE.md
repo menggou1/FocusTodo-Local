@@ -20,7 +20,7 @@ Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by b
 
 | File | Responsibility |
 |---|---|
-| `startup.css` / `js/local-startup.js` | First-screen sources inlined into HTML by `build:release`; independent of external styles/fonts. Progress follows real resource completion and app mounting. Reveal after required styles/data recovery, without waiting for optional images/fonts |
+| `src/startup.css` / `src/js/local-startup.js` | First-screen sources inlined into HTML by `build:release`; independent of external styles/fonts. Progress follows real resource completion and app mounting. Reveal after required styles/data recovery, without waiting for optional images/fonts |
 | `js/local-timer-core.js` | Pure timer transitions, historical spans and completion events; no DOM or database access |
 | `js/local-data.js` | `PomodoroDB6` v3, transaction persistence, import/reset journals and complete snapshots |
 | `js/local-timer-ui.js` | Legacy timer adapter, recovery confirmation, subscriptions, audio and completion notifications |
@@ -29,15 +29,15 @@ Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by b
 | `js/local-backup.js` | Compact JSON/Gzip, content sniffing, scope, size analysis and bounded decoding |
 | `js/local-theme-storage.js` | Recoverable theme JSON/active/theme writes without copying image data into the journal |
 | `js/local-i18n.js` | Language preference, system resolution, local text and legacy fallback |
-| `i18n/local-en.json` | English translations for local UI and errors |
-| `js/local-i18n-catalog.js` | Generated complete fallback catalog; do not edit directly |
+| `public/i18n/local-en.json` | English translations for local UI and errors |
+| `src/js/local-i18n-catalog.js` | Generated complete fallback catalog; do not edit directly |
 | `js/local-settings-ui.js` | General language controls and explicit notification permission/test controls |
-| `local-controls.css` | Shared control atoms across the application: existing button, switch, tomato icon, date-picker and menu visuals; feature layout remains in its owning module |
+| `src/local-controls.css` | Shared control atoms across the application: existing button, switch, tomato icon, date-picker and menu visuals; feature layout remains in its owning module |
 | `release.json` | Human-edited version, author, dates and Chinese/English release notes |
-| `patch.js` | Ordered, idempotent installation of identity, network, backup UI, settings and themes through their owning feature services |
-| `local-network.js` | Same-origin/Bing policy and reachable legacy account XHR behavior; preserve real profile edits |
+| `src/patch.js` | Ordered, idempotent installation of identity, network, backup UI, settings and themes through their owning feature services |
+| `src/js/local-network.js` | Same-origin/Bing policy and reachable legacy account XHR behavior; preserve real profile edits |
 | `js/local-calendar.js` | Local calendar selection/layout/lifecycle; data and timer commands use the existing services |
-| `js/main.js` | Modified legacy bundle; it cannot be discarded and fully rebuilt from an upstream bundle |
+| `src/js/main.js` | Modified legacy bundle; it cannot be discarded and fully rebuilt from an upstream bundle |
 
 Change legacy integration through the checked AST scripts, then retain both script and bundle changes:
 
@@ -53,7 +53,7 @@ node scripts/revise-calendar-integration.cjs
 
 The shared bundle editor checks the known 1,484-module structure, unique boundaries, overlapping edits and final syntax. Inspect a failed boundary instead of bypassing it. Historical `upgrade-*.cjs` scripts are not a complete rebuild pipeline.
 
-`scripts/localize-local-modules.cjs` migrated static local messages to the translation service; it does not translate task names, notes or uploaded filenames. Add new local English messages to `i18n/local-en.json`. Release titles and items also require `titleEn` and `itemsEn`. `npm run build:release` regenerates the catalog, release module, package versions, title and cache tags. Keep Chinese and English current documents aligned; the English historical reports may summarize the original technical history.
+`scripts/localize-local-modules.cjs` migrated static local messages to the translation service; it does not translate task names, notes or uploaded filenames. Add new local English messages to `public/i18n/local-en.json`. Release titles and items also require `titleEn` and `itemsEn`. `npm run build:release` regenerates the catalog, release module, package versions, title and cache tags. Keep Chinese and English current documents aligned; the English historical reports may summarize the original technical history.
 
 
 Module ownership follows features. Reuse the existing data, backup, settings and theme APIs before adding another compatibility file; reducing line count alone does not complete a refactor.
@@ -62,12 +62,12 @@ Module ownership follows features. Reuse the existing data, backup, settings and
 
 | Source | Responsibility |
 |---|---|
-| `main.css` | Legacy feature layout, typography, themes and vendor foundations across sidebar, tasks, timers, calendar, statistics and other application areas |
-| `local-controls.css` | Shared buttons, icon buttons, settings rows, menus, date pickers/popovers, tomato icons and text truncation; legacy class aliases share declarations while preserving specificity and required exceptions |
-| `local-ui.css` | Local feature layout and interaction states; common button borders, backgrounds, colors and cursors belong to controls |
+| `src/main.css` | Legacy feature layout, typography, themes and vendor foundations across sidebar, tasks, timers, calendar, statistics and other application areas |
+| `src/local-controls.css` | Shared buttons, icon buttons, settings rows, menus, date pickers/popovers, tomato icons and text truncation; legacy class aliases share declarations while preserving specificity and required exceptions |
+| `src/local-ui.css` | Local feature layout and interaction states; common button borders, backgrounds, colors and cursors belong to controls |
 | `FocusSettings.selectStyles()` / `switchProps()` | Shared selects for Pomodoro, Appearance and language; shared switch parameters for Pomodoro and General settings. Read current theme colors when used |
-| `startup.css` | Independent inlined first screen, without application-control or external-font dependencies |
-| `purchase.css` / `resetpassword.css` | Original standalone-page layout; no local application theme variables, retaining existing isolation of legacy account networking |
+| `src/startup.css` | Independent inlined first screen, without application-control or external-font dependencies |
+| `src/purchase.css` / `src/resetpassword.css` | Original standalone-page layout; no local application theme variables, retaining existing isolation of legacy account networking |
 
 Reuse an existing atom or compatibility alias before adding a control; retain feature layout in its owning module. Run `revise-controls-integration.cjs` after `revise-app-integration.cjs` and verify idempotence. A new root runtime stylesheet must be included in HTML, portable archives and the Pages allowlist.
 
@@ -87,7 +87,7 @@ Groups and online rankings remain disabled. The original forest UI uses local su
 
 ## Focused verification
 
-If an existing screenshot is temporarily locked on Windows, set `FOCUS_ACCEPTANCE_DIR` to a separate absolute output directory. Startup, app, list and calendar checks write evidence there; copy it into `docs/acceptance/` after the complete run. File-output failures must not bypass business assertions.
+New browser and benchmark evidence goes to `dist/acceptance/`. Set `FOCUS_ACCEPTANCE_DIR` to redirect browser evidence. `docs/acceptance/` preserves historical evidence and is not overwritten by current runs.
 
 Use checks appropriate to the change. Do not repeat expensive performance or manual-environment runs merely to re-confirm unrelated code.
 
@@ -105,7 +105,7 @@ Python 3.12+ builds portable archives and checks extracted execution and documen
 
 ```bash
 python scripts/package-release.py
-python tests/package-smoke.py
+python tests/release/package-smoke.py
 ```
 
 `npm run benchmark:backup` runs the optional generated 1/10/50 MB benchmark. Its sampled JS heap and fixture responsiveness are not process peak memory or full UI throughput. Do not include private backups, credentials or images in test evidence.
@@ -124,9 +124,9 @@ The 1.x series, including this 1.8.2 release, uses `7.1.1-local.<major>.<minor>.
 
 Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 
-Work branches stay local. Merge the verified work into the clean primary main worktree, then push main; do not push a work branch merely to trigger CI. Fetch and resolve divergence without force-pushing. Create a new annotated tag from the merged main commit; do not overwrite an old tag.
+Develop on a separate branch and submit a pull request to `main`. After merge, wait for the exact main commit to pass the full platform checks and deploy to Pages before tagging it. Do not overwrite existing tags. Avoid GitHub skip directives such as `[skip ci]` on a commit intended for release; if the push check was skipped, dispatch the workflow manually while the commit is still the tip of `main`.
 
-Main tests Windows/macOS/Linux × Node 22/24 and checks the extracted packages on Node 24 on all three systems. All three Node 24 jobs run the full Chromium suite in parallel. Ubuntu also runs syntax and generated-file checks. A version tag reuses the same commit’s successful main tests and Pages deployment, checks the version and main ancestry, then publishes ZIP, tar.gz and SHA256SUMS. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
+All main pushes (including docs) and code PRs run Windows/macOS/Linux × Node 22/24 unit tests. Ubuntu preflight checks syntax, generated files, the release gate and Pages filtering, and builds one copy of the archives. All three Node 24 jobs smoke-test the same archives and run the full Chromium suite. Docs-only PRs run preflight and an archive/link check without the full matrix. A version tag reuses the same commit’s successful main tests and Pages deployment, checks the version and main ancestry, then publishes ZIP, tar.gz and SHA256SUMS. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
 
 ## Documentation layout
 
@@ -136,11 +136,11 @@ Engineering version plans live in `docs/plan/`, mirrored in `docs/en/plan/`, and
 
 ## GitHub Pages
 
-The site is [FocusTodo Local](https://menggou1.github.io/FocusTodo-Local/). `main` keeps the complete project. Repository Settings → Pages → Source must be **GitHub Actions**. `.github/workflows/pages.yml` deploys automatically on main pushes and supports manual runs on main. The `gh-pages` branch is no longer maintained or required.
+The site is [FocusTodo Local](https://menggou1.github.io/FocusTodo-Local/). `main` keeps the complete project. Repository Settings → Pages → Source must be **GitHub Actions**. `.github/workflows/ci.yml` deploys main after its full test matrix succeeds and supports manual runs on main. The `gh-pages` branch is no longer maintained or required.
 
-Official `configure-pages`, `upload-pages-artifact` and `deploy-pages` actions publish through the `github-pages` environment. Build has `contents: read`; deployment has `pages: write` and `id-token: write`. No personal token is required. Deployments run serially without cancelling an active deployment.
+Official `configure-pages`, `upload-pages-artifact` and `deploy-pages` actions publish through the `github-pages` environment. Build has `contents: read` and `pages: read`; deployment has `pages: write` and `id-token: write`. No personal token is required. Deployments run serially without cancelling an active deployment.
 
-The existing whitelist in `scripts/deploy-pages.py` is unchanged: root browser HTML/CSS/JS, icons, release.json, LICENSE, and js/audio/font/i18n/img. Only committed main or its ancestors are read. The artifact includes `.nojekyll` and `deployment.json` with source commit/version, excluding scripts, tests and documentation. The upstream CNAME has been removed from the local main branch. The workflow uploads `dist/pages`, never the repository root.
+The shared whitelist `scripts/runtime-layout.json` maps committed `src/` and `public/` files to their original browser paths. The Pages artifact adds `.nojekyll` and `deployment.json`, excluding tooling, tests and docs. The workflow uploads `dist/pages`. Portable archives add launchers and release documentation to the same runtime files.
 
 Build a local preview with Python 3.12+ into a new directory:
 
@@ -148,7 +148,7 @@ Build a local preview with Python 3.12+ into a new directory:
 python scripts/deploy-pages.py --output dist/pages-preview
 ```
 
-To redeploy, run **Deploy GitHub Pages** on main in Actions. The build script no longer accepts `--push` or `--remote` and does not write a deployment branch. This migration keeps the application version, historical tags and Releases unchanged. It does not upload local browser databases. Verify the successful workflow, live manifest and actual startup under the project path. The online origin has separate storage from local loopback; moving data requires backup/import.
+The preview builds committed `HEAD` by default; use `--ref` to preview another commit. To redeploy, run **Test, deploy and release** on main in Actions. The build script no longer accepts `--push` or `--remote` and does not write a deployment branch. This migration keeps the application version, historical tags and Releases unchanged. It does not upload local browser databases. Verify the successful workflow, live manifest and actual startup under the project path. The online origin has separate storage from local loopback; moving data requires backup/import.
 
 ## Provenance
 
@@ -156,7 +156,7 @@ To redeploy, run **Deploy GitHub Pages** on main in Actions. The build script no
 
 ## Startup feedback and performance sampling
 
-After editing `startup.css` or `js/local-startup.js`, run `npm run build:release` to regenerate the inlined first screen. `node tests/startup-acceptance.cjs` runs the fourteen startup/font cases; the full `npm run test:browser` includes them. For an optional cold-start comparison, run `node tests/startup-performance.cjs <verified baseline commit>`. It uses isolated data and the project subpath, 150 ms synthetic latency and 200 KiB/s download throughput, aborting optional images/fonts equally. The JSON evidence is not a live Pages speed guarantee or a CI timing threshold.
+After editing `src/startup.css` or `src/js/local-startup.js`, run `npm run build:release` to regenerate the inlined first screen. `node tests/browser/startup-acceptance.cjs` runs the startup and font cases; the full `npm run test:browser` includes them. For an optional cold-start comparison, run `node tests/performance/startup-performance.cjs <verified baseline commit>`. It uses isolated data and the project subpath, 150 ms synthetic latency and 200 KiB/s download throughput, aborting optional images/fonts equally. The JSON evidence is not a live Pages speed guarantee or a CI timing threshold.
 
 List management component integration is maintained by `node scripts/revise-project-management.cjs`.
 

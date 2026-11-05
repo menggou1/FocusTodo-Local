@@ -4,6 +4,18 @@
 
 FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local modules. Tasks, focus records, sessions and settings are browser-local. Bing is an allowed external image source. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
 
+## Project layout
+
+| Directory | Contents |
+| --- | --- |
+| `src/` | HTML, CSS, `patch.js`, the preserved React bundle `js/main.js` and local modules |
+| `public/` | Icons, images, fonts, audio and translation assets |
+| `scripts/` | Local launch, generation, bundle maintenance, portable packaging and Pages build |
+| `tests/` | Unit, browser, release and performance suites, plus fixtures |
+| `docs/` | Guides, architecture, maintenance, version reports and historical evidence |
+
+The local server maps `src/` and `public/` to the original browser URLs using `scripts/runtime-layout.json`. Pages and portable archives use the same flat runtime layout (for example `index.html`, `js/main.js` and `img/`). Browser resource paths and storage origins remain the same.
+
 ## Startup and module flow
 
 The version generator inlines `startup.css` and `js/local-startup.js` into HTML so the skeleton and real step progress can appear before external assets. Styles load asynchronously; deferred scripts download in parallel and execute in the preserved order. Reveal the workspace when the application and required styles are ready, without waiting for optional images/fonts. Chinese and English reuse the generated catalog; other locales retain the legacy parser with asynchronous requests. Database and theme recovery still precede mounting.

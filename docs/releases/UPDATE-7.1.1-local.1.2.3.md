@@ -1,5 +1,5 @@
 # FocusTodo 7.1.1-local.1.2.3 更新与验收报告
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.2.3.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.2.3.md)
 
 - 日期：2026-10-22
 - 作者：Lexible

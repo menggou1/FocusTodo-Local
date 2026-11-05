@@ -1,5 +1,5 @@
 # 7.1.1-local.1.6.0 — 本地日程与兼容功能
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.6.0.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.6.0.md)
 
 日期：2026-10-29。本文记录相对 main 1.5.4 的最终变化。最初合入 main 和部署 Pages 时未创建 Tag 或 Release；后来补充 1.6.0 Tag，未创建 Release。
 

@@ -1,6 +1,6 @@
 # 7.1.1-local.1.8.2 更新报告
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办](../BACKLOG.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办](../BACKLOG.md)
 
 日期：2026-11-05（Asia/Shanghai）。作者：Lexible。
 

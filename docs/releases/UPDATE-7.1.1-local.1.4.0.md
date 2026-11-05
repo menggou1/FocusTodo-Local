@@ -1,6 +1,6 @@
 # FocusTodo 7.1.1-local.1.4.0 语言选择、英文适配与本地功能定位
 
-[更新记录](../../CHANGELOG.md) · [English report](../en/releases/UPDATE-7.1.1-local.1.4.0.md) · [统一待办与功能设计](../BACKLOG.md)
+[更新记录](../CHANGELOG.md) · [English report](../en/releases/UPDATE-7.1.1-local.1.4.0.md) · [统一待办与功能设计](../BACKLOG.md)
 
 日期：2026-10-25（Asia/Shanghai），作者：Lexible，Tag：`1.4.0`。
 

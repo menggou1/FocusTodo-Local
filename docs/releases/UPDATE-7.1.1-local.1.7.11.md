@@ -1,6 +1,6 @@
 # 7.1.1-local.1.7.11 — 教程、发布稳定性与维护规则
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.7.11.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.7.11.md)
 
 日期：2026-10-30。作者：Lexible。
 

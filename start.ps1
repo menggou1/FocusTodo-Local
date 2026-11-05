@@ -14,7 +14,7 @@ try {
     }
     elseif (Get-Command python -ErrorAction SilentlyContinue) {
         Write-Host "Open http://127.0.0.1:$Port/index.html (Ctrl+C to stop)."
-        & python -m http.server $Port --bind 127.0.0.1 --directory $siteRoot
+        & python (Join-Path $siteRoot 'scripts/serve-static.py') --port $Port
         exit $LASTEXITCODE
     }
     else { throw 'Install Node.js 22+ (recommended) or Python 3.7+ and try again.' }

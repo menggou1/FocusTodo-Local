@@ -2,13 +2,12 @@
   "name": "focustodo",
   "version": "7.1.1-local.1.8.2",
   "description": "FocusTodo web version",
-  "main": "patch.js",
   "scripts": {
     "start": "node scripts/start.cjs",
     "build:release": "node scripts/build-release.cjs",
-    "test": "node --test tests/timer-core.test.cjs tests/server.test.cjs tests/release.test.cjs tests/start.test.cjs tests/backup.test.cjs tests/data-validation.test.cjs tests/theme-storage.test.cjs tests/calendar.test.cjs",
-    "test:browser": "node tests/startup-acceptance.cjs && node tests/browser-acceptance.cjs && node tests/maintenance-acceptance.cjs && node tests/list-ordering-acceptance.cjs && node tests/audio-coordination-acceptance.cjs && node tests/profile-acceptance.cjs && node tests/calendar-acceptance.cjs && node tests/forest-acceptance.cjs && node tests/achievements-acceptance.cjs && node tests/reminders-acceptance.cjs && node tests/controls-acceptance.cjs",
-    "benchmark:backup": "node tests/backup-performance.cjs",
+    "test": "node --test tests/unit/*.test.cjs",
+    "test:browser": "node tests/browser/startup-acceptance.cjs && node tests/browser/browser-acceptance.cjs && node tests/browser/maintenance-acceptance.cjs && node tests/browser/list-ordering-acceptance.cjs && node tests/browser/audio-coordination-acceptance.cjs && node tests/browser/profile-acceptance.cjs && node tests/browser/calendar-acceptance.cjs && node tests/browser/forest-acceptance.cjs && node tests/browser/achievements-acceptance.cjs && node tests/browser/reminders-acceptance.cjs && node tests/browser/controls-acceptance.cjs",
+    "benchmark:backup": "node tests/performance/backup-performance.cjs",
     "check": "node scripts/check-syntax.cjs"
   },
   "keywords": [],

@@ -1,5 +1,5 @@
 # 7.1.1-local.1.5.4 — 系统清单排序与用户名存储修复
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.5.4.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.5.4.md)
 
 发布日期：2026-10-28。
 

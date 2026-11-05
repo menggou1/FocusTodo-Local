@@ -1,7 +1,7 @@
 // One-time/idempotent literal migration. User content is never DOM-translated.
 const fs = require('node:fs'), acorn = require('acorn');
 const { walk } = require('./lib/bundle-editor.cjs');
-for (const name of ['patch.js', ...fs.readdirSync('js').filter(n=>n.startsWith('local-') && !/i18n|release|settings-ui/.test(n)).map(n=>'js/'+n)]) {
+for (const name of ['src/patch.js', ...fs.readdirSync('src/js').filter(n=>n.startsWith('local-') && !/i18n|release|settings-ui/.test(n)).map(n=>'src/js/'+n)]) {
     const source = fs.readFileSync(name,'utf8'), ast = acorn.parse(source,{ecmaVersion:'latest'}), edits=[];
     const covered=[];
     walk(ast,node=>{if(node.type==='ConditionalExpression' && source.slice(node.test.start,node.test.end).includes('FocusI18n')) covered.push([node.start,node.end]);});

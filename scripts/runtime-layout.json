@@ -1,0 +1,24 @@
+{
+  "files": {
+    "index.html": "src/index.html",
+    "patch.js": "src/patch.js",
+    "main.css": "src/main.css",
+    "local-controls.css": "src/local-controls.css",
+    "local-ui.css": "src/local-ui.css",
+    "purchase.html": "src/purchase.html",
+    "purchase.css": "src/purchase.css",
+    "reset-password.html": "src/reset-password.html",
+    "resetpassword.css": "src/resetpassword.css",
+    "favicon.ico": "public/favicon.ico",
+    "8fzlr-o0m4w-001.ico": "public/8fzlr-o0m4w-001.ico",
+    "release.json": "release.json",
+    "LICENSE": "LICENSE"
+  },
+  "directories": {
+    "js": "src/js",
+    "audio": "public/audio",
+    "font": "public/font",
+    "i18n": "public/i18n",
+    "img": "public/img"
+  }
+}

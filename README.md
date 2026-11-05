@@ -29,7 +29,7 @@ FocusTodo 专注清单 - 浏览器本地版
 
 在线使用：[GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。线上站点与本地 `127.0.0.1` 地址使用不同的浏览器存储，迁移数据请先导出备份再导入。
 
-Pages 随 `main` 推送由官方 Actions 自动部署，沿用运行文件白名单；`main` 保留完整项目，无需维护 `gh-pages`。部署与本地预览见[维护指南](docs/MAINTENANCE.md)。
+Pages 在 `main` 推送通过完整检查后由官方 Actions 自动部署，沿用运行文件白名单；`main` 保留完整项目，无需维护 `gh-pages`。部署与本地预览见[维护指南](docs/MAINTENANCE.md)。
 
 从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载 ZIP 或 tar.gz 并解压，安装 Node.js 22+。三个系统使用同一份便携包，无需运行 `npm install`。发布附带 `SHA256SUMS.txt`，运行时需自行安装，不包含在压缩包中。
 
@@ -45,7 +45,7 @@ Pages 随 `main` 推送由官方 Actions 自动部署，沿用运行文件白名
 sh start.sh
 # 无桌面环境或自定义端口：sh start.sh --no-browser --port 5511
 # 或使用 Python，保持相同端口和访问地址
-python3 -m http.server 5500 --bind 127.0.0.1
+python3 scripts/serve-static.py
 ```
 
 然后访问 `http://127.0.0.1:5500/index.html`。
@@ -78,16 +78,20 @@ python3 -m http.server 5500 --bind 127.0.0.1
 
 右上角铃铛展示面向用户的日期、版本和简短更新详情，并保留原任务提醒。维护报告仅在仓库文档中提供，不在更新窗口展示 Markdown 入口。
 
+## 工程目录
+
+`src/` 保存页面、样式、压缩主包和本地模块；`public/` 保存图标、图片、字体、音频和语言资源；`scripts/` 保存启动、生成及发布工具；`tests/` 保存单元、浏览器及发布测试；`docs/` 保存文档和历史验收。开发时运行 `npm ci`、`npm test`、`npm run check` 和 `npm run test:browser`；更多命令见维护指南。
+
 ## 文档导航
 
 | 你想做什么 | 从这里开始 |
 |---|---|
 | 查阅 2.0.0 范围、实施顺序与验收要求 | [2.0.0 版本计划](docs/plan/2.0.0.md) |
 | 学习任务、计时、日程和备份 | [使用教程](docs/GUIDE.md) |
-| 看版本变化、发布验收或历史报告 | [更新记录](CHANGELOG.md) |
+| 看版本变化、发布验收或历史报告 | [更新记录](docs/CHANGELOG.md) |
 | 开发、测试或发布新版本 | [开发维护指南](docs/MAINTENANCE.md) |
 | 未完成工程、验收与未来计划 | [统一待办与验收](docs/BACKLOG.md) |
-| 理解模块、数据库、计时与旧主包之间的关系 | [架构说明](ARCHITECTURE.md) |
+| 理解模块、数据库、计时与旧主包之间的关系 | [架构说明](docs/ARCHITECTURE.md) |
 
 更新记录按版本链接详细报告；维护指南已包含版本规范和发布步骤。日常使用只需按本页启动，无需逐篇阅读历史报告。开发先运行 `npm ci`，其余准备和检查命令集中在维护指南。
 
