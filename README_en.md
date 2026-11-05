@@ -25,7 +25,7 @@ Use a local HTTP server and keep your existing hostname and port. Browser data i
 
 Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). The online site and local loopback address have separate browser storage; use backup export/import to move your data.
 
-Pages deploys automatically from `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
+Pages deploys after the complete checks on `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
 
 Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
 
@@ -41,13 +41,17 @@ Open `http://127.0.0.1:5500/index.html`. Use `-NoBrowser` to suppress automatic 
 sh start.sh
 # Optional: sh start.sh --no-browser --port 5511
 # or
-python3 -m http.server 5500 --bind 127.0.0.1
+python3 scripts/serve-static.py
 ```
 
 ### Access
 ```
 http://127.0.0.1:5500/index.html
 ```
+
+## Project layout
+
+`src/` holds the pages, styles, preserved bundle and local modules. `public/` holds the static assets. `scripts/` contains launch, generation and release tools; `tests/` contains test suites and fixtures; `docs/` contains documentation and historical evidence. For development, run `npm ci`, `npm test`, `npm run check` and `npm run test:browser`. See Maintenance for build and release commands.
 
 ## Features
 

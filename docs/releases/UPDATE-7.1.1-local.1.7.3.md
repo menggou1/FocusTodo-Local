@@ -1,6 +1,6 @@
 # 7.1.1-local.1.7.3 — 本地专注森林、成就与任务提醒
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.7.3.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.7.3.md)
 
 发布日期：2026-10-30。作者：Lexible。
 

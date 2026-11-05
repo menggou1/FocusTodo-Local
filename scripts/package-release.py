@@ -7,7 +7,7 @@ import re
 import tarfile
 import zipfile
 
-ROOT = Path(__file__).resolve().parent.parent
+from runtime_layout import ROOT, checkout_files
 
 
 def build(output, tag=None):
@@ -22,35 +22,36 @@ def build(output, tag=None):
     if package['version'] != full_version or config['updates'][0]['version'] != full_version:
         raise ValueError('Run npm run build:release before packaging')
     # Explicit runtime allowlist: no credentials, dependencies, screenshots or Git state.
-    files = [ROOT / name for name in (
-        'index.html', 'patch.js', 'main.css', 'local-ui.css', 'local-controls.css', 'purchase.html',
-        'purchase.css', 'reset-password.html', 'resetpassword.css', 'favicon.ico',
-        '8fzlr-o0m4w-001.ico', 'package.json', 'release.json', 'LICENSE',
-        'README.md', 'README_en.md', 'CHANGELOG.md', 'start.ps1', 'start.sh',
-        '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs',
+    files = checkout_files()
+    extras = [ROOT / name for name in (
+        'package.json', 'README.md', 'README_en.md', 'start.ps1', 'start.sh',
+        '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs', 'scripts/serve-static.py',
+        'scripts/runtime-layout.json', 'scripts/runtime-paths.cjs', 'scripts/runtime_layout.py',
     )]
-    for directory in ('js', 'audio', 'font', 'i18n', 'img'):
-        files.extend(p for p in (ROOT / directory).rglob('*') if p.is_file())
-    files.extend(ROOT / update['report'] for update in config['updates'])
-    # Preserve historical reports and entry points; the new policy is prospective.
-    files.extend(p for p in (ROOT / 'docs').rglob('*.md')
-                 if 'design-theory' not in p.relative_to(ROOT / 'docs').parts)
-    files.extend(p for p in (ROOT / 'docs' / 'guide-images').rglob('*') if p.is_file())
-    files.append(ROOT / 'ARCHITECTURE.md')
-    files = sorted(set(files))
+    for directory in ('docs', 'docs/en', 'docs/plan', 'docs/en/plan', 'docs/releases', 'docs/en/releases'):
+        extras.extend(p for p in (ROOT / directory).glob('*.md') if p.name != 'CONTRIBUTING.md')
+    extras.extend((ROOT / 'docs/guide-images').glob('*.png'))
+    for file in extras:
+        if not file.is_file() or file.resolve() != file:
+            raise ValueError('Expected a regular portable file: ' + str(file))
+        files[file.relative_to(ROOT).as_posix()] = file
+    for update in config['updates']:
+        if update['report'] not in files:
+            raise ValueError('Missing release report: ' + update['report'])
+    files = sorted(files.items())
     output.mkdir(parents=True, exist_ok=True)
     stem = 'FocusTodo-' + version
     archives = [output / (stem + '.zip'), output / (stem + '.tar.gz')]
     with zipfile.ZipFile(archives[0], 'w', zipfile.ZIP_DEFLATED) as archive:
-        for file in files:
-            name = stem + '/' + file.relative_to(ROOT).as_posix()
+        for destination, file in files:
+            name = stem + '/' + destination
             entry = zipfile.ZipInfo.from_file(file, name)
             entry.create_system = 3
             entry.external_attr = (0o100755 if file.name == 'start.sh' else 0o100644) << 16
             archive.writestr(entry, file.read_bytes(), compress_type=zipfile.ZIP_DEFLATED)
     with tarfile.open(archives[1], 'w:gz', format=tarfile.PAX_FORMAT) as archive:
-        for file in files:
-            info = archive.gettarinfo(str(file), stem + '/' + file.relative_to(ROOT).as_posix())
+        for destination, file in files:
+            info = archive.gettarinfo(str(file), stem + '/' + destination)
             info.uid = info.gid = 0
             info.uname = info.gname = ''
             info.mode = 0o755 if file.name == 'start.sh' else 0o644

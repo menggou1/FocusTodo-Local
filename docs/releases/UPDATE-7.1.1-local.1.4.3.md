@@ -1,6 +1,6 @@
 # 7.1.1-local.1.4.3 — 语言字体、功能整合与发布验收修复
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [1.4.1 加载优化](UPDATE-7.1.1-local.1.4.1.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [1.4.1 加载优化](UPDATE-7.1.1-local.1.4.1.md)
 
 日期：2026-10-26（Asia/Shanghai）。作者：Lexible。官方基础版本 `7.1.1`，本地版本及注释 Tag 为 `1.4.3`，完整版本 `7.1.1-local.1.4.3`。
 

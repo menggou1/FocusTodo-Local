@@ -5,32 +5,43 @@ import time
 import urllib.request
 
 
-def required_runs(runs, sha):
-    selected = []
-    for workflow in ('.github/workflows/ci.yml', '.github/workflows/pages.yml'):
-        matches = [run for run in runs if run['head_sha'] == sha and run['head_branch'] == 'main'
-                   and run['event'] in ('push', 'workflow_dispatch') and run['path'].split('@')[0] == workflow]
-        if not matches:
-            return None
-        run = max(matches, key=lambda item: item['id'])
-        if run['status'] == 'completed' and run['conclusion'] != 'success':
-            raise RuntimeError('Required main workflow failed: ' + run['html_url'])
-        selected.append(run)
-    return selected if all(run['status'] == 'completed' for run in selected) else None
+def required_run(runs, sha):
+    matches = [run for run in runs if run['head_sha'] == sha and run['head_branch'] == 'main'
+               and run['event'] in ('push', 'workflow_dispatch')
+               and run['path'].split('@')[0] == '.github/workflows/ci.yml']
+    if not matches:
+        return None
+    run = max(matches, key=lambda item: item['id'])
+    if run['status'] != 'completed':
+        return None
+    if run['conclusion'] != 'success':
+        raise RuntimeError('Required main workflow failed: ' + run['html_url'])
+    return run
+
+
+def require_pages_deploy(run, jobs):
+    if not any(job['name'] == 'Deploy GitHub Pages' and job['status'] == 'completed'
+               and job['conclusion'] == 'success' for job in jobs):
+        raise RuntimeError('Required main workflow did not deploy Pages: ' + run['html_url'])
+
+
+def request_json(url):
+    request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
+                                                 'Accept': 'application/vnd.github+json', 'User-Agent': 'FocusTodo-release-gate'})
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.load(response)
 
 
 def main():
     repository, sha = os.environ['GITHUB_REPOSITORY'], os.environ['GITHUB_SHA']
-    url = 'https://api.github.com/repos/' + repository + '/actions/runs?head_sha=' + sha + '&per_page=100'
+    api = 'https://api.github.com/repos/' + repository + '/actions/runs'
     deadline = time.monotonic() + 20 * 60
     while True:
-        request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'],
-                                                     'Accept': 'application/vnd.github+json', 'User-Agent': 'FocusTodo-release-gate'})
-        with urllib.request.urlopen(request, timeout=30) as response:
-            result = required_runs(json.load(response)['workflow_runs'], sha)
-        if result:
-            for run in result:
-                print('Required workflow succeeded:', run['html_url'])
+        run = required_run(request_json(api + '?head_sha=' + sha + '&per_page=100')['workflow_runs'], sha)
+        if run:
+            jobs = request_json(api + f"/{run['id']}/jobs?filter=latest&per_page=100")['jobs']
+            require_pages_deploy(run, jobs)
+            print('Required main tests and Pages deployment succeeded:', run['html_url'])
             return
         if time.monotonic() >= deadline:
             raise TimeoutError('Required main tests / Pages deployment did not complete; Release was not created')

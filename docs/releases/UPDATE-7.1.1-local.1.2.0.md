@@ -1,6 +1,6 @@
 # 1.2.0 交付与验收报告
 
-[更新记录](../../CHANGELOG.md) · [开发维护指南](../MAINTENANCE.md) · [返回首页](../../README.md)
+[更新记录](../CHANGELOG.md) · [开发维护指南](../MAINTENANCE.md) · [返回首页](../../README.md)
 
 应用 **7.1.1-local.1.2.0** · 发布日期 **2026-10-21** · 作者 **Lexible** · Git Tag **1.2.0**。
 

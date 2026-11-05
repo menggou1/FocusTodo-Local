@@ -1,6 +1,6 @@
 # FocusTodo 7.1.1-local.1.3.2 每日壁纸缓存与主题恢复
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办与验收](../BACKLOG.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办与验收](../BACKLOG.md)
 
 日期：2026-10-25（Asia/Shanghai），作者：Lexible，Git Tag：`1.3.2`。
 

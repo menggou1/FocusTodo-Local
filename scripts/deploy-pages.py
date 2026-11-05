@@ -8,15 +8,10 @@ import subprocess
 import sys
 import tarfile
 
-ROOT = Path(__file__).resolve().parent.parent
+from runtime_layout import ROOT, runtime_entries, output_path, verify_runtime
+
 os.environ.setdefault('GIT_TERMINAL_PROMPT', '0')
 os.environ.setdefault('GCM_INTERACTIVE', 'never')
-RUNTIME_PATHS = (
-    'index.html', 'patch.js', 'main.css', 'local-controls.css', 'local-ui.css', 'purchase.html',
-    'purchase.css', 'reset-password.html', 'resetpassword.css', 'favicon.ico',
-    '8fzlr-o0m4w-001.ico', 'release.json', 'LICENSE',
-    'js', 'audio', 'font', 'i18n', 'img',
-)
 
 
 def git(*args, data=None, env=None):
@@ -25,28 +20,27 @@ def git(*args, data=None, env=None):
                           capture_output=True, check=True, env=env, timeout=120).stdout
 
 
-def build(ref='main', output=Path('dist/pages')):
+def build(ref='HEAD', output=Path('dist/pages')):
     source = git('rev-parse', '--verify', '--end-of-options', ref + '^{commit}').decode().strip()
-    git('merge-base', '--is-ancestor', source, 'main')
     release = json.loads(git('show', source + ':release.json'))
     version = release['officialVersion'] + '-local.' + release['localVersion']
-    assert json.loads(git('show', source + ':package.json'))['version'] == version
-    entries = git('ls-tree', '-rz', source, '--', *RUNTIME_PATHS)
-    names = []
-    for entry in entries.split(b'\0'):
+    if json.loads(git('show', source + ':package.json'))['version'] != version:
+        raise ValueError('Committed package version does not match release.json')
+    flat = not git('ls-tree', source, '--', 'src/index.html')
+    mounts = list(runtime_entries(flat))
+    paths = [path for path, _ in mounts]
+    tree = git('ls-tree', '-rz', source, '--', *paths)
+    names = {}
+    for entry in tree.split(b'\0'):
         if not entry:
             continue
         metadata, name = entry.split(b'\t', 1)
         mode, kind, _ = metadata.split()
         if kind != b'blob' or mode not in (b'100644', b'100755'):
             raise ValueError('Only regular static files may be published')
-        names.append(name.decode('utf-8'))
-    for required in ('index.html', 'main.css', 'local-controls.css', 'local-ui.css', 'js/main.js', 'js/local-release.js', 'js/local-data.js',
-                     'js/local-timer-core.js', 'js/local-timer-ui.js', 'js/local-app-ui.js', 'js/local-backup.js', 'js/local-theme-storage.js',
-                     'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js',
-                     'js/local-network.js'):
-        if required not in names:
-            raise ValueError('Missing runtime asset: ' + required)
+        name = name.decode('utf-8')
+        names[name] = output_path(name, mounts)
+    verify_runtime(names.values())
     manifest = (json.dumps({'version': version, 'sourceCommit': source, 'sourceRef': ref},
                            ensure_ascii=False, indent=2) + '\n').encode('utf-8')
     generated = {'.nojekyll': b'', 'deployment.json': manifest}
@@ -54,9 +48,12 @@ def build(ref='main', output=Path('dist/pages')):
     if output.exists():
         raise FileExistsError('Choose a new Pages output directory: ' + str(output))
     output.mkdir(parents=True)
-    archive = git('archive', '--format=tar', source, '--', *RUNTIME_PATHS)
+    archive = git('archive', '--format=tar', source, '--', *paths)
     with tarfile.open(fileobj=io.BytesIO(archive)) as files:
-        files.extractall(output, filter='data')
+        for name, destination in names.items():
+            target = output / destination
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(files.extractfile(name).read())
     for name, contents in generated.items():
         (output / name).write_bytes(contents)
     print('Pages version:', version)
@@ -68,7 +65,7 @@ def build(ref='main', output=Path('dist/pages')):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--ref', default='main', help='Committed main revision or an ancestor tag')
+    parser.add_argument('--ref', default='HEAD', help='Committed Git revision to build locally')
     parser.add_argument('--output', type=Path, default=Path('dist/pages'), help='New directory for the Pages artifact or local preview')
     args = parser.parse_args()
     try:

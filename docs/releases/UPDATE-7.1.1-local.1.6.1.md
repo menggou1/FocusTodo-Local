@@ -1,6 +1,6 @@
 # 7.1.1-local.1.6.1 — 日程与提示样式优化
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.6.1.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [English](../en/releases/UPDATE-7.1.1-local.1.6.1.md)
 
 发布日期：2026-10-29。作者：Lexible。
 

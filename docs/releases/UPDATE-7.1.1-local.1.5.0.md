@@ -1,6 +1,6 @@
 # 7.1.1-local.1.5.0 — 字体、清单排序与滚动修复
 
-[更新记录](../../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办与验收](../BACKLOG.md)
+[更新记录](../CHANGELOG.md) · [维护指南](../MAINTENANCE.md) · [统一待办与验收](../BACKLOG.md)
 
 发布日期：2026-10-27。
 

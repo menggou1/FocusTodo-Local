@@ -1,6 +1,6 @@
 # 后续维护指南
 
-[返回首页](../README.md) · [更新记录与版本报告](../CHANGELOG.md) · [架构说明](../ARCHITECTURE.md)
+[返回首页](../README.md) · [更新记录与版本报告](CHANGELOG.md) · [架构说明](ARCHITECTURE.md)
 
 本文是开发、测试、版本管理与发布的统一入口，已合并原版本规范。当前工作树应用为 `7.1.1-local.1.8.2`；版本见下表。历史报告只记录当时事实；当前开发与发布步骤以本文为准，未完成工作、未来计划的任务状态及未完成验收只在[统一待办与验收](BACKLOG.md)维护，阶段目标与依赖见[实施安排](plan/README.md)。
 
@@ -14,7 +14,7 @@
 
 业务运行直接使用 `node scripts/start.cjs`、`npm start`、macOS/Linux 的 `sh start.sh` 或 Windows 启动脚本。默认地址为 `http://127.0.0.1:5500/index.html`，不同主机名/端口隔离浏览器数据。没有热更新或完整 React 源码构建流程，修改静态文件后刷新页面。
 
-Node 本地服务仅接受 `127.0.0.1`、`localhost` 及有效端口的 Host；自定义域名访问不受支持。读取文件前解析实际路径，拒绝目录外及指向隐藏文件、依赖和开发工具目录的链接。Python 备用服务没有相同的边界检查。
+Node 本地服务仅接受 `127.0.0.1`、`localhost` 及有效端口的 Host；自定义域名访问不受支持。读取文件前解析实际路径，拒绝目录外及指向隐藏文件、依赖和开发工具目录的链接。Python 备用服务使用同一份文件清单；它不提供 Node 入口的 Host 校验和音频范围支持。
 
 暂停中的休息使用可选会话字段 `pausedFrom: 'rest'`，备份恢复保留该阶段，数据库版本仍为 v3。回退到 1.7.11 或更早版本前先结束该休息会话并备份，旧版不识别此字段。系统时钟回退后的专注片段按实际发生顺序保存，允许墙上时间重叠；导入时间早于游标时仍要求确认，但不补记负时间。
 
@@ -42,29 +42,27 @@ Remove-Item Env:FOCUS_TEST_FILTER -ErrorAction SilentlyContinue
 npm run test:browser
 ```
 
-浏览器用例启动临时 loopback 服务，使用独立浏览器上下文、测试数据并阻断外部网络。完整结果和截图写入 `docs/acceptance/`；这是最近一次保存的本地证据，不是各历史版本独立的截图档案。筛选结果写入 `results-filtered.json`，不能用其替代全量结果。提交前核对截图只有测试数据。
-
-若 Windows 上已有截图暂被其他程序占用，可把 `FOCUS_ACCEPTANCE_DIR` 设为独立的绝对目录再运行完整验收；启动、应用、清单和日程证据都会写入该目录。全部完成后再复制回 `docs/acceptance/`，不因截图写入失败跳过业务断言。
+浏览器用例启动临时 loopback 服务，使用独立上下文和测试数据，通常阻断外部网络。新截图和 JSON 默认写入 `dist/acceptance/`；可用 `FOCUS_ACCEPTANCE_DIR` 选择另一个绝对路径。筛选结果 `results-filtered.json` 不替代全量结果。`docs/acceptance/` 仅保存历史证据，不由当前测试覆盖。
 
 ## 3. 修改和生成边界
 
 | 文件/边界 | 维护规则 |
 |---|---|
-| `startup.css` / `js/local-startup.js` | 首屏源文件，经 `build:release` 内联到 HTML；独立于外部样式/字体。步骤进度只统计真实资源完成和应用挂载，必要样式与数据恢复就绪后展示，不等待可选资源 |
-| `local-timer-core.js` | 保持纯状态转换；区分完整番茄、部分片段、正常完成事件与恢复补记，不依赖 React/DOM |
-| `local-calendar.js` | 日程交互、布局和生命周期；快速创建复用数据服务事务，安排启动复用现有计时适配器 |
-| `local-data.js` | 数据库仍为 `PomodoroDB6` v3；记录和游标同事务提交；导入/删除保留完整备份与设置日志；数据库版本变更须设计迁移 |
-| `local-achievements.js` | 本地森林收取动画、本地成就定义、原排行榜样式的成就面板和刷新调度；奖励及解锁状态由数据服务一起提交，复用完整备份 |
-| `local-timer-ui.js` | 调用数据服务后更新旧界面；处理任务/子任务清除、订阅释放、跨页刷新、提示与音频 |
-| `local-app-ui.js` | 面向用户的任务提醒、更新、关于、删除确认；更新详情不包含维护 Markdown 按钮；错误反馈与关闭清理保持一致 |
-| `local-backup.js` | 紧凑 JSON/Gzip 编码、按内容识别、128 MB 上限、范围与图片引用校验及体积分析；完整业务校验保留在数据层 |
-| `local-theme-storage.js` | 单次主题设置提交与恢复日志；内部日志不复制图片、不写入备份，初始化必须等待数据库导入日志恢复 |
-| `local-i18n.js` / `local-settings-ui.js` | 语言解析、回退、通用设置中的语言与通知授权；不翻译用户任务/备注。显式选项只包含完整适配语言 |
-| `local-controls.css` | 全应用共用控件原子样式；复用按钮、开关、番茄图标、日期选择与菜单等既有视觉规则，功能布局留在所属模块 |
+| `src/startup.css` / `src/js/local-startup.js` | 首屏源文件，经 `build:release` 内联到 HTML；独立于外部样式/字体。步骤进度只统计真实资源完成和应用挂载，必要样式与数据恢复就绪后展示，不等待可选资源 |
+| `src/js/local-timer-core.js` | 保持纯状态转换；区分完整番茄、部分片段、正常完成事件与恢复补记，不依赖 React/DOM |
+| `src/js/local-calendar.js` | 日程交互、布局和生命周期；快速创建复用数据服务事务，安排启动复用现有计时适配器 |
+| `src/js/local-data.js` | 数据库仍为 `PomodoroDB6` v3；记录和游标同事务提交；导入/删除保留完整备份与设置日志；数据库版本变更须设计迁移 |
+| `src/js/local-achievements.js` | 本地森林收取动画、本地成就定义、原排行榜样式的成就面板和刷新调度；奖励及解锁状态由数据服务一起提交，复用完整备份 |
+| `src/js/local-timer-ui.js` | 调用数据服务后更新旧界面；处理任务/子任务清除、订阅释放、跨页刷新、提示与音频 |
+| `src/js/local-app-ui.js` | 面向用户的任务提醒、更新、关于、删除确认；更新详情不包含维护 Markdown 按钮；错误反馈与关闭清理保持一致 |
+| `src/js/local-backup.js` | 紧凑 JSON/Gzip 编码、按内容识别、128 MB 上限、范围与图片引用校验及体积分析；完整业务校验保留在数据层 |
+| `src/js/local-theme-storage.js` | 单次主题设置提交与恢复日志；内部日志不复制图片、不写入备份，初始化必须等待数据库导入日志恢复 |
+| `src/js/local-i18n.js` / `src/js/local-settings-ui.js` | 语言解析、回退、通用设置中的语言与通知授权；不翻译用户任务/备注。显式选项只包含完整适配语言 |
+| `src/local-controls.css` | 全应用共用控件原子样式；复用按钮、开关、番茄图标、日期选择与菜单等既有视觉规则，功能布局留在所属模块 |
 | `release.json` | 唯一人工编辑的发布元信息；`report` 字段保留供仓库维护和一致性检查，不作为 UI 入口 |
-| `patch.js` | 按原边界安装数据身份、网络、备份界面、设置兼容与主题；逻辑按功能归入已有模块，重复安装无副作用 |
-| `local-network.js` | 同源/精确 Bing 白名单与实际旧账号 XHR 兼容；资料修改的调用路径必须保留验证 |
-| `js/main.js` | 已修改的压缩旧包，非可丢弃构建产物；不要替换成原版后假定脚本能重建所有修改 |
+| `src/patch.js` | 按原边界安装数据身份、网络、备份界面、设置兼容与主题；逻辑按功能归入已有模块，重复安装无副作用 |
+| `src/js/local-network.js` | 同源/精确 Bing 白名单与实际旧账号 XHR 兼容；资料修改的调用路径必须保留验证 |
+| `src/js/main.js` | 已修改的压缩旧包，非可丢弃构建产物；不要替换成原版后假定脚本能重建所有修改 |
 
 ### 全体样式重构与视觉验收
 
@@ -95,14 +93,14 @@ node scripts/revise-calendar-integration.cjs
 
 | 文件/入口 | 维护范围 |
 |---|---|
-| `main.css` | 旧组件各模块布局、字体、主题与 vendor 基础；覆盖侧栏、任务、计时、日程、统计等全应用区域 |
-| `local-controls.css` | 共用按钮、图标按钮、设置行、菜单、日期选择/弹层、番茄小图标与文本截断；旧类名作为兼容别名共用同一份规则，保留各选择器优先级及必要例外 |
-| `local-ui.css` | 本地功能的布局与交互状态；共用按钮基础边框、背景、文字色和指针由控件样式维护 |
+| `src/main.css` | 旧组件各模块布局、字体、主题与 vendor 基础；覆盖侧栏、任务、计时、日程、统计等全应用区域 |
+| `src/local-controls.css` | 共用按钮、图标按钮、设置行、菜单、日期选择/弹层、番茄小图标与文本截断；旧类名作为兼容别名共用同一份规则，保留各选择器优先级及必要例外 |
+| `src/local-ui.css` | 本地功能的布局与交互状态；共用按钮基础边框、背景、文字色和指针由控件样式维护 |
 | `FocusSettings.selectStyles()` / `switchProps()` | 番茄设置、外观设置、语言选择共享下拉样式；番茄与通用设置共享开关参数。颜色须在使用时读取当前主题 |
-| `startup.css` | 独立首屏，生成时内联；不依赖应用控件和外部字体 |
-| `purchase.css` / `resetpassword.css` | 原独立页的布局样式；不引入本地应用主题变量，旧账号联网入口仍按既有边界隔离 |
+| `src/startup.css` | 独立首屏，生成时内联；不依赖应用控件和外部字体 |
+| `src/purchase.css` / `src/resetpassword.css` | 原独立页的布局样式；不引入本地应用主题变量，旧账号联网入口仍按既有边界隔离 |
 
-新增控件先选择已有原子或兼容别名，功能布局留在所属模块。调整旧组件接入时，在 `revise-app-integration.cjs` 后运行 `revise-controls-integration.cjs` 并核对幂等；新根目录运行样式须同步 HTML、便携包与 Pages 白名单。
+新增控件先选择已有原子或兼容别名，功能布局留在所属模块。调整旧组件接入时，在 `revise-app-integration.cjs` 后运行 `revise-controls-integration.cjs` 并核对幂等；新增入口或运行资源须同步 HTML 与共享运行文件清单 `scripts/runtime-layout.json`。
 
 ## 4. 版本与发布
 
@@ -130,9 +128,9 @@ node scripts/revise-calendar-integration.cjs
 
 `release.json` 是版本、作者、日期、remote 名及更新条目的唯一人工编辑入口，日期按本地发布日 `YYYY-MM-DD`。新版本在 `updates` 首部新增条目及对应报告，保留历史条目。`items` 只写面向用户的简短变化，`report` 供仓库维护和一致性检查，不在产品界面提供报告下载入口。
 
-运行 `npm run build:release` 同步 `js/local-release.js`、包版本/作者、锁文件版本、页面标题及缓存参数；勿单独编辑生成文件。这不能重建旧主包，组件接入使用上一节指定的 AST 脚本。
+运行 `npm run build:release` 同步 `src/js/local-release.js`、包版本/作者、锁文件版本、页面标题及缓存参数；勿单独编辑生成文件。这不能重建旧主包，组件接入使用上一节指定的 AST 脚本。
 
-生成时同时读取 `i18n/local-en.json` 和原语言文件，生成同步回退词库，并从 `release.json` 的 `titleEn/itemsEn` 生成缺失的英文历史报告与更新记录。新增本地文案须同时提供英文；当前使用、维护、架构与统一清单的英文文档位于 `docs/en/`，与中文版本按同一范围同步。已存在的英文历史报告保持原文；新英文历史报告是技术摘要，保留原中文报告与公开证据。
+生成时同时读取 `public/i18n/local-en.json` 和原语言文件，生成同步回退词库，并从 `release.json` 的 `titleEn/itemsEn` 生成缺失的英文历史报告与更新记录。新增本地文案须同时提供英文；当前使用、维护、架构与统一清单的英文文档位于 `docs/en/`，与中文版本按同一范围同步。已存在的英文历史报告保持原文；新英文历史报告是技术摘要，保留原中文报告与公开证据。
 
 生成器优先使用 `release.json` 指定的 `Focustodo-local`，缺失时使用新克隆默认的 `origin`，校验 GitHub HTTPS/SSH 地址后生成仓库链接。始终核对 URL；日常应用使用已生成地址，无需 Git，只有用户点击图标才打开仓库。
 
@@ -152,33 +150,19 @@ git diff --stat
 git status --short
 ```
 
-当前全量包含计时核心、服务、发布信息、启动器、备份编码，18 项启动/字体用例、应用浏览器用例和 7 项并发维护场景，以及清单拖动、音频协调、本地资料和日程、森林、成就及任务提醒专项验收。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `docs/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
+当前全量包含计时核心、服务、发布信息、启动器、备份编码，18 项启动/字体用例、应用浏览器用例和 7 项并发维护场景，以及清单拖动、音频协调、本地资料和日程、森林、成就及任务提醒专项验收。便携包使用 Python 3.12+ 执行 `python scripts/package-release.py` 和 `python tests/release/package-smoke.py`，覆盖 ZIP/tar.gz 解压后的实际启动。`npm run benchmark:backup` 在隔离浏览器用生成的 1/10/50 MB 任务历史和图片样本测量容量，结果保存为 `dist/acceptance/backup-performance.json`，不作为每次 CI 的重复负载。报告以实际结果为准。
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 
 ### 合并与推送顺序
 
-**工作分支只在本地使用，先合入本地 main，再推送 main。不要为了触发 CI 推送工作分支。**
-
-仅在用户明确授权时，可临时推送用于指定平台验证的分支；只运行获准平台，完成后删除远程临时分支，并恢复常规三平台发布门禁。本次 `1.2.1` 的 macOS 专项验证属于这项明确授权。
-
-1. 在本地工作分支修改、验证并更新报告；应用变化才递增版本，纯文档整理不新发应用版本。
-2. 确认 main 工作区干净，读取远端最新 main；有分歧先处理，不强推覆盖。本项目 main 位于独立工作区，不要在其他工作区重复切换到 main。
-3. 在 main 所在工作区合并已验证分支，再只推送 main。
-4. 正式发布时，从已合并、已验证的 main 提交创建带注释的新版本 Tag 并推送；Tag 必须等于 `localVersion`，不要覆盖旧 Tag。
-
-```bash
-# 将路径、分支和后续修补版本示例替换为实际值
-git -C "<main工作区>" merge --ff-only "<本地工作分支>"
-git push Focustodo-local main
-# 仅正式发布新版本时执行
-git -C "<main工作区>" tag -a 1.2.3 -m "Release 1.2.3"
-git push Focustodo-local refs/tags/1.2.3
-```
+1. 在独立工作分支修改并验证，通过 PR 提交审查；不要从工作树直接推送 `main`。需要版本发布时同步更新版本元信息和报告。
+2. 确认 PR 检查通过后合并。等待合入提交的三平台检查和 Pages 部署成功。不要为待发布的提交添加 GitHub 的 `[skip ci]` 指令；如果推送检查被跳过，可在该提交仍是 `main` 顶端时手动运行工作流。
+3. 仅正式发布新版本时，从上述确切的 `main` 提交创建带注释的新版本 Tag 并推送。Tag 必须等于 `localVersion`，不得覆盖旧 Tag。
 
 ### Actions 与发布产物
 
-`.github/workflows/ci.yml` 响应 main 代码推送、面向 main 的 PR、版本号 Tag 和手动触发；不响应工作分支 push，纯 Markdown/docs 修改不自动跑测试，三系统分别跑 Node.js 22/24 单元测试，Node.js 24 验证三系统的便携包。三系统在 Node.js 24 上并行运行完整 Chromium 验收，语法及生成一致性检查集中在 Ubuntu，浏览器证据保存 7 天。Tag 只执行发布门禁与打包发布，复用同一提交的 main 测试结果。
+`.github/workflows/ci.yml` 响应所有 `main` 推送（含纯文档）、面向 `main` 的 PR、版本 Tag 和手动运行。Ubuntu 预检统一执行生成一致性、语法、Pages 白名单及发布门禁测试，并只打包一次；仅改文档的 PR 验证文档链接和解压启动，其余 PR 与所有 `main` 推送运行三平台 Node.js 22/24 单元测试。Node.js 24 在三个系统运行完整 Chromium 验收并测试同一份 ZIP/tar.gz，浏览器证据保存 7 天。Pages 构建和部署依赖同一提交的预检和完整矩阵。
 
 版本 Tag 匹配且提交在 main 历史中，并且同一提交的 main 测试与 Pages 部署全部成功，才允许发布 ZIP、tar.gz、SHA256SUMS.txt。便携包不含运行时、npm 依赖、Git 状态或测试数据。文档合并/改名必须同步 `scripts/package-release.py`，确保压缩包内的本地文档链接也可用；普通文档整理不覆盖旧 Release。
 
@@ -188,27 +172,27 @@ git push Focustodo-local refs/tags/1.2.3
 
 ### 启动反馈与性能取样
 
-修改 `startup.css` 或 `js/local-startup.js` 后运行 `npm run build:release`，将首屏源文件内联到 HTML；不要直接维护两份启动代码。`node tests/startup-acceptance.cjs` 可独立运行启动用例；`npm run test:browser` 包含它们。
+修改 `src/startup.css` 或 `src/js/local-startup.js` 后运行 `npm run build:release`，将首屏源文件内联到 HTML；不要直接维护两份启动代码。`node tests/browser/startup-acceptance.cjs` 可独立运行启动用例；`npm run test:browser` 包含它们。
 
-按需运行 `node tests/startup-performance.cjs <已确认的基线提交>`，在隔离数据库和项目子路径下比较一次冷启动。模拟条件为 150 ms 延迟、200 KiB/s 下载，双方同样拦截可选字体和图片；结果写入 `docs/acceptance/startup-performance.json`，不代表线上速度承诺，也不作为每次 CI 的波动阈值。
+按需运行 `node tests/performance/startup-performance.cjs <已确认的基线提交>`，在隔离数据库和项目子路径下比较一次冷启动。模拟条件为 150 ms 延迟、200 KiB/s 下载，双方同样拦截可选字体和图片；结果写入 `dist/acceptance/startup-performance.json`，不代表线上速度承诺，也不作为每次 CI 的波动阈值。
 
 ### GitHub Pages 官方工作流
 
-线上地址为 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。`main` 保存完整项目；`.github/workflows/pages.yml` 在 main 推送时自动部署，也支持在 main 上手动运行。仓库 Settings → Pages → Source 使用 **GitHub Actions**，不再维护或依赖 `gh-pages` 分支。
+线上地址为 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。`main` 保存完整项目；`.github/workflows/ci.yml` 在 main 推送通过测试后部署，也支持在 main 上手动运行。仓库 Settings → Pages → Source 使用 **GitHub Actions**，不再维护或依赖 `gh-pages` 分支。
 
-工作流使用官方 `configure-pages`、`upload-pages-artifact` 和 `deploy-pages`，通过 `github-pages` 环境发布。构建仅有 `contents: read`；部署使用 `pages: write` 与 `id-token: write`，无需个人令牌。并发部署串行执行，避免中断正在发布的网站。
+工作流使用官方 `configure-pages`、`upload-pages-artifact` 和 `deploy-pages`，通过 `github-pages` 环境发布。构建使用 `contents: read` 和 `pages: read`；部署使用 `pages: write` 与 `id-token: write`，无需个人令牌。并发部署串行执行，避免中断正在发布的网站。
 
-沿用原有 `scripts/deploy-pages.py` 文件白名单：根目录浏览器 HTML/CSS/JS、图标、`release.json`、`LICENSE`，以及 `js/`、`audio/`、`font/`、`i18n/`、`img/`。脚本只读取已提交 main 或其祖先，输出这些运行文件、`.nojekyll` 和记录版本/来源提交的 `deployment.json`；开发脚本、测试和文档不上传；本地版主分支已移除上游 `CNAME`。官方工作流上传的目录是 `dist/pages`，不是整个仓库。
+`scripts/runtime-layout.json` 是本地服务、便携包和 Pages 的共享运行文件白名单。构建从已提交的版本读取 `src/` 和 `public/`，将其映射到原浏览器目录（例如 `index.html`、`js/`、`font/`）。Pages 还写入 `.nojekyll` 和记录版本/来源提交的 `deployment.json`，不上传开发脚本、测试、文档或 CNAME；便携包额外包含启动器和发行文档。
 
 使用 Python 3.12+ 可按同一规则生成本地预览（输出目录必须不存在）：
 
 ```bash
 python scripts/deploy-pages.py --output dist/pages-preview
 # 在 main 上重新部署当前提交
-# GitHub Actions → Deploy GitHub Pages → Run workflow → main
+# GitHub Actions → Test, deploy and release → Run workflow → main
 ```
 
-脚本仅构建目录，不再提供 `--push` / `--remote` 或写入部署分支。本次迁移不修改应用版本、历史 Tag 或 Release。部署不会读取或上传本地浏览器数据库。线上地址与本机 loopback 使用不同浏览器存储，数据迁移依赖备份导出/导入。部署后核对工作流成功、线上 `deployment.json` 的来源提交，以及项目子路径下的真实页面启动。
+默认使用已提交的 `HEAD`，可用 `--ref` 指定提交（包括 PR 分支的本地预览）。脚本仅构建目录，不再提供 `--push` / `--remote` 或写入部署分支。本次迁移不修改应用版本、历史 Tag 或 Release。部署不会读取或上传本地浏览器数据库。线上地址与本机 loopback 使用不同浏览器存储，数据迁移依赖备份导出/导入。部署后核对工作流成功、线上 `deployment.json` 的来源提交，以及项目子路径下的真实页面启动。
 
 ## 文档存放与链接
 
