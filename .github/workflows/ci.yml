@@ -128,6 +128,8 @@ jobs:
       - name: Prepare Windows TCP resources
         if: runner.os == 'Windows' && matrix.node == '24'
         shell: pwsh
+        env:
+          FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
         run: ./scripts/windows-ci-network.ps1 -Configure -Phase before
       - name: Browser acceptance
         if: matrix.node == '24'
@@ -138,6 +140,8 @@ jobs:
       - name: Record Windows TCP resources
         if: always() && runner.os == 'Windows' && matrix.node == '24'
         shell: pwsh
+        env:
+          FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
         run: ./scripts/windows-ci-network.ps1 -Phase after
       - name: Upload browser evidence
         if: always() && matrix.node == '24'

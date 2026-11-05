@@ -29,7 +29,7 @@ $snapshot = [ordered]@{
     states = @($connections | Group-Object State | ForEach-Object { @{ state = $_.Name; count = $_.Count } })
     loopbackStates = @($connections | Where-Object { $_.RemoteAddress -in @('127.0.0.1', '::1') } | Group-Object State | ForEach-Object { @{ state = $_.Name; count = $_.Count } })
 }
-$directory = Join-Path $PSScriptRoot '../docs/acceptance'
+$directory = if ($env:FOCUS_ACCEPTANCE_DIR) { $env:FOCUS_ACCEPTANCE_DIR } else { Join-Path $PSScriptRoot '../dist/acceptance' }
 New-Item -ItemType Directory -Path $directory -Force | Out-Null
 $snapshot | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $directory "windows-network-$Phase.json") -Encoding utf8
 $snapshot | ConvertTo-Json -Depth 5 | Write-Output

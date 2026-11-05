@@ -4,4 +4,6 @@
 
 已移除一份无引用的字节级重复截图：根层的 `list-drag-1.7.2.png` 与保留的 `list-drag-1.7.3.png` 相同。独立的 [1.7.2 字体验收截图](typography-1.7.2/list-drag-1.7.2.png) 仍保留。
 
+清理时移除了 `release-1.7.10/` 中未被引用的 32 张重复或近似截图；对应场景的根目录截图、该版本的机器结果和验证记录仍保留。近似截图来自不同运行，不能视为字节相同或作为该版本的精确像素基准。
+
 New acceptance output goes to `dist/acceptance/`. This directory preserves historical evidence; test inputs and baselines live under `tests/fixtures/`.
