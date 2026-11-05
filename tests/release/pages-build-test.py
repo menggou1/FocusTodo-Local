@@ -40,7 +40,7 @@ class PagesBuildTests(unittest.TestCase):
             for excluded in ('CNAME', 'package.json', 'README.md', '.github', 'scripts', 'tests', 'docs', 'src', 'public', 'startup.css'):
                 self.assertFalse((output / excluded).exists(), excluded)
             manifest = json.loads((output / 'deployment.json').read_text(encoding='utf-8'))
-            release = json.loads(pages.git('show', 'main:release.json'))
+            release = json.loads(pages.git('show', 'HEAD:release.json'))
             self.assertEqual(manifest, {
                 'version': release['officialVersion'] + '-local.' + release['localVersion'],
                 'sourceCommit': pages.git('rev-parse', 'HEAD').decode().strip(),
