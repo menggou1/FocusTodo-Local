@@ -104,6 +104,18 @@ fs.mkdirSync(evidence, { recursive: true });
         await blocks(page).first().waitFor();
     }
     try {
+        for (const locale of ['zh-CN', 'en']) for (const dark of [false, true]) {
+            await scenario('day header translates today and dated navigation ' + locale + ' ' + dark, async page => {
+                const header = page.locator('.focus-schedule-day > div').first();
+                const today = locale === 'en' ? 'Today Wednesday' : '今天 星期三';
+                assert.equal(await header.innerText(), today);
+                await page.getByRole('button', { name: locale === 'en' ? 'Next day' : '后一天', exact: true }).click();
+                const dated = locale === 'en' ? 'Nov 5 Thursday' : '11月5日 星期四';
+                await page.waitForFunction(expected => document.querySelector('.focus-schedule-day > div')?.innerText === expected, dated);
+                assert.equal(await header.innerText(), dated);
+                assert(!(await header.innerText()).includes('unavailable'));
+            }, locale, dark, '2026-11-04T12:00:00+08:00');
+        }
         for (const dark of [false, true]) await scenario('empty task and fading notice ' + (dark ? 'dark' : 'light'), async page => {
             const position = await slot(page); await page.mouse.dblclick(position.x, position.y);
             const input = page.locator('#focus-calendar-name');

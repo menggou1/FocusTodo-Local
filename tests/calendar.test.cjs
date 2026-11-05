@@ -18,3 +18,30 @@ test('next week means seven local calendar days at the end of that day', () => {
     const date = new Date(2026, 11, 28, 12), result = new Date(deadlineInSevenDays(date.getTime()));
     assert.deepEqual([result.getFullYear(), result.getMonth(), result.getDate(), result.getHours(), result.getMinutes(), result.getSeconds(), result.getMilliseconds()], [2027, 0, 4, 23, 59, 59, 999]);
 });
+
+test('day headers use the real translation catalog for today and other dates in Chinese and English', () => {
+    const fs = require('node:fs'), vm = require('node:vm'), path = require('node:path');
+    for (const locale of ['en', 'zh-CN']) {
+        const window = {}, context = vm.createContext({ window,
+            localStorage: { getItem: () => locale }, navigator: { languages: [locale] },
+            document: { documentElement: {} } });
+        for (const file of ['local-i18n-catalog.js', 'local-i18n.js', 'local-calendar.js']) {
+            vm.runInContext(fs.readFileSync(path.join(__dirname, '../js', file), 'utf8'), context);
+        }
+        const React = { createElement: (type, props, ...children) => ({ type, props, children }) };
+        for (const today of [true, false]) {
+            const date = { isSame: () => today, format: pattern => ({
+                dddd: locale === 'en' ? 'Wednesday' : '星期三', 'MMM D': 'Nov 4', 'M月D日': '11月4日'
+            })[pattern] };
+            const view = { props: { date: '2026-11-04' }, getMoment: () => date,
+                renderAllDaySection() {}, renderTimeline() {}, shouldUseDualColumn: () => false };
+            const tree = window.FocusCalendar.renderDay(view, React, {});
+            const label = tree.children[0].children[0].children[0];
+            const expected = locale === 'en'
+                ? (today ? 'Today' : 'Nov 4') + ' Wednesday'
+                : (today ? '今天' : '11月4日') + ' 星期三';
+            assert.equal(label, expected);
+            assert(!label.includes('unavailable'));
+        }
+    }
+});

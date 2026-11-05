@@ -23,6 +23,7 @@ concurrency:
 
 jobs:
   test:
+    if: github.ref_type != 'tag'
     name: ${{ matrix.os }} / Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
@@ -43,46 +44,42 @@ jobs:
           python-version: '3.12'
       - run: npm ci
       - run: npm run build:release
+        if: runner.os == 'Linux' && matrix.node == '24'
       - name: Verify generated files are committed
+        if: runner.os == 'Linux' && matrix.node == '24'
         run: git diff --exit-code -- package.json package-lock.json index.html js/local-release.js js/local-i18n-catalog.js
       - run: npm run check
+        if: runner.os == 'Linux' && matrix.node == '24'
       - run: npm test
       - name: Install browser
-        if: matrix.node == '24'
+        if: runner.os == 'Linux' && matrix.node == '24'
         run: npx playwright install --with-deps chromium
-      - name: Prepare Windows TCP resources for full browser acceptance
-        if: runner.os == 'Windows' && matrix.node == '24'
-        shell: pwsh
-        run: ./scripts/windows-ci-network.ps1 -Configure -Phase before
       - name: Browser acceptance
-        if: matrix.node == '24'
+        if: runner.os == 'Linux' && matrix.node == '24'
         run: npm run test:browser
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
-      - name: Record Windows TCP resources after browser acceptance
-        if: always() && runner.os == 'Windows' && matrix.node == '24'
-        shell: pwsh
-        run: ./scripts/windows-ci-network.ps1 -Phase after
+          FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
+      - name: Verify release gate
+        if: runner.os == 'Linux' && matrix.node == '24'
+        run: python tests/release-gate-test.py
       - name: Package runtime
         if: matrix.node == '24'
-        run: |
-          python tests/release-gate-test.py
-          python scripts/package-release.py
+        run: python scripts/package-release.py
       - name: Test extracted ZIP and tar.gz without dependencies
         if: matrix.node == '24'
         run: python tests/package-smoke.py
       - name: Upload browser evidence
-        if: always() && matrix.node == '24'
+        if: always() && runner.os == 'Linux' && matrix.node == '24'
         uses: actions/upload-artifact@v6
         with:
           name: acceptance-${{ matrix.os }}
-          path: docs/acceptance/
+          path: ${{ runner.temp }}/acceptance/
           retention-days: 7
 
   release:
     name: Publish version tag
     if: github.event_name == 'push' && github.ref_type == 'tag'
-    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

@@ -14,8 +14,10 @@ function compare(actual,expected,message){
         assert(actual[key],message+': '+key);
         for(const prop of props){
             const value=actual[key][prop],reference=expected[key][prop];
-            // Bundled font families are portable; the platform fallback tail and
-            // subpixel text widths need not match this Windows Edge capture.
+            // An auto-sized dropdown label follows the platform's glyph widths.
+            // Check containment in the live control instead of a Windows text width.
+            if(key==='value'&&prop==='width')continue;
+            // Ignore the platform fallback tail and subpixel rounding.
             if(prop==='fontFamily')assert.equal(value.split(',')[0],reference.split(',')[0],message+': '+key+' '+prop);
             else if(prop==='width'&&reference.endsWith('px'))assert(Math.abs(parseFloat(value)-parseFloat(reference))<=2,message+': '+key+' '+prop+' '+value+' vs '+reference);
             else assert.equal(value,reference,message+': '+key+' '+prop);
@@ -57,6 +59,11 @@ function compare(actual,expected,message){
                 await menu(locale==='en'?'Pomodoro':'番茄钟').click();
                 compare(await metrics(page,{control:'[class*=PomodoroSettings-selectTable] [class$=-control]',value:'[class*=PomodoroSettings-selectTable] [class$=-singleValue]'}),baseline.cases[key].select,'Existing dropdowns retain pre-refactor appearance');
                 const legacy=page.locator('[class*=PomodoroSettings-selectTable] [class$=-control]').first();await legacy.click();await page.keyboard.press('Escape');
+                const label=legacy.locator('[class$=-singleValue]');
+                assert(await label.evaluate(node=>{
+                    const text=node.getBoundingClientRect(),container=node.parentElement.getBoundingClientRect();
+                    return text.width>0&&text.left>=container.left&&text.right<=container.right&&node.scrollWidth<=node.clientWidth;
+                }),'Settings dropdown text fits its value container without clipping');
             }
             await page.locator('[class^=Settings-close-]').click();await page.locator('[class^=Settings-root-]').waitFor({state:'detached'});
             await page.locator('[class*=HomeHeader-forest]').click();await page.locator('[class*=Forest-container]').waitFor();

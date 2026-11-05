@@ -67,6 +67,37 @@ const server = http.createServer((req, res) => {
     }
     async function release(p) { await p.evaluate(() => window.__acceptanceRelease()); return p.evaluate(() => window.__acceptanceOperation); }
     try {
+        await scenario('invalid imported timer settings leave rows, settings and maintenance untouched', async context => {
+            const p = await page(context);
+            await p.evaluate(async () => {
+                localStorage.setItem('ImportGuard', 'original');
+                const db = await FocusLocalData.open();
+                await FocusLocalData.transaction(db, ['Task'], 'readwrite', tx => tx.objectStore('Task').put({ id: 'keep-original', name: 'Original task' }));
+                window.__maintenanceStarted = 0;
+                window.addEventListener('focus-local-maintenance', () => window.__maintenanceStarted++);
+            });
+            const before = await p.evaluate(() => FocusLocalData.snapshot());
+            for (const [key, value] of [['shortBreak', 0], ['longBreak', 'invalid'], ['longEvery', 0], ['autoWork', 'false']]) {
+                const result = await p.evaluate(async ({ before, key, value }) => {
+                    const target = structuredClone(before), now = Date.now();
+                    target.indexedDB.Task = [{ id: 'must-not-import', name: 'Replacement' }];
+                    target.localStorage.ImportGuard = 'changed';
+                    const session = FocusTimerCore.create({ sessionId: 'invalid-import' }, now);
+                    session.state = 'pause'; session.pausedFrom = 'rest'; session.config[key] = value;
+                    target.indexedDB.TimerSession = [session];
+                    try { await FocusLocalData.replace(target, { backup: false }); return { accepted: true }; }
+                    catch (error) { return { accepted: false, message: error.message }; }
+                }, { before, key, value });
+                assert.equal(result.accepted, false, key);
+                assert.match(result.message, /计时会话字段无效/);
+                const after = await p.evaluate(() => FocusLocalData.snapshot());
+                assert.deepEqual(after.indexedDB, before.indexedDB);
+                assert.deepEqual(after.localStorage, before.localStorage);
+            }
+            assert.equal(await p.evaluate(() => FocusLocalData.maintenance), false);
+            assert.equal(await p.evaluate(() => window.__maintenanceStarted), 0);
+            assert.equal((await state(p)).LocalMeta.length, 0);
+        });
         await scenario('no Web Locks: competing imports serialize without mixed rows or settings', async context => {
             const a = await page(context), b = await page(context), first = await prepare(a, 'first'), second = await prepare(b, 'second');
             await pauseAfterJournal(a); await begin(a, first);

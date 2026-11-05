@@ -73,3 +73,51 @@ test('a paused break survives backup validation and resumes as a break', () => {
     assert.equal(resumed.state, 'rest'); assert.equal(resumed.phaseElapsed, 20);
     assert.equal(resumed.pausedFrom, undefined);
 });
+
+test('import rejects invalid break durations before they can skip a restored break', () => {
+    for (const key of ['shortBreak', 'longBreak']) {
+        for (const value of [undefined, null, 0, -60, 1.5, 28801, '300', 'invalid']) {
+            const s = { ...start(), state: 'pause', pausedFrom: 'rest' };
+            s.config[key] = value;
+            assert.throws(() => dataService().validate(snapshot(s, t)), /计时会话字段无效/, key + ': ' + value);
+        }
+    }
+});
+
+test('import rejects invalid break cadence and non-boolean automation flags', () => {
+    for (const value of [undefined, null, 0, -1, 1.5, 101, '4']) {
+        const s = start(); s.config.longEvery = value;
+        assert.throws(() => dataService().validate(snapshot(s, t)), /计时会话字段无效/, 'longEvery: ' + value);
+    }
+    for (const key of ['autoWork', 'autoBreak', 'banBreak']) {
+        for (const value of [undefined, null, 'false', 'true', 0, 1]) {
+            const s = start(); s.config[key] = value;
+            assert.throws(() => dataService().validate(snapshot(s, t)), /计时会话字段无效/, key + ': ' + value);
+        }
+    }
+});
+
+test('valid boundary configurations survive JSON and Gzip import without changing timer rules', async () => {
+    for (const config of [
+        { interval: 1, shortBreak: 1, longBreak: 28800, longEvery: 1, autoWork: false, autoBreak: true, banBreak: false },
+        { interval: 28800, shortBreak: 28800, longBreak: 1, longEvery: 100, autoWork: true, autoBreak: false, banBreak: true }
+    ]) {
+        const s = core.reduce(null, { type: 'start', sessionId: 'valid-import', config }, t).session;
+        for (const format of ['json', 'gzip']) {
+            const encoded = await backup.encode(snapshot(s, t), { format });
+            const result = dataService().validate((await backup.decode(encoded.bytes)).data);
+            assert.deepEqual(JSON.parse(JSON.stringify(result.indexedDB.TimerSession[0].config)), config);
+        }
+    }
+});
+
+test('legacy backups without timer sessions remain importable', () => {
+    for (const exportVersion of [1, 2]) {
+        const input = snapshot(start(), t);
+        input.meta.exportVersion = exportVersion;
+        delete input.indexedDB.TimerSession;
+        const result = dataService().validate(input);
+        assert.equal(result.indexedDB.TimerSession.length, 0);
+        assert.equal(result.meta.exportVersion, exportVersion);
+    }
+});

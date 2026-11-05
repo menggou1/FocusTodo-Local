@@ -3,29 +3,35 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.8.0",
+    "localVersion": "1.8.1",
     "author": "Lexible",
-    "date": "2026-11-04",
+    "date": "2026-11-05",
     "repositoryRemote": "Focustodo-local",
     "updates": [
         {
-            "version": "7.1.1-local.1.8.0",
-            "date": "2026-11-04",
-            "title": "森林实时角标、一键收取与共用控件",
+            "version": "7.1.1-local.1.8.1",
+            "date": "2026-11-05",
+            "title": "森林一键收取、共用控件与可靠性修复",
             "items": [
                 "森林红点随阳光成熟、过期和数据变化自动刷新，无需先打开森林。",
                 "新增手形一键收取入口，与成就、攻略复用圆形按钮样式。",
                 "梳理全体样式并复用按钮、开关、番茄图标、日期与下拉控件，统一语言菜单。",
-                "确定从 2.0.0 起使用独立三段式版本，提供清晰的实施计划；1.8.0 继续旧版本格式。"
+                "确定从 2.0.0 起使用独立三段式版本，提供清晰的实施计划；1.8.1 继续旧版本格式。",
+                "导入前完整校验计时快照的休息参数及自动切换选项，拒绝无效配置。",
+                "本地服务对包含空字符的请求返回错误，避免服务意外退出。",
+                "修复英文日程当天标题，正确显示 Today。"
             ],
-            "titleEn": "Live forest badge, collect all and shared controls",
+            "titleEn": "Forest collect all, shared controls and reliability fixes",
             "itemsEn": [
                 "Refresh the forest badge as sunlight matures, expires or changes, without opening the forest.",
                 "Collect available sunlight with a hand button sharing the achievement and guide button style.",
                 "Audit all styles and reuse button, switch, pomodoro, date and dropdown controls, matching the language menu to other settings.",
-                "Adopt independent three-part application versions starting with 2.0.0 and provide a practical implementation plan; 1.8.0 retains the current format."
+                "Adopt independent three-part application versions starting with 2.0.0 and provide a practical implementation plan; 1.8.1 retains the current format.",
+                "Validate all timer snapshot break settings and automation flags before import, rejecting invalid configurations.",
+                "Reject request paths containing NUL bytes without terminating the local server.",
+                "Show Today correctly in the English schedule day header."
             ],
-            "report": "docs/releases/UPDATE-7.1.1-local.1.8.0.md"
+            "report": "docs/releases/UPDATE-7.1.1-local.1.8.1.md"
         },
         {
             "version": "7.1.1-local.1.7.12",
@@ -409,7 +415,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.8.0",
+    "version": "7.1.1-local.1.8.1",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

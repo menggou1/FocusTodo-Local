@@ -39,7 +39,7 @@ Theme changes coordinate three existing localStorage values: theme JSON, active 
 
 ## Backup and restore
 
-The data layer takes a consistent business snapshot. `local-backup.js` produces compact JSON or Gzip and sniffs incoming content. Gzip does not change the business backup version. v1/v2 JSON remains readable. The decoder enforces an expanded-size bound before replacement. Business validation checks tables, IDs, time values, sessions and settings.
+The data layer takes a consistent business snapshot. `local-backup.js` produces compact JSON or Gzip and sniffs incoming content. Gzip does not change the business backup version. v1/v2 JSON remains readable. The decoder enforces an expanded-size bound before replacement. Business validation checks tables, IDs, time values, sessions and settings. Imported timer configurations must already match every timer-core setting type and bound before replacement.
 
 Full backups retain image data URLs. Wallpaper omission is explicit in the scope and filename; restore removes unavailable theme references and uses Leaf. Safety backups before import and reset are always complete. Imported running sessions become recovery confirmations, so no post-export offline time starts automatically.
 

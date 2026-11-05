@@ -20,6 +20,8 @@ function createServer() { return http.createServer((req, res) => {
     let pathname;
     try { pathname = decodeURIComponent(new URL(req.url, 'http://127.0.0.1').pathname); }
     catch (_) { res.writeHead(400); res.end(); return; }
+    // fs.realpath throws synchronously for NUL, outside its error callback.
+    if (pathname.includes('\0')) { res.writeHead(400); res.end(); return; }
     const parts = pathname.split(/[\\/]/);
     if (!['GET', 'HEAD'].includes(req.method) || isPrivate(parts)) { res.writeHead(403); res.end(); return; }
     const file = path.resolve(root, '.' + (pathname === '/' ? '/index.html' : pathname));

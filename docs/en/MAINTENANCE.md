@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.8.0`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
+Current worktree: `7.1.1-local.1.8.1`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
 
 Design-theory documents are for entertainment only and are not development rules. Unless the user explicitly requests it, models must not read, consult or modify those documents. Development follows user requirements, code evidence and this maintenance guide.
 
@@ -112,21 +112,21 @@ python tests/package-smoke.py
 
 ## Version and release
 
-Formal retention rules cover the entire 1.7 series and future releases. Versions through 1.6 retain their original rules. A formal version must be merged and pushed to main, deployed to Pages, pass all main/tag platform checks for the same commit and publish a Release. Failed candidates require a version increment before repair; consolidate useful changes into the successful successor and remove standalone failed reports and entries. Preserve pushed tags without replacement.
+Formal retention rules cover the entire 1.7 series and future releases. Versions through 1.6 retain their original rules. A formal version must be merged and pushed to main, deployed to Pages, pass the main platform checks and the tag publication gate for the same commit and publish a Release. Failed candidates require a version increment before repair; consolidate useful changes into the successful successor and remove standalone failed reports and entries. Preserve pushed tags without replacement.
 
 Reports describe initial problems, final behavior and final validation evidence. Omit attempt-by-attempt narratives, temporary fixes and documentation-edit history. Open work belongs only in Backlog. New links point directly to archived reports. Windows CI network configuration applies only to disposable runners and retains the complete test matrix and assertions.
 
 Each new repair release increments the third local-version component. Preserve already-pushed failed tags; publish the corrected commit under the next patch version. Version reports follow the actual task scope, and failed 1.4.2 content is consolidated into 1.4.3.
 
-The 1.x series, including this 1.8.0 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
+The 1.x series, including this 1.8.1 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
 
-**Version 1.8.0 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
+**Version 1.8.1 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
 
 Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 
 Work branches stay local. Merge the verified work into the clean primary main worktree, then push main; do not push a work branch merely to trigger CI. Fetch and resolve divergence without force-pushing. Create a new annotated tag from the merged main commit; do not overwrite an old tag.
 
-The workflow tests Windows/macOS/Linux × Node 22/24. Node 24 also runs browser and extracted-package checks. A version tag publishes ZIP, tar.gz and SHA256SUMS only after all tests, version matching and main ancestry pass. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
+Main tests Windows/macOS/Linux × Node 22/24 and checks the extracted packages on Node 24 on all three systems. Ubuntu / Node 24 runs the full Chromium suite, syntax and generated-file checks. A version tag reuses the same commit’s successful main tests and Pages deployment, checks the version and main ancestry, then publishes ZIP, tar.gz and SHA256SUMS. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
 
 ## Documentation layout
 
@@ -166,9 +166,9 @@ Use Conventional Commits for future commits: `type(optional-scope): short descri
 
 ## Full-application style refactoring and visual acceptance
 
-Declare the refactoring scope, reference and intended visual changes before editing. **The 1.8.0 refactor covers all styles**, including sidebar, settings, timer, calendar, forest and other pages; there are no excluded target regions. Selectors, ownership and reuse may change while visuals and interactions remain stable by default. Explicit changes such as the language menu and collect-all action have their own acceptance criteria. Refactoring CSS organization does not require changing typography or layout.
+Declare the refactoring scope, reference and intended visual changes before editing. **The 1.8.1 refactor covers all styles**, including sidebar, settings, timer, calendar, forest and other pages; there are no excluded target regions. Selectors, ownership and reuse may change while visuals and interactions remain stable by default. Explicit changes such as the language menu and collect-all action have their own acceptance criteria. Refactoring CSS organization does not require changing typography or layout.
 
 Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Keep independent computed-style evidence and deliberately injected regression checks covering geometry, clipping, popovers, keyboard input and control states. The existing sidebar fixture `tests/fixtures/sidebar-typography-cfd6449.json` remains visual regression evidence, not a freeze on CSS files or selector ownership. Future visual baseline changes need clear requirements and independent evidence; local feature changes should constrain their effects. Correct regressions locally while preserving useful changes. Passing test counts do not replace visual acceptance.
 
-Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Publication requires the same commit's main tests, tag tests and Pages deployment to succeed. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
+Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Publication today requires the same commit's main tests and Pages deployment to succeed and the tag to pass the publication gate. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
 

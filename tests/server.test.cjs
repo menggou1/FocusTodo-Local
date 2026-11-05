@@ -9,9 +9,9 @@ test.before(async () => {
     base = `http://127.0.0.1:${server.address().port}`;
 });
 test.after(() => new Promise(resolve => server.close(resolve)));
-function request(name, headers = {}, method = 'GET') {
+function request(name, headers = {}, method = 'GET', origin = base) {
     return new Promise((resolve, reject) => {
-        const req = http.request(base + name, { method, headers }, res => {
+        const req = http.request(origin + name, { method, headers }, res => {
             const chunks = []; res.on('data', chunk => chunks.push(chunk));
             res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
         });
@@ -30,6 +30,27 @@ test('HEAD returns metadata with no response body', async () => {
     assert.equal(res.status, 200); assert.equal(res.body.length, 0);
     assert.equal(Number(res.headers['content-length']), fs.statSync(path.join(root, 'audio/alm_AlarmBeep.mp3')).size);
     assert.equal(res.headers['content-type'], 'audio/mpeg');
+});
+test('NUL bytes in decoded paths return 400 and leave the server running', { timeout: 5000 }, async t => {
+    // Isolate the process so a regression cannot terminate or hang this suite.
+    const child = spawn(process.execPath, ['-e',
+        "const server=require('./scripts/server.cjs').createServer();server.listen(0,'127.0.0.1',()=>console.log(server.address().port));"
+    ], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+    const closed = new Promise(resolve => child.once('exit', resolve));
+    let errors = ''; child.stderr.on('data', chunk => { errors += chunk; });
+    t.after(async () => { child.kill(); await closed; });
+    const port = await new Promise((resolve, reject) => {
+        child.once('error', reject); child.stdout.once('data', chunk => resolve(Number(String(chunk).trim())));
+    });
+    const origin = 'http://127.0.0.1:' + port;
+    for (const name of ['/%00', '/img/github.svg%00.png', '/%00/index.html']) {
+        for (const method of ['GET', 'HEAD']) {
+            const res = await request(name, {}, method, origin).catch(error => assert.fail(errors || error.message));
+            assert.equal(res.status, 400, method + ' ' + name);
+            assert.equal(res.body.length, 0);
+            assert.equal((await request('/index.html', {}, 'GET', origin)).status, 200, 'Valid requests still work');
+        }
+    }
 });
 test('rejects non-loopback Host headers while allowing documented local names', async () => {
     for (const host of ['attacker.example', 'localhost.attacker.example', '127.0.0.1.attacker.example', 'localhost@attacker.example', 'localhost:bad']) {

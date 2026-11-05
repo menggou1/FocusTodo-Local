@@ -263,7 +263,9 @@
             if (!s || s.id !== 'active' || typeof s.sessionId !== 'string' || !s.sessionId ||
                 !['initial', 'work', 'pause', 'rest', 'waitingForRest', 'recovery'].includes(s.state) ||
                 !['countup', 'countdown'].includes(s.mode) || !s.config ||
-                root.FocusTimerCore.settings(s.config).interval !== s.config.interval || !Array.isArray(s.spans) ||
+                // Imported sessions bypass create(), so every setting must
+                // already have the types and bounds used by the timer core.
+                Object.entries(root.FocusTimerCore.settings(s.config)).some(([key, value]) => s.config[key] !== value) || !Array.isArray(s.spans) ||
                 !['cursorAt', 'observedAt', 'phaseElapsed', 'totalSeconds', 'recordedSeconds', 'revision', 'sequence', 'blockSequence', 'completed'].every(key => Number.isFinite(s[key]) && s[key] >= 0)) {
                 throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             }
