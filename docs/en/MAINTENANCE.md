@@ -126,7 +126,7 @@ Add the newest Chinese/English user-facing update and report to `release.json`, 
 
 Work branches stay local. Merge the verified work into the clean primary main worktree, then push main; do not push a work branch merely to trigger CI. Fetch and resolve divergence without force-pushing. Create a new annotated tag from the merged main commit; do not overwrite an old tag.
 
-Main tests Windows/macOS/Linux × Node 22/24 and checks the extracted packages on Node 24 on all three systems. Ubuntu / Node 24 runs the full Chromium suite, syntax and generated-file checks. A version tag reuses the same commit’s successful main tests and Pages deployment, checks the version and main ancestry, then publishes ZIP, tar.gz and SHA256SUMS. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
+Main tests Windows/macOS/Linux × Node 22/24 and checks the extracted packages on Node 24 on all three systems. All three Node 24 jobs run the full Chromium suite in parallel. Ubuntu also runs syntax and generated-file checks. A version tag reuses the same commit’s successful main tests and Pages deployment, checks the version and main ancestry, then publishes ZIP, tar.gz and SHA256SUMS. Archives contain runtime assets and Chinese/English documentation, excluding npm dependencies, tests, evidence, Git state and credentials. Failed candidate evidence belongs in the release report; deleting a failed Actions record does not fix its cause.
 
 ## Documentation layout
 

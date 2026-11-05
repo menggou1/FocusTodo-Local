@@ -178,7 +178,7 @@ git push Focustodo-local refs/tags/1.2.3
 
 ### Actions 与发布产物
 
-`.github/workflows/ci.yml` 响应 main 代码推送、面向 main 的 PR、版本号 Tag 和手动触发；不响应工作分支 push，纯 Markdown/docs 修改不自动跑测试，三系统分别跑 Node.js 22/24 单元测试，Node.js 24 验证三系统的便携包。完整 Chromium、语法及生成一致性检查集中在 Ubuntu / Node.js 24，浏览器证据保存 7 天。Tag 只执行发布门禁与打包发布，复用同一提交的 main 测试结果。
+`.github/workflows/ci.yml` 响应 main 代码推送、面向 main 的 PR、版本号 Tag 和手动触发；不响应工作分支 push，纯 Markdown/docs 修改不自动跑测试，三系统分别跑 Node.js 22/24 单元测试，Node.js 24 验证三系统的便携包。三系统在 Node.js 24 上并行运行完整 Chromium 验收，语法及生成一致性检查集中在 Ubuntu，浏览器证据保存 7 天。Tag 只执行发布门禁与打包发布，复用同一提交的 main 测试结果。
 
 版本 Tag 匹配且提交在 main 历史中，并且同一提交的 main 测试与 Pages 部署全部成功，才允许发布 ZIP、tar.gz、SHA256SUMS.txt。便携包不含运行时、npm 依赖、Git 状态或测试数据。文档合并/改名必须同步 `scripts/package-release.py`，确保压缩包内的本地文档链接也可用；普通文档整理不覆盖旧 Release。
 

@@ -52,14 +52,22 @@ jobs:
         if: runner.os == 'Linux' && matrix.node == '24'
       - run: npm test
       - name: Install browser
-        if: runner.os == 'Linux' && matrix.node == '24'
+        if: matrix.node == '24'
         run: npx playwright install --with-deps chromium
+      - name: Prepare Windows TCP resources
+        if: runner.os == 'Windows' && matrix.node == '24'
+        shell: pwsh
+        run: ./scripts/windows-ci-network.ps1 -Configure -Phase before
       - name: Browser acceptance
-        if: runner.os == 'Linux' && matrix.node == '24'
+        if: matrix.node == '24'
         run: npm run test:browser
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
+      - name: Record Windows TCP resources
+        if: always() && runner.os == 'Windows' && matrix.node == '24'
+        shell: pwsh
+        run: ./scripts/windows-ci-network.ps1 -Phase after
       - name: Verify release gate
         if: runner.os == 'Linux' && matrix.node == '24'
         run: python tests/release-gate-test.py
@@ -70,7 +78,7 @@ jobs:
         if: matrix.node == '24'
         run: python tests/package-smoke.py
       - name: Upload browser evidence
-        if: always() && runner.os == 'Linux' && matrix.node == '24'
+        if: always() && matrix.node == '24'
         uses: actions/upload-artifact@v6
         with:
           name: acceptance-${{ matrix.os }}
