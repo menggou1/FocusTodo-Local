@@ -105,8 +105,11 @@ const server = createServer();
           };
         });
       });
-      await page.getByRole('button',{name:'Restore default system list order',exact:true}).click();
+      const reset=page.getByRole('button',{name:'Restore default order',exact:true});
+      await page.evaluate(()=>{const button=document.querySelector('.focus-project-reset');window.__resetStates=[];const sample=()=>{const style=getComputedStyle(button);window.__resetStates.push([button.disabled,style.opacity,style.cursor]);};window.__resetObserver=new MutationObserver(sample);window.__resetObserver.observe(button,{attributes:true});sample();});
+      await reset.click();
       await page.waitForFunction(()=>!document.querySelector('.focus-project-management').hasAttribute('aria-busy'));
+      assert.deepEqual(await page.evaluate(()=>{window.__resetObserver.disconnect();return [...new Set(window.__resetStates.map(JSON.stringify))].map(JSON.parse);}),[[false,'1','pointer']]);
       const after=await page.evaluate(async()=>{const db=await FocusLocalData.open();return FocusLocalData.transaction(db,['Project'],'readonly',(tx,done)=>{const q=tx.objectStore('Project').getAll();q.onsuccess=()=>done(q.result)})});
       const defaults=await page.evaluate(()=>FocusLocalData.defaultProjects().map(item=>({id:item.id,order:item.order})));
       for(const old of before){const item=after.find(item=>item.id===old.id),original=defaults.find(item=>item.id===old.id);assert.deepEqual(item,original?{...old,order:original.order}:old)}

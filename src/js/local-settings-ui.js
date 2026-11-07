@@ -4,6 +4,29 @@
     const I = root.FocusI18n, t = I.text;
     let refreshPermission=()=>{};
     let controls, languageHost;
+    const NETWORK_KEY='FocusTodo.externalNetwork';
+    function networkEnabled(){return localStorage.getItem(NETWORK_KEY)==='true';}
+    function setNetworkEnabled(enabled){
+        if(root.FocusLocalData.maintenance)throw new Error(t('本地数据维护中，请完成后刷新再修改主题。'));
+        localStorage.setItem(NETWORK_KEY,String(!!enabled));
+        root.dispatchEvent(new Event('focus-local-network-changed'));
+    }
+    function renderNetwork(React,Switch,classes){
+        if(!controls.NetworkSwitch){
+            controls.NetworkSwitch=class extends React.Component{
+                constructor(props){super(props);this.state={enabled:networkEnabled()};this.refresh=()=>this.setState({enabled:networkEnabled()});}
+                componentDidMount(){root.addEventListener('storage',this.refresh);root.addEventListener('focus-local-network-changed',this.refresh);}
+                componentWillUnmount(){root.removeEventListener('storage',this.refresh);root.removeEventListener('focus-local-network-changed',this.refresh);}
+                render(){return React.createElement('tr',null,
+                    React.createElement('td',{className:this.props.classes.title},t('外部联网（实验性）')),
+                    React.createElement('td',{className:this.props.classes.value},React.createElement(Switch,Object.assign(switchProps(),{
+                        id:'focus-external-network','aria-label':t('外部联网（实验性）'),checked:this.state.enabled,
+                        onChange:enabled=>{try{setNetworkEnabled(enabled);}catch(error){root.FocusLocal.notice(error.message);}}
+                    }))));}
+            };
+        }
+        return React.createElement(controls.NetworkSwitch,{classes});
+    }
     // The original settings selects now share this factory, including language.
     // Read current theme colors in every callback, as the legacy controls did.
     function selectStyles(selectedMark=false) {
@@ -23,8 +46,9 @@
         return {checkedIcon:false,uncheckedIcon:false,height:18,width:36,handleDiameter:14,
             onColor:root.FTColor.themeRed,offColor:root.FTColor.bgSwitcherOff,activeBoxShadow:'0 0 0 0 #000'};
     }
-    function installControls(React,ReactDOM,Select,components) {
+    function installControls(React,ReactDOM,Select,components,ScrollView) {
         if(!controls) controls={React,ReactDOM,Select,components};
+        root.FocusSettings.ScrollView=ScrollView;
     }
     function dropdownIndicator(props) {
         const {React,components}=controls;
@@ -63,7 +87,8 @@
             } catch(error){refresh();status.textContent=t('通知设置失败：')+error.message;}
         };
         refreshPermission=()=>{if(section.isConnected) refresh();};
-        refresh();section.append(heading,status,button);general.prepend(section);languageHost=host;
+        refresh();section.append(heading,status,button);
+        (general.querySelector('[class*="ScrollView-root"]')||general).prepend(section);languageHost=host;
         controls.ReactDOM.render(controls.React.createElement(controls.Select,{
             inputId:'focus-language-control',className:'focus-ui-select',classNamePrefix:'focus-ui-select',
             'aria-label':t('语言'),options,value:options.find(option=>option.value===preference),
@@ -124,7 +149,7 @@
             tx.onabort = tx.onerror = () => reject(tx.error || new Error(t('保存失败')));
         });
     }
-    root.FocusSettings = { installCompatibility, reorderProjects, restoreSystemProjectOrder, installControls, selectStyles, switchProps };
+    root.FocusSettings = { installCompatibility, reorderProjects, restoreSystemProjectOrder, installControls, selectStyles, switchProps, networkEnabled, setNetworkEnabled, renderNetwork };
     new MutationObserver(mount).observe(document.body,{childList:true,subtree:true});
     root.addEventListener('focus',()=>refreshPermission());
     mount();

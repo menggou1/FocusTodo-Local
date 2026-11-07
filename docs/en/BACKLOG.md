@@ -9,15 +9,12 @@ Updated 2026-11-07 (Asia/Shanghai). This is the English view of the same canonic
 | ID | Priority | Open work | Scope |
 |---|---|---|---|
 | E01 | P1 | Move theme images to IndexedDB Blob/resources | Copy and validate before switching references and removing old data. Preserve migration recovery and older backups; explain any database upgrade/rollback constraints. |
-| E02 | P1 | Cross-tab theme-edit ownership | Single-operation recovery does not serialize multiple processes. Design ownership and conflict handling; localStorage has no cross-process atomic compare-and-swap. Import/reset locking does not replace a theme-edit protocol. |
 | E03 | P1 | Binary-resource backup format | Evaluate ZIP + JSON + manifest, content deduplication and thumbnail rebuilding while retaining original image bytes. Validate references, integrity, versions and expanded size before replacement. Gzip is already implemented. |
 | E04 | P1 | Large-backup responsiveness, memory and broadcasts | Generated 1/10/50 MB measurements exist. Evaluate workers, batched reads/serialization and large recovery broadcasts from observed bottlenecks, preserving snapshot and journal semantics. |
 | E08 | P3 | Consolidate remaining legacy network behavior by feature | Identity/storage belongs to the data service; backup UI, preferences and theme UI now belong to their existing feature modules. Network retains its distinct responsibility. Local name/avatar updates now use an explicit data service with real failure reporting. Trace other legacy account/cloud callers and remove proven-dead simulated responses. Further work must reuse the owning feature service, not split files for line count. Preserve same-origin/Bing access and initialization/recovery order.  Reused XHR state and same-origin handling were corrected in 1.5.0; simulated responses still need investigation. |
 | E09 | P3 | Restore component sources and a normal build | Recover source, dependencies and configuration component by component. Preserve Redux, events and timer lifecycle; AST integration is not a complete source build. |
-| E14 | P2 | Wallpaper redirect boundaries | Direct image addresses now require HTTPS and an exact Bing hostname, but XHR/Image may still follow redirects. CSP provides additional destination restrictions. Evaluate redirect-rejecting requests and Blob rendering with cross-origin, timeout and fallback acceptance. |
 | E15 | P3 | Local server file-open race | Node real-path checks reject external/private symlink targets, but resolution and opening are separate. Evaluate cross-platform handle-based constraints for local attackers able to mutate the runtime directory. The Python fallback lacks equivalent protections. |
-| E11 | P2 | Separate browser mini-timer window | Keep the existing in-page floating timer this round. Detect Document Picture-in-Picture and bridge the existing timer state/commands; fall back when unavailable. Do not promise native always-on-top behavior from a normal popup. |
-| E16 | P1 | Implement independent 2.0.0 versioning and compatibility | Starting with 2.0.0, application versions and tags will use independent three-part versions; 7.1.1 remains provenance metadata only. Update metadata, generators, old/new parsing, history, packaging and deployment gates together. Verify old backups, notification reads and cache continuity without resetting data. This 1.8.2 release retains the old format. See the [2.0.0 plan](plan/2.0.0.md) for implementation order and acceptance criteria. |
+| E16 | P1 | Implement independent 2.0.0 versioning and compatibility | Starting with 2.0.0, application versions and tags will use independent three-part versions; 7.1.1 remains provenance metadata only. Update metadata, generators, old/new parsing, history, packaging and deployment gates together. Verify old backups, notification reads and cache continuity without resetting data. This 1.9.0 release retains the old format. See the [2.0.0 plan](plan/2.0.0.md) for implementation order and acceptance criteria. |
 
 ## Outstanding real-environment verification
 
@@ -25,7 +22,7 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 
 | ID | Priority | Scope | Missing evidence |
 |---|---|---|---|
-| V02 | P2 | Firefox/Safari and capability fallback | Complete startup, timer, recovery, backup and theme coverage on those engines. Existing limited no-BroadcastChannel/no-Web-Locks/no-compression tests are not full engine acceptance. |
+| V02 | P2 | Firefox/Safari and capability fallback | Firefox/WebKit have isolated Chinese/English startup, task, timer recovery, theme and backup import checks with Document PiP, BroadcastChannel, Web Locks and compression APIs forcibly removed. Still verify real Safari and the complete business/audio/report experience on each engine; WebKit automation is not full Safari acceptance. |
 | V03 | P2 | Reports, history and calendar | Isolated calendar creation, persistence, backup restore, peer refresh and overlap automation exist. Still verify known real spans, midnight/DST/timezones, chart values and task/subtask attribution. Follow the procedure below. Groups and online rankings stay excluded. |
 | V04 | P2 | Real notifications and audio | Actual permission states, operating-system display, every sound/white-noise track, autoplay restrictions, visible multi-window playback and owner termination. Stub calls are not physical display/listening evidence. |
 | V05 | P2 | Bing failures and cross-day refresh | Real source failure, timeout, redirect boundaries and expired/cross-day cache updates. |
@@ -43,10 +40,6 @@ Do not repeat completed automation or enlarge every release gate. Use isolated d
 Groups and online rankings remain excluded.
 
 **Groups and online rankings are permanently excluded.** Do not restore group creation/joining, members, invitations, chat or server ranking. Group, GroupUser and Message tables remain only for backup compatibility; hiding their UI must not erase historical backup contents.
-
-### E11 implementation
-
-Add a user-gesture entry in `local-timer-ui.js`. Where Document Picture-in-Picture exists, render current state and bridge start/pause/stop to the existing adapter. Never create a second writing tick loop, database or session. Dispose subscriptions/styles/references on closure. Fall back to the current in-page floating timer. Verify opening/closing, rest transitions, recovery, multi-tab ownership and cleanup on Chromium, then Firefox/Safari fallback. A window.open alternative additionally needs blocked-popup and same-origin disconnect handling; it cannot promise native always-on-top or window movement rights.
 
 ### V03 procedure
 

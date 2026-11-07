@@ -2,6 +2,12 @@
 const { load, walk } = require('./lib/bundle-editor.cjs');
 const bundle = load();
 const { source, modules, replace, method, assignment } = bundle;
+// Local mode has no cloud subscription. Firefox throws synchronously when the
+// old broker socket hits CSP; Chromium merely reports the rejected attempt.
+const subscriptions=[];
+walk(modules[207],node=>{if(node.type==='AssignmentExpression'&&node.left.type==='MemberExpression'&&node.left.object.type==='ThisExpression'&&node.left.property.name==='subscribe')subscriptions.push(node.right);});
+if(subscriptions.length!==1)throw Error('Cloud subscription boundary changed');
+replace(subscriptions[0],'function(){}');
 // The old loader leaves an undefined regional filename in its queue for short
 // language codes. Its synchronous path hid that bug; async completion must skip it.
 let localeQueue = 0;
@@ -124,7 +130,7 @@ assignment(1148, 'deleteData', 'function(){window.FocusAppUI.confirmReset()}');
 
 // Clear custom overlays during the actual classic-theme selection, including
 // reselecting the classic theme retained by the legacy PureComponent.
-assignment(1154, 'selectTheme', 'function(e){if(m.default.premiumItems.includes(e)&&!i.hasPermission())return;if(!window.FocusThemes.selectClassic(e))return;m.default.shared.name=e;i.setState({theme:e},window.FocusThemes.refresh);v.default.shared.emit(v.default.Event.THEME_CHANGED)}');
+assignment(1154, 'selectTheme', 'async function(e){if(m.default.premiumItems.includes(e)&&!i.hasPermission())return;if(!await window.FocusThemes.selectClassic(e))return;m.default.shared.name=e;i.setState({theme:e},window.FocusThemes.refresh);v.default.shared.emit(v.default.Event.THEME_CHANGED)}');
 
 // Local storage is the account authority. Old browser cookies can survive a
 // reset/import and otherwise shadow the restored name and identity.

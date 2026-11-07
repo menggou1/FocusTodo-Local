@@ -67,11 +67,22 @@
         }
     }
 
-    function renderUpdates(React) {
+    let UpdatesComponent;
+    function renderUpdates(React){
+        if(!UpdatesComponent)UpdatesComponent=class extends React.Component{
+            constructor(props){super(props);this.state={revision:0};this.refresh=event=>{if(event.type==='storage'&&event.key!==READ_KEY&&event.key!==null)return;this.setState(state=>({revision:state.revision+1}));};}
+            componentDidMount(){root.addEventListener('focus-local-release-read',this.refresh);root.addEventListener('storage',this.refresh);}
+            componentWillUnmount(){root.removeEventListener('focus-local-release-read',this.refresh);root.removeEventListener('storage',this.refresh);}
+            render(){return renderUpdateEntries(React);}
+        };
+        return React.createElement(UpdatesComponent);
+    }
+    function renderUpdateEntries(React) {
         const h = React.createElement;
         return h('section', { className: 'focus-release-list', 'aria-label': (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('版本更新'):'版本更新') },
             h('h3', null, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('版本更新'):'版本更新')),
             release.updates.map(original => { const update = root.FocusI18n.update(original); return h('button', { type: 'button', className: 'focus-release-entry', key: update.version, onClick: () => showUpdate(original) },
+                update.version===release.version&&hasUnreadUpdates()?h('span',{className:'HomeHeader-badge-1cVhA','aria-label':root.FocusI18n.text('未读')}):null,
                 h('strong', null, update.title),
                 h('span', null, update.date + ' · ' + update.version),
                 h('span', { className: 'focus-release-hint' }, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('点击查看详情'):'点击查看详情'))); }));

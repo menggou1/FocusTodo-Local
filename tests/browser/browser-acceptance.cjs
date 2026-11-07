@@ -24,6 +24,9 @@ const server = createServer();
         const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
         const errors = [], external = [];
         await context.addInitScript(() => {
+            // Legacy floating-timer checks exercise the no-API fallback; native
+            // Document PiP is covered separately in release-1.9-acceptance.cjs.
+            Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:undefined});
             let api;
             Object.defineProperty(window, 'FocusLocal', { configurable: true, get: () => api, set(value) {
                 api = value; const attach = value.attachTimer;
@@ -103,6 +106,7 @@ const server = createServer();
     const snapshot = page => page.evaluate(() => window.FocusLocalData.snapshot());
     async function themeFixture(page, bing = false) {
         await page.evaluate(bing => {
+            localStorage.setItem('FocusTodo.externalNetwork','true');
             const canvas = document.createElement('canvas'); canvas.width = canvas.height = 2;
             const themes = {};
             for (const [id, color] of [['custom_a', '#ff0000'], ['custom_b', '#0000ff'], ['__bing_daily__', '#00ff00']]) {
@@ -240,13 +244,14 @@ const server = createServer();
                 localStorage.setItem('Theme', 'Leaf'); localStorage.setItem(api.JOURNAL_KEY, prepared);
             });
         }));
-        await check('Bing cache switches immediately without downloading again', () => app(async page => {
+        await check('Bing cache switches after its atomic commit without downloading again', () => app(async page => {
             let requests = 0;
             await page.route('https://bing.biturl.top/**', route => { requests++; return route.abort(); });
             await appearance(page);
             await page.locator('[data-theme-id="__bing_daily__"]').click();
             await page.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();
             await page.locator('[data-theme-id="__bing_daily__"]').click();
+            await page.waitForFunction(()=>localStorage.getItem('Theme')==='__bing_daily__');
             assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), '__bing_daily__');
             assert.equal(requests, 0);
             assert.equal(await page.getByText('下载中...', { exact: true }).count(), 0);
@@ -302,15 +307,17 @@ const server = createServer();
             assert.equal(await page.evaluate(() => localStorage.getItem('lexible-active-custom-theme')), null);
             assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /timer-bg-ocean\.jpg/);
         }, page => themeFixture(page)));
-        await check('theme switching restores the same classic and all indicators in one frame', () => app(async page => {
+        await check('theme switching restores the same classic and all indicators after the atomic commit', () => app(async page => {
             await appearance(page);
             for (const [classic, custom] of [['Leaf', 'custom_a'], ['Ocean', 'custom_b'], ['Leaf', 'custom_a']]) {
                 const image = `img/timer-bg-${classic.toLowerCase()}-shortcut.jpg`;
                 await page.locator(`img[src="${image}"]`).click();
                 await page.locator(`[data-theme-id="${custom}"]`).click();
+                await page.waitForFunction(id=>localStorage.getItem('lexible-active-custom-theme')===id,custom);
                 assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /data:image/);
+                await page.locator(`img[src="${image}"]`).click();
+                await page.waitForFunction(()=>localStorage.getItem('lexible-active-custom-theme')===null);
                 const result = await page.evaluate(async image => {
-                    document.querySelector(`img[src="${image}"]`).click();
                     await new Promise(requestAnimationFrame);
                     const td = document.querySelector(`img[src="${image}"]`).closest('td');
                     return { active: localStorage.getItem('lexible-active-custom-theme'), background: document.querySelector('[class*="Timer-bgi"]').style.backgroundImage,
@@ -322,7 +329,9 @@ const server = createServer();
             }
             await page.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();
             await page.locator('[data-theme-id="custom_b"]').click();
+            await page.waitForFunction(()=>localStorage.getItem('lexible-active-custom-theme')==='custom_b');
             await page.locator('[data-theme-id="custom_b"] [title="删除此主题"]').click();
+            await page.waitForFunction(()=>localStorage.getItem('Theme')==='Leaf');
             assert.equal(await page.evaluate(() => localStorage.getItem('Theme')), 'Leaf');
             assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /timer-bg-leaf\.jpg/);
         }, page => themeFixture(page)));
@@ -826,7 +835,7 @@ const server = createServer();
             await page.evaluate(() => window.__acceptanceTimer.zoomDown());
             await page.getByText('停止回归任务', { exact: true }).first().click();
             await page.waitForTimeout(300);
-            assert.equal(await page.locator('#focus-local-notice').count(), 0);
+            assert.equal(await page.locator('#focus-local-notice').innerText(), '当前浏览器不支持独立迷你窗口，已使用页内浮动计时器。');
         }));
         for (const mode of ['countup', 'countdown']) {
             await check(mode + ' stopped timer stays zero when task completion circle is clicked', () => app(async page => {

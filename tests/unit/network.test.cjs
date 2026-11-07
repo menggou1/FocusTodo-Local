@@ -1,7 +1,7 @@
 const test = require('node:test'), assert = require('node:assert/strict');
 const fs = require('node:fs'), vm = require('node:vm');
 const wait = () => new Promise(resolve => setTimeout(resolve, 15));
-function network() {
+function network(enabled=false) {
     // Native delivery is tested separately from synthetic local responses.
     class XHR extends EventTarget {
         static DONE = 4;
@@ -22,7 +22,7 @@ function network() {
                 this['_on' + name] = value; if (value) this.addEventListener(name, value); } });
     }
     const location = new URL('http://127.0.0.1:5500/index.html');
-    const window = { XMLHttpRequest: XHR, fetch: () => Promise.resolve('native') };
+    const window = { XMLHttpRequest: XHR, FocusSettings:{networkEnabled:()=>enabled}, fetch: (input,options) => {window.lastFetch=options;return Promise.resolve('native');} };
     vm.runInNewContext(fs.readFileSync(require.resolve('../../src/js/local-network.js'), 'utf8'), {
         window, location, URL, Request, Event, ProgressEvent: Event, DOMException, Blob, TextEncoder,
         setTimeout, clearTimeout
@@ -70,12 +70,18 @@ test('reopening or aborting inside a completion listener suppresses stale events
         assert.deepEqual(events, []);
     }
 });
-test('same-origin and exact Bing requests use the native send path', async () => {
+test('same-origin remains available and external networking requires explicit opt-in', async () => {
     const window = network();
-    for (const url of ['/js/local-data.js', 'https://www.bing.com/HPImageArchive.aspx']) {
+    for (const url of ['/js/local-data.js']) {
         const xhr = new window.XMLHttpRequest(); xhr.open('GET', url); xhr.send();
         assert.equal(xhr.sent, 1);
     }
     assert.equal(await window.fetch('/js/local-data.js'), 'native');
+    await assert.rejects(window.fetch('https://www.bing.com/HPImageArchive.aspx'));
     await assert.rejects(window.fetch('https://bing.com.attacker.invalid/'));
+    const enabled=network(true);
+    assert.equal(await enabled.fetch('https://www.bing.com/HPImageArchive.aspx',{redirect:'follow',credentials:'include'}),'native');
+    assert.equal(enabled.lastFetch.redirect,'error');assert.equal(enabled.lastFetch.credentials,'omit');
+    for(const url of ['http://www.bing.com/x','https://www.bing.com:444/x','https://bing.com.attacker.invalid/x'])await assert.rejects(enabled.fetch(url));
+    const xhr=new enabled.XMLHttpRequest();xhr.open('GET','https://www.bing.com/redirect');xhr.send();assert.equal(xhr.sent,0);await wait();
 });

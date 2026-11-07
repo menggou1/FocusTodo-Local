@@ -2,7 +2,7 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Open work](BACKLOG.md)
 
-FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local modules. Tasks, focus records, sessions and settings are browser-local. Bing is an allowed external image source. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
+FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local modules. Tasks, focus records, sessions and settings are browser-local. External networking is off by default; opting in permits the allowed Bing sources. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
 
 ## Project layout
 
@@ -61,13 +61,13 @@ The local app module renders updates, About and reset confirmation. Release deta
 
 The local text catalog translates static UI strings and errors. It never rewrites task text, notes or filenames in the DOM. General settings expose only the two fully adapted explicit languages; partial translations remain system-selected. English release metadata and documentation accompany the runtime. General settings also provide explicit notification permission and a test action, with no startup permission prompt.
 
-Classic theme selection hooks the actual legacy event. It clears custom overlays and markers synchronously, including reselecting a classic theme cached by a PureComponent. Bing caches are reused; refresh, download and upload activation obey the latest selection. Settings-window lifetime does not own the download request.
+Classic theme selection hooks the actual legacy event. After committing under the existing IndexedDB maintenance transaction lock, it clears custom overlays and markers in the same callback, including reselecting a cached classic theme. Compare the previous values before writing and reject stale edits. The transaction lock also works without Web Locks and never uses timeout-based takeover. Bing caches are reused; refresh, download and upload activation obey the latest selection. Settings-window lifetime does not own the download request.
 
 ## Serving and network
 
 `scripts/server.cjs` binds loopback, serves GET/HEAD, disables caching and supports one byte range for local audio. It rejects private paths and writes. `scripts/start.cjs` opens the native browser without a shell and supports ports/headless mode. The portable runtime needs Node.js but no npm install.
 
-XHR/fetch compatibility and CSP restrict external runtime traffic to the allowed Bing origins. Repository navigation happens only when the user clicks its link. No browser database is uploaded by packaging or deployment.
+External networking is off by default. With explicit opt-in, fetch allows exact HTTPS Bing origins, rejects redirects and omits credentials/referrers. Remote XHR stays blocked; wallpapers are downloaded as Blob and rendered locally, with CORS, timeout and failure fallback. CSP disallows direct remote images. Repository navigation happens only when the user clicks its link. No browser database is uploaded by packaging or deployment.
 
 ## Legacy integration boundary
 

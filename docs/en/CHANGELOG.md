@@ -2,7 +2,17 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.8.3**, author Lexible.
+Current application: **7.1.1-local.1.9.0**, author Lexible.
+
+## 7.1.1-local.1.9.0 · 2026-11-07
+
+- Add an external networking (experimental) switch, off by default, using the existing bottom toast when selecting Bing daily while disabled.
+- Reject wallpaper redirects, refresh across days, cancel requests and restore saved images offline.
+- Protect theme changes with the existing maintenance transaction lock and detect cross-tab conflicts, retaining backup compatibility.
+- Open a mini timer on supported browsers using the existing timer commands, with an in-page fallback.
+- Mark unread release updates with the shared badge and keep the Restore default order button visually stable.
+
+[English report](releases/UPDATE-7.1.1-local.1.9.0.md).
 
 ## 7.1.1-local.1.8.3 · 2026-11-07
 

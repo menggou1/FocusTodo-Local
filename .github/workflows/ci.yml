@@ -137,6 +137,14 @@ jobs:
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
+      - name: Install Firefox and WebKit compatibility engines
+        if: runner.os == 'Linux' && matrix.node == '24'
+        run: npx playwright install --with-deps firefox webkit
+      - name: Capability fallback in Firefox and WebKit
+        if: runner.os == 'Linux' && matrix.node == '24'
+        run: npm run test:compat
+        env:
+          FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
       - name: Record Windows TCP resources
         if: always() && runner.os == 'Windows' && matrix.node == '24'
         shell: pwsh

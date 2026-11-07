@@ -5,11 +5,11 @@
     root.FocusLocalNetwork = { install(identity) {
         if (installed) return;
         installed = true;
-        var _REQUEST_WHITELIST = ['www.bing.com', 'bing.com', 'bing.biturl.top'];
+        var _REQUEST_WHITELIST = ['www.bing.com', 'bing.com', 'th.bing.com', 'bing.biturl.top'];
         function _isWhitelisted(input) {
             try {
                 var url = new URL(input instanceof Request ? input.url : String(input), location.href);
-                return url.protocol === 'https:' && _REQUEST_WHITELIST.indexOf(url.hostname) >= 0 && !url.username && !url.password;
+                return window.FocusSettings && window.FocusSettings.networkEnabled() && url.protocol === 'https:' && _REQUEST_WHITELIST.indexOf(url.hostname) >= 0 && !url.port && !url.username && !url.password;
             } catch (_) { return false; }
         }
 
@@ -58,15 +58,18 @@
                 var parsed = new URL(String(url), location.href);
                 var isRemote = parsed.origin !== location.origin;
                 var isUserApi = parsed.pathname.indexOf('v63/user') >= 0;
-                // The legacy user API remains local; ordinary same-origin assets and Bing pass through.
-                if (!isUserApi && (!isRemote || _isWhitelisted(parsed.href))) {
+                // Remote XHR cannot reject redirects, so external wallpaper
+                // traffic uses the controlled fetch path instead.
+                if (!isUserApi && !isRemote) {
                     return origOpen.apply(xhr, arguments);
                 }
                 if (isRemote || isUserApi) {
                     xhr._blocked = true;
                     xhr._blockedMethod = method;
                     xhr._blockedUrl = url;
-                    origOpen.call(xhr, method, 'data:text/plain,');
+                    // Keep the placeholder same-origin under CSP. This request
+                    // is completed locally and never reaches native send.
+                    origOpen.call(xhr, method, location.href);
                     return;
                 }
                 return origOpen.apply(xhr, arguments);
@@ -120,7 +123,8 @@
                 var url;
                 try { url = new URL(input instanceof Request ? input.url : String(input), location.href); }
                 catch (error) { return Promise.reject(error); }
-                if (url.origin === location.origin || _isWhitelisted(url.href)) return origFetch.apply(this, arguments);
+                if (url.origin === location.origin) return origFetch.apply(this, arguments);
+                if (_isWhitelisted(url.href)) return origFetch.call(this,input,Object.assign({},options,{redirect:'error',credentials:'omit',referrerPolicy:'no-referrer'}));
                 return Promise.reject(new TypeError((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地版已阻止外部请求：'):'本地版已阻止外部请求：') + url.hostname));
             };
         }

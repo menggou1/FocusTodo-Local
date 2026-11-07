@@ -1,13 +1,14 @@
 {
   "name": "focustodo",
-  "version": "7.1.1-local.1.8.3",
+  "version": "7.1.1-local.1.9.0",
   "description": "FocusTodo web version",
   "scripts": {
     "start": "node scripts/start.cjs",
     "build:release": "node scripts/build-release.cjs",
     "test": "node --test tests/unit/*.test.cjs",
-    "test:browser": "node tests/browser/startup-acceptance.cjs && node tests/browser/browser-acceptance.cjs && node tests/browser/maintenance-acceptance.cjs && node tests/browser/list-ordering-acceptance.cjs && node tests/browser/audio-coordination-acceptance.cjs && node tests/browser/profile-acceptance.cjs && node tests/browser/calendar-acceptance.cjs && node tests/browser/forest-acceptance.cjs && node tests/browser/achievements-acceptance.cjs && node tests/browser/reminders-acceptance.cjs && node tests/browser/controls-acceptance.cjs",
+    "test:browser": "node tests/browser/startup-acceptance.cjs && node tests/browser/browser-acceptance.cjs && node tests/browser/maintenance-acceptance.cjs && node tests/browser/list-ordering-acceptance.cjs && node tests/browser/audio-coordination-acceptance.cjs && node tests/browser/profile-acceptance.cjs && node tests/browser/calendar-acceptance.cjs && node tests/browser/forest-acceptance.cjs && node tests/browser/achievements-acceptance.cjs && node tests/browser/reminders-acceptance.cjs && node tests/browser/controls-acceptance.cjs && node tests/browser/release-1.9-acceptance.cjs",
     "benchmark:backup": "node tests/performance/backup-performance.cjs",
+    "test:compat": "node tests/browser/capability-acceptance.cjs",
     "check": "node scripts/check-syntax.cjs"
   },
   "keywords": [],

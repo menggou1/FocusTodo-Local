@@ -3,11 +3,32 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.8.3",
+    "localVersion": "1.9.0",
     "author": "Lexible",
     "date": "2026-11-07",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.9.0",
+            "date": "2026-11-07",
+            "title": "外部联网开关、壁纸可靠性与迷你计时窗口",
+            "items": [
+                "通用功能开关新增默认关闭的外部联网（实验性）；关闭时点击 Bing 每日主题显示开启提示。",
+                "壁纸请求拒绝重定向，支持跨日刷新、取消请求及已保存图片的离线恢复。",
+                "主题编辑复用维护事务锁，检测跨标签冲突，保留旧备份兼容。",
+                "支持的浏览器可打开迷你计时窗口，复用原计时控制；不支持时回退页内浮动计时器。",
+                "未读版本更新显示红点；恢复默认排序按钮保持稳定外观与正常光标。"
+            ],
+            "titleEn": "External networking, reliable wallpapers and a mini timer",
+            "itemsEn": [
+                "Add an external networking (experimental) switch, off by default, using the existing bottom toast when selecting Bing daily while disabled.",
+                "Reject wallpaper redirects, refresh across days, cancel requests and restore saved images offline.",
+                "Protect theme changes with the existing maintenance transaction lock and detect cross-tab conflicts, retaining backup compatibility.",
+                "Open a mini timer on supported browsers using the existing timer commands, with an in-page fallback.",
+                "Mark unread release updates with the shared badge and keep the Restore default order button visually stable."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.9.0.md"
+        },
         {
             "version": "7.1.1-local.1.8.3",
             "date": "2026-11-07",
@@ -436,7 +457,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.8.3",
+    "version": "7.1.1-local.1.9.0",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

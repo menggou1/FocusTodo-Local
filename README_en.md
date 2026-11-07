@@ -59,7 +59,7 @@ http://127.0.0.1:5500/index.html
 - ✅ Task management (projects, subtasks, deadlines, reminders)
 - 📅 Calendar view, quick task creation, overlap layout and focus from a plan
 - 📊 Focus time reports
-- 🎨 Custom themes (Bing daily wallpaper + local upload)
+- 🎨 Custom themes (Bing daily wallpaper requires Settings → General → External networking, off by default; local upload works offline)
 - 💾 Lossless Gzip / JSON backups, legacy imports, size analysis and optional wallpapers
 - 🌐 Complete Simplified Chinese and English local UI, with system-selected existing partial translations and readable English fallbacks
 - 🔔 Explicit desktop notification permission and test controls
@@ -115,7 +115,7 @@ The application guide, maintenance, architecture, backlog and release documentat
 | Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
 | Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
 
-Current application: `7.1.1-local.1.8.3`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+Current application: `7.1.1-local.1.9.0`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
 
 ## License
 

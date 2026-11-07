@@ -114,7 +114,7 @@ b.method(1174,'render',function(){
   return m.default.createElement('div',{className:g.default.root+' focus-project-management',ref:function(element){self.projectRoot=element}},
     m.default.createElement('div',{className:'focus-project-toolbar'},
       m.default.createElement('p',{className:'focus-project-hint',role:'status','aria-live':'polite'},hint),
-      m.default.createElement('button',{type:'button',className:'focus-project-reset',disabled:!!self.state.projectOrderSaving,onClick:function(){clearDrag();persist(function(){return window.FocusSettings.restoreSystemProjectOrder(v.default.shared.db)},null,false)}},translate('恢复系统清单默认排序'))),
+      m.default.createElement('button',{type:'button',className:'focus-project-reset',onClick:function(){clearDrag();persist(function(){return window.FocusSettings.restoreSystemProjectOrder(v.default.shared.db)},null,false)}},translate('恢复默认排序'))),
     m.default.createElement(x.default,{classNames:[g.default.content],autoDisappear:!1,isUl:!0},
       this.state.presetProjects.map(function(item,index){return m.default.createElement(_.default,Object.assign({project:item,key:item.id,highlight:index%2==1,changeHiddenState:self.switchPresetProjectHiddenState,isDarkMode:self.props.isDarkMode},row(item,'presetProjects')))}),
       this.state.customProjects.map(function(item,index){return m.default.createElement(y.default,{project:item,key:item.id,highlight:index%2==1,delete:self.showDeleteDialog,changeHiddenState:self.switchProjectHiddenState})})),this.getConfirmDialog());

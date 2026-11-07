@@ -159,6 +159,18 @@
             hold();
         });
     }
+    function themeStorageOperation(body) {
+        return exclusive(()=>maintenanceLock(async lease=>{
+            if(maintenance || invalidated)throw new Error(root.FocusI18n.text('本地数据维护中，请等待完成后刷新。'));
+            const db=await open();
+            await transaction(db,['LocalMeta'],'readonly',(tx,done,fail)=>{
+                const query=tx.objectStore('LocalMeta').getAll();
+                query.onsuccess=()=>query.result.some(row=>['maintenance','settings-journal'].includes(row.id))
+                    ?fail(new Error(root.FocusI18n.text('存在待恢复的数据维护，请刷新。'))):done();
+            });
+            lease.assert();return body();
+        }));
+    }
     function sameOperation(marker, operation) {
         return marker && marker.operationId === operation.operationId && marker.ownerId === operation.ownerId;
     }
@@ -831,7 +843,7 @@
 
     root.FocusLocalData = { installIdentity, defaultProjects, clearLegacyNameCookie, DB_NAME, DB_VERSION, BASE, DATA, ALL, open, transaction, exclusive, timerAction, session,
         snapshot: () => exclusive(() => maintenanceLock(() => snapshotUnlocked())), download, validate, replace, reset, putPomodoro,
-        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, forestGet, forestSet, collectForest, syncAchievements, saveProfile, createCalendarTask, putSchedule,
+        storageSnapshot, applySettings, rawSet, rawRemove, recoverJournal, notify, forestGet, forestSet, collectForest, syncAchievements, saveProfile, createCalendarTask, putSchedule, themeStorageOperation,
         get maintenance() { return maintenance; } };
     root.FocusLocalReady = exclusive(recoverJournal);
     root.FocusLocalReady.catch(error => { notify((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('本地数据初始化失败：'):'本地数据初始化失败：') + error.message); console.error(error); });

@@ -144,14 +144,19 @@
             }
         });
         window.FocusThemeStore = themeStore;
-        window.FocusLocalReady = Promise.resolve(window.FocusLocalReady).then(function() { themeStore.recover(); });
+        window.FocusLocalReady = Promise.resolve(window.FocusLocalReady).then(function() { return window.FocusLocalData.themeStorageOperation(()=>themeStore.recover()); });
         window.FocusLocalReady.catch(function(error) { window.FocusLocal.notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题设置恢复未完成，请刷新重试：'):'主题设置恢复未完成，请刷新重试：') + error.message); });
         window.addEventListener('focus-local-maintenance', function() { selectionRevision++; themeDataRevision++; });
 
-        function writeThemeState(update) {
+        async function writeThemeState(update) {
+            var expected=themeStore.read();
             try {
-                if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('存在待恢复的主题设置，请刷新后重试。'):'存在待恢复的主题设置，请刷新后重试。'));
-                return themeStore.commit(update);
+                return await window.FocusLocalData.themeStorageOperation(function(){
+                    var current=themeStore.read();
+                    if(fields.some(name=>current[name]!==expected[name]))throw new Error(window.FocusI18n.text('主题已在其他操作中修改，请重试。'));
+                    if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) throw new Error(window.FocusI18n.text('存在待恢复的主题设置，请刷新后重试。'));
+                    return themeStore.commit(update);
+                });
             }
             catch (error) {
                 var failure = new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题保存失败，请检查存储空间或刷新后重试：'):'主题保存失败，请检查存储空间或刷新后重试：') + error.message);
@@ -172,15 +177,11 @@
             return json;
         }
         function saveCustomThemes(data) {
-            writeThemeState({ themes: customThemesJSON(data) });
+            return writeThemeState({ themes: customThemesJSON(data) });
         }
 
         function getActiveId() {
             return localStorage.getItem(ACTIVE_KEY) || null;
-        }
-
-        function setActiveId(id) {
-            writeThemeState({ active: id || null });
         }
 
         function genId() {
@@ -240,8 +241,8 @@
             _savedClassicThemeId = null;
         }
 
-        function selectClassic(id) {
-            try { writeThemeState({ active: null, theme: id }); }
+        async function selectClassic(id) {
+            try { await writeThemeState({ active: null, theme: id }); }
             catch (error) { window.FocusLocal.notice(error.message); return false; }
             selectionRevision++;
             var wasCustom = _savedClassicBg || findBgiElements().some(function(el) { return el.style.backgroundImage.indexOf('data:image/') >= 0; });
@@ -272,7 +273,6 @@
                         // 用户通过 React UI 选择了内置主题 → 清除自定义状态
                         // 必须清除自定义背景！否则切回同一经典主题时 React 跳过渲染，
                         // 导致自定义背景的 inline style 残留覆盖
-                        setActiveId(null);
                         clearCustomBackground(currentTheme);
                         refreshThemeUI();
                         return;
@@ -298,10 +298,15 @@
 
         // ---- 图片下载与压缩 ----
         function downloadImageAsDataUrl(imageUrl) {
+            if(/^https:/.test(imageUrl))return wallpaperRequest(imageUrl,'blob').then(function(blob){
+                if(!/^image\/(jpeg|png|webp)$/.test(blob.type)||blob.size>10*1024*1024)throw new Error(window.FocusI18n.text('图片格式或大小无效。'));
+                var objectUrl=URL.createObjectURL(blob);
+                return downloadImageAsDataUrl(objectUrl).finally(function(){URL.revokeObjectURL(objectUrl);});
+            });
             return new Promise(function(resolve, reject) {
                 var img = new Image();
                 img.crossOrigin = 'anonymous';
-                var timer = setTimeout(function() { reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('图片加载超时'):'图片加载超时'))); }, 20000);
+                var timer = setTimeout(function() { img.onload=img.onerror=null;img.src='';reject(new Error(window.FocusI18n.text('图片加载超时'))); }, 20000);
                 img.onload = function() {
                     clearTimeout(timer);
                     try {
@@ -344,31 +349,40 @@
         }
 
         // ---- Bing 每日壁纸获取（多API容错）----
-        function fetchBingWallpaper() {
-            return new Promise(function(resolve, reject) {
-                var apis = [
-                    'https://bing.biturl.top/?format=json&index=0&mkt=zh-CN',
-                    'https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN'
-                ];
-                function tryApi(idx) {
-                    if (idx >= apis.length) { reject(new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('所有API端点均不可用'):'所有API端点均不可用'))); return; }
-                    var xhr = new XMLHttpRequest();
-                    xhr.open('GET', apis[idx], true);
-                    xhr.timeout = 10000;
-                    xhr.onload = function() {
-                        try {
-                            var result = bingImageFromResponse(JSON.parse(xhr.responseText));
-                            if (result) resolve(result);
-                            else tryApi(idx + 1);
-                        } catch(e) { tryApi(idx + 1); }
-                    };
-                    xhr.onerror = function() { tryApi(idx + 1); };
-                    xhr.ontimeout = function() { tryApi(idx + 1); };
-                    xhr.send();
-                }
-                tryApi(0);
-            });
+        var wallpaperControllers=new Set();
+        async function wallpaperRequest(url,type){
+            if(!window.FocusSettings.networkEnabled())throw new Error(window.FocusI18n.text('请打开外部联网'));
+            var controller=new AbortController();wallpaperControllers.add(controller);
+            var timeout=setTimeout(()=>controller.abort(),type==='blob'?20000:10000);
+            try{
+                var response=await fetch(url,{signal:controller.signal,redirect:'error',credentials:'omit',cache:'no-store',referrerPolicy:'no-referrer'});
+                if(!response.ok||response.redirected)throw new Error('Wallpaper HTTP '+response.status);
+                // Fetch rejects redirects before their destination is contacted.
+                if(response.url&&new URL(response.url).href!==new URL(url).href)throw new Error('Unexpected wallpaper response URL');
+                var declared=Number(response.headers.get('content-length'));
+                if(declared>(type==='blob'?10*1024*1024:256*1024))throw new Error('Wallpaper response too large');
+                if(type==='blob')return await response.blob();
+                var text=await response.text();if(text.length>256*1024)throw new Error('Wallpaper metadata too large');
+                return JSON.parse(text);
+            }finally{clearTimeout(timeout);wallpaperControllers.delete(controller);}
         }
+        async function fetchBingWallpaper() {
+            for(var url of ['https://bing.biturl.top/?format=json&index=0&mkt=zh-CN','https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN']){
+                try{var result=bingImageFromResponse(await wallpaperRequest(url,'json'));if(result)return result;}catch(error){if(!window.FocusSettings.networkEnabled())throw error;}
+            }
+            throw new Error(window.FocusI18n.text('所有API端点均不可用'));
+        }
+        function networkChanged(){
+            selectionRevision++;themeDataRevision++;
+            if(!window.FocusSettings.networkEnabled())wallpaperControllers.forEach(controller=>controller.abort());
+            refreshThemeUI();
+        }
+        window.addEventListener('focus-local-network-changed',networkChanged);
+        window.addEventListener('storage',function(event){
+            if(event.key==='FocusTodo.externalNetwork'||event.key===null)networkChanged();
+            if(Object.values(KEYS).includes(event.key)||event.key===null){selectionRevision++;themeDataRevision++;refreshThemeUI();}
+        });
+        function bingFresh(bing){return bing&&bing.updatedAt<=Date.now()&&Date.now()-bing.updatedAt<BING_EXPIRY_MS&&new Date(bing.updatedAt).toDateString()===new Date().toDateString();}
 
         // ---- 用户手动点击获取Bing壁纸 ----
         var _bingLoading = false;
@@ -384,15 +398,15 @@
                         return { dataUrl: dataUrl, thumbnail: thumb, copyright: result.copyright };
                     });
                 });
-            }).then(function(data) {
-                if (dataRevision !== themeDataRevision) return null;
+            }).then(async function(data) {
+                if (dataRevision !== themeDataRevision || !window.FocusSettings.networkEnabled()) return null;
                 var themes = getCustomThemes();
                 themes[BING_ID] = {
                     name: (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('Bing每日壁纸'):'Bing每日壁纸'), dataUrl: data.dataUrl,
                     thumbnail: data.thumbnail, type: 'bing',
                     updatedAt: Date.now(), copyright: data.copyright || ''
                 };
-                saveCustomThemes(themes);
+                await saveCustomThemes(themes);
                 return data;
             }).finally(function() {
                 _bingLoading = false;
@@ -402,25 +416,29 @@
             return _bingRequest;
         }
 
-        function activateCustomTheme(id, theme, themes) {
+        async function activateCustomTheme(id, theme, themes) {
             var prevTheme = localStorage.getItem('Theme');
             var update = { active: id, theme: id };
             if (themes) update.themes = customThemesJSON(themes);
-            writeThemeState(update);
+            await writeThemeState(update);
             _lastObservedTheme = id;
             applyCustomBackground(theme.dataUrl, prevTheme);
             refreshThemeUI();
         }
 
-        function fetchAndApplyBing() {
+        async function fetchAndApplyBing() {
+            if(!window.FocusSettings.networkEnabled()){
+                window.FocusLocal.notice(window.FocusI18n.text('请打开外部联网'));
+                return;
+            }
             var revision = ++selectionRevision;
             var cached = getCustomThemes()[BING_ID];
             if (cached && cached.dataUrl) {
-                activateCustomTheme(BING_ID, cached);
-                if (Date.now() - (cached.updatedAt || 0) < BING_EXPIRY_MS) return;
+                await activateCustomTheme(BING_ID, cached);
+                if (bingFresh(cached)) return;
             }
             loadBingWallpaper().then(function(data) {
-                if (data && revision === selectionRevision) activateCustomTheme(BING_ID, data);
+                if (data && revision === selectionRevision) return activateCustomTheme(BING_ID, data);
             }).catch(function(err) {
                 console.warn('[Lexible] Bing fetch failed:', err.message || err);
                 if (revision === selectionRevision && !(cached && cached.dataUrl)) alert((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('获取 Bing 每日壁纸失败。\n\n'):'获取 Bing 每日壁纸失败。\n\n') + ((err && err.message) || (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('网络错误，请检查网络连接后重试。'):'网络错误，请检查网络连接后重试。')));
@@ -429,13 +447,13 @@
 
         // ---- Bing 过期自动刷新（12小时）----
         function checkBingExpiry() {
-            if (window.FocusLocalData.maintenance) return;
+            if (window.FocusLocalData.maintenance || !window.FocusSettings.networkEnabled()) return;
             var activeId = getActiveId();
             if (activeId !== BING_ID) return;
             var themes = getCustomThemes();
             var bing = themes[BING_ID];
             if (!bing) return;
-            if (Date.now() - (bing.updatedAt || 0) < BING_EXPIRY_MS) return;
+            if (bingFresh(bing)) return;
 
             console.log('[Lexible] Bing wallpaper expired, auto-refreshing...');
             var revision = selectionRevision;
@@ -449,20 +467,20 @@
         }
 
         // ---- 选择自定义主题 ----
-        function selectCustomTheme(id) {
+        async function selectCustomTheme(id) {
             var themes = getCustomThemes();
             if (!themes[id]) return;
             selectionRevision++;
-            activateCustomTheme(id, themes[id]);
+            await activateCustomTheme(id, themes[id]);
         }
 
         // ---- 删除自定义主题 ----
-        function deleteCustomTheme(id) {
+        async function deleteCustomTheme(id) {
             if (!confirm((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('确定要删除此自定义主题吗？'):'确定要删除此自定义主题吗？'))) return;
             var themes = getCustomThemes();
             delete themes[id];
             if (getActiveId() === id) {
-                writeThemeState({ themes: customThemesJSON(themes), active: null, theme: 'Leaf' });
+                await writeThemeState({ themes: customThemesJSON(themes), active: null, theme: 'Leaf' });
                 selectionRevision++;
                 var table = findThemeTable();
                 var leaf = table && table.querySelector('img[src="img/timer-bg-leaf-shortcut.jpg"]');
@@ -470,10 +488,9 @@
                 // cached classic theme and timer background also return to Leaf.
                 if (leaf) leaf.click();
                 else {
-                    writeThemeState({ active: null, theme: 'Leaf' });
                     clearCustomBackground('Leaf');
                 }
-            } else saveCustomThemes(themes);
+            } else await saveCustomThemes(themes);
             refreshThemeUI();
         }
 
@@ -547,11 +564,11 @@
                 delBtn.textContent = '×';
                 delBtn.title = (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('删除此主题'):'删除此主题');
                 delBtn.style.cssText = 'position:absolute;top:2px;right:10px;width:22px;height:22px;line-height:20px;text-align:center;background:rgba(0,0,0,0.5);color:#fff;border-radius:50%;cursor:pointer;font-size:16px;font-weight:bold;z-index:10;user-select:none;';
-                delBtn.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); deleteCustomTheme(id); });
+                delBtn.addEventListener('click', function(e) { e.stopPropagation(); e.preventDefault(); deleteCustomTheme(id).catch(error=>window.FocusLocal.notice(error.message)); });
                 td.appendChild(delBtn);
             }
 
-            td.addEventListener('click', function() { selectCustomTheme(id); });
+            td.addEventListener('click', function() { selectCustomTheme(id).catch(error=>window.FocusLocal.notice(error.message)); });
             return td;
         }
 
@@ -625,7 +642,7 @@
                         }).catch(function() {
                             throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('图片压缩失败，未保存原始大图。请更换图片。'):'图片压缩失败，未保存原始大图。请更换图片。'));
                         });
-                    }).then(function(result) {
+                    }).then(async function(result) {
                         var id = genId();
                         var themes = getCustomThemes();
                         themes[id] = {
@@ -633,8 +650,8 @@
                             thumbnail: result.thumbnail, type: 'custom',
                             createdAt: Date.now(), originalName: file.name
                         };
-                        if (revision === selectionRevision) activateCustomTheme(id, result, themes);
-                        else saveCustomThemes(themes);
+                        if (revision === selectionRevision) await activateCustomTheme(id, result, themes);
+                        else await saveCustomThemes(themes);
                         refreshThemeUI();
                     }).catch(function(err) {
                         console.error('[Lexible] Upload failed:', err);
@@ -733,7 +750,9 @@
                 bingTd.appendChild(bingChk);
             }
 
-            bingTd.addEventListener('click', function() { fetchAndApplyBing(bingLabel); });
+            bingTd.tabIndex=0;bingTd.setAttribute('role','button');bingTd.setAttribute('aria-label',window.FocusI18n.text('Bing 每日'));
+            bingTd.addEventListener('keydown',function(event){if(event.key==='Enter'||event.key===' '){event.preventDefault();bingTd.click();}});
+            bingTd.addEventListener('click', function() { fetchAndApplyBing().catch(error=>window.FocusLocal.notice(error.message)); });
             actionRow.appendChild(bingTd);
 
             // 上传按钮

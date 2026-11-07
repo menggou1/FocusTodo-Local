@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后端服务进行数据同步，经由 **Lexible** 修改后将任务、专注记录与设置保存在浏览器本地。Bing 壁纸仍有明确允许的外部资源来源，不能把当前版本描述为不产生任何网络请求。
+FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后端服务进行数据同步，经由 **Lexible** 修改后将任务、专注记录与设置保存在浏览器本地。外部联网默认关闭，用户开启后才允许 Bing 壁纸访问明确的外部来源。
 
 当前本地版保留原森林界面并在本地计算阳光与成就；小组和在线排名仍排除。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
 
@@ -29,7 +29,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 - `scripts/revise-timer-integration.cjs` 只更新明确的计时接入边界，可重复执行；旧 `upgrade-*.cjs` 仍是一次性改造记录，不能当作最终版本完整构建脚本。
 - `scripts/revise-app-integration.cjs` 维护关于、通知、森林接入、删除及项目刷新保护；与计时脚本共用 `scripts/lib/bundle-editor.cjs` 的检查和写入流程。
 - 本地账号读取统一使用 localStorage，避免旧浏览器 Cookie 覆盖重置/导入后的用户名。`local-ui.css` 使用原应用主题变量，使通知、独立弹窗及导入/导出按钮跟随外观切换。
-- 经典主题选择通过 `scripts/revise-app-integration.cjs` 接入 `FocusThemes.selectClassic`，在原组件事件中同步移除自定义背景覆盖和选中标记；Bing、上传和自动刷新结果按最新选择序号决定是否激活，下载缓存与激活分开。
+- 经典主题选择通过 `scripts/revise-app-integration.cjs` 接入 `FocusThemes.selectClassic`，等待维护事务锁下的主题提交后，在同一回调中移除自定义背景覆盖和选中标记。主题提交比较旧值，发现跨标签冲突时拒绝覆盖；没有 Web Locks 时仍复用 IndexedDB 事务锁，不按超时接管。Bing、上传和自动刷新结果按最新选择序号决定是否激活，下载缓存与激活分开。
 - 本地服务优先采用 `scripts/server.cjs`，只绑定 loopback，支持 GET/HEAD 和单段音频范围请求。
 
 ### 修改路径与约束
@@ -224,7 +224,7 @@ App
 - 支持白噪音背景音和完成铃声
 
 ### 自定义主题系统
-- Bing 每日壁纸：多 API 容错（biturl.top → bing.com），12小时自动刷新
+- Bing 每日壁纸：外部联网默认关闭；开启后多 API 容错（biturl.top → bing.com），按 12 小时及跨日刷新。元数据与 HTTPS Bing 图片通过拒绝重定向、可取消的 fetch 获取，图片转成本地 Blob/data URL，失败保留缓存。
 - 本地上传：最大 10MB，压缩至 1920×1080，生成 240×160 缩略图
 - 存储结构：`lexible-custom-themes` (JSON) + `lexible-active-custom-theme` (ID)
 - 背景守护：1秒轮询检测 Theme 变化，自动恢复自定义背景

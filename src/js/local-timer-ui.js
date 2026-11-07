@@ -35,6 +35,57 @@
     }
     function attachTimer(timer, options) {
         let current = null, queue = Promise.resolve(), disposed = false, halted = false, dialog = null, poll, mounted = false, completingTask = false;
+        let miniWindow=null,miniOpening=false,miniNodes=null;
+        const t=text=>root.FocusI18n.text(text),floatInPage=timer.zoomDown;
+        function updateMini(){
+            if(!miniNodes||!miniWindow||miniWindow.closed)return;
+            const session=current,view=session?core.view(session,Date.now()):timer.state.timerInfo;
+            const elapsed=view.elapse||0,seconds=Math.max(0,Math.ceil(timer.state.isCountdown?view.interval-elapsed:elapsed));
+            miniNodes.time.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+            miniNodes.title.textContent=timer.props.task?timer.props.task.name:t('专注计时');
+            miniNodes.status.textContent=t(({work:'专注中',rest:'休息中',pause:'已暂停',recovery:'等待恢复确认',waitingForRest:'等待休息',initial:'准备开始'})[session?session.state:'initial']);
+            miniNodes.start.textContent=t(session&&session.state==='pause'?'继续':session&&session.state==='waitingForRest'?'开始休息':'开始');
+            miniNodes.start.disabled=halted||!!(session&&(core.running(session)||session.state==='recovery'));
+            miniNodes.pause.disabled=halted||!session||!core.running(session);
+            miniNodes.stop.disabled=halted||!session||session.state==='initial'||session.state==='recovery';
+            miniWindow.document.body.className=document.body.className;
+            const computed=getComputedStyle(document.body);
+            for(const name of ['--bg-main','--bg-popup','--border','--text-title','--text-desc','--theme-red','--focus-ui-font'])miniWindow.document.documentElement.style.setProperty(name,computed.getPropertyValue(name));
+        }
+        function closeMini(){const win=miniWindow;miniWindow=null;miniNodes=null;if(win&&!win.closed)win.close();}
+        timer.zoomDown=async()=>{
+            if(disposed||halted)return;
+            if(miniWindow&&!miniWindow.closed){miniWindow.focus();return;}
+            if(miniOpening)return;
+            const api=root.documentPictureInPicture;
+            if(!api||typeof api.requestWindow!=='function'){
+                floatInPage();notice(t('当前浏览器不支持独立迷你窗口，已使用页内浮动计时器。'));return;
+            }
+            miniOpening=true;
+            try{
+                const win=await api.requestWindow({width:340,height:280});
+                if(disposed||halted){win.close();return;}
+                miniWindow=win;const doc=win.document;doc.title=t('迷你计时器');doc.documentElement.lang=root.FocusI18n.locale;doc.documentElement.className='focus-mini-document';
+                const base=doc.createElement('base');base.href=location.href;doc.head.appendChild(base);
+                for(const sheet of document.styleSheets){
+                    const style=doc.createElement('style');style.textContent=Array.from(sheet.cssRules,rule=>rule.cssText).join('\n');doc.head.appendChild(style);
+                }
+                const card=doc.createElement('section');card.className='focus-app-dialog focus-mini-timer';
+                const title=doc.createElement('h2'),time=doc.createElement('div'),status=doc.createElement('p'),actions=doc.createElement('div');
+                time.className='focus-mini-time';time.setAttribute('role','timer');actions.className='focus-app-actions';
+                miniNodes={title,time,status};
+                for(const [name,label,type] of [['start','开始',null],['pause','暂停','pause'],['stop','停止','stop']]){
+                    const button=doc.createElement('button');button.type='button';button.textContent=t(label);miniNodes[name]=button;
+                    button.onclick=async()=>{button.disabled=true;try{await run(type||(current&&current.state==='pause'?'resume':current&&current.state==='waitingForRest'?'rest':'start'));}catch(_){}finally{updateMini();}};
+                    actions.appendChild(button);
+                }
+                card.append(title,time,status,actions);doc.body.replaceChildren(card);
+                floatInPage();
+                win.addEventListener('pagehide',()=>{if(miniWindow===win){miniWindow=null;miniNodes=null;}},{once:true});
+                updateMini();
+            }catch(error){if(!disposed&&!halted){floatInPage();notice(t('迷你窗口无法打开，已使用页内浮动计时器。'));}}
+            finally{miniOpening=false;}
+        };
         const listeners = [];
         const listen = (target, event, callback) => { target.addEventListener(event, callback); listeners.push(() => target.removeEventListener(event, callback)); };
         function config(task) {
@@ -115,6 +166,7 @@
             // Also restore audio on a short reload where the saved state is already 'work'.
             timer.refreshBgMusic(view.state);
             showRecovery();
+            updateMini();
             if (records && records.length) {
                 await options.onRecords(records);
                 await timer.resetTaskPomodoros();
@@ -159,6 +211,7 @@
                 : current.phaseElapsed + elapsed >= view.interval;
             if (core.running(current) && (now - current.observedAt >= 30000 || now < current.cursorAt || boundary)) await fire('tick');
             else if (core.running(current)) timer.setState({ timerInfo: view, countdownFlag: !timer.state.countdownFlag });
+            updateMini();
         }
         const originalCompleteTask = timer.completeTask;
         const originalUpdateTimingTask = timer.updateTimingTask;
@@ -239,7 +292,8 @@
                 const resume = () => { if (!document.hidden) fire('tick'); };
                 listen(document, 'visibilitychange', () => { if (current) fire('tick'); });
                 listen(document, 'resume', resume); listen(root, 'pageshow', resume); listen(root, 'focus', resume);
-                listen(root, 'focus-local-maintenance', () => { halted = true; clearInterval(poll); closeDialog(); });
+                listen(root, 'focus-local-maintenance', () => { halted = true; clearInterval(poll); closeDialog(); closeMini(); });
+                listen(root,'pagehide',closeMini);
                 listen(root, 'focus-local-maintenance-end', event => {
                     if (!event.detail.succeeded) {
                         halted = false;
@@ -250,7 +304,7 @@
             },
             dispose() {
                 disposed = true; clearInterval(poll); clearInterval(timer.countdownTimer);
-                listeners.forEach(remove => remove()); closeDialog();
+                listeners.forEach(remove => remove()); closeDialog(); closeMini();
                 if (options.disposeBridge) options.disposeBridge();
             },
             run, get session() { return current; }, get disposed() { return disposed; }
