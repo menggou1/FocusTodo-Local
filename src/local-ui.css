@@ -420,6 +420,10 @@
     background:var(--bg-hover);
     border-color:var(--theme-red)
 }
+.focus-release-unread {
+    position:absolute; top:4px; right:0; width:24px; height:24px;
+    clip-path:inset(0 0 16px 16px); pointer-events:none;
+}
 
 .focus-app-backdrop {
     position:fixed;

@@ -40,13 +40,14 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
   });
   await scenario('release entry reuses notification badge and only latest detail marks read across tabs',async ctx=>{
    const p=await page(ctx),peer=await page(ctx);await p.getByRole('button',{name:'通知',exact:true}).click();
-   const entries=p.locator('.focus-release-entry'),dot=entries.first().locator('.HomeHeader-badge-1cVhA');await dot.waitFor();
-   assert.equal(await dot.evaluate(n=>{const probe=document.createElement('span');probe.style.color='var(--theme-red)';document.body.appendChild(probe);const match=getComputedStyle(n).backgroundColor===getComputedStyle(probe).color;probe.remove();return match;}),true);
+   const entries=p.locator('.focus-release-entry'),dot=entries.first().locator('.focus-release-unread');await dot.waitFor();
+   assert.equal(await dot.getAttribute('src'),'img/header-notification-highlight.png');assert.equal(await dot.evaluate(n=>getComputedStyle(n).clipPath),'inset(0px 0px 16px 16px)');
+   await p.waitForTimeout(250);await p.screenshot({path:path.join(evidence,'1.9-unread-notification.png')});
    await entries.nth(1).click();await p.locator('#focus-update-dialog').getByRole('button',{name:'关闭',exact:true}).click();
    await p.locator('#focus-update-dialog').waitFor({state:'detached'});
    await p.waitForTimeout(250);const bell=p.getByRole('button',{name:'通知',exact:true});if(await bell.getAttribute('aria-expanded')!=='true')await bell.click();await dot.waitFor();
-   await entries.first().click();await p.waitForFunction(()=>!document.querySelector('.focus-release-entry .HomeHeader-badge-1cVhA'));
-   await peer.getByRole('button',{name:'通知',exact:true}).click();assert.equal(await peer.locator('.focus-release-entry .HomeHeader-badge-1cVhA').count(),0);
+   await entries.first().click();await p.waitForFunction(()=>!document.querySelector('.focus-release-entry .focus-release-unread'));
+   await peer.getByRole('button',{name:'通知',exact:true}).click();assert.equal(await peer.locator('.focus-release-entry .focus-release-unread').count(),0);
   });
   await scenario('Bing image download uses Blob; metadata and image redirects never contact destination',async ctx=>{
    const p=await page(ctx);await p.evaluate(()=>FocusSettings.setNetworkEnabled(true));let evil=0,fallback=0;

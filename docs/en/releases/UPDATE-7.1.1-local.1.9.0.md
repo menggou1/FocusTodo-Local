@@ -10,7 +10,7 @@ Date: 2026-11-07. Author: Lexible.
 - Reject wallpaper redirects, refresh across days, cancel requests and restore saved images offline.
 - Protect theme changes with the existing maintenance transaction lock and detect cross-tab conflicts, retaining backup compatibility.
 - Open a mini timer on supported browsers using the existing timer commands, with an in-page fallback.
-- Mark unread release updates with the shared badge and keep the Restore default order button visually stable.
+- Mark unread release updates with the existing notification icon's small red dot and keep the Restore default order button visually stable.
 
 ## Technical and verification account
 

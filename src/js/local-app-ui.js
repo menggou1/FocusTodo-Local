@@ -82,7 +82,7 @@
         return h('section', { className: 'focus-release-list', 'aria-label': (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('版本更新'):'版本更新') },
             h('h3', null, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('版本更新'):'版本更新')),
             release.updates.map(original => { const update = root.FocusI18n.update(original); return h('button', { type: 'button', className: 'focus-release-entry', key: update.version, onClick: () => showUpdate(original) },
-                update.version===release.version&&hasUnreadUpdates()?h('span',{className:'HomeHeader-badge-1cVhA','aria-label':root.FocusI18n.text('未读')}):null,
+                update.version===release.version&&hasUnreadUpdates()?h('img',{className:'focus-release-unread',src:'img/header-notification-highlight.png',alt:root.FocusI18n.text('未读')}):null,
                 h('strong', null, update.title),
                 h('span', null, update.date + ' · ' + update.version),
                 h('span', { className: 'focus-release-hint' }, (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('点击查看详情'):'点击查看详情'))); }));
