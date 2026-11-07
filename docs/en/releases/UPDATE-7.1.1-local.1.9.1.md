@@ -19,3 +19,5 @@ See the shipped behavior above and the linked public evidence.
 The release behavior and commands are recorded in the repository history.
 
 [Original Chinese report](../../releases/UPDATE-7.1.1-local.1.9.1.md). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.
+
+Acceptance waits for the forest achievement entry image to decode before checking completeness and its circular shape, avoiding a macOS image-loading race.
