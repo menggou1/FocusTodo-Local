@@ -3,11 +3,26 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.9.2",
+    "localVersion": "1.9.3",
     "author": "Lexible",
     "date": "2026-11-07",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.9.3",
+            "date": "2026-11-07",
+            "title": "全屏交互回退与发布规则修正",
+            "titleEn": "Restore expanded timer controls and correct release rules",
+            "items": [
+                "保留全屏下拉按钮的原位置、图标和页内收起行为，小窗入口仅在浮动计时条。",
+                "长期开发使用 feature/2.0.0-versioning；中英文规范均禁止复用任何已推送的版本 Tag。"
+            ],
+            "itemsEn": [
+                "Preserve the expanded timer collapse control and keep the mini-window entry on the floating bar.",
+                "Use feature/2.0.0-versioning for ongoing development; both maintenance guides forbid reusing any pushed version tag."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.9.3.md"
+        },
         {
             "version": "7.1.1-local.1.9.2",
             "date": "2026-11-07",
@@ -489,7 +504,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.9.2",
+    "version": "7.1.1-local.1.9.3",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

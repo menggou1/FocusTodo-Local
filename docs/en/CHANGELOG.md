@@ -2,7 +2,14 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.9.2**, author Lexible.
+Current application: **7.1.1-local.1.9.3**, author Lexible.
+
+## 7.1.1-local.1.9.3 · 2026-11-07
+
+- Preserve the expanded timer collapse control and keep the mini-window entry on the floating bar.
+- Use feature/2.0.0-versioning for ongoing development; both maintenance guides forbid reusing any pushed version tag.
+
+[English report](releases/UPDATE-7.1.1-local.1.9.3.md).
 
 ## 7.1.1-local.1.9.2 · 2026-11-07
 
