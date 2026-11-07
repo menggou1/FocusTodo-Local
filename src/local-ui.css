@@ -7,9 +7,18 @@
     overflow-wrap:anywhere; opacity:1; transition:opacity .4s ease;
 }
 .focus-local-notice-fading { opacity:0; pointer-events:none; }
-.focus-mini-document,.focus-mini-document body { min-width:0; width:100%; height:100%; margin:0; overflow:hidden; }
-.focus-app-dialog.focus-mini-timer { box-sizing:border-box; width:100%; max-width:none; max-height:none; height:100vh; margin:0; padding:16px; border-radius:0; display:flex; flex-direction:column; justify-content:center; }
-.focus-mini-time { font:48px/1.2 var(--focus-ui-font); text-align:center; }
+.focus-mini-document,.focus-mini-document body { min-width:0; min-height:0; width:100%; height:100%; margin:0; overflow:hidden; }
+.focus-mini-timer { position:relative; width:100%; height:100%; background:var(--bg-main-timer); }
+.focus-mini-host { position:relative; height:100%; }
+.FullscreenTimer-zoomdown-10U6T { left:auto; right:16px; z-index:801; }
+.FloatTimer-zoomup-3tTgo { left:auto; right:0; top:0; width:20px; height:15px; padding:5px 5px 0 0; }
+.FloatTimer-zoomup-3tTgo img { display:block; margin-left:auto; width:8px; height:8px; }
+.FloatTimer-root-3_uz_:hover .FloatTimer-zoomup-3tTgo { margin:0; }
+.FloatTimer-root-3_uz_:focus-within .FloatTimer-zoomup-3tTgo,
+.FloatTimer-root-3_uz_:focus-within .focus-timer-mini { display:block; }
+.focus-fullscreen-mini { position:absolute; left:16px; top:16px; width:24px; height:24px; z-index:801; }
+.focus-fullscreen-mini .FullscreenTimer-miniMode-aApy- { margin:0; }
+.focus-mini-timer .FloatTimer-actions-YG_w6 { width:46px; }
 @media (prefers-reduced-motion:reduce) { .focus-local-notice { transition:none; } }
 
 
@@ -722,3 +731,88 @@ body.focus-schedule-quick-open #project-selection-popover { z-index:50010; }
 .focus-achievements .focus-achievement-text small { color: var(--text-desc); font-size: 11px; line-height: 1.35; }
 .focus-achievements .focus-achievement-trophy.is-locked { filter: grayscale(1); opacity: .3; }
 .focus-achievements .RankingList-pomodoroTime-TN_nv { font-size: 14px; white-space: nowrap; }
+
+/* Official Windows 7.2.2 mini controls; source: installed WebContent/main.css. */
+.FloatTimer-close-1w7xS,
+.FloatTimer-zoomUp-1IznD,
+.FloatTimer-miniMode-1KgSp {
+    display: none;
+    position: absolute;
+    line-height: 0;
+    top: 0;
+    width: 20px;
+    height: 15px;
+    padding-top: 5px;
+}
+
+.FloatTimer-miniMode-1KgSp {
+    left: 0;
+    padding-left: 5px;
+}
+
+.FloatTimer-miniModeImg-2zD-r {
+    display: inline-block;
+    width: 15px;
+    height: 10px;
+    background-repeat: no-repeat;
+    background-size: 8px 8px;
+    background-position: top left;
+    background-image: url(img/float-timer-float.png);
+}
+
+.FloatTimer-miniModeImgZoomUp-1F54S {
+    display: inline-block;
+    width: 15px;
+    height: 10px;
+    background-repeat: no-repeat;
+    background-size: 8px 8px;
+    background-position: top left;
+    background-image: url(img/float-timer-zoomup.png);
+}
+
+.FloatTimer-close-1w7xS,
+.FloatTimer-zoomUp-1IznD {
+    right: 0;
+    padding-right: 5px;
+}
+
+.FloatTimer-zoomUpImg-3YIJu {
+    display: inline-block;
+    width: 15px;
+    height: 10px;
+    background-repeat: no-repeat;
+    background-size: 8px 8px;
+    background-position: top right;
+    background-image: url(img/timer-zoomup.png);
+}
+
+.FloatTimer-closeImg-1Wz4U {
+    display: inline-block;
+    width: 15px;
+    height: 10px;
+    background-repeat: no-repeat;
+    background-size: 8px 8px;
+    background-position: top right;
+    background-image: url(img/float-timer-close.png);
+}
+
+.FloatTimer-root-3_uz_:hover .FloatTimer-close-1w7xS,
+.FloatTimer-root-3_uz_:hover .FloatTimer-zoomUp-1IznD,
+.FloatTimer-root-3_uz_:hover .FloatTimer-miniMode-1KgSp {
+    display: block;
+}
+
+.FullscreenTimer-miniMode-aApy- {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 24px 24px;
+}
+
+
+.FullscreenTimer-miniMode-aApy- {
+    margin-left: 0;
+    background-image: url(img/timer-float.png);
+}

@@ -109,33 +109,30 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
    await hold();await p.locator('[data-theme-id="custom_a"]').click();await p.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();await drain();
    await p.waitForFunction(()=>localStorage.getItem('Theme')==='Ocean');assert.equal(await p.evaluate(()=>localStorage.getItem('lexible-active-custom-theme')),null);
   });
-  await scenario('mini timer capability fallback and rejected request keep the existing floating timer',async ctx=>{
-   const p=await page(ctx);await p.evaluate(()=>Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:undefined}));
-   await p.evaluate(()=>testTimer.zoomDown());await p.locator('[class*="FloatTimer-root"]').waitFor();await p.locator('#focus-local-notice').filter({hasText:'不支持独立迷你窗口'}).waitFor();
-   await p.evaluate(()=>{testTimer.zoomUp();Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:{requestWindow:()=>Promise.reject(new Error('blocked'))}});});
-   await p.evaluate(()=>testTimer.zoomDown());await p.locator('#focus-local-notice').filter({hasText:'迷你窗口无法打开'}).waitFor();
-   assert.equal(await p.evaluate(()=>FocusLocalData.session()),null);
+  await scenario('only the left mini button requests PiP; zoom and double click stay in-page',async ctx=>{
+   const p=await page(ctx);await p.evaluate(()=>{window.miniRequests=0;Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:{requestWindow:()=>{miniRequests++;return Promise.reject(new Error('blocked'));}}});});
+   await p.evaluate(()=>testTimer.zoomDown());await p.locator('[class*="FloatTimer-root"]').dblclick({position:{x:75,y:35}});
+   const full=p.locator('[class*="FullscreenTimer-root"]');await full.waitFor();
+   const bounds=await full.evaluate(root=>{const a=root.querySelector('.focus-timer-mini').getBoundingClientRect(),b=root.querySelector('[class*="FullscreenTimer-zoomdown"]').getBoundingClientRect();return {left:a.x,right:b.x};});assert(bounds.right>bounds.left);
+   await full.locator('[class*="FullscreenTimer-zoomdown"]').click();assert.equal(await p.evaluate(()=>miniRequests),0);
+   await p.locator('[class*="FloatTimer-root"]').hover();await p.locator('.FloatTimer-miniMode-1KgSp').click();
+   await p.locator('#focus-local-notice').filter({hasText:'迷你窗口无法打开'}).waitFor();assert.equal(await p.evaluate(()=>miniRequests),1);
+   await p.evaluate(()=>Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:undefined}));
+   await p.locator('[class*="FloatTimer-root"]').hover();await p.locator('.FloatTimer-miniMode-1KgSp').click();await p.locator('#focus-local-notice').filter({hasText:'不支持独立迷你窗口'}).waitFor();
   });
-  await scenario('native Document PiP shares commands, reflects peer changes and cleans up on close',async ctx=>{
-   const p=await page(ctx);assert.equal(await p.evaluate(()=>typeof documentPictureInPicture?.requestWindow),'function');
-   await p.evaluate(()=>{const button=document.createElement('button');button.id='test-mini-open';button.textContent='Open mini';button.onclick=()=>testTimer.zoomDown();document.body.appendChild(button);});
-   await p.locator('#test-mini-open').click();await p.waitForFunction(()=>documentPictureInPicture.window?.document.querySelector('.focus-mini-timer'));
-   assert.equal(await p.evaluate(()=>documentPictureInPicture.window.document.querySelectorAll('button').length),3);
-   await p.waitForFunction(()=>documentPictureInPicture.window.document.styleSheets.length>0);
-   const miniPage=ctx.pages().find(target=>target!==p);if(miniPage)await miniPage.setViewportSize({width:340,height:280});
-   if(miniPage&&process.env.FOCUS_MINI_SCREENSHOT)await miniPage.screenshot({path:path.join(evidence,'1.9-native-mini.png')});
-   assert.equal(await p.evaluate(()=>{const w=documentPictureInPicture.window;return [...w.document.querySelectorAll('button')].every(button=>{const box=button.getBoundingClientRect();return box.top>=0&&box.bottom<=w.innerHeight&&box.left>=0&&box.right<=w.innerWidth;});}),true);
-   await p.evaluate(()=>documentPictureInPicture.window.document.querySelector('.focus-app-actions button').click());await p.waitForFunction(()=>testTimer.localTimer.session?.state==='work');
-   const id=await p.evaluate(()=>testTimer.localTimer.session.sessionId);
-   await p.evaluate(()=>documentPictureInPicture.window.document.querySelectorAll('button')[1].click());await p.waitForFunction(()=>testTimer.localTimer.session?.state==='pause');
-   assert.equal(await p.evaluate(()=>testTimer.localTimer.session.sessionId),id);
-   const peer=await page(ctx);await peer.evaluate(()=>testTimer.localTimer.run('resume'));await p.waitForFunction(()=>documentPictureInPicture.window.document.querySelector('p').textContent==='专注中');
-   await p.evaluate(()=>documentPictureInPicture.window.document.querySelectorAll('button')[2].click());await p.waitForFunction(()=>testTimer.localTimer.session.state==='initial');
-   // The same window follows work-to-break transitions and maintenance cleanup.
-   await p.evaluate(()=>{testTimer.state.isCountdown=true;});
-   await p.evaluate(()=>testTimer.localTimer.run('start',{config:FocusTimerCore.settings({interval:1,shortBreak:2,autoBreak:true})}));
-   await p.waitForFunction(()=>testTimer.localTimer.session.state==='rest'&&documentPictureInPicture.window.document.querySelector('p').textContent==='休息中');
-   assert.equal(await p.evaluate(()=>documentPictureInPicture.window.document.querySelector('p').textContent),'休息中');
+  await scenario('native Document PiP reuses the official compact timer and existing commands',async ctx=>{
+   const p=await page(ctx);await p.locator('[class*="FloatTimer-root"]').hover();await p.locator('.FloatTimer-miniMode-1KgSp').click();
+   await p.waitForFunction(()=>documentPictureInPicture.window?.document.querySelector('.focus-mini-timer [class*="FloatTimer-root"]'));
+   const mini=ctx.pages().find(target=>target!==p);await mini.setViewportSize({width:147,height:58});
+   const click=selector=>p.evaluate(selector=>documentPictureInPicture.window.document.querySelector(selector).click(),selector);
+   assert.equal(await p.evaluate(()=>documentPictureInPicture.window.document.querySelector('[class*="FloatTimer-content"] table').getBoundingClientRect().height),58);
+   if(process.env.FOCUS_MINI_SCREENSHOT)await mini.screenshot({path:path.join(evidence,'1.9.1-native-mini.png'),animations:'disabled'});
+   await click('[class*="FloatTimer-start-"]');await p.waitForFunction(()=>testTimer.localTimer.session?.state==='work');
+   await click('[class*="FloatTimer-pause-"]');await p.waitForFunction(()=>testTimer.localTimer.session?.state==='pause');
+   const peer=await page(ctx);await peer.evaluate(()=>testTimer.localTimer.run('resume'));
+   await p.waitForFunction(()=>documentPictureInPicture.window.document.querySelector('.focus-mini-host').dataset.state==='work');
+   await click('[class*="FloatTimer-pause-"]');await p.waitForFunction(()=>documentPictureInPicture.window.document.querySelector('[class*="FloatTimer-stop-"]'));
+   await click('[class*="FloatTimer-stop-"]');await p.waitForFunction(()=>testTimer.localTimer.session.state==='initial');
    await p.evaluate(()=>documentPictureInPicture.window.close());await p.waitForFunction(()=>!documentPictureInPicture.window);
   });
  }finally{fs.writeFileSync(path.join(evidence,process.env.FOCUS_TEST_FILTER?'release-1.9-filtered.json':'release-1.9-results.json'),JSON.stringify(results,null,2));await browser.close();await new Promise(r=>server.close(r));clearTimeout(watchdog);}

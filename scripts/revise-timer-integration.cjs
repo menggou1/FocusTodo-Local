@@ -4,6 +4,12 @@ const { load, walk } = require('./lib/bundle-editor.cjs');
 const bundle = load();
 const { source, modules, edits } = bundle;
 const methods = new Map();
+if(!source.slice(modules[1043].start,modules[1043].end).includes('var focusTimerReactDOM=')){
+ const start=modules[1043].body.body[0].end;edits.push({start,end:start,code:'var focusTimerReactDOM=n(22);'});
+}
+if(!source.slice(modules[1043].start,modules[1043].end).includes('var focusTimerMiniComponent=')){
+ const start=modules[1043].body.body[0].end;edits.push({start,end:start,code:'var focusTimerMiniComponent=n(1044).default,focusTimerReact=n(0);'});
+}
 if (!source.slice(modules[1043].start, modules[1043].end).includes('var focusTimerI18n=')) {
     let boundary;
     walk(modules[1043], node => {
@@ -24,6 +30,8 @@ walk(modules[1043], node => {
     const options = node.arguments[1];
     edits.push({ start: options.start, end: options.end, code: `{
 preference:_.default.shared,
+renderMini:function(host,props){focusTimerReactDOM.render(focusTimerReact.createElement(focusTimerMiniComponent,props),host)},
+unmountMini:function(host){focusTimerReactDOM.unmountComponentAtNode(host)},
 events:E.default.shared,
 subscriptions:[
 [E.default.Event.TSK_DID_DELETE,"deleteTask",t.deleteTask],
@@ -82,5 +90,23 @@ if (methods.has('componentWillUnmount')) {
     const method = methods.get('componentWillUnmount').value;
     edits.push({ start: method.start, end: method.end, code: unmountCode });
 } else edits.push({ start: mount.node.start, end: mount.node.start, code: '{key:"componentWillUnmount",value:' + unmountCode + '},' });
+// Both timer presentations expose the dedicated mini button. Their existing
+// zoom and double-click handlers continue to control only the in-page view.
+const render= bundle.method(1043,'render').value;
+walk(render,node=>{
+ if(node.type!=='ObjectExpression')return;
+ if(!node.properties.some(p=>['zoomUp','zoomDown'].includes(p.key?.name)))return;
+ if(!node.properties.some(p=>p.key?.name==='openMiniWindow'))edits.push({start:node.end-1,end:node.end-1,code:',openMiniWindow:this.openMiniWindow'});
+});
+for(const [id,anchor,addition] of [
+ [1044,'l.default.createElement("div",{className:d.default.zoomup', 'window.FocusLocal.miniButton(l.default,this.props.openMiniWindow,false,this.props.miniMode),'],
+ [1049,'f.default.createElement("div",{className:p.default.zoomdown', 'window.FocusLocal.miniButton(f.default,this.props.openMiniWindow,true),']
+]){
+ const value=bundle.method(id,'render').value,text=source.slice(value.start,value.end);
+ let updated=text;
+ if(!updated.includes('FocusLocal.miniButton'))updated=updated.replace(anchor,addition+anchor);
+ if(id===1044)updated=updated.replace('src:n(599)','src:this.props.miniMode?"img/float-timer-close.png":n(599)');
+ if(updated!==text)bundle.replace(value,updated);
+}
 bundle.save();
 console.log('Updated timer event bindings, notifications, statistics and lifecycle.');

@@ -3,11 +3,28 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.9.0",
+    "localVersion": "1.9.1",
     "author": "Lexible",
     "date": "2026-11-07",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.9.1",
+            "date": "2026-11-07",
+            "title": "官方小窗样式与专用入口",
+            "titleEn": "Official mini timer styling and a dedicated entry",
+            "items": [
+                "小窗口复用官方 Windows 7.2.2 的紧凑计时条、圆形计时盘与图标控制。",
+                "原计时器角落按钮移到右上角，左上角加入官方小窗口按钮。",
+                "只有点击左上角小按钮才请求独立小窗口，展开、收起和双击保持页内操作。"
+            ],
+            "itemsEn": [
+                "Reuse the official Windows 7.2.2 compact timer, circular dial and icon controls.",
+                "Move existing corner controls to the upper right and add the official mini-window button on the upper left.",
+                "Only the dedicated upper-left button requests a mini window; expanding, collapsing and double-clicking stay in-page."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.9.1.md"
+        },
         {
             "version": "7.1.1-local.1.9.0",
             "date": "2026-11-07",
@@ -457,7 +474,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.9.0",
+    "version": "7.1.1-local.1.9.1",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

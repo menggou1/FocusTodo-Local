@@ -32,7 +32,7 @@ Start the timer from a task or use the compact timer without a task. Depending o
 
 To use Bing daily themes, first enable Settings → General → External networking (experimental), which is off by default. Selecting Bing while disabled uses the existing bottom toast. Saved images remain available offline and failed refreshes preserve the cache.
 
-Minimizing the expanded timer opens a separate mini window where supported, with start, pause and stop controls. Unsupported or failed requests fall back to the existing in-page timer. Closing the mini window does not stop the timer; confirm interrupted sessions in the main page.
+The dedicated upper-left mini-window button opens a separate mini window where supported, with start, pause and stop controls. Unsupported or failed requests fall back to the existing in-page timer. Closing the mini window does not stop the timer; confirm interrupted sessions in the main page.
 
 Open Calendar in the sidebar. Navigate dates and views to inspect plans and completed records. In day view, drag over an empty time range or double-click to create a task and its schedule; cancel to discard. Existing plans can be moved, resized, opened or started with the play control. Overlapping plans appear in columns.
 

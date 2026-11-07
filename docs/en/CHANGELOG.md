@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.9.0**, author Lexible.
+Current application: **7.1.1-local.1.9.1**, author Lexible.
+
+## 7.1.1-local.1.9.1 · 2026-11-07
+
+- Reuse the official Windows 7.2.2 compact timer, circular dial and icon controls.
+- Move existing corner controls to the upper right and add the official mini-window button on the upper left.
+- Only the dedicated upper-left button requests a mini window; expanding, collapsing and double-clicking stay in-page.
+
+[English report](releases/UPDATE-7.1.1-local.1.9.1.md).
 
 ## 7.1.1-local.1.9.0 · 2026-11-07
 

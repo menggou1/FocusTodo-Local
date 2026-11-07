@@ -35,25 +35,26 @@
     }
     function attachTimer(timer, options) {
         let current = null, queue = Promise.resolve(), disposed = false, halted = false, dialog = null, poll, mounted = false, completingTask = false;
-        let miniWindow=null,miniOpening=false,miniNodes=null;
+        let miniWindow=null,miniOpening=false,miniNodes=null,miniImages=new Map();
+        function localMiniImages(css){return css.replace(/url\(["']?([^"')]+)["']?\)/g,(match,url)=>{try{return miniImages.has(new URL(url,location.href).href)?'url("'+miniImages.get(new URL(url,location.href).href)+'")':match;}catch(_){return match;}});}
         const t=text=>root.FocusI18n.text(text),floatInPage=timer.zoomDown;
         function updateMini(){
             if(!miniNodes||!miniWindow||miniWindow.closed)return;
             const session=current,view=session?core.view(session,Date.now()):timer.state.timerInfo;
-            const elapsed=view.elapse||0,seconds=Math.max(0,Math.ceil(timer.state.isCountdown?view.interval-elapsed:elapsed));
-            miniNodes.time.textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
-            miniNodes.title.textContent=timer.props.task?timer.props.task.name:t('专注计时');
-            miniNodes.status.textContent=t(({work:'专注中',rest:'休息中',pause:'已暂停',recovery:'等待恢复确认',waitingForRest:'等待休息',initial:'准备开始'})[session?session.state:'initial']);
-            miniNodes.start.textContent=t(session&&session.state==='pause'?'继续':session&&session.state==='waitingForRest'?'开始休息':'开始');
-            miniNodes.start.disabled=halted||!!(session&&(core.running(session)||session.state==='recovery'));
-            miniNodes.pause.disabled=halted||!session||!core.running(session);
-            miniNodes.stop.disabled=halted||!session||session.state==='initial'||session.state==='recovery';
+            options.renderMini(miniNodes.host,{task:timer.props.task,subtask:timer.props.subtask,theme:timer.state.theme,
+                state:session&&session.state==='recovery'?'recovery':view.state,interval:view.interval,elapse:view.elapse||0,
+                isCountdown:timer.state.isCountdown,stateActions:{start:()=>fire('start'),pause:()=>fire('pause'),continue:()=>fire('resume'),stop:()=>fire('stop'),startRest:()=>fire('rest'),complete:()=>fire('stop')},miniMode:true,zoomUp:closeMini,openMiniWindow:closeMini});
+            const background=document.querySelector('[class*="Timer-bgi"]');
+            if(background)miniNodes.background.style.backgroundImage=localMiniImages(getComputedStyle(background).backgroundImage);
+            miniNodes.host.setAttribute('aria-label',t('迷你计时器'));
+            miniNodes.host.dataset.state=session?session.state:'initial';
             miniWindow.document.body.className=document.body.className;
             const computed=getComputedStyle(document.body);
             for(const name of ['--bg-main','--bg-popup','--border','--text-title','--text-desc','--theme-red','--focus-ui-font'])miniWindow.document.documentElement.style.setProperty(name,computed.getPropertyValue(name));
         }
-        function closeMini(){const win=miniWindow;miniWindow=null;miniNodes=null;if(win&&!win.closed)win.close();}
-        timer.zoomDown=async()=>{
+        function releaseMini(){if(miniNodes)options.unmountMini(miniNodes.host);miniWindow=null;miniNodes=null;}
+        function closeMini(){const win=miniWindow;releaseMini();if(win&&!win.closed)win.close();}
+        timer.openMiniWindow=async()=>{
             if(disposed||halted)return;
             if(miniWindow&&!miniWindow.closed){miniWindow.focus();return;}
             if(miniOpening)return;
@@ -63,27 +64,33 @@
             }
             miniOpening=true;
             try{
-                const win=await api.requestWindow({width:340,height:280});
+                const win=await api.requestWindow({width:timer.props.task||timer.props.subtask?232:147,height:58});
                 if(disposed||halted){win.close();return;}
+                miniWindow=win;
+                // The native view reuses the main page's asset bytes. Loading
+                // images in the opener also works in throttled PiP documents.
+                const imageFiles=['timer-start.png','timer-stop.png','timer-pause.png','timer-complete.png','float-timer-zoomup.png','float-timer-close.png'].map(name=>'img/'+name);
+                const currentBackground=document.querySelector('[class*="Timer-bgi"]'),backgroundURL=currentBackground&&/url\(["']?([^"')]+)/.exec(getComputedStyle(currentBackground).backgroundImage);
+                if(backgroundURL&&new URL(backgroundURL[1],location.href).origin===location.origin)imageFiles.push(backgroundURL[1]);
+                miniImages=new Map(await Promise.all(imageFiles.map(async name=>{
+                    const url=new URL(name,location.href).href,response=await fetch(url);
+                    if(!response.ok)throw Error('Mini timer asset unavailable');
+                    const blob=await response.blob(),data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=reject;reader.readAsDataURL(blob);});return [url,data];
+                })));
+                if(disposed||halted||win.closed){win.close();return;}
                 miniWindow=win;const doc=win.document;doc.title=t('迷你计时器');doc.documentElement.lang=root.FocusI18n.locale;doc.documentElement.className='focus-mini-document';
                 const base=doc.createElement('base');base.href=location.href;doc.head.appendChild(base);
                 for(const sheet of document.styleSheets){
-                    const style=doc.createElement('style');style.textContent=Array.from(sheet.cssRules,rule=>rule.cssText).join('\n');doc.head.appendChild(style);
+                    const style=doc.createElement('style');style.textContent=localMiniImages(Array.from(sheet.cssRules,rule=>rule.cssText).join('\n'));doc.head.appendChild(style);
                 }
-                const card=doc.createElement('section');card.className='focus-app-dialog focus-mini-timer';
-                const title=doc.createElement('h2'),time=doc.createElement('div'),status=doc.createElement('p'),actions=doc.createElement('div');
-                time.className='focus-mini-time';time.setAttribute('role','timer');actions.className='focus-app-actions';
-                miniNodes={title,time,status};
-                for(const [name,label,type] of [['start','开始',null],['pause','暂停','pause'],['stop','停止','stop']]){
-                    const button=doc.createElement('button');button.type='button';button.textContent=t(label);miniNodes[name]=button;
-                    button.onclick=async()=>{button.disabled=true;try{await run(type||(current&&current.state==='pause'?'resume':current&&current.state==='waitingForRest'?'rest':'start'));}catch(_){}finally{updateMini();}};
-                    actions.appendChild(button);
-                }
-                card.append(title,time,status,actions);doc.body.replaceChildren(card);
+                const card=doc.createElement('section');card.className='focus-mini-timer';
+                const background=doc.createElement('div');background.className='Timer-bgi-13jbG';
+                const host=doc.createElement('div');host.className='focus-mini-host';
+                miniNodes={host,background};card.append(background,host);doc.body.replaceChildren(card);
                 floatInPage();
-                win.addEventListener('pagehide',()=>{if(miniWindow===win){miniWindow=null;miniNodes=null;}},{once:true});
+                win.addEventListener('pagehide',()=>{if(miniWindow===win)releaseMini();},{once:true});
                 updateMini();
-            }catch(error){if(!disposed&&!halted){floatInPage();notice(t('迷你窗口无法打开，已使用页内浮动计时器。'));}}
+            }catch(error){closeMini();if(!disposed&&!halted){floatInPage();notice(t('迷你窗口无法打开，已使用页内浮动计时器。'));}}
             finally{miniOpening=false;}
         };
         const listeners = [];
@@ -418,5 +425,11 @@
         if (seconds > 0 && seconds < 60) return Math.max(1, Math.round(seconds)) + root.FocusI18n.text('秒');
         return seconds.secondsToLocalHH_MM();
     }
-    root.FocusLocal = { attachTimer, attachAudio, RELEASE, notice, notifyCompletion, pomodoroValues, isVisibleFocusRecord, formatFocusDuration };
+    function miniButton(React,action,fullscreen,miniMode){
+        const label=root.FocusI18n.text(miniMode?'退出小窗口':'打开小窗口');
+        return React.createElement('button',{type:'button',className:'focus-ui-icon-button focus-timer-mini '+(fullscreen?'focus-fullscreen-mini':'FloatTimer-miniMode-1KgSp'),
+            title:label,'aria-label':label,onClick:event=>{event.stopPropagation();if(action)action();},onDoubleClick:event=>event.stopPropagation()},
+            React.createElement('span',{className:fullscreen?'FullscreenTimer-miniMode-aApy-':miniMode?'FloatTimer-miniModeImgZoomUp-1F54S':'FloatTimer-miniModeImg-2zD-r','aria-hidden':true}));
+    }
+    root.FocusLocal = { attachTimer, attachAudio, RELEASE, notice, notifyCompletion, pomodoroValues, isVisibleFocusRecord, formatFocusDuration, miniButton };
 })(window);

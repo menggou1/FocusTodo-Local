@@ -295,5 +295,7 @@
   "停止": "Stop",
   "迷你计时器": "Mini timer",
   "当前浏览器不支持独立迷你窗口，已使用页内浮动计时器。": "This browser does not support a separate mini window. Using the in-page floating timer.",
-  "迷你窗口无法打开，已使用页内浮动计时器。": "The mini window could not open. Using the in-page floating timer."
+  "迷你窗口无法打开，已使用页内浮动计时器。": "The mini window could not open. Using the in-page floating timer.",
+  "打开小窗口": "Open mini window",
+  "退出小窗口": "Exit mini window"
 }

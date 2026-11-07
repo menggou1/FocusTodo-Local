@@ -25,7 +25,7 @@ const evidence=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance')
     const taskInput=p.getByPlaceholder(locale==='en'?/Add a task/:/添加一个任务/);await taskInput.fill('Compatibility task');await taskInput.press('Enter');
     await p.waitForFunction(async()=>(await FocusLocalData.snapshot()).indexedDB.Task.length===1);
     await p.evaluate(()=>testTimer.localTimer.run('start'));await p.evaluate(()=>testTimer.localTimer.run('pause'));
-    assert.equal(await p.evaluate(()=>testTimer.localTimer.session.state),'pause');await p.evaluate(()=>testTimer.zoomDown());await p.locator('[class*="FloatTimer-root"]').waitFor();
+    assert.equal(await p.evaluate(()=>testTimer.localTimer.session.state),'pause');await p.evaluate(()=>testTimer.openMiniWindow());await p.locator('[class*="FloatTimer-root"]').waitFor();
     await p.locator('#focus-local-notice').filter({hasText:locale==='en'?'in-page floating timer':'页内浮动计时器'}).waitFor();
     const backup=await p.evaluate(()=>FocusLocalData.snapshot());
     await p.reload();await p.waitForFunction(()=>window.testTimer&&!document.documentElement.classList.contains('focus-starting'));await p.evaluate(()=>FocusLocalReady);

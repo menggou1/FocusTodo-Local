@@ -835,7 +835,7 @@ const server = createServer();
             await page.evaluate(() => window.__acceptanceTimer.zoomDown());
             await page.getByText('停止回归任务', { exact: true }).first().click();
             await page.waitForTimeout(300);
-            assert.equal(await page.locator('#focus-local-notice').innerText(), '当前浏览器不支持独立迷你窗口，已使用页内浮动计时器。');
+            assert.equal(await page.locator('#focus-local-notice').count(), 0);
         }));
         for (const mode of ['countup', 'countdown']) {
             await check(mode + ' stopped timer stays zero when task completion circle is clicked', () => app(async page => {
