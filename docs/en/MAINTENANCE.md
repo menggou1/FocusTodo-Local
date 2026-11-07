@@ -178,4 +178,4 @@ Measure a known pre-change revision with the same locale, theme, viewport, zoom 
 Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Current publication rules are described in Version and release above. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
 
 
-A pushed version tag must never be moved or reused, including failed, cancelled or unpublished candidates. Increment the patch version for every repaired candidate. Daily development reuses the existing project directory and a long-lived development branch.
+A pushed version tag must never be moved or reused, including failed, cancelled or unpublished candidates. Increment the patch version for every repaired candidate. Daily development reuses `D:\Program Files\Focustodo` on the long-lived branch `feature/2.0.0-versioning`, without creating a worktree for every task.

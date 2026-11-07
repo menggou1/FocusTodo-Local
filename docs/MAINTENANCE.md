@@ -158,6 +158,8 @@ git status --short
 
 ### 开发与发布流程
 
+日常开发在 `D:\Program Files\Focustodo` 复用长期分支 `feature/2.0.0-versioning`，不为每次任务建立新工作树。验收后合入 main；发布后切回该开发分支继续。
+
 
 1. 在功能分支修改并运行适当检查；PR 推荐用于审查，是否合并由任务决定。应用变化时更新 `release.json`、生成文件和中英文报告。
 2. 从拟发布的提交创建与 `localVersion` 完全一致的版本 Tag 并推送。Tag push 自动执行完整 CI，成功后创建 Pre-release；无需先合并或部署 Pages。避免在待发布提交使用 `[skip ci]`。
