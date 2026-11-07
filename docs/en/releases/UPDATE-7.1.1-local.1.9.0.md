@@ -26,7 +26,7 @@ General settings reuse the existing scrolling component. Disable the unused clou
 
 ## Evidence
 
-Windows / Node 24: 92 unit tests passed, one POSIX-only test skipped; syntax, generation and whitespace checks passed. The full isolated Edge suite passed startup, 66 application scenarios, maintenance, calendar and all specialized controls/data suites. Eight 1.9 scenarios cover opt-in networking, the existing bottom toast, release reads, metadata/image redirects, cancellation, day changes, no-Web-Locks ownership, timeout/offline fallback and native mini-window commands/lifecycle. The mini view also passed 340×280 button bounds, rest-phase and peer-state checks.
+Windows / Node 24: 92 unit tests passed, one POSIX-only test skipped; syntax, generation and whitespace checks passed. The full isolated Edge suite passed startup, 66 application scenarios, maintenance, calendar and all specialized controls/data suites. Nine 1.9 scenarios cover opt-in networking, the existing bottom toast, release reads, metadata/image redirects, cancellation, day changes, no-Web-Locks ownership, timeout/offline fallback, cancellation of queued cached selections on opt-out or a newer choice, and native mini-window commands/lifecycle. The mini view also passed 340×280 button bounds, rest-phase and peer-state checks.
 
 A real isolated Bing retrieval returned HTTP 200 for metadata and image and saved/activated the wallpaper. Failure, redirect and day-change tests use controlled requests/clocks. Python 3.12 checks passed extracted ZIP/tar.gz startup without npm/Git in Unicode/space paths, Python fallback, invalid-tag rejection and package documentation links. JSON/screenshots go to `dist/acceptance/` and CI evidence artifacts.
 

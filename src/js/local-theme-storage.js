@@ -148,12 +148,14 @@
         window.FocusLocalReady.catch(function(error) { window.FocusLocal.notice((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('主题设置恢复未完成，请刷新重试：'):'主题设置恢复未完成，请刷新重试：') + error.message); });
         window.addEventListener('focus-local-maintenance', function() { selectionRevision++; themeDataRevision++; });
 
-        async function writeThemeState(update) {
+        async function writeThemeState(update, guard) {
             var expected=themeStore.read();
             try {
                 return await window.FocusLocalData.themeStorageOperation(function(){
                     var current=themeStore.read();
                     if(fields.some(name=>current[name]!==expected[name]))throw new Error(window.FocusI18n.text('主题已在其他操作中修改，请重试。'));
+                    if(guard&&!guard())return null;
+                    if(update.active===BING_ID&&!window.FocusSettings.networkEnabled())throw new Error(window.FocusI18n.text('请打开外部联网'));
                     if (localStorage.getItem(window.FocusThemeStorage.JOURNAL_KEY)) throw new Error(window.FocusI18n.text('存在待恢复的主题设置，请刷新后重试。'));
                     return themeStore.commit(update);
                 });
@@ -176,8 +178,8 @@
             if (json.length > 2 * 1024 * 1024 && json.length >= (localStorage.getItem(STORAGE_KEY) || '').length) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('自定义主题总量已达到限制，请删除部分图片后重试。'):'自定义主题总量已达到限制，请删除部分图片后重试。'));
             return json;
         }
-        function saveCustomThemes(data) {
-            return writeThemeState({ themes: customThemesJSON(data) });
+        function saveCustomThemes(data, guard) {
+            return writeThemeState({ themes: customThemesJSON(data) },guard);
         }
 
         function getActiveId() {
@@ -242,9 +244,9 @@
         }
 
         async function selectClassic(id) {
-            try { await writeThemeState({ active: null, theme: id }); }
+            var revision=++selectionRevision;
+            try { if(!await writeThemeState({ active: null, theme: id },()=>revision===selectionRevision))return false; }
             catch (error) { window.FocusLocal.notice(error.message); return false; }
-            selectionRevision++;
             var wasCustom = _savedClassicBg || findBgiElements().some(function(el) { return el.style.backgroundImage.indexOf('data:image/') >= 0; });
             if (wasCustom) clearCustomBackground(id);
             _lastObservedTheme = id;
@@ -406,7 +408,7 @@
                     thumbnail: data.thumbnail, type: 'bing',
                     updatedAt: Date.now(), copyright: data.copyright || ''
                 };
-                await saveCustomThemes(themes);
+                if(!await saveCustomThemes(themes,()=>dataRevision===themeDataRevision&&window.FocusSettings.networkEnabled()))return null;
                 return data;
             }).finally(function() {
                 _bingLoading = false;
@@ -417,13 +419,15 @@
         }
 
         async function activateCustomTheme(id, theme, themes) {
+            var revision=selectionRevision;
             var prevTheme = localStorage.getItem('Theme');
             var update = { active: id, theme: id };
             if (themes) update.themes = customThemesJSON(themes);
-            await writeThemeState(update);
+            if(!await writeThemeState(update,()=>revision===selectionRevision))return false;
             _lastObservedTheme = id;
             applyCustomBackground(theme.dataUrl, prevTheme);
             refreshThemeUI();
+            return true;
         }
 
         async function fetchAndApplyBing() {
@@ -434,7 +438,7 @@
             var revision = ++selectionRevision;
             var cached = getCustomThemes()[BING_ID];
             if (cached && cached.dataUrl) {
-                await activateCustomTheme(BING_ID, cached);
+                if(!await activateCustomTheme(BING_ID, cached))return;
                 if (bingFresh(cached)) return;
             }
             loadBingWallpaper().then(function(data) {

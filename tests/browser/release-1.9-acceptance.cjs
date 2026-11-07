@@ -99,6 +99,15 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
    await p.waitForFunction(()=>!document.querySelector('[data-theme-id="__bing_daily__"]').textContent.includes('下载中'));
    assert.equal(await p.evaluate(()=>localStorage.getItem('Theme')),'__bing_daily__');assert.equal(await p.evaluate(()=>JSON.parse(localStorage.getItem('lexible-custom-themes')).__bing_daily__.dataUrl),saved);
   });
+  await scenario('queued cached Bing selection cancels on opt-out and later classic choices win',async ctx=>{
+   const p=await page(ctx);await seed(p);await p.evaluate(()=>FocusSettings.setNetworkEnabled(true));await appearance(p);
+   async function hold(){await p.evaluate(()=>{window.held=FocusLocalData.themeStorageOperation(()=>new Promise(resolve=>{window.releaseThemeLock=resolve;}));});await p.waitForFunction(()=>window.releaseThemeLock);}
+   async function drain(){await p.evaluate(async()=>{releaseThemeLock();await FocusLocalData.themeStorageOperation(()=>{});delete window.releaseThemeLock;});}
+   await hold();await p.locator('[data-theme-id="__bing_daily__"]').click();await p.evaluate(()=>FocusSettings.setNetworkEnabled(false));await drain();
+   assert.equal(await p.evaluate(()=>localStorage.getItem('lexible-active-custom-theme')),null);
+   await hold();await p.locator('[data-theme-id="custom_a"]').click();await p.locator('img[src="img/timer-bg-ocean-shortcut.jpg"]').click();await drain();
+   await p.waitForFunction(()=>localStorage.getItem('Theme')==='Ocean');assert.equal(await p.evaluate(()=>localStorage.getItem('lexible-active-custom-theme')),null);
+  });
   await scenario('mini timer capability fallback and rejected request keep the existing floating timer',async ctx=>{
    const p=await page(ctx);await p.evaluate(()=>Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:undefined}));
    await p.evaluate(()=>testTimer.zoomDown());await p.locator('[class*="FloatTimer-root"]').waitFor();await p.locator('#focus-local-notice').filter({hasText:'不支持独立迷你窗口'}).waitFor();
