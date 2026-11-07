@@ -1,0 +1,37 @@
+{
+  "baseline": "f102da8919e810006b6611aabcef5f0159057d61",
+  "browser": "156.0.4314.58",
+  "node": "v24.16.0",
+  "platform": "10.0.26200",
+  "method": "Generated task data, fixed time, isolated loopback, zh-CN/Asia-Shanghai, 1280x900, reduced motion. Tests create, subtask and note persistence; repeat popup only is observed.",
+  "before": {
+    "task": {
+      "id": "E3020C37-2889-460D-B339-A4E34E3778F0",
+      "name": "Audit task",
+      "remark": "Audit note",
+      "rUnit": "",
+      "rValue": ""
+    },
+    "subtask": {
+      "id": "35524519-1E67-46EE-9AA4-C68C4F49DDA6",
+      "taskId": "E3020C37-2889-460D-B339-A4E34E3778F0",
+      "name": "Audit subtask"
+    }
+  },
+  "after": {
+    "task": {
+      "id": "E3020C37-2889-460D-B339-A4E34E3778F0",
+      "name": "Audit task",
+      "remark": "Audit note",
+      "rUnit": "",
+      "rValue": ""
+    },
+    "subtask": {
+      "id": "35524519-1E67-46EE-9AA4-C68C4F49DDA6",
+      "taskId": "E3020C37-2889-460D-B339-A4E34E3778F0",
+      "name": "Audit subtask"
+    }
+  },
+  "repeatOptions": "每\n天\n周\n月\n年\n移除确定",
+  "errors": []
+}

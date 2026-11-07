@@ -1,0 +1,105 @@
+{
+  "baseline": "f102da8919e810006b6611aabcef5f0159057d61",
+  "browser": "156.0.4314.58",
+  "node": "v24.16.0",
+  "platform": "10.0.26200",
+  "method": "Generated data only; 30-minute interval crossing local midnight or DST fall-back plus a 10-minute task interval; fixed time; isolated fresh browser contexts. Screenshots and text record observed UI, not a claim that aggregations are correct.",
+  "results": [
+    {
+      "id": "shanghai-midnight",
+      "timezone": "Asia/Shanghai",
+      "now": "2026-11-07T12:00:00+08:00",
+      "end": "2026-11-07T00:20:00+08:00",
+      "seed": {
+        "tasks": [
+          "A07B0A3A-5A5E-42CB-A57C-35FE237892AC",
+          "7B69E218-0A33-4DBE-B3DC-C48E1CB59684"
+        ],
+        "records": [
+          {
+            "id": "audit-cross-boundary",
+            "taskId": "A07B0A3A-5A5E-42CB-A57C-35FE237892AC",
+            "subtaskId": "audit-subtask",
+            "endDate": 1793982000000,
+            "interval": 1800
+          },
+          {
+            "id": "audit-second",
+            "taskId": "7B69E218-0A33-4DBE-B3DC-C48E1CB59684",
+            "subtaskId": "",
+            "endDate": 1793985600000,
+            "interval": 600
+          }
+        ],
+        "subtask": "audit-subtask"
+      },
+      "history": "本地用户\n今天\n0m\n2\n明天\n0m\n0\n本周\n0m\n2\n已计划\n0m\n2\n日程\n已完成\n任务\n0m\n2\n创建清单\t\t\n已完成\t\n\n今天\n\n\t\nAudit subtask\n30分钟\n\t\n23:50\n|\n00:20\n\t\nAudit task B\n10分钟\n\t\n01:10\n|\n01:20\n25\n\t",
+      "calendar": "本地用户\n今天\n0m\n2\n明天\n0m\n0\n本周\n0m\n2\n已计划\n0m\n2\n日程\n已完成\n任务\n0m\n2\n创建清单\t\t\n今天\n‹\n›\n2026-11-07\n日\n周\n月\n+\n今天 星期六\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00\n已安排\n已完成\nAudit subtask\n30m\nAudit task B\n10m\n25\n\t",
+      "calendarGeometry": [
+        {
+          "id": "audit-cross-boundary",
+          "title": "Audit subtask\n23:50 - 00:20 · 30m",
+          "top": "0px",
+          "height": "41.3333px"
+        },
+        {
+          "id": "audit-second",
+          "title": "Audit task B\n01:10 - 01:20 · 10m",
+          "top": "144.667px",
+          "height": "20.6667px"
+        }
+      ],
+      "report": "本地用户\n今天\n0m\n2\n明天\n0m\n0\n本周\n0m\n2\n已计划\n0m\n2\n日程\n已完成\n任务\n0m\n2\n创建清单\t\t\n今天\n‹\n›\n2026-11-07\n日\n周\n月\n+\n今天 星期六\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00\n已安排\n已完成\nAudit subtask\n30m\nAudit task B\n10m\n25\n\t\n报表\n总专注时间\n40\n分钟\n本周专注时间\n40\n分钟\n今日专注时间\n30\n分钟\n总完成任务\n0\n本周完成任务\n0\n今日完成任务\n0\n番茄记录\n显示任务\n专注时间\n总专注时间: 30分钟\n日周月年\n年\n今天\nAudit task A\n20分钟\nAudit task B\n10分钟\n10分钟\n今天\n日周月年\n年\n清单时间分布\n30\n分钟\n任务\n30分钟 • 100%\n目标: 3小时\n每日专注目标\n专注天数: 1天，完成目标天数: 0天，目标完成率: 17%\n2026年11月\n一\n二\n三\n四\n五\n六\n日\n24\n25\n26\n27\n28\n29\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n1\n2\n3\n4\n5\n6\n日周月年\n年\n专注时间\n最高: 30分钟　　平均: 3分钟\n日周月年\n年\n任务\n最高: 0 个　　平均: 0 个",
+      "backupRoundTrip": true,
+      "errors": []
+    },
+    {
+      "id": "newyork-dst",
+      "timezone": "America/New_York",
+      "now": "2026-11-01T12:00:00-05:00",
+      "end": "2026-11-01T01:20:00-05:00",
+      "seed": {
+        "tasks": [
+          "0562FE8D-3813-4ECC-AB94-EF22B71FA482",
+          "88F6B356-BB5C-45DF-A03C-F66127A05519"
+        ],
+        "records": [
+          {
+            "id": "audit-cross-boundary",
+            "taskId": "0562FE8D-3813-4ECC-AB94-EF22B71FA482",
+            "subtaskId": "audit-subtask",
+            "endDate": 1793514000000,
+            "interval": 1800
+          },
+          {
+            "id": "audit-second",
+            "taskId": "88F6B356-BB5C-45DF-A03C-F66127A05519",
+            "subtaskId": "",
+            "endDate": 1793517600000,
+            "interval": 600
+          }
+        ],
+        "subtask": "audit-subtask"
+      },
+      "history": "本地用户\n今天\n0m\n2\n明天\n0m\n0\n本周\n0m\n2\n已计划\n0m\n2\n日程\n已完成\n任务\n0m\n2\n创建清单\t\t\n已完成\t\n\n今天\n\n\t\nAudit subtask\n30分钟\n\t\n01:50\n|\n01:20\n\t\nAudit task B\n10分钟\n\t\n02:10\n|\n02:20\n25\n\t",
+      "calendar": "本地用户\n今天\n0m\n2\n明天\n0m\n0\n本周\n0m\n2\n已计划\n0m\n2\n日程\n已完成\n任务\n0m\n2\n创建清单\t\t\n今天\n‹\n›\n2026-11-01\n日\n周\n月\n+\n今天 星期日\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00\n已安排\n已完成\nAudit subtask\n30m\nAudit task B\n10m\n25\n\t",
+      "calendarGeometry": [
+        {
+          "id": "audit-cross-boundary",
+          "title": "Audit subtask\n01:50 - 01:20 · 30m",
+          "top": "227.333px",
+          "height": "62px"
+        },
+        {
+          "id": "audit-second",
+          "title": "Audit task B\n02:10 - 02:20 · 10m",
+          "top": "392.667px",
+          "height": "20.6667px"
+        }
+      ],
+      "report": "本地用户\n今天\n0m\n2\n明天\n0m\n0\n本周\n0m\n2\n已计划\n0m\n2\n日程\n已完成\n任务\n0m\n2\n创建清单\t\t\n今天\n‹\n›\n2026-11-01\n日\n周\n月\n+\n今天 星期日\n01:00\n02:00\n03:00\n04:00\n05:00\n06:00\n07:00\n08:00\n09:00\n10:00\n11:00\n12:00\n13:00\n14:00\n15:00\n16:00\n17:00\n18:00\n19:00\n20:00\n21:00\n22:00\n23:00\n已安排\n已完成\nAudit subtask\n30m\nAudit task B\n10m\n25\n\t\n报表\n总专注时间\n40\n分钟\n本周专注时间\n40\n分钟\n今日专注时间\n40\n分钟\n总完成任务\n0\n本周完成任务\n0\n今日完成任务\n0\n番茄记录\n显示任务\n专注时间\n总专注时间: 40分钟\n日周月年\n年\n今天\nAudit task A\n30分钟\nAudit task B\n10分钟\n10分钟\n今天\n日周月年\n年\n清单时间分布\n40\n分钟\n任务\n40分钟 • 100%\n目标: 3小时\n每日专注目标\n专注天数: 1天，完成目标天数: 0天，目标完成率: 22%\n2026年11月\n一\n二\n三\n四\n五\n六\n日\n24\n25\n26\n27\n28\n29\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n1\n2\n3\n4\n5\n6\n日周月年\n年\n专注时间\n最高: 40分钟　　平均: 3分钟\n日周月年\n年\n任务\n最高: 0 个　　平均: 0 个",
+      "backupRoundTrip": true,
+      "errors": []
+    }
+  ]
+}
