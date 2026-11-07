@@ -1,0 +1,6 @@
+{
+  "siteDirectory": "dist/standalone/site",
+  "debugDirectory": "dist/standalone/debug",
+  "files": ["index.html", "prototype-build.json", "LICENSE", "THIRD-PARTY-NOTICES.txt", "runtime-manifest.json"],
+  "directories": ["assets", "licenses"]
+}

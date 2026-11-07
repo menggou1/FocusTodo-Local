@@ -1,0 +1,225 @@
+{
+  "method": "Temporary loopback origins and fresh contexts; only external networking is blocked. No service-worker or first-visit Internet-origin offline guarantee. WebKit automation is not real Safari.",
+  "engines": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "versions": {
+    "chromium": "156.0.4314.58",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "results": [
+    {
+      "name": "chromium / zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 815
+    },
+    {
+      "name": "chromium / en: cold start without external network",
+      "passed": true,
+      "ms": 485
+    },
+    {
+      "name": "chromium: persisted page lifecycle keeps the restored preview interactive",
+      "passed": true,
+      "ms": 523
+    },
+    {
+      "name": "chromium: language, theme, keyboard navigation and reload continuity",
+      "passed": true,
+      "ms": 743
+    },
+    {
+      "name": "chromium: narrow viewport remains navigable without horizontal clipping",
+      "passed": true,
+      "ms": 479
+    },
+    {
+      "name": "chromium: optional resource delay and failure never block usable navigation",
+      "passed": true,
+      "ms": 592
+    },
+    {
+      "name": "chromium: existing legacy settings are preserved and blocked",
+      "passed": true,
+      "ms": 360
+    },
+    {
+      "name": "chromium: existing IndexedDB remains unchanged and blocked",
+      "passed": true,
+      "ms": 395
+    },
+    {
+      "name": "chromium: missing session attestation blocks an ordinary static origin",
+      "passed": true,
+      "ms": 408
+    },
+    {
+      "name": "chromium: failed module exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 610
+    },
+    {
+      "name": "chromium: failed stylesheet exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 530
+    },
+    {
+      "name": "chromium /FocusTodo-Local/ zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 466
+    },
+    {
+      "name": "chromium /FocusTodo-Local/ en: cold start without external network",
+      "passed": true,
+      "ms": 537
+    },
+    {
+      "name": "chromium: React render boundary exposes retry and recovers",
+      "passed": true,
+      "ms": 384
+    },
+    {
+      "name": "firefox / zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 1627
+    },
+    {
+      "name": "firefox / en: cold start without external network",
+      "passed": true,
+      "ms": 572
+    },
+    {
+      "name": "firefox: persisted page lifecycle keeps the restored preview interactive",
+      "passed": true,
+      "ms": 749
+    },
+    {
+      "name": "firefox: language, theme, keyboard navigation and reload continuity",
+      "passed": true,
+      "ms": 1106
+    },
+    {
+      "name": "firefox: narrow viewport remains navigable without horizontal clipping",
+      "passed": true,
+      "ms": 473
+    },
+    {
+      "name": "firefox: optional resource delay and failure never block usable navigation",
+      "passed": true,
+      "ms": 554
+    },
+    {
+      "name": "firefox: existing legacy settings are preserved and blocked",
+      "passed": true,
+      "ms": 448
+    },
+    {
+      "name": "firefox: existing IndexedDB remains unchanged and blocked",
+      "passed": true,
+      "ms": 651
+    },
+    {
+      "name": "firefox: missing session attestation blocks an ordinary static origin",
+      "passed": true,
+      "ms": 429
+    },
+    {
+      "name": "firefox: failed module exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 602
+    },
+    {
+      "name": "firefox: failed stylesheet exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 597
+    },
+    {
+      "name": "firefox /FocusTodo-Local/ zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 563
+    },
+    {
+      "name": "firefox /FocusTodo-Local/ en: cold start without external network",
+      "passed": true,
+      "ms": 610
+    },
+    {
+      "name": "firefox: React render boundary exposes retry and recovers",
+      "passed": true,
+      "ms": 558
+    },
+    {
+      "name": "webkit / zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 665
+    },
+    {
+      "name": "webkit / en: cold start without external network",
+      "passed": true,
+      "ms": 443
+    },
+    {
+      "name": "webkit: persisted page lifecycle keeps the restored preview interactive",
+      "passed": true,
+      "ms": 616
+    },
+    {
+      "name": "webkit: language, theme, keyboard navigation and reload continuity",
+      "passed": true,
+      "ms": 815
+    },
+    {
+      "name": "webkit: narrow viewport remains navigable without horizontal clipping",
+      "passed": true,
+      "ms": 558
+    },
+    {
+      "name": "webkit: optional resource delay and failure never block usable navigation",
+      "passed": true,
+      "ms": 783
+    },
+    {
+      "name": "webkit: existing legacy settings are preserved and blocked",
+      "passed": true,
+      "ms": 383
+    },
+    {
+      "name": "webkit: existing IndexedDB remains unchanged and blocked",
+      "passed": true,
+      "ms": 461
+    },
+    {
+      "name": "webkit: missing session attestation blocks an ordinary static origin",
+      "passed": true,
+      "ms": 347
+    },
+    {
+      "name": "webkit: failed module exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 710
+    },
+    {
+      "name": "webkit: failed stylesheet exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 693
+    },
+    {
+      "name": "webkit /FocusTodo-Local/ zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 461
+    },
+    {
+      "name": "webkit /FocusTodo-Local/ en: cold start without external network",
+      "passed": true,
+      "ms": 516
+    },
+    {
+      "name": "webkit: React render boundary exposes retry and recovers",
+      "passed": true,
+      "ms": 572
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-src 'none'" />
+  <title>FocusTodo — isolated prototype</title>
+  <script>
+    // Install before Vite's stylesheet links: resource errors can precede body parsing.
+    window.__prototypeBoot = { styles: Object.create(null), failed: false };
+    document.addEventListener('load', event => {
+      if (event.target instanceof HTMLLinkElement && event.target.rel === 'stylesheet') {
+        window.__prototypeBoot.styles[event.target.href] = 'loaded';
+      }
+    }, true);
+    document.addEventListener('error', event => {
+      if (event.target instanceof HTMLLinkElement && event.target.rel === 'stylesheet') {
+        window.__prototypeBoot.styles[event.target.href] = 'error';
+        window.__prototypeBoot.failed = true;
+      }
+      if (event.target instanceof HTMLScriptElement || event.error) window.__prototypeBoot.failed = true;
+    }, true);
+  </script>
+  <style>
+    html,body{margin:0;min-height:100%;font:15px/1.6 system-ui,sans-serif;color:#303846;background:#fff}*{box-sizing:border-box}
+    #prototype-startup{position:fixed;inset:0;z-index:100;display:grid;place-content:center;gap:16px;padding:32px;background:#fff}
+    #prototype-startup[hidden],[hidden]{display:none!important}#prototype-startup h1{margin:0;color:#e65350;font-size:22px}#prototype-status{max-width:540px;margin:0}
+    #prototype-retry{justify-self:start;padding:8px 18px;border:0;border-radius:8px;background:#e65350;color:white;font:inherit;cursor:pointer}
+    #prototype-retry:focus-visible{outline:3px solid #e6535080;outline-offset:3px}
+    @media(prefers-color-scheme:dark){html,body,#prototype-startup{background:#20242b;color:#e8ebf0}}
+  </style>
+</head>
+<body>
+  <section id="prototype-startup" data-state="loading" role="status" aria-live="polite">
+    <h1>FocusTodo</h1>
+    <p id="prototype-status">Starting isolated prototype… / 正在启动隔离原型…</p>
+    <button id="prototype-retry" type="button" hidden>Retry / 重试</button>
+    <noscript>Enable JavaScript to run this isolated prototype. / 请启用 JavaScript。</noscript>
+  </section>
+  <div id="prototype-root"></div>
+  <script>
+    (() => {
+      let timer;
+      const fail = () => {
+        const screen = document.getElementById('prototype-startup');
+        if (screen.hidden) return;
+        screen.dataset.state = 'error';
+        document.getElementById('prototype-status').textContent = navigator.language.startsWith('zh')
+          ? '启动资源加载失败。请检查本地服务器并重试。'
+          : 'Startup resources could not load. Check the local server and retry.';
+        document.getElementById('prototype-retry').hidden = false;
+      };
+      addEventListener('error', event => {
+        if (event.target instanceof HTMLScriptElement || event.target instanceof HTMLLinkElement || event.error) fail();
+      }, true);
+      addEventListener('unhandledrejection', fail);
+      document.getElementById('prototype-retry').addEventListener('click', () => location.reload());
+      window.__prototypeBoot.fail = fail;
+      if (window.__prototypeBoot.failed) fail();
+      timer = setTimeout(fail, 15000);
+      addEventListener('pagehide', () => clearTimeout(timer), {once:true});
+    })();
+  </script>
+  <script type="module" src="./app/main.tsx"></script>
+</body>
+</html>

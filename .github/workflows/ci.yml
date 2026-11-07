@@ -62,6 +62,10 @@ jobs:
           git diff --exit-code
           test -z "$(git ls-files --others --exclude-standard)"
       - run: npm run check
+      - name: Build and package the isolated Phase B prototype
+        run: |
+          npm run build:standalone
+          npm run package:standalone
       - run: python tests/release/release-gate-test.py
       - run: python tests/release/pages-build-test.py
       - name: Build archives and verify tag version
@@ -90,6 +94,18 @@ jobs:
           if-no-files-found: error
           overwrite: true
           retention-days: 1
+      - name: Share the isolated prototype across operating systems
+        if: steps.scope.outputs.full == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: standalone-prototype-test
+          path: |
+            dist/standalone/site/
+            dist/standalone/FocusTodo-standalone-prototype.zip
+            dist/standalone/FocusTodo-standalone-prototype.tar.gz
+            dist/standalone/prototype-SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 1
 
   test:
     needs: preflight
@@ -110,6 +126,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - name: Standalone contracts and isolated server
+        run: node --test tests/standalone/*.test.cjs
       - uses: actions/setup-python@v6
         if: matrix.node == '24'
         with:
@@ -119,6 +137,11 @@ jobs:
         with:
           name: portable-test-archives
           path: dist
+      - uses: actions/download-artifact@v7
+        if: matrix.node == '24'
+        with:
+          name: standalone-prototype-test
+          path: dist/standalone
       - name: Test extracted ZIP and tar.gz without dependencies
         if: matrix.node == '24'
         run: python tests/release/package-smoke.py
@@ -137,6 +160,15 @@ jobs:
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
+      - name: Standalone Chromium and both extracted prototype archives
+        if: matrix.node == '24'
+        run: |
+          node tests/standalone/browser-acceptance.cjs
+          node tests/standalone/package-smoke.cjs
+        env:
+          FOCUS_TEST_BUNDLED_BROWSER: '1'
+          FOCUS_STANDALONE_ENGINES: chromium
+          FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance/standalone-chromium
       - name: Install Firefox and WebKit compatibility engines
         if: runner.os == 'Linux' && matrix.node == '24'
         run: npx playwright install --with-deps firefox webkit
@@ -145,6 +177,12 @@ jobs:
         run: npm run test:compat
         env:
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
+      - name: Standalone Firefox and WebKit
+        if: runner.os == 'Linux' && matrix.node == '24'
+        run: node tests/standalone/browser-acceptance.cjs
+        env:
+          FOCUS_STANDALONE_ENGINES: firefox,webkit
+          FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance/standalone-firefox-webkit
       - name: Record Windows TCP resources
         if: always() && runner.os == 'Windows' && matrix.node == '24'
         shell: pwsh

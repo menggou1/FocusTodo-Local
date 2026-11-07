@@ -2,7 +2,19 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Open work](BACKLOG.md)
 
-FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local modules. Tasks, focus records, sessions and settings are browser-local. External networking is off by default; opting in permits the allowed Bing sources. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
+The production FocusTodo Local app combines the preserved 7.1.1 React bundle with explicit local modules. Its version remains `7.1.1-local.1.9.3`. Tasks, focus records, sessions and settings are browser-local. External networking is off by default; opting in permits the allowed Bing sources. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
+
+## Phase B candidate boundary
+
+The production `src/index.html` continues to load the legacy bundle and local modules; the existing business flows below describe that entry. `standalone/` contains a separate React + TypeScript + Vite skeleton built from source. It does not replace the production page or enter official Pages/ordinary portable artifacts. The [Phase B engineering report](plan/2.0.0-skeleton.md) records its scope and evidence; commands are in [Maintenance](MAINTENANCE.md).
+
+`app/` owns startup and dependency composition; `app/contracts.ts` defines snapshots, subscriptions, preference commands and environment interfaces. Components in `features/` use injected services, with a local reducer for navigation and no legacy Redux, router or legacy globals. `services/` implements isolation and synthetic in-memory adapters, calling pure version-metadata rules in `domain/`. `shared/` resolves Chinese/English with fallback; `styles/` and `assets/` own candidate visuals and local optional resources. Services and components depend on contracts; domain rules do not depend on component lifetimes or browser storage.
+
+The inline startup screen appears first. Bootstrap checks the loopback server and storage isolation, creates services, then mounts an error boundary and components. Required styles precede reveal; optional modules/resources load asynchronously, with retry on failure while the skeleton remains usable. The shell retains startup geometry, red accent, light/dark and narrow-screen rules. It does not establish completion of Phase D business views or visual migration.
+
+No business database is opened. Tasks remain synthetic in memory; only language and theme preferences under `FocusTodoStandalone.` use localStorage. Startup rejects any existing IndexedDB database or localStorage outside that namespace and also rejects unavailable `indexedDB.databases()`. The Firefox runtime baseline is therefore 126+. Relative `base: './'` and a separate `scripts/standalone-layout.json` allowlist govern resources. `dist/standalone/site/` contains served assets; hidden sourcemaps and the Vite manifest stay in `debug/`, outside serving and packaging. ZIP/tar.gz artifacts are isolated prototypes. No service worker is installed; offline scope means local HTTP startup with external networking blocked.
+
+The metadata prototype distinguishes legacy 1.x full versions from independent 2.x three-part versions while retaining provenance, database and backup-format identifiers. The actual app remains `7.1.1-local.1.9.3`; no 2.0.0 version switch or naming-triggered data migration has occurred.
 
 ## Project layout
 
@@ -10,6 +22,7 @@ FocusTodo Local combines the preserved 7.1.1 React bundle with explicit local mo
 | --- | --- |
 | `src/` | HTML, CSS, `patch.js`, the preserved React bundle `js/main.js` and local modules |
 | `public/` | Icons, images, fonts, audio and translation assets |
+| `standalone/` | Phase B candidate entry, contracts, domain rules, services, features, shared messages, styles and optional resources |
 | `scripts/` | Local launch, generation, bundle maintenance, portable packaging and Pages build |
 | `tests/` | Unit, browser, release and performance suites, plus fixtures |
 | `docs/` | Guides, architecture, maintenance, version reports and historical evidence |

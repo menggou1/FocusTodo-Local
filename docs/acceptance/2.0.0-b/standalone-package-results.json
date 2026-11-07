@@ -1,0 +1,14 @@
+[
+  {
+    "archive": "FocusTodo-standalone-prototype.zip",
+    "passed": true,
+    "externalNetworkBlocked": true,
+    "pathWithSpacesAndUnicode": true
+  },
+  {
+    "archive": "FocusTodo-standalone-prototype.tar.gz",
+    "passed": true,
+    "externalNetworkBlocked": true,
+    "pathWithSpacesAndUnicode": true
+  }
+]

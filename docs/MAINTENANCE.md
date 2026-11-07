@@ -12,7 +12,7 @@
 2. 备份实际浏览器数据；开发/自动测试使用临时端口和独立上下文，避免在日常数据库上清空、导入或试验迁移。
 3. 阅读对应模块及历史报告，确认是计时规则、持久化、旧组件接入还是界面问题。
 
-业务运行直接使用 `node scripts/start.cjs`、`npm start`、macOS/Linux 的 `sh start.sh` 或 Windows 启动脚本。默认地址为 `http://127.0.0.1:5500/index.html`，不同主机名/端口隔离浏览器数据。没有热更新或完整 React 源码构建流程，修改静态文件后刷新页面。
+正式应用仍使用旧入口，直接运行 `node scripts/start.cjs`、`npm start`、macOS/Linux 的 `sh start.sh` 或 Windows 启动脚本。默认地址为 `http://127.0.0.1:5500/index.html`，不同主机名/端口隔离浏览器数据。该入口没有热更新或完整 React 源码构建流程，修改静态文件后刷新页面；独立候选工程见下一节。
 
 Node 和 Python 本地服务仅接受 `127.0.0.1`、`localhost` 及有效端口的 Host；自定义域名访问不受支持。两种服务均禁用缓存并发送 `nosniff`。Node 读取文件前解析实际路径，拒绝目录外及指向隐藏文件、依赖和开发工具目录的链接。Python 备用服务使用同一份文件清单并拒绝符号链接，不提供 Node 入口的音频范围支持。
 
@@ -26,7 +26,7 @@ npm test
 npm run check
 ```
 
-使用 Node.js 22+；CI 检查 Node.js 22/24。Acorn、Playwright 与 fake-indexeddb 仅为开发依赖，运行应用不需要安装。新增事务回归使用独立内存数据库；它验证数据服务事务和导入拒绝行为，不能代替真实浏览器验收。`package-lock.json` 已提交，通过 `npm ci` 固定依赖；升级依赖时同时更新锁文件并运行全量验收。
+开发使用 Node.js 22.12+；CI 检查 Node.js 22/24，本次候选工程在 Node.js 24.16.0 验证。Acorn、Playwright、fake-indexeddb 及 React/TypeScript/Vite 构建依赖均通过 `package-lock.json` 锁定；便携运行时不需要安装 npm 依赖。新增事务回归使用独立内存数据库；它验证数据服务事务和导入拒绝行为，不能代替真实浏览器验收。升级依赖时同时更新锁文件并运行全量验收。
 
 浏览器验收需 Playwright 与 Chromium/Edge。本机有 Codex 捆绑运行时可被测试脚本自动找到；其他机器可临时安装：
 
@@ -45,6 +45,28 @@ npm run test:browser
 浏览器用例启动临时 loopback 服务，使用独立上下文和测试数据，通常阻断外部网络。新截图和 JSON 默认写入 `dist/acceptance/`；可用 `FOCUS_ACCEPTANCE_DIR` 选择另一个绝对路径。筛选结果 `results-filtered.json` 不替代全量结果。`docs/acceptance/` 仅保存历史证据，不由当前测试覆盖。
 
 1.9 的独立专项覆盖默认关闭的联网开关、底部提示、版本红点、壁纸重定向/超时/跨日/取消、主题事务归属和原生迷你计时窗口。`npx playwright install firefox webkit` 后运行 `npm run test:compat` 可核对 Firefox/WebKit 在无 BroadcastChannel、Web Locks 和压缩 API 时的启动、任务、计时恢复、主题和备份导入；Linux Node 24 CI 同样运行它。WebKit 自动化不等于真实 Safari 全量验收。
+
+### 2.0.0 Phase B 隔离候选工程
+
+Phase B 已实现 `standalone/` 下的 React + TypeScript + Vite 骨架，包含服务注入、启动与错误提示、中英和亮暗样式、合成只读任务及可选资源加载；结果见 [Phase B 工程报告](plan/2.0.0-skeleton.md)。本轮仅在 `refactor/standalone-app` 实施，按用户要求禁止把该分支合并到 `main`、`dev` 或任何其他分支。正式应用、Pages 和普通便携包继续使用原入口。
+
+```powershell
+npm ci
+npm run build:standalone
+npm run start:standalone
+# 开发调试与热更新；使用另一个随机 loopback 端口
+npm run dev:standalone
+# 打包并执行候选专项验收
+npm run package:standalone
+npx playwright install chromium firefox webkit
+npm run test:standalone
+```
+
+启动和开发命令打印随机 loopback 地址；使用全新浏览器上下文访问。候选启动先校验专用服务器、localStorage 键名和 IndexedDB 数据库清单，遇到任何已有数据库、`FocusTodoStandalone.` 命名空间以外的存储或无法枚举数据库时拒绝启动。`indexedDB.databases()` 是隔离前提，因此 Firefox 运行基线为 126+，高于构建语法目标 114。候选任务仅在内存，只有自身命名空间下的语言和主题偏好写入 localStorage，不迁移真实数据。
+
+构建输出为 `dist/standalone/site/`；隐藏 sourcemap 与 Vite manifest 放在 `dist/standalone/debug/`，不由候选服务器公开，也不进包。独立的 `scripts/standalone-layout.json` 限定候选资源；`package:standalone` 在 `dist/standalone/` 生成 `FocusTodo-standalone-prototype.zip` 与 `.tar.gz`。完整解压后运行 `node start.cjs`，无 npm/CDN 依赖；`node start.cjs --base /FocusTodo-Local/` 可复验项目子路径。
+
+`test:standalone` 默认运行 Chromium、Firefox、WebKit 和两个解压包的专项验收；用逗号分隔的 `FOCUS_STANDALONE_ENGINES` 可筛选浏览器，但筛选结果不替代完整验收。证据仍写入 `dist/acceptance/` 或 `FOCUS_ACCEPTANCE_DIR`。候选未使用 service worker；离线验证指阻断外网后由本地 HTTP 服务冷启动，不涵盖 `file://` 或未缓存远程网站的断网启动。此骨架保留布局与视觉 token，C/D 的业务服务和逐视图视觉迁移仍按 BACKLOG 跟踪。
 
 ## 3. 修改和生成边界
 

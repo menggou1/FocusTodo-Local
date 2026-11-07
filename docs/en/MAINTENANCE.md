@@ -13,13 +13,35 @@ Design-theory documents are for entertainment only and are not development rules
 
 Check `git status --short`, the current branch and `git remote -v`. Preserve unrelated work. Test imports and resets with generated data in an isolated browser context and an ephemeral port, not the daily database.
 
-Run `npm ci` to install locked development dependencies. Node.js 22+ is required; CI covers 22 and 24. Running the packaged app does not require npm dependencies. Start with `node scripts/start.cjs`, `npm start`, `sh start.sh`, or the Windows launcher. The default origin is `http://127.0.0.1:5500/index.html`. Browser data is scoped to the browser, hostname and port. There is no React source build or hot reload; refresh after editing static files.
+Run `npm ci` to install locked development dependencies. Development requires Node.js 22.12+; CI covers 22 and 24, and this candidate was checked on Node.js 24.16.0. Running the packaged app does not require npm dependencies. The production app retains its legacy entry: start with `node scripts/start.cjs`, `npm start`, `sh start.sh`, or the Windows launcher. The default origin is `http://127.0.0.1:5500/index.html`. Browser data is scoped to the browser, hostname and port. That entry has no React source build or hot reload; refresh after editing static files. The independent candidate has its own workflow below.
+
+### Isolated Phase B candidate
+
+The React + TypeScript + Vite skeleton in `standalone/` implements injected service contracts, startup and error displays, Chinese/English and light/dark styles, read-only synthetic tasks and optional resource loading. Results are in the [Phase B engineering report](plan/2.0.0-skeleton.md). Work stays on `refactor/standalone-app`; the user prohibits merging this branch into `main`, `dev` or any other branch. The production app, Pages and ordinary portable packages retain the existing entry.
+
+```bash
+npm ci
+npm run build:standalone
+npm run start:standalone
+# Debugging and hot reload, on another random loopback port
+npm run dev:standalone
+# Build the candidate archives and run focused acceptance
+npm run package:standalone
+npx playwright install chromium firefox webkit
+npm run test:standalone
+```
+
+Both server commands print a random loopback URL. Open it in a fresh browser context. Startup verifies the dedicated server, localStorage key names and the IndexedDB database list. Any existing database, storage outside the `FocusTodoStandalone.` namespace or inability to enumerate databases prevents startup. `indexedDB.databases()` is required for isolation, so the Firefox runtime baseline is 126+, above the syntax build target of 114. Tasks stay in synthetic memory; only language and theme preferences in the prototype namespace use localStorage. No real data migration occurs.
+
+Build output is `dist/standalone/site/`. Hidden sourcemaps and the Vite manifest are stored in `dist/standalone/debug/`, outside the served and packaged runtime. `scripts/standalone-layout.json` explicitly limits candidate resources. `package:standalone` creates `FocusTodo-standalone-prototype.zip` and `.tar.gz` under `dist/standalone/`. Fully extract either archive and run `node start.cjs` without npm/CDN dependencies; `node start.cjs --base /FocusTodo-Local/` checks a project subpath.
+
+`test:standalone` runs Chromium, Firefox, WebKit and both extracted archives by default. The comma-separated `FOCUS_STANDALONE_ENGINES` variable selects engines for focused work; filtered results do not replace full acceptance. Evidence uses `dist/acceptance/` or `FOCUS_ACCEPTANCE_DIR`. There is no service worker: offline validation means cold startup from the local HTTP server with external networking blocked, not `file://` or uncached remote-site offline startup. The skeleton retains layout and visual tokens; business services and per-view visual migration belong to C/D and remain tracked in Backlog.
 
 ## Source boundaries
 
 The Node and Python servers accept only `127.0.0.1` or `localhost` Host values with valid optional ports. Custom domains are unsupported. Both disable caching and send `nosniff`. Node real-path checks reject links outside the runtime root or into hidden/private tooling paths. The Python fallback rejects symlinks and uses the same runtime allowlist, but does not support Node's audio range requests.
 
-Acorn, Playwright and fake-indexeddb are development dependencies only. The new data-service regression tests use isolated in-memory IndexedDB transactions to verify imports and conflict rejection. They do not replace real-browser acceptance.
+Acorn, Playwright, fake-indexeddb and the React/TypeScript/Vite build dependencies are locked development dependencies. The data-service regression tests use isolated in-memory IndexedDB transactions to verify imports and conflict rejection. They do not replace real-browser acceptance.
 
 Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by backups without changing database v3. End that break and export a backup before downgrading to 1.7.11 or earlier, which does not understand this field. Work spans retain occurrence order after a clock rollback even when wall-clock ranges overlap. Imports dated before the saved cursor require confirmation without counting a negative interval.
 
