@@ -1,0 +1,2801 @@
+{
+  "baseline": "f102da8919e810006b6611aabcef5f0159057d61",
+  "upstream": "fe15a1d9201c6298f1c28c16dcb0b58c481f9999",
+  "method": "Git blob identity at corresponding upstream path; identical bytes do not establish licensing or ownership. Unknown means no file-specific rights evidence established.",
+  "assets": [
+    {
+      "path": "public/audio/Complete.m4a",
+      "blob": "92362373156efc9a9225d9ef7e907351edbc4883",
+      "bytes": 61981,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/Notification.m4a",
+      "blob": "080c79c9fe35614b6b5eda5c28e3a8bcb4a99756",
+      "bytes": 65630,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/VolumeTip.wav",
+      "blob": "f11c91c6bfb809b9117a5e2bfd4d8780b7579200",
+      "bytes": 282970,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_AlarmBeep.mp3",
+      "blob": "47e81c925f019fd3c7dc691fd56b53a1160dcb0f",
+      "bytes": 5976,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Beeps.mp3",
+      "blob": "3352c5200e20fca31a9f44873edf26a89664d459",
+      "bytes": 53997,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Bell1.mp3",
+      "blob": "ebe27ba2c00ae35a84ce326fdbb7a3eb4bfe44c8",
+      "bytes": 11120,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Bell2.mp3",
+      "blob": "c7c090b3645b4c8ccbb042b1d791d866c7920d52",
+      "bytes": 12791,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_BicycleBell.mp3",
+      "blob": "49fc72c040b3f75ab121921dd022538831ea3656",
+      "bytes": 67396,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Birdcall.mp3",
+      "blob": "1c37aeb880d1d1f92e0dce93f88fa552889d9a37",
+      "bytes": 31425,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_CarHorn.mp3",
+      "blob": "285565f50192dba50592370dcbf8f8b61dcdcfb8",
+      "bytes": 12172,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_ClownHorn.mp3",
+      "blob": "4be704a7fcc2f0e86372c77baf623cae840fd24e",
+      "bytes": 96230,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_CockCrow.mp3",
+      "blob": "3affc35d2d13f51dce19a04e2e1799cf60f59c09",
+      "bytes": 28338,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Cuckoo.mp3",
+      "blob": "8b76654641421dc5551d7a5507d3d0d417186064",
+      "bytes": 31728,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_DrumCymbalCrash.mp3",
+      "blob": "745efb898600538eddf4b128d90226ad81f8c234",
+      "bytes": 76403,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Fanfare.mp3",
+      "blob": "dfeea212924fb3d50126ed020c3c8e4039572822",
+      "bytes": 72984,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Music1.mp3",
+      "blob": "d39b9e4ef5ff5790acf7595705a294918cd2f912",
+      "bytes": 58823,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Music2.mp3",
+      "blob": "f9244579e8dd567b5e7c94a3005d6da4b109c447",
+      "bytes": 48108,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Music3.mp3",
+      "blob": "634d2b463abdbe6f6363e80e35f880a408b9737b",
+      "bytes": 7008,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_PartyHorn.mp3",
+      "blob": "43ed43cbf38dc17a4581d1f7bd82dfbfa70bbaef",
+      "bytes": 97484,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Percussion.mp3",
+      "blob": "c25f704121d6f866f3c1fb2c5f926886f3c4778c",
+      "bytes": 68956,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_PianoMusic.mp3",
+      "blob": "6457eb32656428b73cc1aa90f059be5fcac6ad9a",
+      "bytes": 56885,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_RingTone.mp3",
+      "blob": "ce88c4caeb3f6bbbc428b1564ed6781334a071fa",
+      "bytes": 85676,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Satellite.mp3",
+      "blob": "d0fc7d44d669c9fbac04efd2b898f9cc14301695",
+      "bytes": 28338,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_SchoolBell.mp3",
+      "blob": "ea47e730d4f9476ec95e426cbcb399f9fcbf40e7",
+      "bytes": 30624,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Timer.mp3",
+      "blob": "2f7707913931017cf95fd0d5d082b87bd6d5b5c5",
+      "bytes": 124066,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_ToyNoisemakerHonk.mp3",
+      "blob": "94225c20ef5c29d8df83ad33be62468f5ab0b9df",
+      "bytes": 51119,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Victory.mp3",
+      "blob": "c68c784994e80d1929fb63146aa84f8c2285511d",
+      "bytes": 30504,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_Whistle.mp3",
+      "blob": "144236d05d60907ce7319205d0fb56078bb4607e",
+      "bytes": 12988,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_WindChimes.mp3",
+      "blob": "6e77b8466571e38b2f1ff66ccc72d29564005a9a",
+      "bytes": 59520,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/alm_WindUp.mp3",
+      "blob": "716049f7414f41dffbc7ce315ecac7b5482e6ea8",
+      "bytes": 11400,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_BrownNoise.m4a",
+      "blob": "71a88827f7626f81174f1476c6c762a5a21807c3",
+      "bytes": 737065,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Classroom.m4a",
+      "blob": "7439e1993ccf790bffcbba77036d60c9e55b5f1d",
+      "bytes": 2229063,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_CofficeShop.m4a",
+      "blob": "10d871afcdcdaddbdd439f20fe618aca08ed66c3",
+      "bytes": 2855281,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_FastTicking.m4a",
+      "blob": "73e738ae427391b12e2560fb9ea36e83b16099c7",
+      "bytes": 300155,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_FireBurning.m4a",
+      "blob": "574df252f9e67be36e76b39f9da9e283f871cde0",
+      "bytes": 983473,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Frogs.m4a",
+      "blob": "4c64c755cfeb90399668798175b9431088e1ecf1",
+      "bytes": 1313249,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Library.m4a",
+      "blob": "df628df10a257460a20d462a463014431ed7d5a1",
+      "bytes": 1225022,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Metronome.m4a",
+      "blob": "7a45ac138a11356d3c9d3a44f50a15bf266852ac",
+      "bytes": 268210,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Mute.m4a",
+      "blob": "7e5f75bdda3b220797981debc6ceeca374c35095",
+      "bytes": 20065,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_OceanShore.m4a",
+      "blob": "5ac1572a4bb24a8d568a58a0291234fe4b9cf283",
+      "bytes": 881465,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Rain.m4a",
+      "blob": "bb40d3ed01c0b8070c30cc9172f336d4996b845b",
+      "bytes": 1863855,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Stream.m4a",
+      "blob": "089af2aa5d1c305c46b919afdaa23dc15ad05270",
+      "bytes": 840117,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Ticking.m4a",
+      "blob": "0483ba3002fed7fe3e1694bfb1323db9d7393375",
+      "bytes": 147318,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_Wilderness.m4a",
+      "blob": "e927e05fcd6512ab27498a3ce1588a476b8ecf5b",
+      "bytes": 908243,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_WindThroughTrees.m4a",
+      "blob": "b31aafb6b9f7cc665e77e78e177aae38672e7a51",
+      "bytes": 443032,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/audio/bgm_WindWithCrickets.m4a",
+      "blob": "8f4e83ce42ebc851f5ed2ac469eded7d626e9609",
+      "bytes": 1158818,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/DINCond-Black.otf",
+      "blob": "52c17589d7f6e3b9c231f92f17610ab42b68d01c",
+      "bytes": 31144,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/DINCond-Medium.otf",
+      "blob": "58a47618c8012d967aecdc4f4d70a7863b4d94e1",
+      "bytes": 30536,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/HelveticaNeueLight.otf",
+      "blob": "2ca8f3147ef989bb47ccb282671ef38df76f110a",
+      "bytes": 48120,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/NotoSans-Variable.ttf",
+      "blob": "75575046c015ff623a848096a15779867ba71453",
+      "bytes": 2049096,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "OFL-1.1 evidence in bundled font metadata and OFL-NotoSans.txt"
+    },
+    {
+      "path": "public/font/NotoSansSC-Bold.ttf",
+      "blob": "17380a951d4a418ff7ec23b5aabd893c1eba2970",
+      "bytes": 10549020,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "OFL-1.1 evidence in bundled font metadata and OFL-NotoSans.txt"
+    },
+    {
+      "path": "public/font/NotoSansSC-Medium.ttf",
+      "blob": "901afd40c27b0dafe487d8c153847f2dd9b1bd0e",
+      "bytes": 10552448,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "OFL-1.1 evidence in bundled font metadata and OFL-NotoSans.txt"
+    },
+    {
+      "path": "public/font/NotoSansSC-Regular.ttf",
+      "blob": "9c21fd3fece329bd767fcb3f3ff61d51b1febb66",
+      "bytes": 10559284,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "OFL-1.1 evidence in bundled font metadata and OFL-NotoSans.txt"
+    },
+    {
+      "path": "public/font/OFL-NotoSans.txt",
+      "blob": "7d7fbd8f759f04ce523b623abe68f2eee27b1d72",
+      "bytes": 4395,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "bundled OFL license text"
+    },
+    {
+      "path": "public/font/glyphicons-halflings-regular.eot",
+      "blob": "b93a4953fff68df523aa7656497ee339d6026d64",
+      "bytes": 20127,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/glyphicons-halflings-regular.ttf",
+      "blob": "1413fc609ab6f21774de0cb7e01360095584f65b",
+      "bytes": 45404,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/glyphicons-halflings-regular.woff",
+      "blob": "9e612858f802245ddcbf59788a0db942224bab35",
+      "bytes": 23424,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/glyphicons-halflings-regular.woff2",
+      "blob": "64539b54c3751a6d9adb44c8e3a45ba5a73b77f0",
+      "bytes": 18028,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/font/impact.otf",
+      "blob": "8f6da36d7de266481de6a08cac391fa223598b22",
+      "bytes": 135848,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/WarningTip.png",
+      "blob": "9ba775bbdc39ad8752fc876ed96c39aa9ea61bb8",
+      "bytes": 7127,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/add-pomodoro.png",
+      "blob": "d46524d63ed523ba7ec760827c7730b9b3698566",
+      "bytes": 1431,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/add_widget.png",
+      "blob": "985b72cea547449f1b2a417b7b35512a5eae5267",
+      "bytes": 938,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-day-active.png",
+      "blob": "3e9a9463ab37e36a9da4de4cc305d34e8ac0dcac",
+      "bytes": 960,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-month-next.png",
+      "blob": "e64b3267903a59023dd1f0a21d62230a1fe2b5f3",
+      "bytes": 386,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-month-prev.png",
+      "blob": "aa6a6cde89d68c8365129cd3f8c7944e20eb692e",
+      "bytes": 432,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-someday.png",
+      "blob": "f29b08b68fb7b700afd3fa80b5468bc21a813394",
+      "bytes": 1166,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-today.png",
+      "blob": "25713a179ca21205e17e789a09a8950226853da8",
+      "bytes": 1579,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-tomorrow.png",
+      "blob": "085ff68365b816b81129890e496c4ba50c79e58d",
+      "bytes": 1125,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/calendar-upcoming.png",
+      "blob": "9baad24e5d102d58706af7549e7575e4d8e1d5cb",
+      "bytes": 957,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/clear-search-content-dark.png",
+      "blob": "f305e78cfaff1f64e16cc3f54eb948f7f61ac098",
+      "bytes": 1063,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/clear-search-content.png",
+      "blob": "36cba600111071712a2ee9fa7b50dc449ad892e9",
+      "bytes": 957,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/close-drawer.png",
+      "blob": "8b57b76bce8a6856fde01ed92e64443a1c25cab3",
+      "bytes": 663,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-close.png",
+      "blob": "b8673417dbff4bb6c7874564083e352112ca89f7",
+      "bytes": 1290,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-deadline-highlight.png",
+      "blob": "b99bec057fe43a9ceb47c6cab0758b7c1fee99eb",
+      "bytes": 988,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-deadline.png",
+      "blob": "197122bb8258ad16bfab6015d0280601327c3207",
+      "bytes": 946,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-delete.png",
+      "blob": "85dce0068f42d233773fca1b77addbc7bbd9c692",
+      "bytes": 959,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-pomo-actual.png",
+      "blob": "386152ad0f1e96dc6ed1b95e73fd917b9382c4d3",
+      "bytes": 1003,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-pomo-blank-dark.png",
+      "blob": "3b868f76441cc30539941f4ca25b69eb8b40217b",
+      "bytes": 1150,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-pomo-blank.png",
+      "blob": "370d0ae15e389b6b4080a716487f504882870959",
+      "bytes": 1008,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-pomo-estimation.png",
+      "blob": "a2f2a21d82b979126d81bdc3f1a3d8c346013105",
+      "bytes": 961,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-pomodoro-highlight.png",
+      "blob": "a9b9b9785db2aa04b7413c37fe25eb1cdf9e1fa0",
+      "bytes": 1315,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-pomodoro.png",
+      "blob": "0cacde0f1a0c210aa80a90dd73c0a112a565f2cf",
+      "bytes": 1425,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-project.png",
+      "blob": "6f53ff837b87a7a9dcea1f73edcf526fcf34cfe5",
+      "bytes": 436,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-reminder-highlight.png",
+      "blob": "a2e8c62da4539703cf6bc9ac9645a72f606b864e",
+      "bytes": 1070,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-reminder.png",
+      "blob": "bf70767293400a7a591ab0be35b9b9032a988152",
+      "bytes": 1211,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-repetition-arrow.png",
+      "blob": "ef4a928fd254c03c65e6049c01f575708cbad91e",
+      "bytes": 337,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-repetition-highlight.png",
+      "blob": "0468935d011ccaf4cec152943140bc81193c9a9f",
+      "bytes": 1126,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-repetition.png",
+      "blob": "a8ca4145399b2610247638b95898d0c4d2d00887",
+      "bytes": 1285,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-subtask-add.png",
+      "blob": "334813f11a048993037b174a64e9452e98d442f1",
+      "bytes": 354,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/detail-subtask-delete.png",
+      "blob": "95a47783c2f679955cf5de05cf786524eee4db12",
+      "bytes": 410,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/discount-img.png",
+      "blob": "83dfd1bd00c80bc9cc498fc89a15cdaa7ab1ebfd",
+      "bytes": 3410,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/down-flag.png",
+      "blob": "f24465527fda3e8d7c48ea45485e50cc969e40e9",
+      "bytes": 265,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/drag_flag.png",
+      "blob": "a2f7178c824234a29e41d7fdf7e26dc1f0c02929",
+      "bytes": 339,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/dropdown-indicator.png",
+      "blob": "91c2a2e14d81223f09449e9b022ff402eb4bc866",
+      "bytes": 650,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/favicon.png",
+      "blob": "db527dcf332f34cc1085004470326785cf54c3ba",
+      "bytes": 623,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/float-timer-close.png",
+      "blob": "bf70206ea5d61afdc4facef93dee76ff2230538c",
+      "bytes": 307,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/float-timer-float.png",
+      "blob": "afbc665aae75f166521275bf76af2066da98d910",
+      "bytes": 385,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/float-timer-zoomup.png",
+      "blob": "5ee46e9026805fd4995d8db790adc6051cef7d57",
+      "bytes": 270,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/folder-expanded-indicator.png",
+      "blob": "0ff13b0eb3d8d10cdb22d6adb6f7ad508a3314a6",
+      "bytes": 425,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/folder-new.png",
+      "blob": "a7d98f7557f876482c59a27e7d087334e915633b",
+      "bytes": 1216,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/folder.png",
+      "blob": "c6d9446b261384bb2ebb5722c1fc3f2fd01b3e47",
+      "bytes": 743,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/folder_project_checked.png",
+      "blob": "77cc3ecfd9469ed7e3470ca5494ec44c4abf439e",
+      "bytes": 1043,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/folder_project_unchecked.png",
+      "blob": "fec4a64fb0b68f9b82317f1cc872589f13699c0f",
+      "bytes": 1247,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-badge.png",
+      "blob": "11d63a74bc8fb6dd67aab43ab541ee7ea1e4d6fe",
+      "bytes": 1714,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-bg-0.jpg",
+      "blob": "1b647ceeb13127b518eed1a5b9384a742b0228bc",
+      "bytes": 85769,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-bg-1.jpg",
+      "blob": "bbcb59227fa01dee16a4932109a90a0f2111b25d",
+      "bytes": 88288,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-bg-2.jpg",
+      "blob": "78f7e6609fad0c370fe41db146cdfe3acda44ddc",
+      "bytes": 91377,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-bg-3.jpg",
+      "blob": "76f2d4523242f0149b724f3f89ae03b5ca4f7335",
+      "bytes": 85943,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-help.png",
+      "blob": "beba2a2dd97bf0987ee54796d8861a0bf53724b9",
+      "bytes": 3801,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-ranking.png",
+      "blob": "45185c6f7112390013300face3449050d5708b92",
+      "bytes": 4007,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-sun-available.png",
+      "blob": "4142473d158e74beff421e83cf268b0a71fdc480",
+      "bytes": 6841,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/forest-sun-unavailable.png",
+      "blob": "514e279fb40aae2f154e9b06f48fdee2478b44e0",
+      "bytes": 6526,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/fullscreen-close.png",
+      "blob": "033c695358bad064b6971ca9643dee2287cbcfbc",
+      "bytes": 921,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/fullscreen-complete-break.png",
+      "blob": "7e09d537bafa1679ab5de8b78533467c836265d6",
+      "bytes": 2730,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/fullscreen-pause.png",
+      "blob": "57fd1a5861000ca4ca55c107404372211c788602",
+      "bytes": 2391,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/fullscreen-play.png",
+      "blob": "04195dd1f9c9c7f8adbc0084b9e177670af00c0d",
+      "bytes": 2977,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/fullscreen-stop.png",
+      "blob": "dfca5827e5f814bbbdbfd146ed9ee4ed0c7d8848",
+      "bytes": 2693,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/github.svg",
+      "blob": "dd703033378cce5508410851941f06d7d7ecb5df",
+      "bytes": 838,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/glyphicons-halflings-regular.svg",
+      "blob": "94fb5490a2ed10b2c69a4a567a4fd2e4f706d841",
+      "bytes": 108738,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-add.png",
+      "blob": "72e88169985eda0d329bfdca23994c3eb74c3427",
+      "bytes": 312,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-edit.png",
+      "blob": "02c4888cf3f054410ffb20e6fa9f7be8c1460f42",
+      "bytes": 1087,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-focus-time.png",
+      "blob": "7353fddf8ddccf54cd35316376c1b2951fa8846d",
+      "bytes": 537,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-leader.png",
+      "blob": "a5e258db63b98668df04c045aa0c369aca4513e1",
+      "bytes": 1050,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-search.png",
+      "blob": "196d57903e61cb8276b4c933a388c7d32b68a1f4",
+      "bytes": 915,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-update.png",
+      "blob": "58a7bd5f12139cdee64a7c8ea406157befc3e906",
+      "bytes": 897,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group-user.png",
+      "blob": "587d76f71c8e3d6481e1082eb16b5a4c8fffd0af",
+      "bytes": 499,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/group_update.png",
+      "blob": "58a7bd5f12139cdee64a7c8ea406157befc3e906",
+      "bytes": 897,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-forest.png",
+      "blob": "6ab268362db8a9b8c70ac715dee12e239ee70c95",
+      "bytes": 1402,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-group.png",
+      "blob": "9248ffb8385fa588850a08cbe8956846705e1039",
+      "bytes": 1880,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-notification-highlight.png",
+      "blob": "b9753779b2bd2ca9396fad4362b0ca8805e89603",
+      "bytes": 1225,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-notification.png",
+      "blob": "cda1f34d25bcf0bdb689def474788cc32cfd23c2",
+      "bytes": 1190,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-offline.png",
+      "blob": "9793253e8cb75f919a364a1de4ee306482ee6cb5",
+      "bytes": 626,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-portrait.png",
+      "blob": "eac413cb902ef4c58a0f69f06b3f9311b7f0f238",
+      "bytes": 1873,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-premium.png",
+      "blob": "adfd983e298ef74f68e22c7d381e98f7ff604685",
+      "bytes": 1783,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-ranking.png",
+      "blob": "962f35a52467ad9a67f8f5225424a37f8495f2ad",
+      "bytes": 1515,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-report.png",
+      "blob": "07475b19d205bc4f58548e2ea23ef1ae268b34fc",
+      "bytes": 1487,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/header-setting.png",
+      "blob": "1cf89b19c57536106a0841d94ab72c0da178bc36",
+      "bytes": 1876,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/login-close.png",
+      "blob": "e3bcb352eb699161c408778e92c40ce300b2f8e7",
+      "bytes": 578,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/login-error.png",
+      "blob": "6842668c9d9b93d570044d83b0f76271fc9bca19",
+      "bytes": 468,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/login-facebook.svg",
+      "blob": "0bef667b18ffcc4d49cb286039128c56d3cf71f5",
+      "bytes": 1656,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/login-wechat.svg",
+      "blob": "ee604367687ed9d7acdd754a2a0fb54b2a4ce656",
+      "bytes": 3324,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/logo.png",
+      "blob": "1deab1666af4de77fabccc0b3ae4e70183cb4b8b",
+      "bytes": 10891,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/logo30.png",
+      "blob": "c301686882fdb444803b109f6e961b9b7efdf565",
+      "bytes": 1494,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/menu-triangle-dark.png",
+      "blob": "f6866f3f59300eee379ac89cf8bffd2983498e95",
+      "bytes": 476,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/menu-triangle-disabled.png",
+      "blob": "667462c694c4f0860211847679295675938ae7cc",
+      "bytes": 470,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/menu-triangle-highlight.png",
+      "blob": "5aba7e2c00505cff346fefbc8bc8eed2b394b148",
+      "bytes": 284,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/menu-triangle.png",
+      "blob": "f9abb8f7d5651b3e48816eed51ff5682eb153523",
+      "bytes": 479,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/new-task-myday-active.png",
+      "blob": "cb801c2c4cc3c54647fb7e3366615c943bdf419e",
+      "bytes": 1104,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/new-task-myday-deactive.png",
+      "blob": "e92551666056f4457d0fd873d2b6a388b821e141",
+      "bytes": 1538,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/new-task-project-selected.png",
+      "blob": "424c6023fb3b7d0315d527dc1d4bfa9e47997a44",
+      "bytes": 437,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/no-group-image-dark.png",
+      "blob": "e123c57f7c13545c4322cc45aa23f3a6ccaf4b54",
+      "bytes": 19760,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/no-group-image.png",
+      "blob": "0e9cee2f1616c34ca5d86532a738a558de0bfcc7",
+      "bytes": 26069,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-ali-button.png",
+      "blob": "1b74167ae12d91daa587dcde84f243051fb74137",
+      "bytes": 5936,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-ali-logo.png",
+      "blob": "9848065aab615074053a54316a0b5307fda1e31f",
+      "bytes": 18658,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-ali-tip.png",
+      "blob": "581cbe3744963a647ccde7570cea2469564b9b84",
+      "bytes": 14748,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-ms-button.png",
+      "blob": "2916a98ca75047ae62d8f30aaa7e29f6b508963d",
+      "bytes": 8957,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-paypal-button.png",
+      "blob": "7874291534f3f53c73357326f287dcd7c4270bff",
+      "bytes": 6375,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-wx-button.png",
+      "blob": "3c1f5f2c80bb47f93ad524b63840c565887c7fa7",
+      "bytes": 7766,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-wx-logo.png",
+      "blob": "0fed82311e1374265f677eeabd4deaefe69683d6",
+      "bytes": 24497,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pay-wx-tip.png",
+      "blob": "04876038093e8e810022d83728a11821260803a0",
+      "bytes": 15653,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-minus-icon-dark.png",
+      "blob": "31982482d1f7a80dc347b00bcfe738a53981b638",
+      "bytes": 754,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-minus-icon.png",
+      "blob": "69285aec421889793bdcf9b39c99cec17da8d4fa",
+      "bytes": 693,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-new-dark.png",
+      "blob": "f95fc46910b5f766a6b9235b11405b3ec3f0795c",
+      "bytes": 1993,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-new.png",
+      "blob": "407cedb783c1c98c755a78ecc8de3f856f3c54c7",
+      "bytes": 1582,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-plus-icon-dark.png",
+      "blob": "9eb2217c6a88ed2251531375c0cdb12cbdb52ad3",
+      "bytes": 786,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-plus-icon.png",
+      "blob": "b3b06ecbf6f2fd898e722f42cdb8bd5d8b144371",
+      "bytes": 731,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-project-triangle.png",
+      "blob": "fa8336ea6e4fdd02d7c6579e1e5d1feea477b409",
+      "bytes": 480,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-starttime.png",
+      "blob": "6fe7b87497f5715ee655e0c96be9b5680ba9a849",
+      "bytes": 1494,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo-task.png",
+      "blob": "29bfa2c3c645cb83c19aac6dfe9a6f144f926055",
+      "bytes": 893,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pomo.png",
+      "blob": "aff089da85375c14007bc2261c7aaf0f575047f6",
+      "bytes": 1151,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/premium-icon.png",
+      "blob": "c7d229422680ba3b1a42493d4764e01fc4cc3192",
+      "bytes": 1464,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/prj-history.png",
+      "blob": "b86af4efbce9a20484931d8ecfef4a64a9139bc8",
+      "bytes": 1558,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-all.png",
+      "blob": "84599f883cb1e1afd055b67a02d85aef92907fba",
+      "bytes": 1834,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-calendar.png",
+      "blob": "22ae235beba958e8e3ba7bea633e8af54631ca57",
+      "bytes": 1019,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-color-checked.png",
+      "blob": "cadbe933f5ea0ef628fdbcab07106a6c1403ef7d",
+      "bytes": 273,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-delete.png",
+      "blob": "c1eb30608c2cd58b81079617604adcf64f436b18",
+      "bytes": 916,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-hidden.png",
+      "blob": "4d1e4229a05beb22e137cf327dd7ff944aa3baa6",
+      "bytes": 4336,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-hover-menu.png",
+      "blob": "99fa0474090dd3f332956282bef61f8d77afecb3",
+      "bytes": 948,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-myday.png",
+      "blob": "c46a97e58ea17aea14f27c6a3fe105a8a154649c",
+      "bytes": 1562,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-new.png",
+      "blob": "ccf53e8f7807a8ee0418b28f289e4c5f7743fc07",
+      "bytes": 380,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-next7days.png",
+      "blob": "e069bcc6cb361f17ba65dcf6b2259c332f421e9e",
+      "bytes": 1152,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-overdue.png",
+      "blob": "08f1c08ca682525e32a5e43b0cc3e6dfebbcdd49",
+      "bytes": 1077,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-priority-high.png",
+      "blob": "5b06ecebd3d6abf5008e7ca313f4973478979b06",
+      "bytes": 940,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-priority-low.png",
+      "blob": "1da4ff4935975971b500f876dd2360419b5a957f",
+      "bytes": 980,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-priority-medium.png",
+      "blob": "f102f4eafeb2e18ebc564b224d02a1fe78d216e3",
+      "bytes": 943,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-selected-hover-menu.png",
+      "blob": "a66ce564c264b664a67773d43484afb2b20c34ee",
+      "bytes": 900,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-selected.png",
+      "blob": "64d98fa497631f03b4754c5b1927993550ebaa38",
+      "bytes": 234,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-show.png",
+      "blob": "af1b6943ac3985e8674ed8453bbbcb4bb7bb0d79",
+      "bytes": 1799,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-someday-selected.png",
+      "blob": "1ef40124a85c5fee07f3e6341191f2458ea19af2",
+      "bytes": 646,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-someday.png",
+      "blob": "f55665b1834bfa7b472fba9fa4aa791147ca9d46",
+      "bytes": 1232,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-tasks.png",
+      "blob": "51a72b751bd964d7ad7a103937bd622e59695492",
+      "bytes": 922,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-today-selected.png",
+      "blob": "8596a5c1d689cd3c4556c1bf4878c91d9ec17773",
+      "bytes": 1070,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-today.png",
+      "blob": "8a4d94d43a12bd4ed4f24686805c83aed5a11900",
+      "bytes": 1823,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-tomorrow-selected.png",
+      "blob": "556c77327c471cc81ded5df1a999bf17649e681b",
+      "bytes": 744,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-tomorrow.png",
+      "blob": "24e700d7617e719bbb8d9a914a6cf1fd067df999",
+      "bytes": 1155,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-upcoming-selected.png",
+      "blob": "e296976d32735a6774468f424cbf3450765654b3",
+      "bytes": 705,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-upcoming.png",
+      "blob": "788dd3d8a8e406f8cb04ff79076da2673926aebd",
+      "bytes": 901,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project-week.png",
+      "blob": "ae97835e8cb10620dbfa16201d24e7b7955deec3",
+      "bytes": 1112,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/project.png",
+      "blob": "795c00523210d0ea7931e60d699bc48789026fe9",
+      "bytes": 250,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-alarm.png",
+      "blob": "96be4ef4c330a5f56b839bce87b44df1925441a4",
+      "bytes": 1364,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-cloud.png",
+      "blob": "339bf204c47901cd2af397755ccc4c67ebc3f2cc",
+      "bytes": 1251,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-folder.png",
+      "blob": "6341835504b0428b8dbee8e07931b54ae73164f0",
+      "bytes": 1042,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-future.png",
+      "blob": "675804ac7b0d189ca71e633c50bd71f7f2619f75",
+      "bytes": 1941,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-history.png",
+      "blob": "36b18d2ca0ee1d1e5f17743b40f10519bf56c6a6",
+      "bytes": 2539,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-pomo-add.png",
+      "blob": "e950ff59fd89ad6c12adc0a58d0992006b63a4d5",
+      "bytes": 1655,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-pomodoro.png",
+      "blob": "0aa8cc621c744d035729be4ece4f6fefaf51215b",
+      "bytes": 1614,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-project.png",
+      "blob": "4d8ad9d22e8d94fe10fc98b11741a7f9124f7d52",
+      "bytes": 911,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-reminder.png",
+      "blob": "c561d6f2f77db8e4488ef5b5342c5e7ba1ba667e",
+      "bytes": 1328,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-repeat.png",
+      "blob": "3b9924e04fc2154d72a55d7ce7b2a1735c4d588a",
+      "bytes": 1386,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-report.png",
+      "blob": "d79ad62527d57a79501e52b0e6ee4c97601d629a",
+      "bytes": 701,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-sync.png",
+      "blob": "2e4d4cd65146cc24560f9021ae32c29070acd76c",
+      "bytes": 890,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-tag.png",
+      "blob": "ded907e172872dd55b5e43986fdad641f882d718",
+      "bytes": 1563,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-task-pomo.png",
+      "blob": "3a9e7b259845775b7de9f3d6fbe0f44039fe6978",
+      "bytes": 1632,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/pur-theme.png",
+      "blob": "cd1c10e68dc749fedc3094fa22268265bfc985b4",
+      "bytes": 1074,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/purchase_success.png",
+      "blob": "239252fe93bb457a7f637aac50f51a1534e18b84",
+      "bytes": 3761,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/rank-bronze.png",
+      "blob": "2c20711082f41babb075a27ce143bab2d2057473",
+      "bytes": 1262,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/rank-gold.png",
+      "blob": "f4dfc2ac1c97aab14fc1d7852bb28e7a1b35c009",
+      "bytes": 1113,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/rank-silver.png",
+      "blob": "8d898e88f81a5f00ef99073539be6b4ecba03cb7",
+      "bytes": 1254,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/report-duration-next-dark.png",
+      "blob": "2dd7ee08cae4f23f857da6df7aa8b6daf7a599d4",
+      "bytes": 872,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/report-duration-next.png",
+      "blob": "2df40b490c7f0156bf54e1fd9168a435061bd77f",
+      "bytes": 868,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/report-duration-pre-dark.png",
+      "blob": "d82d807459bbf940ca15bfbf6e8555d6f5753fc2",
+      "bytes": 914,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/report-duration-pre.png",
+      "blob": "0b06393c19fb9d0567091511fd812f60fdb4dbea",
+      "bytes": 907,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/rpt_no_data.png",
+      "blob": "11557add2eb4950f88f5a56259dc8ccda1ec4b1e",
+      "bytes": 3801,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/scroll-top-dark.png",
+      "blob": "7dcdba82c15632e0c71214ec157fe2c7eac99f54",
+      "bytes": 1708,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/scroll-top.png",
+      "blob": "57fce9ccc4ac557cb03e32df6525e578817de5b0",
+      "bytes": 2070,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/search-empty-image-dark.png",
+      "blob": "3803770502abb5d07343fb6b6f3381e77e8dbc2d",
+      "bytes": 22804,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/search-empty-image.png",
+      "blob": "e624b9eda017631512f0214803ab12ed4eb066a6",
+      "bytes": 21421,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/search-icon.png",
+      "blob": "39f9f3ee79db323a55b2d83321a76d965bdccb18",
+      "bytes": 1340,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-about-dark.png",
+      "blob": "37c8468fc33b99849b4257b12eca930789f19454",
+      "bytes": 1055,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-about-highlight.png",
+      "blob": "86d347fe709749d2fe3f748ca6971176a1c7a70a",
+      "bytes": 2727,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-about.png",
+      "blob": "c9ef620c9d8fd68addcc725cbe3104556c41d4f3",
+      "bytes": 1066,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-account-dark.png",
+      "blob": "78bbad99785551ffc8521ab185f8b47520fb90fb",
+      "bytes": 1236,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-account-highlight.png",
+      "blob": "796d8e588a4a83875d5971c7f2d088b220208335",
+      "bytes": 2860,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-account.png",
+      "blob": "d24550d7783f5ea5578dc783c1a78ff2a3357802",
+      "bytes": 1241,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-close.png",
+      "blob": "4c58af9a6973da07be77f45bf5580219fdfaa18b",
+      "bytes": 697,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-general-dark.png",
+      "blob": "1da2ed40a897b352a6742e8a6b525a2cdbf6fb3c",
+      "bytes": 963,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-general-highlight.png",
+      "blob": "2616ba6c16e5e707e0a9163626a62e50c418caf6",
+      "bytes": 1935,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-general.png",
+      "blob": "00be4bf89cd60d00b8b14594d863075dfa860692",
+      "bytes": 970,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-android.png",
+      "blob": "9489a4956bc7c03ed1915bc3956079b6ae0de23b",
+      "bytes": 1552,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-apple.png",
+      "blob": "9010e2ba241d01d4a405f4299305bf1231453f14",
+      "bytes": 1641,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-chrome.png",
+      "blob": "622f6c02d6a567c26187c796818675ba8111518e",
+      "bytes": 2824,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-edge.png",
+      "blob": "8d09ae1fb9fc262d32504c171a5d5b65d9b65b9a",
+      "bytes": 5417,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-firefox.png",
+      "blob": "63b5607888b9cc8e4557043ec9d587c9e825f142",
+      "bytes": 7245,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-mac.png",
+      "blob": "d9ce77a06721a0ced583ff52ef46c448f09666cb",
+      "bytes": 2766,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-logo-windows.png",
+      "blob": "ba540efef3169461da91c649be559249c2b4b84d",
+      "bytes": 2128,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-play.png",
+      "blob": "436430a497c8a490e3ae88b98ce3f2109e1e4819",
+      "bytes": 719,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-pomo-dark.png",
+      "blob": "cc90847162b4d2a7c4dba3686b04d4dc1a5f1bd8",
+      "bytes": 1246,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-pomo-highlight.png",
+      "blob": "4d9327dd2d0efc426856126b93408a43a0badac6",
+      "bytes": 2641,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-pomo.png",
+      "blob": "87ddf4b37599ba36b2359b2722d41934c9397cf7",
+      "bytes": 1320,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-projects-dark.png",
+      "blob": "069fe201e22996929461f7ba594b0f36d4cb5fbd",
+      "bytes": 299,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-projects.png",
+      "blob": "bf2c44dc7357b84e12cc50b435979d1c2c2ac387",
+      "bytes": 308,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-purchase-highlight.png",
+      "blob": "edf24a8585a83c6e3dccd759155bf610ee44df43",
+      "bytes": 2942,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-purchase.png",
+      "blob": "2bb38dc7a976c586d4298d949b0b392102f0421e",
+      "bytes": 1075,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-select-icon.png",
+      "blob": "1a3dca221b996c0e9fd3ff514dad66605029207c",
+      "bytes": 357,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-sound-dark.png",
+      "blob": "536992a860f79dc827f3455feacafe89c0469f7c",
+      "bytes": 1120,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-sound-highlight.png",
+      "blob": "585cb31a1698b16b0be2703eaf2b710f0ee4c468",
+      "bytes": 2097,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-sound.png",
+      "blob": "260d5794f31e2f6487f33777746cf2eb45904208",
+      "bytes": 1080,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-theme-dark.png",
+      "blob": "b5c52213f6e46506661449b3cd3289d4823c19f6",
+      "bytes": 1007,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/setting-theme.png",
+      "blob": "7e67354384e7b1dc0f2235f34556dc54a7ef4a06",
+      "bytes": 1052,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/sun-hand.png",
+      "blob": "4473ac921a87652e2e5a0e3cac6e93a70d83034f",
+      "bytes": 548,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/sun-timer.png",
+      "blob": "a8e40d62e3b0a951597b61526459e288c10d2b14",
+      "bytes": 451,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/sun.png",
+      "blob": "75a7faab6b1ef1e679deaf478612ed83630c4d49",
+      "bytes": 3239,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-add.png",
+      "blob": "336797396e15a1d05a0a40bd9aa0704d0937bde8",
+      "bytes": 250,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-add32.png",
+      "blob": "cf944aa07d804939a53577e8b2ce928033f9e96e",
+      "bytes": 244,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-delete.png",
+      "blob": "0190e8dacaf3c74efbf49de1c645fe4e2312d6c8",
+      "bytes": 534,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-detail.png",
+      "blob": "a5d441fd9d86d45b4df8d21e4452625308ffc314",
+      "bytes": 483,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-new.png",
+      "blob": "9ab0d64c7e584144729253bb1a66f2ace7ae72c2",
+      "bytes": 1281,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-small.png",
+      "blob": "e5d2aab18f1f1f53eea97a0aedac404b264bd136",
+      "bytes": 838,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag-unchecked.png",
+      "blob": "1a02f544e955dc64d7cb76bccbbde50ac8c6f920",
+      "bytes": 1054,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tag.png",
+      "blob": "e753ceda0f2c8307b1caca31f3ee6320a01efe43",
+      "bytes": 907,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-detail-myday-active.png",
+      "blob": "2fb227cb376939daa9842879e3366b05ae311f56",
+      "bytes": 1038,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-detail-myday-deactive.png",
+      "blob": "05c2f34c6440c78be89235c15bd76b12212f859f",
+      "bytes": 1368,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-finished.png",
+      "blob": "ae9c4756eb75aaf04a6c89227f5ce1684a1adb9b",
+      "bytes": 1030,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-myday.png",
+      "blob": "64efda3b7eb3a1452b0ec35f7a6eadbf076b5f90",
+      "bytes": 1171,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-actual.png",
+      "blob": "70e804940b2c7ee1c14f8d6ee011dd6cf7c38297",
+      "bytes": 800,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-actual20.png",
+      "blob": "f50e5b85b439d79ac2584810aa633bdae2abeac5",
+      "bytes": 813,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-actual40.png",
+      "blob": "7d5ec95504ea6554c80b5870f8f478c94ee7c85d",
+      "bytes": 822,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-actual60.png",
+      "blob": "e2360c954487364ff85e3779cb82755fb102f76f",
+      "bytes": 876,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-actual80.png",
+      "blob": "373fe227f4449960158039cb3dd59974329199d0",
+      "bytes": 850,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-estimate.png",
+      "blob": "a4d57c2466dff781a8aa489c794e8614bb882ec6",
+      "bytes": 771,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-pomo-running.png",
+      "blob": "71f997d47c949055ac465f7afb14e19aeb8e5936",
+      "bytes": 1136,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-project.png",
+      "blob": "1c59351112c848b212b566fd5c9b772d66417306",
+      "bytes": 241,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-remark.png",
+      "blob": "7a979cf4311c8a2fcb4cb2ac551e6bf478afbc96",
+      "bytes": 511,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-reminder-expired.png",
+      "blob": "afc51451627c3c03b81a9365d230f35f46c610cd",
+      "bytes": 955,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-reminder.png",
+      "blob": "d5651fb39f5755637713810cef6c69ff04c18a65",
+      "bytes": 898,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-repetition.png",
+      "blob": "7a52f5222575750987d2f9158ea3a2385e293b1d",
+      "bytes": 752,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-start-disabled.png",
+      "blob": "ecee52fa2daeabf5611d10c671b02858156462e5",
+      "bytes": 1006,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-start.png",
+      "blob": "128e09e5153903dd36feab61c5f7598afbf06b11",
+      "bytes": 987,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-subtask.png",
+      "blob": "fa1f48b8f8ba2ccaa7966643df50ac7219f94498",
+      "bytes": 819,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-unfinished-priority-high.png",
+      "blob": "20fbcf97cc0e2ac5b6dccbe097c0eded4886d88b",
+      "bytes": 946,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-unfinished-priority-low.png",
+      "blob": "9a6b6180bf6bc0fc557d7efe85f46472faf6a3f1",
+      "bytes": 922,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-unfinished-priority-middle.png",
+      "blob": "8e16ed146af92935b94e90d39f05495016a39587",
+      "bytes": 900,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task-unfinished.png",
+      "blob": "979def3808291fda51d0a2e7a1c5e8f38a9fe4de",
+      "bytes": 880,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_done_high_priority.png",
+      "blob": "6c669c24420d7728f594cb8ffb97058b110496c9",
+      "bytes": 1493,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_done_low_priority.png",
+      "blob": "e98041fbdb574d05ef02c5994161bf3147707040",
+      "bytes": 1506,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_done_medium_priority.png",
+      "blob": "705b3ec125f2c5c6edc712feb45ad55e938a0231",
+      "bytes": 1446,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_done_no_priority.png",
+      "blob": "5b6cc6c93876a3721a6d8fc6a65d52d130db482b",
+      "bytes": 1214,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_high_priority.png",
+      "blob": "004a5f3d51d27e025f0c7f4e34a481898cf22694",
+      "bytes": 1324,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_low_priority.png",
+      "blob": "7782d2a16c1e17486ea370898b359f28930c3e0c",
+      "bytes": 1336,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_medium_priority.png",
+      "blob": "c2a1fa28adb0391141d05606d23755312338c70f",
+      "bytes": 1282,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_no_priority.png",
+      "blob": "25596f4b575bee9f4c5c9e219b59e89bdd56eac5",
+      "bytes": 1026,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_priority_high.png",
+      "blob": "dc34ee4d429f43871e4fb4a908d06f85cd386e8a",
+      "bytes": 619,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_priority_low.png",
+      "blob": "f86cabb4f2ca203b448d77c2b1e495becef4c47b",
+      "bytes": 632,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_priority_middle.png",
+      "blob": "bf7ebe451489def1685126643364e61e7f3d4acb",
+      "bytes": 590,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_priority_none.png",
+      "blob": "624c1673530753d4d134b31aaec6ab224bb2ee95",
+      "bytes": 596,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_repeat_high_priority.png",
+      "blob": "3cd13462bdf6c31ed444f306d1d4982eb92bf719",
+      "bytes": 1552,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_repeat_low_priority.png",
+      "blob": "be3cd7ebf0f43761debbac81486441c356d1b752",
+      "bytes": 1576,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_repeat_medium_priority.png",
+      "blob": "bfc2f81a7ea571850387fa83a8a0c6e464648057",
+      "bytes": 1457,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/task_repeat_no_priority.png",
+      "blob": "131e9c540c258d123e966ebe165ef255e47e31e1",
+      "bytes": 1416,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/theme-selected.png",
+      "blob": "ad012a38106a05d9735a25601a807dbdd1e05196",
+      "bytes": 1107,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-beach-shortcut.jpg",
+      "blob": "1e7c1e9b875edd5b5488357713af8269d817f08d",
+      "bytes": 14862,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-beach.jpg",
+      "blob": "9b917f478a610042dd135d27f5c9f4196b42aa04",
+      "bytes": 1004161,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-city-shortcut.jpg",
+      "blob": "4ad2551ba834e09c47425770d3efb4bfc301e0a1",
+      "bytes": 11953,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-city.jpg",
+      "blob": "8345618cae5b856ee72ea0e9bbda56642e2d4899",
+      "bytes": 594745,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-desert-shortcut.jpg",
+      "blob": "81220c130422916d78e2761ec3034fd8a3209eb8",
+      "bytes": 7487,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-desert.jpg",
+      "blob": "6b77ba7bd8f630bf61e0625a2710bbbc63132453",
+      "bytes": 784035,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-forest-shortcut.jpg",
+      "blob": "c2d2ef02067f400f0860ec6236ab88e78b4c4aa8",
+      "bytes": 18264,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-forest.jpg",
+      "blob": "1bc88a4853f47f359ac8d83db2863e3e817e92d5",
+      "bytes": 356399,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-lake-shortcut.jpg",
+      "blob": "834e03ab14e0316b2f37abd19b57baf2ac6c38fe",
+      "bytes": 38821,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-lake.jpg",
+      "blob": "d6901ad90ef310be27c445fdff68241a163ccdee",
+      "bytes": 800794,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-leaf-shortcut.jpg",
+      "blob": "257fb39a90b1ce49a64b879a9cd20cb345da989d",
+      "bytes": 7920,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-leaf.jpg",
+      "blob": "4ad4a4380b68026f0b614d99eccc134236f82f32",
+      "bytes": 530869,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-mountain-shortcut.jpg",
+      "blob": "a28c6c23449e033fd17c45de36932290d711b90c",
+      "bytes": 22970,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-mountain.jpg",
+      "blob": "dd1bd4fca4d40cc26eb11592a95af55ba3234612",
+      "bytes": 1023004,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-ocean-shortcut.jpg",
+      "blob": "d65c6183e7a6d5c30abcf3c4d936a1fdcd414122",
+      "bytes": 21713,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-ocean.jpg",
+      "blob": "ee5934d876317306311f4fda812d3809939a814d",
+      "bytes": 814856,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-starrysky-shortcut.jpg",
+      "blob": "2319776060508026443d51fdfdedea296ae6100c",
+      "bytes": 9738,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-starrysky.jpg",
+      "blob": "4aee569c7a4a37d91583bbc3891612de6fa12a2b",
+      "bytes": 917106,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-trees-shortcut.jpg",
+      "blob": "801e343951408ce3e98eaaeda09da5dbd983d891",
+      "bytes": 48037,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-bg-trees.jpg",
+      "blob": "038368d19387f7e9ee853ac78a282de848f81b1d",
+      "bytes": 989197,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-complete-big.png",
+      "blob": "0cf8a86c9a18dbfe4ed7942706ed0f6ac0388d29",
+      "bytes": 3892,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-complete.png",
+      "blob": "9dcb0fc8a882eb15b6d71f11a58cf3be64ae363b",
+      "bytes": 1214,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-float.png",
+      "blob": "c5b8539e33f75d818704da42b276e9127c1e4982",
+      "bytes": 547,
+      "upstream_7_1_1": "not found at same path",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-green.svg",
+      "blob": "b0ee65ca4bf6c6e2ab3df00a49de6f046dfa5ced",
+      "bytes": 1054,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-indicator-blue.png",
+      "blob": "60a7345aa63ce0e20ae50821d7c94a9eb6859c0b",
+      "bytes": 3120,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-indicator-red.png",
+      "blob": "0d341e328176178f3cdc8accdb759a44f85f9c13",
+      "bytes": 3444,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-pause-big.png",
+      "blob": "a43cb238d1630dddf153e467ba539f47fe542da4",
+      "bytes": 3223,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-pause.png",
+      "blob": "ef0d73c77a4af1f78fa6c6eb1200574b61849f0a",
+      "bytes": 1005,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-red.svg",
+      "blob": "99153411a02a2d3cbf6c67ba6b057beb530b3774",
+      "bytes": 1056,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-scale-highlight.png",
+      "blob": "9f0e646c06231a13b2aafca8551477b73bb1ce81",
+      "bytes": 571,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-scale.png",
+      "blob": "455b3bc74ecf5d0c7a00e8b1d76533e0455db360",
+      "bytes": 691,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-start-big.png",
+      "blob": "99e7bca4caf93cf4d6f4f3c00e6f8c2de2ef41d5",
+      "bytes": 600,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-start.png",
+      "blob": "997f40dfe4e5a67562584fc1aacea446f263c60c",
+      "bytes": 1259,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-stop-big.png",
+      "blob": "0620bb7658f46213db897bc74653ea9303e79627",
+      "bytes": 3325,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-stop.png",
+      "blob": "dd71d5bf947f1381cba12b3113647d8750f3d8f3",
+      "bytes": 1199,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-task-delete.png",
+      "blob": "9ccf7207ff1e6f1a6117d7ddf6aa73dfcda76856",
+      "bytes": 466,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-zoomdown.png",
+      "blob": "a9bfc027e727105b38ceedd12f8b9a768f26119b",
+      "bytes": 1555,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/timer-zoomup.png",
+      "blob": "26592a09b7e00b2bb74fb7fc76c3edad4ca3b54f",
+      "bytes": 213,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tip.png",
+      "blob": "d41953be1e023fcfa03a72d91327f6c9174e1b16",
+      "bytes": 1180,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tmr_bgm.png",
+      "blob": "1955414b458496853b6ca954802dd2ae0ed512e3",
+      "bytes": 1087,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tmr_flipclock.png",
+      "blob": "b2f2668aaf366c39bd01e75f53e68cc2bf48a1c1",
+      "bytes": 1258,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tmr_mode_count.png",
+      "blob": "7d69791954dbc4bb0f403e81e2d3e7fa0f0cf5e8",
+      "bytes": 1210,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tmr_mode_countdown.png",
+      "blob": "f4be16a82d933e2d90c1632299f783e70acd3b92",
+      "bytes": 1099,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-0.png",
+      "blob": "084ae6e1add77940494ad83419ec3914257d9b02",
+      "bytes": 11876,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-1.png",
+      "blob": "a27d0940b61e69d2461f85181691dca1e2ac133c",
+      "bytes": 20573,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-10.png",
+      "blob": "31a173b98043e73835b13bb4b7fad789647e41f1",
+      "bytes": 111646,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-11.png",
+      "blob": "357781bdaaa6fbb18c5d031b3df736a0da48e4e3",
+      "bytes": 158419,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-2.png",
+      "blob": "6ac252826d97349bc725c4376b62a04308b206fd",
+      "bytes": 30646,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-3.png",
+      "blob": "227fff7ac87fb3a2fb0b78760fb67478f396b952",
+      "bytes": 42058,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-4.png",
+      "blob": "3decb17b811358589f1076fca1c463e0a1d4f3d8",
+      "bytes": 56454,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-5.png",
+      "blob": "df84e4f4697890a37df3506c9780f10eb2a995bb",
+      "bytes": 60716,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-6.png",
+      "blob": "3cfcbcd22cce404234d9e80403a8be9b99c09bb3",
+      "bytes": 90727,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-7.png",
+      "blob": "4047144f34250d745287a753c745f88d052596df",
+      "bytes": 83235,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-8.png",
+      "blob": "abc73e0e843a101b1aa126b7a13c5cd6eae8e4dc",
+      "bytes": 88814,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tree-9.png",
+      "blob": "96c9657a6c641298da4c37dfe7d7d9939a96ab1d",
+      "bytes": 101870,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk-new.png",
+      "blob": "201d9034e9f92bd252b7e038b259dd9d7aade5eb",
+      "bytes": 447,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk-pomo-selection-trigger.png",
+      "blob": "e35e5089d0d93f372b318dcf0659b87f41aa564a",
+      "bytes": 578,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk-sort-dark.png",
+      "blob": "eaf606f02b65aa00c5f5723f33fa6c4cf77131ef",
+      "bytes": 1199,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk-sort.png",
+      "blob": "8ac7dfc821d1e0cb68e6838e684305f03957809e",
+      "bytes": 1003,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk_empty.png",
+      "blob": "0d2df0036166d487292aed8f2d6fe05b7d0086af",
+      "bytes": 15345,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk_empty_dark.png",
+      "blob": "a011f631017ff6d08e2f221321aec393ec0421c8",
+      "bytes": 16637,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk_finished_indicator.png",
+      "blob": "0325ff4bf08537ca834ab15c11268c1e81fdbd27",
+      "bytes": 394,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk_finished_indicator_dark.png",
+      "blob": "096dde4e6789fc93a8bc34f7d818e7873fbf0aef",
+      "bytes": 384,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/tsk_finished_indicator_up.png",
+      "blob": "490ee48273867df11b4b2ce06ca69c5af2439e12",
+      "bytes": 378,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/up-flag.png",
+      "blob": "1d0711acfdbedc6411c8f2c51d3ee9e6fe03d87a",
+      "bytes": 277,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/upload-image-dark.png",
+      "blob": "05aaba57d9951959c0ab9c7b14782db19cbabff8",
+      "bytes": 3566,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/upload-image.png",
+      "blob": "e6be82ce2c710ad6df43bac2b4e00791da64e8d2",
+      "bytes": 3379,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/user-dropdown-dark.png",
+      "blob": "821e4fe59b6ead5e3c782fb849cea382ac0999b8",
+      "bytes": 427,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/user-dropdown.png",
+      "blob": "236ca86876550fa6bee4b095f0ecb90f24148144",
+      "bytes": 443,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/widget_empty.png",
+      "blob": "e8e0f21afe7594b133260cfc50f6d4f1d67a064d",
+      "bytes": 5444,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/widget_hide.png",
+      "blob": "bf56de8758fe3fcf1931529d422cc80b0b16ff41",
+      "bytes": 389,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/widget_show.png",
+      "blob": "b9a5cecdfb7d8ed7a3610df507811e8b5fff1f49",
+      "bytes": 396,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-bonfire.png",
+      "blob": "3c609ed46e460bc36f3d4ae9367bd9276fb7b03f",
+      "bytes": 12445,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-brown-noise.png",
+      "blob": "0a42447e372f7d5daecc345c861f73f8f8b8c24e",
+      "bytes": 13821,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-class-room.png",
+      "blob": "b6ab79ea59a1ea029c1560dfc9d71be928712f8d",
+      "bytes": 14354,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-cofe.png",
+      "blob": "83d2bb5c124c06229ea8e2e1cd9bfb5809518211",
+      "bytes": 13023,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-countdown.png",
+      "blob": "f33e8ffe7eed82af723b09a15a2d8e47199a500f",
+      "bytes": 16221,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-frogs-at-night.png",
+      "blob": "48d63e844dab21411e1db0a5b20d40d7c43e9869",
+      "bytes": 10626,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-library.png",
+      "blob": "cbe5d22d94b5d567602ab4a3accd7f2d72b494ad",
+      "bytes": 14447,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-metronome.png",
+      "blob": "d36b4639a6e75953627efb018d2f38cfbc0e80dc",
+      "bytes": 12104,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-mute-dark.png",
+      "blob": "3b5bc90c5b2a389eb9aff301d3bb6f309840d41b",
+      "bytes": 4080,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-mute.png",
+      "blob": "c4609811dbc3653e8dab87882231d324e3670b92",
+      "bytes": 3890,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-oceam-shore.png",
+      "blob": "48fbe4070f0144dc247b6bcf6ff79406c93049c3",
+      "bytes": 13815,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-rain.png",
+      "blob": "99894487e9e98c1de79c92d8b94ec1089bbcd132",
+      "bytes": 14534,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-stream.png",
+      "blob": "c9ba52536bf397e451b0141e5ae7f14ca2b944ec",
+      "bytes": 15550,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-tic-tac.png",
+      "blob": "0edaec5ca9a4a50ca8ff2072fd9f222d4613bfda",
+      "bytes": 12827,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-wilderness.png",
+      "blob": "c3504cf3e3fd4b010e1faa86834e53c5a6e956c2",
+      "bytes": 12920,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-wind-with-crickets.png",
+      "blob": "b11bea7284990cca06945a800480c5f58c54d258",
+      "bytes": 12848,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    },
+    {
+      "path": "public/img/wn-wind.png",
+      "blob": "2a73213db295ec4b39ba6aafc39b63c7e0b6aabd",
+      "bytes": 14105,
+      "upstream_7_1_1": "identical",
+      "rights_evidence": "user confirms redistribution permission; file-specific license and notice terms to verify"
+    }
+  ],
+  "redistribution_permission": "User confirmed on 2026-11-07 that redistribution permission has been obtained; applicable license and notice terms remain to be inventoried."
+}

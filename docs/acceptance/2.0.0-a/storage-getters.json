@@ -1,0 +1,446 @@
+{
+  "baseline": "f102da8919e810006b6611aabcef5f0159057d61",
+  "method": "Acorn object-property getters in legacy module 13 that contain direct string-literal localStorage calls; includes code only, no user values. Does not cover dynamic keys or other modules.",
+  "items": [
+    {
+      "property": "accountExpiredDate",
+      "storageKeys": [
+        "ExpiredDate"
+      ],
+      "getter": "function(){var e=(0,o.default)(localStorage.getItem(\"ExpiredDate\"));if((0,r.default)(e)){var t=(0,d.default)().startOf(\"day\").add(3,\"days\").valueOf();return localStorage.setItem(\"ExpiredDate\",t),t}return e}",
+      "setter": "function(e){(this.released||0===e||e>=this.accountExpiredDate)&&!this.shouldUploadExpiredDate&&(localStorage.setItem(\"ExpiredDate\",e),f.default.shared.emit(f.default.Event.USERINFO_CHANGED))}"
+    },
+    {
+      "property": "avatarTimestamp",
+      "storageKeys": [
+        "AvatarTimestamp"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"AvatarTimestamp\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"AvatarTimestamp\",e)}"
+    },
+    {
+      "property": "configTimestamp",
+      "storageKeys": [
+        "ConfigTimestamp"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"ConfigTimestamp\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"ConfigTimestamp\",e)}"
+    },
+    {
+      "property": "serverTimestamp",
+      "storageKeys": [
+        "ServerTimestamp"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"ServerTimestamp\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"ServerTimestamp\",e)}"
+    },
+    {
+      "property": "version",
+      "storageKeys": [
+        "Version"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"Version\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"Version\",e)}"
+    },
+    {
+      "property": "lastReleaseVersion",
+      "storageKeys": [
+        "LstRlsVer"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"LstRlsVer\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"LstRlsVer\",e)}"
+    },
+    {
+      "property": "upgradeAlertCount",
+      "storageKeys": [
+        "UpdAltCnt"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"UpdAltCnt\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"UpdAltCnt\",e)}"
+    },
+    {
+      "property": "workInterval",
+      "storageKeys": [
+        "WorkInterval"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"WorkInterval\"))||1500}",
+      "setter": "function(e){localStorage.setItem(\"WorkInterval\",e)}"
+    },
+    {
+      "property": "shortBreakInterval",
+      "storageKeys": [
+        "ShortBreakInterval"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"ShortBreakInterval\"))||300}",
+      "setter": "function(e){localStorage.setItem(\"ShortBreakInterval\",e)}"
+    },
+    {
+      "property": "longBreakInterval",
+      "storageKeys": [
+        "LongBreakInterval"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"LongBreakInterval\"))||900}",
+      "setter": "function(e){localStorage.setItem(\"LongBreakInterval\",e)}"
+    },
+    {
+      "property": "longBreakPomodoros",
+      "storageKeys": [
+        "LongBreakPomodoros"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"LongBreakPomodoros\"))||4}",
+      "setter": "function(e){localStorage.setItem(\"LongBreakPomodoros\",e)}"
+    },
+    {
+      "property": "autoWorkEnabled",
+      "storageKeys": [
+        "AutoWork"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"AutoWork\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"AutoWork\",e)}"
+    },
+    {
+      "property": "autoBreakEnabled",
+      "storageKeys": [
+        "AutoBreak"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"AutoBreak\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"AutoBreak\",e)}"
+    },
+    {
+      "property": "completeSoundEnabled",
+      "storageKeys": [
+        "TskCmpSnd"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"TskCmpSnd\");return!e||\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"TskCmpSnd\",e)}"
+    },
+    {
+      "property": "newTaskOnTop",
+      "storageKeys": [
+        "NewTskOnTop"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"NewTskOnTop\");return!e||\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"NewTskOnTop\",e)}"
+    },
+    {
+      "property": "banBreakEnabled",
+      "storageKeys": [
+        "BanBreak"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"BanBreak\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"BanBreak\",e)}"
+    },
+    {
+      "property": "workAlarm",
+      "storageKeys": [
+        "WorkAlarm"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"WorkAlarm\")||\"alm_Timer\";return e.includes(\"alm_\")?e:\"alm_Timer\"}",
+      "setter": "function(e){localStorage.setItem(\"WorkAlarm\",e)}"
+    },
+    {
+      "property": "breakAlarm",
+      "storageKeys": [
+        "BreakAlarm"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"BreakAlarm\")||\"alm_Timer\";return e.includes(\"alm_\")?e:\"alm_Timer\"}",
+      "setter": "function(e){localStorage.setItem(\"BreakAlarm\",e)}"
+    },
+    {
+      "property": "bgMusic",
+      "storageKeys": [
+        "BgMusic"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"BgMusic\")||\"bgm_Mute\";return e.includes(\"bgm_\")?e:\"bgm_Mute\"}",
+      "setter": "function(e){localStorage.setItem(\"BgMusic\",e)}"
+    },
+    {
+      "property": "defaultDeadline",
+      "storageKeys": [
+        "DefaultDeadline"
+      ],
+      "getter": "function(){var e=parseFloat(localStorage.getItem(\"DefaultDeadline\"));return isNaN(e)?(0,d.default)().endOf(\"day\").valueOf():e}",
+      "setter": "function(e){localStorage.setItem(\"DefaultDeadline\",e)}"
+    },
+    {
+      "property": "timingTaskId",
+      "storageKeys": [
+        "timingTaskId"
+      ],
+      "getter": "function(){return localStorage.getItem(\"timingTaskId\")||\"\"}",
+      "setter": "function(e){\"\"===e&&(this.timingSubtaskId=\"\"),localStorage.setItem(\"timingTaskId\",e)}"
+    },
+    {
+      "property": "timingSubtaskId",
+      "storageKeys": [
+        "timingSubtaskId"
+      ],
+      "getter": "function(){return localStorage.getItem(\"timingSubtaskId\")||\"\"}",
+      "setter": "function(e){localStorage.setItem(\"timingSubtaskId\",e)}"
+    },
+    {
+      "property": "lastReminderDate",
+      "storageKeys": [
+        "LastReminderDate"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"LastReminderDate\"))||1}",
+      "setter": "function(e){localStorage.setItem(\"LastReminderDate\",e)}"
+    },
+    {
+      "property": "syncTimestamp",
+      "storageKeys": [
+        "SyncTimestamp"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"SyncTimestamp\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"SyncTimestamp\",e)}"
+    },
+    {
+      "property": "selectedGroupId",
+      "storageKeys": [
+        "SelectedGroupId"
+      ],
+      "getter": "function(){return localStorage.getItem(\"SelectedGroupId\")||null}",
+      "setter": "function(e){e?localStorage.setItem(\"SelectedGroupId\",e):localStorage.removeItem(\"SelectedGroupId\")}"
+    },
+    {
+      "property": "portrait",
+      "storageKeys": [
+        "Portrait"
+      ],
+      "getter": "function(){return localStorage.getItem(\"Portrait\")||\"\"}",
+      "setter": "function(e){localStorage.setItem(\"Portrait\",e)}"
+    },
+    {
+      "property": "receipt",
+      "storageKeys": [
+        "Receipt"
+      ],
+      "getter": "function(){return localStorage.getItem(\"Receipt\")||\"\"}",
+      "setter": "function(e){localStorage.setItem(\"Receipt\",e)}"
+    },
+    {
+      "property": "price",
+      "storageKeys": [
+        "Price"
+      ],
+      "getter": "function(){return localStorage.getItem(\"Price\")||\"$14.99\"}",
+      "setter": "function(e){localStorage.setItem(\"Price\",e)}"
+    },
+    {
+      "property": "priceUSD",
+      "storageKeys": [
+        "PriceUSD"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"PriceUSD\"))||14.99}",
+      "setter": "function(e){localStorage.setItem(\"PriceUSD\",e)}"
+    },
+    {
+      "property": "lastUpgradePromptDate",
+      "storageKeys": [
+        "UpdAltDate"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"UpdAltDate\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"UpdAltDate\",e)}"
+    },
+    {
+      "property": "installationDate",
+      "storageKeys": [
+        "InstallationDate"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"InstallationDate\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"InstallationDate\",e)}"
+    },
+    {
+      "property": "hasRated",
+      "storageKeys": [
+        "HasRated"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"HasRated\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"HasRated\",e)}"
+    },
+    {
+      "property": "shouldShowRateDialog",
+      "storageKeys": [
+        "ShowRateDialog"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"ShowRateDialog\");return(!e||\"true\"===String(e))&&!this.hasRated}",
+      "setter": "function(e){localStorage.setItem(\"ShowRateDialog\",e)}"
+    },
+    {
+      "property": "priceInfo",
+      "storageKeys": [
+        "PriceInfo"
+      ],
+      "getter": "function(){return JSON.parse(localStorage.getItem(\"PriceInfo\"))||p.default.shared.defaultPriceInfo}",
+      "setter": "function(e){localStorage.setItem(\"PriceInfo\",(0,a.default)(e))}"
+    },
+    {
+      "property": "serverAccessInfo",
+      "storageKeys": [
+        "ServerAccessInfo"
+      ],
+      "getter": "function(){return JSON.parse(localStorage.getItem(\"ServerAccessInfo\"))||{}}",
+      "setter": "function(e){localStorage.setItem(\"ServerAccessInfo\",(0,a.default)(e))}"
+    },
+    {
+      "property": "serverUrls",
+      "storageKeys": [
+        "ServerUrls"
+      ],
+      "getter": "function(){return JSON.parse(localStorage.getItem(\"ServerUrls\"))||[]}",
+      "setter": "function(e){localStorage.setItem(\"ServerUrls\",(0,a.default)(e))}"
+    },
+    {
+      "property": "publicKey",
+      "storageKeys": [
+        "PK1"
+      ],
+      "getter": "function(){return localStorage.getItem(\"PK1\")||\"\"}",
+      "setter": "function(e){localStorage.setItem(\"PK1\",e)}"
+    },
+    {
+      "property": "shouldUploadExpiredDate",
+      "storageKeys": [
+        "UploadExpiredDate"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"UploadExpiredDate\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"UploadExpiredDate\",e)}"
+    },
+    {
+      "property": "shouldUpdateV64Data",
+      "storageKeys": [
+        "UpdateV64Data"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"UpdateV64Data\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"UpdateV64Data\",e)}"
+    },
+    {
+      "property": "shouldUpdateTasksData",
+      "storageKeys": [
+        "UpdateTasksData"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"UpdateTasksData\");return!!e&&\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"UpdateTasksData\",e)}"
+    },
+    {
+      "property": "groupIntervalIncrement",
+      "storageKeys": [
+        "GroupIntervalIncrement"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"GroupIntervalIncrement\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"GroupIntervalIncrement\",e)}"
+    },
+    {
+      "property": "overseaServerUrl",
+      "storageKeys": [
+        "OverseaServerUrl"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"OverseaServerUrl\");return e&&e.length>0?e:null}",
+      "setter": "function(e){localStorage.setItem(\"OverseaServerUrl\",e)}"
+    },
+    {
+      "property": "regionCode",
+      "storageKeys": [
+        "RegionCode"
+      ],
+      "getter": "function(){return localStorage.getItem(\"RegionCode\")||\"CN\"}",
+      "setter": "function(e){localStorage.setItem(\"RegionCode\",e)}"
+    },
+    {
+      "property": "isCountdown",
+      "storageKeys": [
+        "Countdown"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"Countdown\");return!e||\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"Countdown\",e)}"
+    },
+    {
+      "property": "isDarkMode",
+      "storageKeys": [
+        "DarkMode"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"DarkMode\");return e?\"true\"===String(e):null}",
+      "setter": "function(e){null===e?localStorage.removeItem(\"DarkMode\"):localStorage.setItem(\"DarkMode\",e)}"
+    },
+    {
+      "property": "prevRank30",
+      "storageKeys": [
+        "PrevRank30"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"PrevRank30\"))||\"--\"}",
+      "setter": "function(e){localStorage.setItem(\"PrevRank30\",e)}"
+    },
+    {
+      "property": "prevRankAll",
+      "storageKeys": [
+        "PrevRankAll"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"PrevRankAll\"))||\"--\"}",
+      "setter": "function(e){localStorage.setItem(\"PrevRankAll\",e)}"
+    },
+    {
+      "property": "prevRankForest",
+      "storageKeys": [
+        "PrevRankForest"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"PrevRankForest\"))||\"--\"}",
+      "setter": "function(e){localStorage.setItem(\"PrevRankForest\",e)}"
+    },
+    {
+      "property": "lastSyncFocusTimeAll",
+      "storageKeys": [
+        "LastSyncFocusTimeAll"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"LastSyncFocusTimeAll\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"LastSyncFocusTimeAll\",e)}"
+    },
+    {
+      "property": "lastSyncSunlight",
+      "storageKeys": [
+        "LastSyncSunlight"
+      ],
+      "getter": "function(){return Number(localStorage.getItem(\"LastSyncSunlight\"))||0}",
+      "setter": "function(e){localStorage.setItem(\"LastSyncSunlight\",e)}"
+    },
+    {
+      "property": "projectRegionWidth",
+      "storageKeys": [
+        "ProjectRegionWidth"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"ProjectRegionWidth\");if(null===e)return 280;var t=Number(e);return((0,r.default)(t)||0===t)&&(t=280),Math.round(Math.min(Math.max(t,180),380))}",
+      "setter": "function(e){var t=Number(e);(0,r.default)(t)&&(t=280),t=Math.round(Math.min(Math.max(t,180),380)),localStorage.setItem(\"ProjectRegionWidth\",t)}"
+    },
+    {
+      "property": "showFinishedTasksInToday",
+      "storageKeys": [
+        "ShowFinishedTasksInToday"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"ShowFinishedTasksInToday\");return!e||\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"ShowFinishedTasksInToday\",e)}"
+    },
+    {
+      "property": "forestEnabled",
+      "storageKeys": [
+        "Forest"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"Forest\");return!e||\"true\"===String(e)}",
+      "setter": "function(e){localStorage.setItem(\"Forest\",e),f.default.shared.emit(f.default.Event.FOREST_ENABLED_CHANGED)}"
+    },
+    {
+      "property": "ringtoneVolume",
+      "storageKeys": [
+        "RtnVol"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"RtnVol\"),t=null===e?100:Number(e);return t=Math.min(100,t),t=Math.max(0,t)}",
+      "setter": "function(e){localStorage.setItem(\"RtnVol\",e)}"
+    },
+    {
+      "property": "whiteNoiseVolume",
+      "storageKeys": [
+        "WNVol"
+      ],
+      "getter": "function(){var e=localStorage.getItem(\"WNVol\"),t=null===e?100:Number(e);return t=Math.min(100,t),t=Math.max(0,t)}",
+      "setter": "function(e){localStorage.setItem(\"WNVol\",e)}"
+    }
+  ]
+}
