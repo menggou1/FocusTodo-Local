@@ -18,6 +18,11 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
  async function page(ctx){const p=await ctx.newPage();p.on('dialog',d=>d.accept());await p.goto(base);await p.waitForFunction(()=>window.testTimer&&!document.documentElement.classList.contains('focus-starting'));await p.evaluate(()=>FocusLocalReady);return p;}
  async function settings(p,name){await p.locator('header img[src="img/header-setting.png"]').click();await p.getByText(name,{exact:true}).click();}
  async function appearance(p){await settings(p,'外观');await p.locator('[data-theme-id="__bing_daily__"]').waitFor();}
+ async function hoverFloat(p){
+  const root=p.locator('[class*="FloatTimer-root"]');await root.waitFor();
+  await root.evaluate(async element=>{await new Promise(requestAnimationFrame);await Promise.all(element.closest('[class*="Timer-root"]').getAnimations({subtree:true}).map(animation=>animation.finished.catch(()=>{})));});
+  await root.hover();
+ }
  async function seed(p,active=false,updatedAt=Date.now()){
   await p.evaluate(({active,updatedAt})=>{const c=document.createElement('canvas');c.width=c.height=2;const dataUrl=c.toDataURL();const themes={};for(const id of ['custom_a','custom_b','__bing_daily__'])themes[id]={name:id,dataUrl,thumbnail:dataUrl,updatedAt,createdAt:1};localStorage.setItem('lexible-custom-themes',JSON.stringify(themes));if(active){localStorage.setItem('Theme','__bing_daily__');localStorage.setItem('lexible-active-custom-theme','__bing_daily__');}},{active,updatedAt});
  }
@@ -115,13 +120,13 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
    const full=p.locator('[class*="FullscreenTimer-root"]');await full.waitFor();
    const bounds=await full.evaluate(root=>{const a=root.querySelector('.focus-timer-mini').getBoundingClientRect(),b=root.querySelector('[class*="FullscreenTimer-zoomdown"]').getBoundingClientRect();return {left:a.x,right:b.x};});assert(bounds.right>bounds.left);
    await full.locator('[class*="FullscreenTimer-zoomdown"]').click();assert.equal(await p.evaluate(()=>miniRequests),0);
-   await p.locator('[class*="FloatTimer-root"]').hover();await p.locator('.FloatTimer-miniMode-1KgSp').click();
+   await hoverFloat(p);await p.locator('.FloatTimer-miniMode-1KgSp').click();
    await p.locator('#focus-local-notice').filter({hasText:'迷你窗口无法打开'}).waitFor();assert.equal(await p.evaluate(()=>miniRequests),1);
    await p.evaluate(()=>Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:undefined}));
-   await p.locator('[class*="FloatTimer-root"]').hover();await p.locator('.FloatTimer-miniMode-1KgSp').click();await p.locator('#focus-local-notice').filter({hasText:'不支持独立迷你窗口'}).waitFor();
+   await hoverFloat(p);await p.locator('.FloatTimer-miniMode-1KgSp').click();await p.locator('#focus-local-notice').filter({hasText:'不支持独立迷你窗口'}).waitFor();
   });
   await scenario('native Document PiP reuses the official compact timer and existing commands',async ctx=>{
-   const p=await page(ctx);await p.locator('[class*="FloatTimer-root"]').hover();await p.locator('.FloatTimer-miniMode-1KgSp').click();
+   const p=await page(ctx);await hoverFloat(p);await p.locator('.FloatTimer-miniMode-1KgSp').click();
    await p.waitForFunction(()=>documentPictureInPicture.window?.document.querySelector('.focus-mini-timer [class*="FloatTimer-root"]'));
    const mini=ctx.pages().find(target=>target!==p);await mini.setViewportSize({width:147,height:58});
    const click=selector=>p.evaluate(selector=>documentPictureInPicture.window.document.querySelector(selector).click(),selector);
