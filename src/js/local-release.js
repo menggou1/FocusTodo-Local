@@ -3,11 +3,32 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.8.2",
+    "localVersion": "1.8.3",
     "author": "Lexible",
-    "date": "2026-11-05",
+    "date": "2026-11-07",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.8.3",
+            "date": "2026-11-07",
+            "title": "审查修复与提醒显示优化",
+            "items": [
+                "加强计时备份校验，防止损坏数据覆盖现有记录。",
+                "日程编辑检测跨标签冲突，避免覆盖新修改或恢复已删除安排。",
+                "修复网络请求取消、大量提醒与奖励处理、休息恢复显示及 Python 启动服务。",
+                "修复一键收取阳光动画结束后的原位闪现，保留失败重试。",
+                "优化任务提醒的日期边距、行间距和长标题换行。"
+            ],
+            "titleEn": "Audit fixes and reminder layout improvements",
+            "itemsEn": [
+                "Validate timer backups before replacing existing records.",
+                "Detect cross-tab schedule conflicts and prevent stale edits from restoring deleted plans.",
+                "Fix cancelled network requests, large reminder and reward collections, break recovery display and the Python server.",
+                "Prevent sunlight from flashing back after collection animations while preserving retries.",
+                "Improve reminder date padding, line spacing and long-title wrapping."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.8.3.md"
+        },
         {
             "version": "7.1.1-local.1.8.2",
             "date": "2026-11-05",
@@ -415,7 +436,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.8.2",
+    "version": "7.1.1-local.1.8.3",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

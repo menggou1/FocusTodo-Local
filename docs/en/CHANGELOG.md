@@ -2,7 +2,17 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.8.2**, author Lexible.
+Current application: **7.1.1-local.1.8.3**, author Lexible.
+
+## 7.1.1-local.1.8.3 · 2026-11-07
+
+- Validate timer backups before replacing existing records.
+- Detect cross-tab schedule conflicts and prevent stale edits from restoring deleted plans.
+- Fix cancelled network requests, large reminder and reward collections, break recovery display and the Python server.
+- Prevent sunlight from flashing back after collection animations while preserving retries.
+- Improve reminder date padding, line spacing and long-title wrapping.
+
+[English report](releases/UPDATE-7.1.1-local.1.8.3.md).
 
 ## 7.1.1-local.1.8.2 · 2026-11-05
 

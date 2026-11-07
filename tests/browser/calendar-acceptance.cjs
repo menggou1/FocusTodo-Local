@@ -251,6 +251,21 @@ fs.mkdirSync(evidence, { recursive: true });
             assert(error.includes('Injected move failure'));
             data = await snapshot(page); assert.equal(data.indexedDB.Schedule.find(row => row.id === plan.id).endDate, plan.endDate + 5400000);
         });
+        await scenario('stale drags and deletes cannot overwrite a peer edit or resurrect a deleted schedule', async (page,context) => {
+            await create(page,'Concurrent schedule');
+            const original=await page.evaluate(()=>{window.__staleEvent=window.__calendar.state.calendarDayScheduledEvents[0];return window.__staleEvent.raw});
+            const peer=await context.newPage();await peer.goto(url);await ready(peer);
+            await peer.evaluate(row=>FocusLocalData.putSchedule({...row,endDate:row.endDate+600000},row),original);
+            await page.evaluate(async()=>{const event=window.__staleEvent;await window.__calendar.handleCalendarEventDrop({event,startTime:event.start+3600000,endTime:event.end+3600000})});
+            assert.equal((await snapshot(page)).indexedDB.Schedule.find(row=>row.id===original.id).endDate,original.endDate+600000);
+            assert.match(await page.locator('#focus-local-notice').innerText(),/另一个标签页/);
+            const current=(await snapshot(page)).indexedDB.Schedule.find(row=>row.id===original.id);
+            await peer.evaluate(row=>FocusLocalData.putSchedule({...row,state:-1},row),current);
+            await page.evaluate(async()=>{const c=window.__calendar;c.state.calendarContextMenuTarget=window.__staleEvent;await c.handleCalendarEventDelete()});
+            assert.equal((await snapshot(page)).indexedDB.Schedule.find(row=>row.id===original.id).state,-1);
+            const refused=await page.evaluate(async row=>{try{await FocusLocalData.putSchedule({...row,endDate:row.endDate+120000});return false}catch(_){return true}},original);
+            assert(refused);await peer.close();
+        });
         await scenario('calendar writes refresh another tab and completed-record association without stale names', async (page, context) => {
             const peer = await context.newPage(); await peer.goto(url); await ready(peer); await calendar(peer);
             await create(page, 'Peer task'); await peer.locator('.focus-calendar-event').first().waitFor();

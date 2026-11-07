@@ -2,7 +2,7 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.8.2`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
+Current worktree: `7.1.1-local.1.8.3`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
 
 Design-theory documents are for entertainment only and are not development rules. Unless the user explicitly requests it, models must not read, consult or modify those documents. Development follows user requirements, code evidence and this maintenance guide.
 
@@ -14,7 +14,9 @@ Run `npm ci` to install locked development dependencies. Node.js 22+ is required
 
 ## Source boundaries
 
-The Node server accepts only `127.0.0.1` or `localhost` Host values with valid optional ports. Custom domains are unsupported. Real-path checks reject links outside the runtime root or into hidden/private tooling paths. The Python fallback does not provide these checks.
+The Node and Python servers accept only `127.0.0.1` or `localhost` Host values with valid optional ports. Custom domains are unsupported. Both disable caching and send `nosniff`. Node real-path checks reject links outside the runtime root or into hidden/private tooling paths. The Python fallback rejects symlinks and uses the same runtime allowlist, but does not support Node's audio range requests.
+
+Acorn, Playwright and fake-indexeddb are development dependencies only. The new data-service regression tests use isolated in-memory IndexedDB transactions to verify imports and conflict rejection. They do not replace real-browser acceptance.
 
 Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by backups without changing database v3. End that break and export a backup before downgrading to 1.7.11 or earlier, which does not understand this field. Work spans retain occurrence order after a clock rollback even when wall-clock ranges overlap. Imports dated before the saved cursor require confirmation without counting a negative interval.
 
@@ -118,9 +120,9 @@ Keep historical reports and public evidence as records of their time. New report
 
 An unpublished candidate can be fixed and revalidated, including moving its tag after confirming no public Release or concurrent publication exists. Do not silently replace a published Pre-release: use a new version for fixes, or explicitly promote it after verifying its assets match the accepted build. Never overwrite a published stable Release or its assets; publish fixes as a new version. Preserve historical failures and necessary evidence.
 
-The 1.x series, including this 1.8.2 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
+The 1.x series, including this 1.8.3 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
 
-**Version 1.8.2 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
+**Version 1.8.3 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
 
 Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 

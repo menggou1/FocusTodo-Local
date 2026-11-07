@@ -230,6 +230,9 @@
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 30000);
     }
+    // Finite numbers outside the Date range still crash date formatting and
+    // create unusable index ranges after an import.
+    const validDate = value => Number.isFinite(value) && Math.abs(value) <= 8.64e15;
     function validate(input) {
         if (!input || typeof input !== 'object' || !input.meta || input.meta.app !== 'FocusTodo' ||
             ![1, 2].includes(input.meta.exportVersion) || !input.indexedDB || !input.localStorage || Array.isArray(input.localStorage)) {
@@ -245,9 +248,9 @@
             if (!Array.isArray(records)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('备份缺少数据表：'):'备份缺少数据表：') + name);
             const seen = new Set(), key = keys[name] || 'id';
             records.forEach(record => {
-                if (!record || typeof record[key] !== 'string' || !record[key] || seen.has(record[key])) throw new Error(name + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 存在无效或重复 ID。'):' 存在无效或重复 ID。'));
+                if (!record || Array.isArray(record) || typeof record[key] !== 'string' || !record[key] || seen.has(record[key])) throw new Error(name + (typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text(' 存在无效或重复 ID。'):' 存在无效或重复 ID。'));
                 seen.add(record[key]);
-                if (name === 'Pomodoro' && (!Number.isFinite(record.endDate) || !Number.isFinite(record.interval) ||
+                if (name === 'Pomodoro' && (!validDate(record.endDate) || !validDate(record.endDate - record.interval * 1000) || !Number.isFinite(record.interval) ||
                     record.interval <= 0 || record.interval > 28800 || !Number.isFinite(record.pomodoroInterval) || record.pomodoroInterval <= 0 || record.pomodoroInterval > 28800)) {
                     throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('专注记录包含无效时长或日期：'):'专注记录包含无效时长或日期：') + record[key]);
                 }
@@ -257,22 +260,33 @@
             if (['__proto__', 'constructor', 'prototype', 'setItem', 'removeItem'].includes(key) || typeof data.localStorage[key] !== 'string') throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('备份包含无效设置：'):'备份包含无效设置：') + key);
         });
         // Preserve unfinished work without counting time after the backup was taken.
-        const sessions = data.indexedDB.TimerSession || [];
+        const sessions = data.indexedDB.TimerSession === undefined ? [] : data.indexedDB.TimerSession;
         if (!Array.isArray(sessions) || sessions.length > 1) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效计时会话备份。'):'无效计时会话备份。'));
         sessions.forEach(s => {
             if (!s || s.id !== 'active' || typeof s.sessionId !== 'string' || !s.sessionId ||
                 !['initial', 'work', 'pause', 'rest', 'waitingForRest', 'recovery'].includes(s.state) ||
-                !['countup', 'countdown'].includes(s.mode) || !s.config ||
+                !['countup', 'countdown'].includes(s.mode) || typeof s.taskId !== 'string' || typeof s.subtaskId !== 'string' || !s.config || Array.isArray(s.config) ||
                 // Imported sessions bypass create(), so every setting must
                 // already have the types and bounds used by the timer core.
                 Object.entries(root.FocusTimerCore.settings(s.config)).some(([key, value]) => s.config[key] !== value) || !Array.isArray(s.spans) ||
-                !['cursorAt', 'observedAt', 'phaseElapsed', 'totalSeconds', 'recordedSeconds', 'revision', 'sequence', 'blockSequence', 'completed'].every(key => Number.isFinite(s[key]) && s[key] >= 0)) {
+                !['cursorAt', 'observedAt', 'phaseElapsed', 'totalSeconds', 'recordedSeconds'].every(key => Number.isFinite(s[key]) && s[key] >= 0) ||
+                !['cursorAt', 'observedAt'].every(key => validDate(s[key])) ||
+                !['revision', 'sequence', 'blockSequence', 'completed'].every(key => Number.isSafeInteger(s[key]) && s[key] >= 0 && s[key] < Number.MAX_SAFE_INTEGER)) {
                 throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             }
             // Spans are stored in the order worked, not necessarily in wall-clock
             // order: after a clock rollback two legitimate spans can overlap.
             s.spans.forEach(span => {
-                if (!span || !Number.isFinite(span.start) || !Number.isFinite(span.end) || span.start < 0 || span.end < span.start) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话包含无效专注区间。'):'计时会话包含无效专注区间。'));
+                if (!span || !validDate(span.start) || !validDate(span.end) || span.start < 0 || span.end <= span.start) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话包含无效专注区间。'):'计时会话包含无效专注区间。'));
+            });
+            const pending = root.FocusTimerCore.pendingSeconds(s);
+            if (Math.abs(s.totalSeconds - s.recordedSeconds - pending) > 0.01) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
+            // The next record ID must be beyond every already committed row.
+            // Otherwise the first restored timer write aborts on a duplicate ID.
+            const prefix = s.sessionId + ':';
+            data.indexedDB.Pomodoro.forEach(record => {
+                const suffix = record.id.startsWith(prefix) ? record.id.slice(prefix.length) : '';
+                if (/^[1-9]\d*$/.test(suffix) && Number(suffix) > s.sequence) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             });
             if (s.pausedFrom !== undefined && (s.state !== 'pause' || s.pausedFrom !== 'rest')) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('计时会话字段无效。'):'计时会话字段无效。'));
             if (s.state === 'work' || s.state === 'rest') {
@@ -285,7 +299,8 @@
                 s.state = 'recovery';
             } else if (s.state === 'recovery') {
                 const p = s.pendingRecovery;
-                if (!p || !Number.isFinite(p.from) || !Number.isFinite(p.to) || p.to < p.from || !['work', 'rest'].includes(p.priorState)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效的待确认区间。'):'无效的待确认区间。'));
+                if (!p || !validDate(p.from) || !validDate(p.to) || !validDate(p.detectedAt) || p.from !== s.cursorAt || p.to < p.from ||
+                    (p.clockChanged !== undefined && typeof p.clockChanged !== 'boolean') || !['work', 'rest'].includes(p.priorState)) throw new Error((typeof globalThis.FocusI18n!=="undefined"?globalThis.FocusI18n.text('无效的待确认区间。'):'无效的待确认区间。'));
                 p.source = 'import';
             }
         });
@@ -555,10 +570,23 @@
             };
         });
     }
-    function putSchedule(record) {
-        if (!record || typeof record.id !== 'string' || !Number.isFinite(record.endDate) ||
-            !Number.isFinite(record.interval) || record.interval < 60) return Promise.reject(new Error('Invalid schedule'));
-        return calendarWrite(['Schedule'], (tx, done) => { tx.objectStore('Schedule').put(record); done(record); });
+    function putSchedule(record, expected) {
+        if (!record || typeof record.id !== 'string' || !record.id || !validDate(record.endDate) ||
+            !Number.isFinite(record.interval) || record.interval < 60 || !validDate(record.endDate - record.interval * 1000) ||
+            (expected && expected.id !== record.id)) return Promise.reject(new Error('Invalid schedule'));
+        return calendarWrite(['Schedule'], (tx, done, fail) => {
+            const store = tx.objectStore('Schedule'), request = store.get(record.id);
+            request.onsuccess = () => {
+                const current = request.result;
+                // Compare inside the same write transaction as the update. A
+                // stale drag/delete must not undo another tab's committed edit.
+                const changed = expected && (!current || ['endDate', 'interval', 'state', 'taskId', 'subtaskId', 'projectId', 'isAllDay'].some(key => current[key] !== expected[key]));
+                if (changed || current && current.state === -1 && record.state !== -1) {
+                    fail(new Error(root.FocusI18n.text('数据已在另一个标签页更新，请刷新本页。'))); return;
+                }
+                store.put(record); done(record);
+            };
+        });
     }
     let channel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('focustodo-local') : null;
     function broadcast(type, records, operation) { if (channel) channel.postMessage({ type, records: records || [], operationId: operation && operation.operationId }); }

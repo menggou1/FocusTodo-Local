@@ -192,7 +192,8 @@
     }
     function view(s, now) {
         const delta = running(s) ? Math.max(0, now - s.cursorAt) / 1000 : 0;
-        const rest = s.state === 'rest' || s.state === 'waitingForRest' || (s.state === 'pause' && s.pausedFrom === 'rest');
+        const rest = s.state === 'rest' || s.state === 'waitingForRest' || (s.state === 'pause' && s.pausedFrom === 'rest') ||
+            (s.state === 'recovery' && s.pendingRecovery && s.pendingRecovery.priorState === 'rest');
         const elapsed = s.state === 'initial' ? 0 : s.mode === 'countup' && !rest ? s.totalSeconds + delta : s.phaseElapsed + delta;
         return { state: s.state === 'recovery' ? 'pause' : s.state,
             interval: rest ? restInterval(s) : s.config.interval,

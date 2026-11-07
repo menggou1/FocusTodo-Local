@@ -1,6 +1,6 @@
 {
   "name": "focustodo",
-  "version": "7.1.1-local.1.8.2",
+  "version": "7.1.1-local.1.8.3",
   "description": "FocusTodo web version",
   "scripts": {
     "start": "node scripts/start.cjs",
@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "acorn": "8.17.0",
+    "fake-indexeddb": "6.2.7",
     "playwright": "1.62.1"
   }
 }

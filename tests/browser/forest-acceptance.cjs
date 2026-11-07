@@ -73,6 +73,25 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   await rp.locator('[class*=HomeHeader-forest]').click();
   await rp.waitForFunction(()=>document.querySelector('[class*=ForestSection-expBarText]')?.textContent.includes('55g'));
   assert.equal(await rp.locator('[id^=sun-]').filter({hasText:'5g'}).count(),0);assert.deepEqual(rapidErrors,[]);await rapid.close();
+  // Force an async refresh gap after a normal-motion bulk flight, sampling
+  // rendered frames until removal. A cancelled forwards fill must not flash back.
+  const flightContext=await browser.newContext({locale:'zh-CN',viewport:{width:1280,height:900}});
+  await flightContext.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());
+  const fp=await flightContext.newPage();fp.on('pageerror',e=>errors.push(e.message));await ready(fp);
+  await fp.evaluate(async()=>{
+   const mount=FocusForest.mount;FocusForest.mount=function(view,manager){window.__flightView=view;return mount(view,manager)};
+   const d=FocusLocalData;await d.putPomodoro({id:'flash-pomo',endDate:Date.now()-25*3600000,interval:1500,pomodoroInterval:1500,isManual:false,state:0});
+   await d.transaction(await d.open(),['Task'],'readwrite',tx=>tx.objectStore('Task').put({id:'flash-task',name:'flight',finishedDate:Date.now()-25*3600000,isFinished:true,state:0}));
+  });
+  await fp.locator('[class*=HomeHeader-forest]').click();await fp.waitForFunction(()=>{const b=document.querySelector('[data-forest-collect-all]');return b&&!b.disabled});
+  await fp.evaluate(()=>{
+   const view=window.__flightView,generate=view.generateSunItems;view.generateSunItems=async function(){await new Promise(r=>setTimeout(r,220));return generate.apply(this,arguments)};
+   const nodes=[...document.querySelectorAll('[id^=sun-]')].filter(n=>/25g|5g/.test(n.textContent));if(nodes.length!==2)throw Error('Expected two visible flight rewards');window.__flashSamples=[];window.__flightSampleDone=false;
+   const faded=new Set();function sample(){for(const node of nodes){if(!node.isConnected)continue;const style=getComputedStyle(node),visible=style.visibility!=='hidden'&&Number(style.opacity)>.01;if(!visible)faded.add(node);else if(faded.has(node))window.__flashSamples.push(node.id)}if(nodes.some(n=>n.isConnected))requestAnimationFrame(sample);else window.__flightSampleDone=true}requestAnimationFrame(sample);
+  });
+  await fp.locator('[data-forest-collect-all]').click();await fp.waitForFunction(()=>window.__flightSampleDone);
+  assert.deepEqual(await fp.evaluate(()=>window.__flashSamples),[],'Committed sunlight never reappears after its flight, even during a slow refresh');
+  assert.equal(await fp.evaluate(()=>FocusLocalData.forestGet('Sunlight')),50);await flightContext.close();
   const reduced=await browser.newContext({locale:'zh-CN',reducedMotion:'reduce'});
   await reduced.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());
   const mp=await reduced.newPage();await ready(mp);

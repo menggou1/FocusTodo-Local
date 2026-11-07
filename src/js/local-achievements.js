@@ -56,7 +56,7 @@
     async function rewards(manager){
         const [pomodoros,tasks]=await Promise.all([manager.getPomodoroSunItemData(),manager.getTaskSunItemData()]);
         const items=pomodoros.map(row=>({itemType:0,id:row.id,date:row.completedDate,powerValue:manager.POMODOROMULTIPERREWARD*Math.max(Math.floor(row.interval/60),1)}));
-        items.push(...tasks.map(row=>({itemType:1,id:row.id,date:row.completedDate,powerValue:manager.TASKREWARD})));
+        for(const row of tasks)items.push({itemType:1,id:row.id,date:row.completedDate,powerValue:manager.TASKREWARD});
         for(const row of manager.getLaunchSunItemData()){
             if(!row.isGotDailyLoginReward)items.push({itemType:2,id:'',date:row.date,powerValue:manager.DAILYLAUNCHREWARD});
             if(!row.isGotContinueLoginReward)items.push({itemType:3,id:'',date:row.date,powerValue:manager.CONTINUELAUNCHMULTIPERREWARD*Math.min(row.count,80)});
@@ -77,7 +77,7 @@
                 // Wake exactly when a reward matures/expires, and periodically
                 // recover from system-clock adjustments without opening the UI.
                 const boundaries=items.flatMap(item=>[item.date+DAY,item.date+2*DAY]).filter(date=>date>now);
-                const next=Math.min(now+60000,...boundaries);
+                const next=boundaries.reduce((next,date)=>Math.min(next,date),now+60000);
                 timer=setTimeout(refresh,Math.max(1,next-Date.now()));
             }catch(error){if(live&&request===generation){root.FocusLocal.notice(error.message);timer=setTimeout(refresh,60000)}}
         };
@@ -106,14 +106,14 @@
             const [result,allRewards]=await Promise.all([view.generateSunItems(),rewards(state.manager)]);
             if(forests.get(view)!==state||generation!==state.generation)return;
             const old=view.props.sunItems||[];
-            state.nextId=Math.max(state.nextId||0,...old.map(x=>x.id+1));
+            state.nextId=old.reduce((next,item)=>Math.max(next,item.id+1),state.nextId||0);
             const same=(a,b)=>a.data.itemType===b.data.itemType&&a.data.id===b.data.id&&a.data.date===b.data.date;
             const items=result[0].map(x=>{const match=old.find(y=>same(x,y));return Object.assign({},x,match?{id:match.id,left:match.left,top:match.top}:{id:state.nextId++})});
             for(const entry of old)if(state.pending.has(entry.id)&&!items.some(x=>same(x,entry)))items.push(entry);
             view.props.setSunItems(items);view.props.setActivityItems(result[1]);
             const now=Date.now(),boundaries=allRewards.flatMap(item=>[item.date+DAY,item.date+2*DAY]).filter(date=>date>now);
             view.setState({localForestCollecting:state.bulk||state.pending.size>0,localForestCollectable:allRewards.some(item=>collectible(item,now))});
-            state.timer=setTimeout(state.refresh,Math.max(1,Math.min(now+60000,...boundaries)-Date.now()));
+            state.timer=setTimeout(state.refresh,Math.max(1,boundaries.reduce((next,date)=>Math.min(next,date),now+60000)-Date.now()));
         }catch(error){if(forests.get(view)===state&&generation===state.generation){root.FocusLocal.notice(error.message);state.timer=setTimeout(state.refresh,60000)}}
     }
     function animateForest(state,element,frames,options){
@@ -122,7 +122,7 @@
         return animation;
     }
     async function collectItems(view,entries,state){
-        const flights=[],background=view.forestBgRef.current;let collected=false;
+        const flights=[],committed=new Set(),background=view.forestBgRef.current;let collected=false;
         for(const entry of entries){
             const key=entry.id==null?rewardKey(entry.data):entry.id;state.pending.set(key,true);
             const element=entry.id==null?null:document.getElementById('sun-'+entry.id);if(!element)continue;
@@ -131,20 +131,24 @@
                 {left:element.style.left,top:element.style.top,opacity:1,transform:'scale(1)'},
                 {left:(background.offsetWidth/2-24)+'px',top:(.84*background.offsetHeight-34)+'px',opacity:0,transform:'scale(0.2)'}
             ],{duration:1000,easing:'ease-in-out',fill:'forwards'}):null;
-            flights.push({element,flight,finished:flight?flight.finished.catch(()=>{}):Promise.resolve()});
+            flights.push({element,flight,key:rewardKey(entry.data),finished:flight?flight.finished.catch(()=>{}):Promise.resolve()});
         }
         view.setState({localForestCollecting:true});
         try{
             for(const entry of entries){
                 if(!collectible(entry.data))continue;
-                const result=await root.FocusLocalData.collectForest(entry.data);collected=collected||result.collected;
+                const result=await root.FocusLocalData.collectForest(entry.data);collected=collected||result.collected;committed.add(rewardKey(entry.data));
                 if(forests.get(view)===state)view.setState(view.loadLocalForestState);
             }
-            await Promise.all(flights.map(entry=>entry.finished));
         }catch(error){if(forests.get(view)===state)root.FocusLocal.notice(error.message)}
         finally{
+            // Hide committed nodes before cancelling the forwards-filled flight.
+            // The asynchronous query and React removal can span multiple frames;
+            // cancellation alone would reveal the original position in that gap.
+            // Failed rewards stay visible and can be retried.
+            await Promise.all(flights.map(entry=>entry.finished));
             for(const entry of entries)state.pending.delete(entry.id==null?rewardKey(entry.data):entry.id);
-            for(const {element,flight} of flights){if(flight){flight.cancel();state.animations.delete(flight)}element.removeAttribute('aria-busy')}
+            for(const {element,flight,key} of flights){if(committed.has(key))element.style.visibility='hidden';if(flight){flight.cancel();state.animations.delete(flight)}element.removeAttribute('aria-busy')}
             state.bulk=false;
             if(forests.get(view)===state){
                 await refreshForest(view);

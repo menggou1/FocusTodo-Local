@@ -283,7 +283,7 @@
             if (!event?.raw?.id || event.category !== 'scheduled') return;
             const raw = event.raw, duration = raw.interval * 1000;
             const start = Math.round(startTime), end = action === 'resize' ? Math.max(start + 60000, Math.round(endTime)) : start + duration;
-            try { await root.FocusLocalData.putSchedule({ ...raw, endDate: end, interval: Math.round((end - start) / 1000), sync: 0 }); }
+            try { await root.FocusLocalData.putSchedule({ ...raw, endDate: end, interval: Math.round((end - start) / 1000), sync: 0 }, raw); }
             catch (error) { notice(error); }
             finally { await refresh(); }
         };
@@ -298,7 +298,7 @@
         c.handleCalendarEventDelete = async () => {
             const event = c.state.calendarContextMenuTarget; c.hideCalendarContextMenu();
             if (!event?.raw?.id) return;
-            try { await root.FocusLocalData.putSchedule({ ...event.raw, state: -1, sync: 0 }); }
+            try { await root.FocusLocalData.putSchedule({ ...event.raw, state: -1, sync: 0 }, event.raw); }
             catch (error) { notice(error); }
         };
         c.getCalendarEventMenuGroups = () => [[

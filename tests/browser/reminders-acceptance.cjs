@@ -30,6 +30,19 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   assert(position.top>0&&position.bottom<=position.height&&position.scroll===0,JSON.stringify(position));
   assert.match(await p.locator('.focus-task-reminders').innerText(),/无需滚动即可查看的提醒/);
   assert.match(await p.locator('.focus-task-reminders time').getAttribute('datetime'),/^20/);
+  async function reminderLayout(page){
+   const layout=await page.locator('.focus-task-reminders li').first().evaluate(row=>{
+    const r=row.getBoundingClientRect(),content=row.children[1],nodes=[...row.children].map(node=>{const b=node.getBoundingClientRect();return {left:b.left-r.left,right:r.right-b.right,top:b.top,bottom:b.bottom}});
+    return {nodes,overflow:row.scrollWidth>row.clientWidth,clipped:content.scrollWidth>content.clientWidth||content.scrollHeight>content.clientHeight};
+   });
+   assert(!layout.overflow&&!layout.clipped,JSON.stringify(layout));
+   for(const item of layout.nodes)assert(item.left>=15&&item.right>=15,'Every reminder line has horizontal inset: '+JSON.stringify(layout));
+   for(let i=1;i<layout.nodes.length;i++)assert(layout.nodes[i].top>=layout.nodes[i-1].bottom+5,'Reminder lines never overlap');
+  }
+  await reminderLayout(p);
+  // Verify the geometry guard detects a broken date inset.
+  const broken=await p.addStyleTag({content:'.focus-task-reminders time { margin-left:-16px!important; }'});
+  await assert.rejects(()=>reminderLayout(p));await broken.evaluate(el=>el.remove());
   await highlighted(p,true); // Latest release remains unread.
   await p.locator('.focus-release-entry').first().click();await p.getByRole('button',{name:'关闭',exact:true}).click();await highlighted(p,false);
   const evidence=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance');fs.mkdirSync(evidence,{recursive:true});
@@ -60,10 +73,11 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   const english=await browser.newContext({locale:'en',viewport:{width:960,height:720}});
   await english.addInitScript(()=>{localStorage.setItem('FocusTodo.language','en');localStorage.setItem('DarkMode','true')});
   await english.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());
-  const ep=await english.newPage();await ready(ep);await task(ep,'An English task reminder',-100);
+  const ep=await english.newPage();await ready(ep);await task(ep,'An English task reminder with a long title that must wrap without overlapping its date',-100);
   await ep.getByRole('button',{name:'Notifications',exact:true}).click();await ep.locator('.focus-reminder-summary').waitFor();
   assert.match(await ep.locator('.focus-reminder-summary').innerText(),/Task reminders/);
   assert.doesNotMatch(await ep.locator('.focus-notification-panel').innerText(),/[\u3400-\u9fff]/);
+  await reminderLayout(ep);
   const surface=await ep.locator('.focus-notification-panel').evaluate(el=>({dark:document.body.classList.contains('dark'),background:getComputedStyle(el).backgroundColor}));
   assert(surface.dark&&Number(surface.background.match(/\d+/)[0])<100,surface.background);
   await ep.waitForFunction(()=>{const panel=document.querySelector('#notification-popover');return panel&&getComputedStyle(panel).opacity==='1'});

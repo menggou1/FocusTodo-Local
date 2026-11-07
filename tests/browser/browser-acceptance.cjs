@@ -1353,6 +1353,32 @@ const server = createServer();
             });
             assert.equal(JSON.parse(result).localVersion,release.localVersion);
         }));
+        await check('audit XHR cancellation, JSON events and reopening use real browser delivery', () => app(async page => {
+            const result=await page.evaluate(async()=>{
+                const wait=()=>new Promise(r=>setTimeout(r,30)),cancelled=[],json=[],reopened=[];
+                const x=new XMLHttpRequest();x.open('GET','https://example.invalid/cancel');
+                for(const type of ['load','abort','loadend'])x.addEventListener(type,()=>cancelled.push(type));
+                x.send();x.abort();await wait();
+                const j=new XMLHttpRequest();j.open('GET','https://example.invalid/json');j.responseType='json';
+                for(const type of ['readystatechange','load','loadend'])j.addEventListener(type,event=>json.push(event.type));
+                j.send();await wait();let rejectsText=false;try{j.responseText}catch(e){rejectsText=e.name==='InvalidStateError'}
+                const r=new XMLHttpRequest();r.open('GET','https://example.invalid/reopen');
+                r.addEventListener('readystatechange',()=>{if(r.readyState===4)r.open('GET','/release.json')});
+                r.addEventListener('load',()=>reopened.push('stale load'));r.send();await wait();
+                return {cancelled,json,status:j.status,response:j.response,rejectsText,reopened,state:r.readyState,done:XMLHttpRequest.DONE};
+            });
+            assert.deepEqual(result,{cancelled:['abort','loadend'],json:['readystatechange','load','loadend'],status:200,response:{status:0},rejectsText:true,reopened:[],state:1,done:4});
+        }));
+        await check('audit corrupt timer import leaves real IndexedDB and settings unchanged', () => app(async page => {
+            const result=await page.evaluate(async()=>{
+                const d=FocusLocalData;await d.syncAchievements();const before=await d.snapshot();
+                const invalid=JSON.parse(JSON.stringify(before));invalid.indexedDB.TimerSession=null;invalid.localStorage.AuditOverwrite='must not persist';
+                let rejected=false,started=0;const listener=()=>started++;window.addEventListener('focus-local-maintenance',listener);
+                try{await d.replace(invalid,{backup:false})}catch(_){rejected=true}finally{window.removeEventListener('focus-local-maintenance',listener)}
+                const after=await d.snapshot();return {rejected,started,before:before.indexedDB,after:after.indexedDB,setting:localStorage.getItem('AuditOverwrite'),maintenance:d.maintenance};
+            });
+            assert(result.rejected);assert.equal(result.started,0);assert.deepEqual(result.after,result.before);assert.equal(result.setting,null);assert.equal(result.maintenance,false);
+        }));
         await check('Request and URL inputs cannot bypass exact network allowlist', () => app(async (page, context, errors, external) => {
             const rejected = await page.evaluate(async () => {
                 const values = ['https://example.invalid/?www.bing.com', new URL('https://www.bing.com.evil.invalid/'), new Request('https://example.invalid/')];

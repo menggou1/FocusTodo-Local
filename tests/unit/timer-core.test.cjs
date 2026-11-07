@@ -205,3 +205,14 @@ test('idle configuration changes persist while active work keeps its original du
     s = core.reduce(s, { type: 'configure', config: { interval: 1800 } }, minute(4)).session;
     assert.equal(s.config.interval, 1200);
 });
+
+test('interrupted breaks keep their break duration and elapsed display during recovery', () => {
+    let s = start({ mode: 'countdown', config: { interval: 60, shortBreak: 300, autoBreak: true } });
+    s = core.reduce(s, { type: 'tick' }, START + 70000).session;
+    s = core.reduce(s, { type: 'tick' }, START + 400000).session;
+    assert.equal(s.state, 'recovery');
+    const view = core.view(s, START + 500000);
+    assert.equal(view.state, 'pause');
+    assert.equal(view.interval, 300);
+    assert.equal(view.elapse, 10);
+});

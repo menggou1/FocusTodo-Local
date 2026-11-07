@@ -54,7 +54,24 @@ attach(1036, 't', 'window.FocusCalendar.attachTimeline(t,f.default,m.default)');
 bundle.method(1033, 'render', 'function(){return window.FocusCalendar.renderShell(this,d.default,m.default)}');
 bundle.assignment(1033, 'getTaskPaneEmptyLabel', 'function(){return ""}');
 bundle.method(1036, 'render', 'function(){return window.FocusCalendar.renderDay(this,f.default,m.default)}');
-bundle.method(256, 'updateSchedule', 'function(record){return window.FocusLocalData.putSchedule(record)}');
+bundle.method(256, 'updateSchedule', 'function(record,expected){return window.FocusLocalData.putSchedule(record,expected).catch(function(error){window.FocusLocal.notice(error.message);throw error})}');
+// Existing schedule edits already clone the original row. Pass that original
+// through the manager so the data service can compare it atomically. New rows
+// and legacy migration calls retain their existing creation behavior.
+let scheduleEdits = 0;
+for (const id of [256, 1021, 1042]) walk(modules[id], node => {
+    if (node.type !== 'CallExpression' || node.callee.property?.name !== 'updateSchedule') return;
+    const clone = node.arguments[0];
+    if (clone?.type !== 'CallExpression' || clone.arguments.length !== 3 ||
+        clone.arguments[0].type !== 'ObjectExpression' || clone.arguments[0].properties.length ||
+        clone.arguments[1].type !== 'Identifier' || clone.arguments[2].type !== 'ObjectExpression') return;
+    const expected = source.slice(clone.arguments[1].start, clone.arguments[1].end);
+    if (node.arguments.length > 2 || node.arguments[1] && source.slice(node.arguments[1].start, node.arguments[1].end) !== expected)
+        throw new Error('Unexpected schedule conflict-check argument: ' + id);
+    replace(node, source.slice(node.callee.start, node.callee.end) + '(' + source.slice(clone.start, clone.end) + ',' + expected + ')');
+    scheduleEdits++;
+});
+if (scheduleEdits !== 6) throw new Error('Schedule edit boundaries changed: ' + scheduleEdits);
 // The legacy local fork filtered the calendar out despite retaining its view.
 // Restore the real system-list entry so users can reach these enhancements.
 walk(modules[863], node => {

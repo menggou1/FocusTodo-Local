@@ -100,7 +100,7 @@
                 const saved=read();
                 header.setState({localReleaseRead:!hasUnreadUpdates(),notification:{show:open||header.state.notification.show,highlight:due.some(row=>!saved.has(key(row))),items:due}});
                 due.forEach(row=>announced.add(key(row)));
-                const next=Math.min(...active.filter(row=>row.reminderDate>now).map(row=>row.reminderDate));
+                const next=active.reduce((next,row)=>row.reminderDate>now?Math.min(next,row.reminderDate):next,Infinity);
                 if(Number.isFinite(next))timer=setTimeout(()=>refresh(false,true),Math.min(Math.max(1,next-Date.now()),86400000));
                 if(notify&&fresh.length&&!open&&!header.state.notification.show){
                     const title=root.FocusI18n.text('任务到时提醒'),message=fresh.map(row=>row.name).join('、');

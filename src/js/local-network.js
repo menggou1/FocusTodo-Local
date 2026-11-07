@@ -19,12 +19,40 @@
             var xhr = new OrigXHR();
             var origOpen = xhr.open;
             var origSetRequestHeader = xhr.setRequestHeader;
+            var origAbort = xhr.abort;
+            var responseTimer = null, pending = false, async = true;
+            var responseKeys = ['readyState', 'status', 'statusText', 'responseText', 'response', 'responseXML', 'responseURL'];
+            function clearResponse() { responseKeys.forEach(function(key) { delete xhr[key]; }); }
+            function response(status) {
+                var text = status ? '{"status":0}' : '', type = xhr.responseType;
+                var value = type === 'json' ? (status ? { status: 0 } : null)
+                    : type === 'arraybuffer' ? new TextEncoder().encode(text).buffer
+                    : type === 'blob' ? new Blob([text], { type: 'application/json' })
+                    : type === 'document' ? null : text;
+                Object.defineProperties(xhr, {
+                    readyState: { value: 4, configurable: true },
+                    status: { value: status, configurable: true },
+                    statusText: { value: status ? 'OK' : '', configurable: true },
+                    responseURL: { value: '', configurable: true },
+                    responseXML: { value: null, configurable: true },
+                    response: { value: value, configurable: true },
+                    responseText: { configurable: true, get: function() {
+                        if (type && type !== 'text') throw new DOMException('responseText requires a text responseType', 'InvalidStateError');
+                        return text;
+                    } }
+                });
+            }
+            function dispatch(names, generation) {
+                names.forEach(function(name) {
+                    if (xhr._focusRequestGeneration === generation) xhr.dispatchEvent(new Event(name));
+                });
+            }
             xhr.open = function(method, url) {
                 xhr._focusRequestGeneration = (xhr._focusRequestGeneration || 0) + 1;
-                // A reused XHR must not retain the previous request's blocked state.
-                if (xhr._blocked) {
-                    delete xhr.readyState; delete xhr.status; delete xhr.responseText;
-                }
+                clearTimeout(responseTimer); responseTimer = null; pending = false;
+                // A reused XHR must not retain the previous synthetic response.
+                clearResponse();
+                async = arguments[2] !== false;
                 xhr._blocked = false;
                 xhr._blockedMethod = xhr._blockedUrl = undefined;
                 var parsed = new URL(String(url), location.href);
@@ -53,26 +81,37 @@
             var origSend = xhr.send;
             xhr.send = function(data) {
                 if (xhr._blocked) {
-                    // 构建响应数据
-                    var _xhrResponse = { status: 0 };
-
-                    var _xhrRespStr = JSON.stringify(_xhrResponse);
+                    if (pending || xhr.readyState !== 1) throw new DOMException('XHR is not open or was already sent', 'InvalidStateError');
+                    pending = true;
                     var generation = xhr._focusRequestGeneration;
-                    setTimeout(function() {
-                        if (xhr._focusRequestGeneration !== generation) return;
-                        Object.defineProperty(xhr, 'readyState', { value: 4, writable: true, configurable: true });
-                        Object.defineProperty(xhr, 'status', { value: 200, writable: true, configurable: true });
-                        Object.defineProperty(xhr, 'responseText', { value: _xhrRespStr, writable: true, configurable: true });
-                        if (xhr.onload) xhr.onload();
-                        if (xhr._focusRequestGeneration === generation && xhr.onreadystatechange) xhr.onreadystatechange();
-                    }, 0);
+                    function complete() {
+                        if (!pending || xhr._focusRequestGeneration !== generation) return;
+                        pending = false; responseTimer = null; response(200);
+                        // dispatchEvent reaches both addEventListener and onload
+                        // consumers, with native ordering and a real Event value.
+                        dispatch(['readystatechange', 'load', 'loadend'], generation);
+                    }
+                    if (async) responseTimer = setTimeout(complete, 0);
+                    else complete();
                     return;
                 }
                 return origSend.apply(xhr, arguments);
             };
+            xhr.abort = function() {
+                if (!xhr._blocked) return origAbort.apply(xhr, arguments);
+                var wasPending = pending, generation = ++xhr._focusRequestGeneration;
+                clearTimeout(responseTimer); responseTimer = null; pending = false;
+                clearResponse(); origAbort.call(xhr);
+                if (wasPending) {
+                    response(0);
+                    dispatch(['readystatechange', 'abort', 'loadend'], generation);
+                    if (xhr._focusRequestGeneration === generation) clearResponse();
+                }
+            };
             return xhr;
         };
         window.XMLHttpRequest.prototype = OrigXHR.prototype;
+        Object.setPrototypeOf(window.XMLHttpRequest, OrigXHR);
 
         // 拦截 fetch API
         if (window.fetch) {
