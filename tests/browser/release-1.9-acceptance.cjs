@@ -20,7 +20,7 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
  async function appearance(p){await settings(p,'外观');await p.locator('[data-theme-id="__bing_daily__"]').waitFor();}
  async function hoverFloat(p){
   const root=p.locator('[class*="FloatTimer-root"]');await root.waitFor();
-  await root.evaluate(async element=>{await new Promise(requestAnimationFrame);await Promise.all(element.closest('[class*="Timer-root"]').getAnimations({subtree:true}).map(animation=>animation.finished.catch(()=>{})));});
+  await root.evaluate(async element=>{await new Promise(requestAnimationFrame);await Promise.all(element.closest('[class^="Timer-root-"]').getAnimations({subtree:true}).map(animation=>animation.finished.catch(()=>{})));});
   await root.hover();
  }
  async function seed(p,active=false,updatedAt=Date.now()){
