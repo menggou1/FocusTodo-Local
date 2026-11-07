@@ -156,12 +156,18 @@ git status --short
 
 仅整理文档时检查文件和锚点链接；若变更文档打包清单，额外构建压缩包并检查解压后的链接与启动，不必重跑全部浏览器测试。
 
+### 分支管理
+
+- `main` 是默认稳定分支，保存稳定版本，也是正式 GitHub Pages 的唯一部署来源。
+- `dev` 是长期开发分支，用于日常开发、修复和测试；验证通过后可合并至 `main`。日常开发复用 `D:\Program Files\Focustodo`，不为每次任务建立新工作树。
+- `feature/<name>` 和 `fix/<name>` 分别用于按需创建的临时功能和修复分支；`release/<version>` 用于按需进行版本验收和发布。名称应简短、清晰，使用小写字母、数字和连字符；版本采用对应版本号。
+- 创建前先获取远程最新状态：通常从最新 `dev` 创建功能或修复分支，从拟验收的提交创建 release 分支。将远程更新合入相应本地分支，处理冲突后再推送；不强推覆盖他人工作。
+- 临时功能和修复分支验证后合入 `dev`；`dev` 验证后合入 `main`。release 分支验收后的改动合入 `main`，并同步回 `dev`，避免遗漏修复。可使用 PR 审查，也可在本地直接合并并推送，不强制 PR。
+- 临时分支合并且不再需要后，确认提交已保留，再删除本地及远程分支；保留 `main`、`dev` 和历史归档分支。非 `main` 分支仍可按下述 Tag 流程独立发布 Release，不会部署正式 Pages。
+
 ### 开发与发布流程
 
-日常开发在 `D:\Program Files\Focustodo` 复用长期分支 `feature/2.0.0-versioning`，不为每次任务建立新工作树。验收后合入 main；发布后切回该开发分支继续。
-
-
-1. 在功能分支修改并运行适当检查；PR 推荐用于审查，是否合并由任务决定。应用变化时更新 `release.json`、生成文件和中英文报告。
+1. 在 `dev` 或按需创建的临时分支修改并运行适当检查；PR 推荐用于审查，是否合并由任务决定。应用变化时更新 `release.json`、生成文件和中英文报告。
 2. 从拟发布的提交创建与 `localVersion` 完全一致的版本 Tag 并推送。Tag push 自动执行完整 CI，成功后创建 Pre-release；无需先合并或部署 Pages。避免在待发布提交使用 `[skip ci]`。
 3. release 分支完成验收后，可运行 `gh workflow run ci.yml --ref <版本Tag> -f release_channel=stable`，完整 CI 再次通过后创建正式 Release，或将同一 Tag 已有的 Pre-release 显式提升。提升前会校验已有附件与本次测试包的内容一致。手动选择正式版表示已完成验收；工作流不根据分支名称推断验收。
 4. 检查 Actions、Release 的 ZIP、tar.gz、SHA256SUMS 和报告证据。部署 Pages 时另行核对 main 工作流及线上 `deployment.json`；独立发布不改变 Pages。
