@@ -100,7 +100,7 @@ walk(render,node=>{
 });
 for(const [id,anchor,addition] of [
  [1044,'l.default.createElement("div",{className:d.default.zoomup', 'window.FocusLocal.miniButton(l.default,this.props.openMiniWindow,false,this.props.miniMode),'],
- [1049,'f.default.createElement("div",{className:p.default.zoomdown', 'window.FocusLocal.miniButton(f.default,this.props.openMiniWindow,true),']
+
 ]){
  const value=bundle.method(id,'render').value,text=source.slice(value.start,value.end);
  let updated=text;

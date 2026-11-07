@@ -3,11 +3,26 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.9.1",
+    "localVersion": "1.9.2",
     "author": "Lexible",
     "date": "2026-11-07",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "7.1.1-local.1.9.2",
+            "date": "2026-11-07",
+            "title": "恢复全屏计时器原交互",
+            "titleEn": "Restore original expanded timer controls",
+            "items": [
+                "恢复全屏下拉按钮的原位置、图标和收起行为；小窗入口仅保留在浮动计时条。",
+                "取消自行增加的开发分支命名条款；失败候选也使用递增的新版本 Tag。"
+            ],
+            "itemsEn": [
+                "Restore the expanded timer collapse control to its original position, icon and behavior; keep the mini-window entry on the floating bar.",
+                "Remove the invented development branch naming rule and require fresh patch-version tags for failed candidates."
+            ],
+            "report": "docs/releases/UPDATE-7.1.1-local.1.9.2.md"
+        },
         {
             "version": "7.1.1-local.1.9.1",
             "date": "2026-11-07",
@@ -474,7 +489,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.9.1",
+    "version": "7.1.1-local.1.9.2",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

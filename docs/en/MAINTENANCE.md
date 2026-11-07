@@ -2,9 +2,8 @@
 
 [English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
 
-Current worktree: `7.1.1-local.1.9.1`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
+Current worktree: `7.1.1-local.1.9.2`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
 
-Daily development reuses `D:\Program Files\Focustodo` on the long-lived `codex/dev` branch, following the `codex/` prefix. Do not create a worktree for every task. Merge verified work into `main`; after a successful release, fast-forward and check out `codex/dev` for subsequent work. Its same-name remote branch runs checks; only `main` deploys official Pages.
 
 The 1.9 browser suite covers opt-in networking, the shared bottom toast, release badges, wallpaper redirects/timeouts/day changes/cancellation, theme ownership and native mini windows. After `npx playwright install firefox webkit`, run `npm run test:compat` for Firefox/WebKit startup, tasks, timer recovery, themes and backup imports without BroadcastChannel, Web Locks or compression APIs. Linux Node 24 CI also runs this suite. Automated WebKit checks do not establish full real Safari acceptance.
 
@@ -124,9 +123,9 @@ Keep historical reports and public evidence as records of their time. New report
 
 An unpublished candidate can be fixed and revalidated, including moving its tag after confirming no public Release or concurrent publication exists. Do not silently replace a published Pre-release: use a new version for fixes, or explicitly promote it after verifying its assets match the accepted build. Never overwrite a published stable Release or its assets; publish fixes as a new version. Preserve historical failures and necessary evidence.
 
-The 1.x series, including this 1.9.1 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
+The 1.x series, including this 1.9.2 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
 
-**Version 1.9.1 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
+**Version 1.9.2 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
 
 Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
 
@@ -178,3 +177,5 @@ Measure a known pre-change revision with the same locale, theme, viewport, zoom 
 
 Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Current publication rules are described in Version and release above. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
 
+
+A pushed version tag must never be moved or reused, including failed, cancelled or unpublished candidates. Increment the patch version for every repaired candidate. Daily development reuses the existing project directory and a long-lived development branch.

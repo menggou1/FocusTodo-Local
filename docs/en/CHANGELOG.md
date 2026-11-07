@@ -2,7 +2,14 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.9.1**, author Lexible.
+Current application: **7.1.1-local.1.9.2**, author Lexible.
+
+## 7.1.1-local.1.9.2 · 2026-11-07
+
+- Restore the expanded timer collapse control to its original position, icon and behavior; keep the mini-window entry on the floating bar.
+- Remove the invented development branch naming rule and require fresh patch-version tags for failed candidates.
+
+[English report](releases/UPDATE-7.1.1-local.1.9.2.md).
 
 ## 7.1.1-local.1.9.1 · 2026-11-07
 

@@ -118,7 +118,8 @@ const watchdog=setTimeout(()=>{console.error('1.9 acceptance exceeded four minut
    const p=await page(ctx);await p.evaluate(()=>{window.miniRequests=0;Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:{requestWindow:()=>{miniRequests++;return Promise.reject(new Error('blocked'));}}});});
    await p.evaluate(()=>testTimer.zoomDown());await p.locator('[class*="FloatTimer-root"]').dblclick({position:{x:75,y:35}});
    const full=p.locator('[class*="FullscreenTimer-root"]');await full.waitFor();
-   const bounds=await full.evaluate(root=>{const a=root.querySelector('.focus-timer-mini').getBoundingClientRect(),b=root.querySelector('[class*="FullscreenTimer-zoomdown"]').getBoundingClientRect();return {left:a.x,right:b.x};});assert(bounds.right>bounds.left);
+   assert.equal(await full.locator('.focus-timer-mini').count(),0);
+   assert.equal(await full.locator('[class*="FullscreenTimer-zoomdown"]').evaluate(el=>getComputedStyle(el).left),'16px');
    await full.locator('[class*="FullscreenTimer-zoomdown"]').click();assert.equal(await p.evaluate(()=>miniRequests),0);
    await hoverFloat(p);await p.locator('.FloatTimer-miniMode-1KgSp').click();
    await p.locator('#focus-local-notice').filter({hasText:'迷你窗口无法打开'}).waitFor();assert.equal(await p.evaluate(()=>miniRequests),1);
