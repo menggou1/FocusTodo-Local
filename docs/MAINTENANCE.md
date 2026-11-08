@@ -48,7 +48,7 @@ npm run test:browser
 
 ### 2.0.0 隔离候选工程（B/C/D）
 
-`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 首批界面通过冻结接口接入导航、清单/文件夹、任务/子任务、搜索、排序、任务字段、完成与确认交互，语言/深色改用核心设置服务；其他视图逐批接入。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)、[冻结服务合同](plan/2.0.0-service-contracts.md)及 [D 首批报告](plan/2.0.0-ui-batch-1.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
+`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 工作区和计时通过冻结接口接入导航、清单/文件夹/标签、任务/子任务、搜索、分组/排序、任务字段、四项统计、计时/中断恢复/声音/原生迷你窗口，语言/深色使用核心设置服务；完整功能与原交互继续按 BACKLOG 实施。D-R 是全部功能及全页面渲染通过后的强制人工门禁，用户明确授权前不得进入 D-V、E 或 F。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)、[冻结服务合同](plan/2.0.0-service-contracts.md)、[D 首批报告](plan/2.0.0-ui-batch-1.md)及 [D 第二批报告](plan/2.0.0-ui-batch-2.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
 
 ```powershell
 npm ci

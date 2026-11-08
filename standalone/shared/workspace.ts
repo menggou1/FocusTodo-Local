@@ -20,6 +20,17 @@ const en = {
   language: 'Language', theme: 'Theme', auto: 'System default', light: 'Light', dark: 'Dark', preview: 'Isolated preview',
   previewHelp: 'Use this isolated preview for testing. Continue using the current app for everyday work.', navigation: 'Navigation', skip: 'Skip to content',
   deleteSubtask: 'Delete subtask', editSubtask: 'Edit subtask', toggleSubtask: 'Toggle subtask completion', completedCount: 'completed', activeCount: 'remaining',
+  tags: 'Tags', createTag: 'Create tag', color: 'Color', sort: 'Order tasks by', manual: 'Custom order', sidebarWidth: 'Sidebar width',
+  estimatedTime: 'Estimated time', elapsedTime: 'Elapsed time', minutes: 'min', noDeadline: 'No due date',
+  start: 'Start', pause: 'Pause', resume: 'Continue', stop: 'Stop', finish: 'Complete', rest: 'Start break', skipRest: 'Skip break',
+  countdown: 'Countdown', countup: 'Stopwatch', mini: 'Mini timer', expandTimer: 'Expand timer', closeMini: 'Close mini timer',
+  idle: 'Ready to focus', working: 'Focusing', resting: 'Taking a break', paused: 'Paused', waiting: 'Ready for a break',
+  noTask: 'No task selected', focusTask: 'Start task', focusSubtask: 'Start subtask', switchMode: 'Switch timer mode?',
+  stopHelp: 'End this session? Eligible focus time will be saved; work shorter than 25 seconds is not added to history.',
+  recovery: 'Confirm interrupted time', recoveryHelp: 'Choose the end of the time to keep. Time after the cutoff is excluded.',
+  cutoff: 'Count until', keepRunning: 'Continue after confirmation', discardGap: 'Exclude interrupted time', confirm: 'Confirm',
+  miniUnavailable: 'This browser does not support a separate mini window. The floating timer remains available here.',
+  miniFailed: 'The mini window could not be opened. Try opening it again.', audio: 'Sound', previewSound: 'Preview sound', stopSound: 'Stop preview',
 };
 export type WorkspaceText = { [K in keyof typeof en]: string };
 const zh: WorkspaceText = {
@@ -43,6 +54,17 @@ const zh: WorkspaceText = {
   language: '语言', theme: '主题', auto: '跟随系统', light: '浅色', dark: '深色', preview: '隔离预览',
   previewHelp: '此隔离预览用于测试，日常使用请继续打开现有应用。', navigation: '导航', skip: '跳至内容',
   deleteSubtask: '删除子任务', editSubtask: '编辑子任务', toggleSubtask: '切换子任务完成状态', completedCount: '已完成', activeCount: '待完成',
+  tags: '标签', createTag: '创建标签', color: '颜色', sort: '任务排序方式', manual: '自定义顺序', sidebarWidth: '侧栏宽度',
+  estimatedTime: '预计时间', elapsedTime: '已专注时间', minutes: '分钟', noDeadline: '无到期日',
+  start: '开始', pause: '暂停', resume: '继续', stop: '停止', finish: '完成', rest: '开始休息', skipRest: '跳过休息',
+  countdown: '倒计时', countup: '正向计时', mini: '迷你计时器', expandTimer: '展开计时器', closeMini: '关闭迷你计时器',
+  idle: '准备专注', working: '正在专注', resting: '正在休息', paused: '已暂停', waiting: '准备休息',
+  noTask: '未选择任务', focusTask: '开始任务', focusSubtask: '开始子任务', switchMode: '切换计时模式？',
+  stopHelp: '结束本次计时？符合条件的专注时间将保存；不足 25 秒的专注不计入历史。',
+  recovery: '确认中断时间', recoveryHelp: '请选择要保留时间的截止点，截止点之后的时间不计入。',
+  cutoff: '计入至', keepRunning: '确认后继续计时', discardGap: '不计入中断时间', confirm: '确认',
+  miniUnavailable: '此浏览器不支持独立迷你窗口，可继续使用页面内的浮动计时器。',
+  miniFailed: '无法打开迷你窗口，请重试。', audio: '声音', previewSound: '试听', stopSound: '停止试听',
 };
 export const workspaceText = (locale: string): WorkspaceText => locale.startsWith('zh') ? zh : en;
 export const presetKeys: Record<number, keyof WorkspaceText> = {

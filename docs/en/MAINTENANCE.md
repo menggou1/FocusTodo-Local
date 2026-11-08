@@ -17,7 +17,7 @@ Run `npm ci` to install locked development dependencies. Development requires No
 
 ### Isolated 2.0.0 candidate (B/C/D)
 
-`standalone/` combines the React + TypeScript + Vite skeleton with C core services. The first D batch connects navigation, lists/folders, tasks/subtasks, search, ordering, task fields, completion and confirmations through frozen contracts. Language/dark mode use core preferences. See the [B report](plan/2.0.0-skeleton.md), [C compatibility report](plan/2.0.0-services.md), [frozen contracts](plan/2.0.0-service-contracts.md) and [D first-batch report](plan/2.0.0-ui-batch-1.md). Keep work on `refactor/standalone-app`; merging into other branches is prohibited. Production, Pages and normal portable packages retain the existing entry.
+`standalone/` combines the React + TypeScript + Vite skeleton with C core services. The D workspace/timer connect navigation, lists/folders/tags, tasks/subtasks, search, grouping/order, task fields/summaries, timer/recovery/sounds/native mini windows through frozen contracts. Language/dark mode use core preferences. Full functionality/legacy interactions continue under BACKLOG. D-R is a mandatory human gate after all functionality and page rendering pass; no D-V, E or F before explicit user authorization. See the [B report](plan/2.0.0-skeleton.md), [C compatibility report](plan/2.0.0-services.md), [frozen contracts](plan/2.0.0-service-contracts.md), [D first-batch report](plan/2.0.0-ui-batch-1.md) and [second-batch report](plan/2.0.0-ui-batch-2.md). Keep work on `refactor/standalone-app`; merging into other branches is prohibited. Production, Pages and normal portable packages retain the existing entry.
 
 ```bash
 npm ci

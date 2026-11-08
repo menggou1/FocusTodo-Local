@@ -7,17 +7,19 @@ import { expected, number, ordered, projectName, string } from './model';
 export function ProjectEditor({ row, type, projects, close }: { row?: Entity; type: number; projects: readonly Entity[]; close(): void }) {
   const { services, text, run, busy, blocked } = useWorkspace();
   const [name, setName] = useState(string(row?.name)), [parentId, setParent] = useState(string(row?.parentId));
+  const [color, setColor] = useState('#' + (/^[a-f\d]{6}$/i.test(string(row?.color)) ? string(row?.color) : 'AEBDC3'));
   const [deleting, setDeleting] = useState(false);
-  return <Dialog title={row ? text.edit : type === 2000 ? text.createFolder : text.createList} close={close}>
+  return <Dialog title={row ? text.edit : type === 2000 ? text.createFolder : type === 3000 ? text.createTag : text.createList} close={close}>
     {deleting ? <form onSubmit={async event => { event.preventDefault(); if (row && await run(() => services.business.command({ type: 'removeProject', id: row.id, expected: row }))) close(); }}>
       <p>{text.deleteListHelp}</p><p>{name}</p><footer><button type="button" onClick={() => setDeleting(false)}>{text.cancel}</button><button disabled={busy || blocked} className="danger">{text.remove}</button></footer>
     </form> : <form onSubmit={async event => {
       event.preventDefault();
-      const changes = { name: name.trim(), parentId };
-      if (await run(() => services.business.command(row ? { type: 'updateProject', id: row.id, changes, expected: expected(row, ['name', 'parentId', 'state']) }
-        : { type: 'addProject', values: { ...changes, type, order: Math.max(0, ...projects.map(row => number(row.order))) + 10000 } }))) close();
+      const changes = { name: name.trim(), parentId, color: color.slice(1).toUpperCase() };
+      if (await run(() => services.business.command(row ? { type: 'updateProject', id: row.id, changes, expected: expected(row, ['name', 'parentId', 'state', 'color']) }
+        : { type: 'addProject', values: { ...changes, type, orderingRule: type === 1000 ? 3 : 0, order: Math.max(0, ...projects.map(row => number(row.order))) + 10000 } }))) close();
     }}>
       <label>{text.name}<input autoFocus required maxLength={1000} value={name} onChange={event => setName(event.target.value)} /></label>
+      <label>{text.color}<input type="color" value={color} onChange={event => setColor(event.target.value)} /></label>
       {type === 1000 && <label>{text.folder}<select aria-label={text.folder} value={parentId} onChange={event => setParent(event.target.value)}><option value="">{text.none}</option>
         {projects.filter(row => row.type === 2000 && row.state === 0).map(row => <option key={row.id} value={row.id}>{row.name}</option>)}</select></label>}
       <footer>{row && <button type="button" className="danger" disabled={busy || blocked} onClick={() => setDeleting(true)}>{text.remove}</button>}
@@ -31,8 +33,8 @@ export function ProjectManager({ projects, close }: { projects: readonly Entity[
   const [editor, setEditor] = useState<Entity | null>(null);
   const drag = useRef<{ from: string; snapshot: { id: string; order: number }[] } | null>(null);
   const [active, setActive] = useState('');
-  const rows = ordered(projects.filter(row => row.state !== -1 && row.type !== 3000 && row.type !== 7002));
-  const group = (row: Entity) => number(row.type) >= 4000 ? 'preset' : string(row.parentId) || 'root';
+  const rows = ordered(projects.filter(row => row.state !== -1 && row.type !== 7002));
+  const group = (row: Entity) => number(row.type) >= 4000 ? 'preset' : row.type === 3000 ? 'tags' : string(row.parentId) || 'root';
   const reorder = (from: string, to: string, snapshot: { id: string; order: number }[]) => run(() => services.business.command({ type: 'reorderProjects', from, to, snapshot }));
   function cancelDrag() { drag.current = null; setActive(''); }
   return <>

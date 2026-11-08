@@ -214,6 +214,96 @@ async function createProject(page, name, folder = false, parent) {
                     await page.getByLabel('Name', { exact: true }).fill('Edited compatibility task'); await save(page);
                     const after = (await rows(page, 'Task'))[0]; assert.deepEqual(after, { ...before, name: 'Edited compatibility task', sync: 0 });
                 });
+                await run(browser, engine, 'tags, colors, grouping, sidebar width and cross-list task dragging', async ({ page }) => {
+                    await createProject(page, 'Destination list');
+                    await page.getByRole('button', { name: 'Create tag', exact: true }).click();
+                    await page.getByRole('dialog').getByLabel('Name', { exact: true }).fill('Urgent tag');
+                    await page.getByRole('dialog').getByLabel('Color', { exact: true }).fill('#ee3366');
+                    await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click(); await page.getByRole('dialog').waitFor({ state: 'hidden' });
+                    await page.locator('[data-view="tasks"]').click(); await add(page, 'Move sample');
+                    await open(page, 'Move sample'); await page.locator('.workspace-tags').getByRole('checkbox', { name: 'Urgent tag' }).click(); await save(page);
+                    const childInput = page.getByLabel('Add a subtask', { exact: true });
+                    for (const name of ['Order child A', 'Order child B']) { await childInput.fill(name); await childInput.press('Enter'); await page.getByRole('button', { name: 'Edit subtask: ' + name, exact: true }).waitFor(); }
+                    const children = page.locator('.workspace-subtask');
+                    await children.first().locator('.workspace-handle').focus(); await page.keyboard.press('ArrowDown');
+                    await page.waitForFunction(() => document.querySelector('.workspace-subtask .workspace-task-name').textContent === 'Order child B');
+                    await children.last().locator('.workspace-handle').dragTo(children.first());
+                    await page.waitForFunction(() => document.querySelector('.workspace-subtask .workspace-task-name').textContent === 'Order child A');
+                    const tag = (await rows(page, 'Project')).find(row => row.name === 'Urgent tag'); assert.equal(tag.color, 'EE3366');
+                    await page.getByRole('button', { name: 'Urgent tag', exact: true }).click(); await task(page, 'Move sample').waitFor();
+                    await page.getByRole('combobox', { name: 'Order tasks by', exact: true }).selectOption('2');
+                    await page.waitForFunction(() => !document.querySelector('.workspace-sort select').disabled);
+                    assert(await page.locator('.workspace-task-group h2').filter({ hasText: 'Normal' }).isVisible());
+                    await page.locator('[data-view="tasks"]').click();
+                    await task(page, 'Move sample').locator('.workspace-handle').dragTo(page.getByRole('button', { name: 'Destination list', exact: true }));
+                    await page.getByRole('button', { name: 'Destination list', exact: true }).click(); await task(page, 'Move sample').waitFor();
+                    assert.equal((await rows(page, 'Task')).find(row => row.name === 'Move sample').projectId, (await rows(page, 'Project')).find(row => row.name === 'Destination list').id);
+                    const separator = page.getByRole('separator', { name: 'Sidebar width' }); await separator.focus(); await page.keyboard.press('ArrowRight');
+                    await page.waitForFunction(() => document.querySelector('.workspace-sidebar').getBoundingClientRect().width === 290);
+                    await page.reload(); await ready(page); assert.equal(await page.locator('.workspace-sidebar').evaluate(element => element.getBoundingClientRect().width), 290);
+                });
+                await run(browser, engine, 'timer task/subtask start, pause/resume, finish, mode and persisted history', async ({ page }) => {
+                    await page.clock.install();
+                    await add(page, 'Timer sample'); await open(page, 'Timer sample');
+                    await page.getByLabel('Add a subtask', { exact: true }).fill('Timer child'); await page.getByLabel('Add a subtask', { exact: true }).press('Enter');
+                    await page.getByRole('button', { name: 'Start subtask: Timer child' }).click();
+                    await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
+                    assert.equal((await rows(page, 'TimerSession'))[0].subtaskId, (await rows(page, 'Subtask'))[0].id);
+                    await page.clock.fastForward(30000);
+                    await page.locator('[data-view="timer"]').click();
+                    const timer = page.getByTestId('timer-expanded');
+                    await timer.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
+                    assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 30);
+                    await timer.getByRole('button', { name: 'Continue', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
+                    await page.clock.fastForward(10000); await timer.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor(); await timer.getByRole('button', { name: 'Stop', exact: true }).click();
+                    await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click(); await page.getByRole('dialog').waitFor({ state: 'hidden' });
+                    assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 30, 'A separate resumed 10-second span is below the legacy 25-second threshold');
+                    await timer.getByRole('button', { name: 'Countdown', exact: true }).click();
+                    await timer.getByRole('button', { name: 'Stopwatch', exact: true }).waitFor();
+                    await page.reload(); await ready(page); await page.locator('[data-view="timer"]').click(); await page.getByTestId('timer-expanded').getByRole('button', { name: 'Stopwatch', exact: true }).waitFor();
+                    assert.equal((await rows(page, 'Pomodoro')).length, 1);
+                });
+                await run(browser, engine, 'timer interrupted gap recovery and unsupported mini fallback remain operable', async ({ page }) => {
+                    await page.clock.install();
+                    await page.locator('[data-view="timer"]').click(); const timer = page.getByTestId('timer-expanded');
+                    await timer.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
+                    await page.clock.fastForward(360000); await page.getByRole('dialog', { name: 'Confirm interrupted time', exact: true }).waitFor();
+                    await page.getByRole('dialog').getByRole('button', { name: 'Exclude interrupted time', exact: true }).click();
+                    await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor(); assert.equal((await rows(page, 'Pomodoro')).length, 0);
+                    await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { configurable: true, value: undefined }));
+                    await timer.getByRole('button', { name: 'Mini timer', exact: true }).click(); await timer.getByText(/floating timer remains available/).waitFor();
+                    await timer.getByRole('button', { name: 'Continue', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
+                    await timer.getByRole('button', { name: 'Sound', exact: true }).click(); const sound = page.getByRole('dialog', { name: 'Sound', exact: true });
+                    await sound.getByRole('combobox').first().selectOption('bgm_Rain');
+                    await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.BgMusic') === 'bgm_Rain');
+                    await sound.getByRole('button', { name: 'Stop preview', exact: true }).click(); await sound.getByRole('button', { name: 'Close', exact: true }).last().click();
+                    await page.getByTestId('timer-expanded').getByRole('button', { name: 'Pause', exact: true }).click();
+                    await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
+                });
+                await run(browser, engine, 'countdown work completion exposes the legacy break/start and break/complete actions', async ({ page }) => {
+                    await page.clock.install(); await page.locator('[data-view="timer"]').click(); const timer = page.getByTestId('timer-expanded');
+                    await timer.getByLabel('Pomodoro length (minutes)', { exact: true }).fill('1');
+                    await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.WorkInterval') === '60' && !document.querySelector('.workspace-timer-expanded input').disabled);
+                    await timer.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
+                    await page.clock.fastForward(61000); await page.locator('[data-testid="timer-expanded"][data-state="waitingForRest"]').waitFor();
+                    await timer.getByRole('button', { name: 'Start break', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="rest"]').waitFor();
+                    await timer.getByRole('button', { name: 'Complete', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="initial"]').waitFor();
+                    assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 60);
+                });
+                if (engine === 'chromium') await run(browser, engine, 'native mini window renders the shared timer and controls without a second writer', async ({ page, context }) => {
+                    assert(await page.evaluate(() => !!window.documentPictureInPicture?.requestWindow));
+                    await page.locator('[data-view="timer"]').click(); await page.getByTestId('timer-expanded').getByRole('button', { name: 'Mini timer', exact: true }).click();
+                    await page.waitForFunction(() => documentPictureInPicture.window?.document.querySelector('.workspace-mini-native'));
+                    const mini = context.pages().find(other => other !== page); assert(mini);
+                    const miniErrors = []; mini.on('pageerror', error => miniErrors.push(error.message));
+                    await mini.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
+                    await mini.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
+                    await mini.getByRole('button', { name: 'Stop', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="initial"]').waitFor();
+                    await mini.getByRole('button', { name: 'Close mini timer', exact: true }).click();
+                    await page.waitForFunction(() => !documentPictureInPicture.window);
+                    assert.equal((await rows(page, 'TimerSession')).length, 1);
+                    assert.deepEqual(miniErrors, []);
+                });
                 for (const locale of ['zh-CN', 'en']) for (const dark of [false, true]) {
                     await run(browser, engine, `${locale} ${dark ? 'dark' : 'light'}: baseline geometry, typography, screenshot, keyboard and narrow viewport`, async ({ page }) => {
                         await page.locator('[data-view="settings"]').click();
@@ -232,6 +322,11 @@ async function createProject(page, name, folder = false, parent) {
                         assert.equal(metrics.header.background, baseline.background);
                         assert.equal(metrics.header.color, baseline.color);
                         await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}.png`) });
+                        await page.locator('[data-view="timer"]').click();
+                        assert(await page.getByTestId('timer-expanded').isVisible());
+                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 50), true, 'Expanded timer must render in the first visible viewport');
+                        await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-timer.png`) });
+                        await page.locator('[data-project-id="id-deadline-today"]').click(); await open(page, 'Audit sample');
                         const injected = await page.addStyleTag({ content: '.workspace-nav-name {font-size:30px!important}' });
                         const badSize = await page.locator('.workspace-nav-name').first().evaluate(element => getComputedStyle(element).fontSize);
                         assert.throws(() => assertTypography({ ...metrics, name: { ...metrics.name, fontSize: badSize } }), /name.fontSize/);
@@ -245,6 +340,10 @@ async function createProject(page, name, folder = false, parent) {
                         await page.waitForFunction(() => document.activeElement.tagName === 'H1');
                         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                         await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-narrow.png`) });
+                        await page.locator('[data-view="timer"]').click();
+                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 50), true, 'Narrow timer must open above the fold');
+                        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+                        await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-timer-narrow.png`) });
                         return { metrics, reference: 'A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity' };
                     }, { locale });
                 }
