@@ -4,17 +4,19 @@
 
 The production FocusTodo Local app combines the preserved 7.1.1 React bundle with explicit local modules. Its version remains `7.1.1-local.1.9.3`. Tasks, focus records, sessions and settings are browser-local. External networking is off by default; opting in permits the allowed Bing sources. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
 
-## Phase B candidate boundary
+## B/C candidate boundary
 
-The production `src/index.html` continues to load the legacy bundle and local modules; the existing business flows below describe that entry. `standalone/` contains a separate React + TypeScript + Vite skeleton built from source. It does not replace the production page or enter official Pages/ordinary portable artifacts. The [Phase B engineering report](plan/2.0.0-skeleton.md) records its scope and evidence; commands are in [Maintenance](MAINTENANCE.md).
+Production `src/index.html` still loads the legacy bundle/local modules described below. `standalone/` is an independently built React + TypeScript + Vite candidate, excluded from production Pages and normal portable releases. See the [B report](plan/2.0.0-skeleton.md), [C service/compatibility report](plan/2.0.0-services.md) and [Maintenance](MAINTENANCE.md).
 
-`app/` owns startup and dependency composition; `app/contracts.ts` defines snapshots, subscriptions, preference commands and environment interfaces. Components in `features/` use injected services, with a local reducer for navigation and no legacy Redux, router or legacy globals. `services/` implements isolation and synthetic in-memory adapters, calling pure version-metadata rules in `domain/`. `shared/` resolves Chinese/English with fallback; `styles/` and `assets/` own candidate visuals and local optional resources. Services and components depend on contracts; domain rules do not depend on component lifetimes or browser storage.
+`app/` bootstraps; `services/application.mjs` composes explicit capabilities; `browser.ts` adapts native storage/clock/media/images/notifications/network/lifecycle. `core.d.mts` freezes contracts. Components receive `ApplicationServices` with the repository physically omitted, without transactions or legacy globals. `domain/` owns pure timer/recurrence/calendar/report/achievement/version rules. `shared/catalog.json` is generated from existing catalogs. Navigation remains a local reducer without legacy Redux/router dependencies.
 
-The inline startup screen appears first. Bootstrap checks the loopback server and storage isolation, creates services, then mounts an error boundary and components. Required styles precede reveal; optional modules/resources load asynchronously, with retry on failure while the skeleton remains usable. The shell retains startup geometry, red accent, light/dark and narrow-screen rules. It does not establish completion of Phase D business views or visual migration.
+Required startup/styles precede isolation, protocol/DB import recovery, theme recovery, identity/preferences, timer, business snapshots/schedulers, then React/error-boundary mounting. Optional modules load asynchronously with retry. C services run in candidate startup and extracted archives; visible views remain B's read-only sample. D connects business and visual views; shell display does not establish full UI acceptance.
 
-No business database is opened. Tasks remain synthetic in memory; only language and theme preferences under `FocusTodoStandalone.` use localStorage. Startup rejects any existing IndexedDB database or localStorage outside that namespace and also rejects unavailable `indexedDB.databases()`. The Firefox runtime baseline is therefore 126+. Relative `base: './'` and a separate `scripts/standalone-layout.json` allowlist govern resources. `dist/standalone/site/` contains served assets; hidden sourcemaps and the Vite manifest stay in `debug/`, outside serving and packaging. ZIP/tar.gz artifacts are isolated prototypes. No service worker is installed; offline scope means local HTTP startup with external networking blocked.
+Only `FocusTodoStandalone.PomodoroDB6` v3 and its separate lock DB are opened; settings use `FocusTodoStandalone.data.`. Foreign/production databases or storage, opaque enumeration and incompatible schema/protocol reject startup. Backups retain legacy logical metadata/keys and unknown fields. Firefox needs 126+. Relative base, a separate runtime allowlist and private debug maps remain. Audio/catalogs are local, networking defaults off, and there is no service worker; offline means local HTTP with Internet blocked.
 
-The metadata prototype distinguishes legacy 1.x full versions from independent 2.x three-part versions while retaining provenance, database and backup-format identifiers. The actual app remains `7.1.1-local.1.9.3`; no 2.0.0 version switch or naming-triggered data migration has occurred.
+Services own ticks, reminders, audio locks, cross-page refresh and recovery. Without broadcasts, bounded polling and focus/storage events refresh; without Web Locks, live IDB transactions retain maintenance ownership while automatic background audio is disabled. Non-cached departure disposes resources; cached restoration suspends/resumes. The C matrix defines legacy/concurrency/downgrade restrictions.
+
+Version services distinguish legacy full versions from independent three-part versions, retaining provenance/schema/backup versions and read keys. Production remains `7.1.1-local.1.9.3`; naming never resets data. Actual version switching belongs to release preparation.
 
 ## Project layout
 
@@ -22,7 +24,7 @@ The metadata prototype distinguishes legacy 1.x full versions from independent 2
 | --- | --- |
 | `src/` | HTML, CSS, `patch.js`, the preserved React bundle `js/main.js` and local modules |
 | `public/` | Icons, images, fonts, audio and translation assets |
-| `standalone/` | Phase B candidate entry, contracts, domain rules, services, features, shared messages, styles and optional resources |
+| `standalone/` | B/C candidate entry, contracts, domain rules, services, features, shared messages, styles and optional resources |
 | `scripts/` | Local launch, generation, bundle maintenance, portable packaging and Pages build |
 | `tests/` | Unit, browser, release and performance suites, plus fixtures |
 | `docs/` | Guides, architecture, maintenance, version reports and historical evidence |

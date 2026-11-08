@@ -5,7 +5,9 @@ import { preferencePrefix } from './isolation';
 declare const __LOCAL_VERSION__: string;
 declare const __SOURCE_VERSION__: string;
 
-export function createPrototypeServices(): PrototypeServices {
+export function createPrototypeServices(core: import('./core.mjs').CoreServices): PrototypeServices {
+  const { repository, ...applicationServices } = core;
+  void repository;
   const read = (key: string) => localStorage.getItem(preferencePrefix + key);
   let preferences: Preferences = Object.freeze({
     language: (['auto', 'zh-CN', 'en'].includes(read('language') || '') ? read('language') : 'auto') as LanguagePreference,
@@ -29,6 +31,7 @@ export function createPrototypeServices(): PrototypeServices {
   };
   addEventListener('storage', storageChanged);
   return {
+    core: Object.freeze(applicationServices),
     environment: Object.freeze({ kind: 'isolated-prototype', origin: location.origin, ...versionMetadata(__LOCAL_VERSION__, __SOURCE_VERSION__) }),
     preferences: {
       getSnapshot: () => preferences,
@@ -48,6 +51,6 @@ export function createPrototypeServices(): PrototypeServices {
       signal.throwIfAborted();
       return loadPreview(signal);
     },
-    dispose() { removeEventListener('storage', storageChanged); listeners.clear(); },
+    dispose() { removeEventListener('storage', storageChanged); listeners.clear(); core.dispose(); },
   };
 }

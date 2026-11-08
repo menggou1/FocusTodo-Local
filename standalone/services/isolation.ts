@@ -4,7 +4,7 @@ export class IsolationError extends Error {
 }
 
 /** Fail closed before constructing adapters. Never opens a legacy database. */
-export async function verifyIsolation(signal: AbortSignal): Promise<void> {
+export async function verifyIsolation(signal: AbortSignal, allowServiceData = false): Promise<void> {
   if (!['127.0.0.1', 'localhost'].includes(location.hostname) || location.protocol !== 'http:') {
     throw new IsolationError();
   }
@@ -19,5 +19,9 @@ export async function verifyIsolation(signal: AbortSignal): Promise<void> {
     if (!localStorage.key(index)?.startsWith(preferencePrefix)) throw new IsolationError();
   }
   // If storage cannot be inspected, we cannot establish the isolation contract.
-  if (!indexedDB.databases || (await indexedDB.databases()).length) throw new IsolationError();
+  if (!indexedDB.databases) throw new IsolationError();
+  const databases = await indexedDB.databases();
+  if (databases.some(database => !allowServiceData ||
+    !(database.name === 'FocusTodoStandalone.PomodoroDB6' && database.version === 3 ||
+      database.name === 'FocusTodoStandalone.PomodoroDB6-maintenance-lock' && database.version === 1))) throw new IsolationError();
 }

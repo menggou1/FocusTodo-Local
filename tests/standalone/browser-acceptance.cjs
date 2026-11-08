@@ -65,7 +65,9 @@ async function main() {
                                 assert.equal(await page.locator('#prototype-startup').isVisible(), false);
                                 assert(!requests.some(request => !new URL(request).pathname.startsWith(basePath)), 'Relative resources remain within the mounted project path');
                                 const databases = await page.evaluate(() => indexedDB.databases());
-                                assert.deepEqual(databases, [], 'Skeleton services use memory rather than opening any database');
+                                assert.deepEqual(databases.map(database => [database.name, database.version]).sort(), [
+                                    ['FocusTodoStandalone.PomodoroDB6', 3], ['FocusTodoStandalone.PomodoroDB6-maintenance-lock', 1]
+                                ], 'Core services open only their isolated schema and ownership databases');
                                 assert.equal(await page.evaluate(() => Object.keys(localStorage).some(key => !key.startsWith('FocusTodoStandalone.'))), false);
                                 await page.screenshot({ path: path.join(evidence, `standalone-${engine}-${locale}-${basePath === '/' ? 'root' : 'subpath'}.png`) });
                             }, { context: { locale } });
@@ -105,7 +107,7 @@ async function main() {
                             await ready(page);
                             await page.waitForFunction(() => document.documentElement.lang === 'en' && document.documentElement.dataset.theme === 'dark');
                             assert(await page.getByTestId('prototype-task').getByText('Prototype task', { exact: true }).isVisible());
-                            assert.deepEqual(await page.evaluate(() => Object.keys(localStorage).sort()), ['FocusTodoStandalone.language', 'FocusTodoStandalone.theme']);
+                            assert.deepEqual(await page.evaluate(() => Object.keys(localStorage).filter(key => !key.startsWith('FocusTodoStandalone.data.')).sort()), ['FocusTodoStandalone.language', 'FocusTodoStandalone.theme']);
                             await page.screenshot({ path: path.join(evidence, 'standalone-' + engine + '-dark.png') });
                         });
                         await run(browser, origin, url, engine + ': narrow viewport remains navigable without horizontal clipping', async ({ page }) => {

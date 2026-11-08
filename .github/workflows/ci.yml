@@ -164,6 +164,7 @@ jobs:
         if: matrix.node == '24'
         run: |
           node tests/standalone/browser-acceptance.cjs
+          node tests/standalone/services-browser.cjs
           node tests/standalone/package-smoke.cjs
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
@@ -179,7 +180,9 @@ jobs:
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
       - name: Standalone Firefox and WebKit
         if: runner.os == 'Linux' && matrix.node == '24'
-        run: node tests/standalone/browser-acceptance.cjs
+        run: |
+          node tests/standalone/browser-acceptance.cjs
+          node tests/standalone/services-browser.cjs
         env:
           FOCUS_STANDALONE_ENGINES: firefox,webkit
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance/standalone-firefox-webkit

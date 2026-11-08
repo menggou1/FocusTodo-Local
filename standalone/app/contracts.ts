@@ -1,4 +1,5 @@
-/** Phase B contracts. Production persistence is deliberately implemented in C. */
+/** Current Phase B preview contracts. Phase C services are composed separately. */
+export type { CoreCapabilities, CoreServices, ApplicationServices } from '../services/core.mjs';
 export type LanguagePreference = 'auto' | 'zh-CN' | 'en';
 export type ThemePreference = 'auto' | 'light' | 'dark';
 export type Unsubscribe = () => void;
@@ -15,6 +16,7 @@ export interface PrototypeTask {
   readonly title: string;
 }
 export interface PrototypeServices {
+  readonly core: import('../services/core.mjs').ApplicationServices;
   readonly environment: {
     readonly kind: 'isolated-prototype';
     readonly origin: string;

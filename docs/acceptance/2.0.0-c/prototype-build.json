@@ -1,0 +1,21 @@
+{
+  "kind": "isolated-prototype",
+  "localVersion": "1.9.3",
+  "sourceVersion": "7.1.1",
+  "schemaVersion": 3,
+  "backupExportVersion": 2,
+  "persistence": "isolated-namespaced-v3",
+  "serviceProtocol": 1,
+  "base": "./",
+  "syntaxTargets": [
+    "Chrome 111",
+    "Edge 111",
+    "Firefox 114",
+    "Safari 16.4"
+  ],
+  "isolationCapabilities": [
+    "localStorage key enumeration",
+    "indexedDB.databases (Firefox 126+)",
+    "loopback server attestation"
+  ]
+}

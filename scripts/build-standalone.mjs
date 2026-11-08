@@ -54,11 +54,11 @@ for (const name of ['react', 'react-dom', 'scheduler']) {
 }
 await copyFile('LICENSE', path.join(site, 'LICENSE'));
 await writeFile(path.join(site, 'THIRD-PARTY-NOTICES.txt'),
-  'FocusTodo isolated engineering prototype\nReact, ReactDOM and scheduler: MIT. Full copyright and license texts are in licenses/.\nNo legacy bundle, fonts, photos or audio are distributed in this prototype.\n');
+  'FocusTodo isolated engineering candidate\nReact, ReactDOM and scheduler: MIT. Full copyright and license texts are in licenses/.\nAudio assets and translation catalogs originate from FocusTodo 7.1.1; redistribution authorization was confirmed by the maintainer. Per-asset release notices remain a release-preparation requirement.\nNo legacy bundle, fonts or photos are distributed in this candidate.\n');
 const release = JSON.parse(await readFile('release.json', 'utf8'));
 await writeFile(path.join(site, 'prototype-build.json'), JSON.stringify({
   kind: 'isolated-prototype', localVersion: release.localVersion, sourceVersion: release.officialVersion,
-  schemaVersion: 3, backupExportVersion: 2, persistence: 'synthetic-memory-only', base: './',
+  schemaVersion: 3, backupExportVersion: 2, persistence: 'isolated-namespaced-v3', serviceProtocol: 1, base: './',
   syntaxTargets: ['Chrome 111', 'Edge 111', 'Firefox 114', 'Safari 16.4'],
   isolationCapabilities: ['localStorage key enumeration', 'indexedDB.databases (Firefox 126+)', 'loopback server attestation'],
 }, null, 2) + '\n');

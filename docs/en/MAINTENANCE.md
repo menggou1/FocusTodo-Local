@@ -15,27 +15,32 @@ Check `git status --short`, the current branch and `git remote -v`. Preserve unr
 
 Run `npm ci` to install locked development dependencies. Development requires Node.js 22.12+; CI covers 22 and 24, and this candidate was checked on Node.js 24.16.0. Running the packaged app does not require npm dependencies. The production app retains its legacy entry: start with `node scripts/start.cjs`, `npm start`, `sh start.sh`, or the Windows launcher. The default origin is `http://127.0.0.1:5500/index.html`. Browser data is scoped to the browser, hostname and port. That entry has no React source build or hot reload; refresh after editing static files. The independent candidate has its own workflow below.
 
-### Isolated Phase B candidate
+### Isolated 2.0.0 candidate (B/C)
 
-The React + TypeScript + Vite skeleton in `standalone/` implements injected service contracts, startup and error displays, Chinese/English and light/dark styles, read-only synthetic tasks and optional resource loading. Results are in the [Phase B engineering report](plan/2.0.0-skeleton.md). Work stays on `refactor/standalone-app`; the user prohibits merging this branch into `main`, `dev` or any other branch. The production app, Pages and ordinary portable packages retain the existing entry.
+`standalone/` combines the React + TypeScript + Vite skeleton with C core services. Startup constructs persistence, timers, tasks/calendar/reports, backups, preferences/language/profile, forest, themes/network, notifications/reminders and release services. The visible shell retains B's read-only sample; D connects business and visual views. See the [B report](plan/2.0.0-skeleton.md), [C report and compatibility matrix](plan/2.0.0-services.md) and [frozen contracts](plan/2.0.0-service-contracts.md). Keep work on `refactor/standalone-app`; merging into other branches is prohibited. Production, Pages and normal portable packages retain the existing entry.
 
 ```bash
 npm ci
 npm run build:standalone
 npm run start:standalone
-# Debugging and hot reload, on another random loopback port
+# Source debugging and hot reload on another random loopback port
 npm run dev:standalone
-# Build the candidate archives and run focused acceptance
 npm run package:standalone
 npx playwright install chromium firefox webkit
 npm run test:standalone
+# C services only; no site build required
+npm run test:services
 ```
 
-Both server commands print a random loopback URL. Open it in a fresh browser context. Startup verifies the dedicated server, localStorage key names and the IndexedDB database list. Any existing database, storage outside the `FocusTodoStandalone.` namespace or inability to enumerate databases prevents startup. `indexedDB.databases()` is required for isolation, so the Firefox runtime baseline is 126+, above the syntax build target of 114. Tasks stay in synthetic memory; only language and theme preferences in the prototype namespace use localStorage. No real data migration occurs.
+Use a separate browser context at the printed random URL. Startup checks server attestation, storage and database inventory. Only `FocusTodoStandalone.PomodoroDB6` v3 and its `-maintenance-lock` v1 are allowed. Foreign/legacy databases or storage, opaque database enumeration, incompatible schemas and client protocols reject startup without deletion. Firefox needs 126+ for enumeration. Physical settings use `FocusTodoStandalone.data.`; backups retain logical legacy keys and `PomodoroDB6` v3 metadata. Never share the production database or bypass isolation by renaming databases.
 
-Build output is `dist/standalone/site/`. Hidden sourcemaps and the Vite manifest are stored in `dist/standalone/debug/`, outside the served and packaged runtime. `scripts/standalone-layout.json` explicitly limits candidate resources. `package:standalone` creates `FocusTodo-standalone-prototype.zip` and `.tar.gz` under `dist/standalone/`. Fully extract either archive and run `node start.cjs` without npm/CDN dependencies; `node start.cjs --base /FocusTodo-Local/` checks a project subpath.
+Recovery order is database import journal, theme journal, identity/preferences, timer, then business snapshots/schedulers. Imports await the caller's backup sink and cancel if missing or failed. Durable logs support recreation. Services own ticks, audio locks, reminders and cleanup. Components consume `ApplicationServices` without repository transactions. `standalone/shared/catalog.json` is generated from `public/i18n/` by `node scripts/build-i18n.cjs` (also called by `build:release`); do not hand-edit it.
 
-`test:standalone` runs Chromium, Firefox, WebKit and both extracted archives by default. The comma-separated `FOCUS_STANDALONE_ENGINES` variable selects engines for focused work; filtered results do not replace full acceptance. Evidence uses `dist/acceptance/` or `FOCUS_ACCEPTANCE_DIR`. There is no service worker: offline validation means cold startup from the local HTTP server with external networking blocked, not `file://` or uncached remote-site offline startup. The skeleton retains layout and visual tokens; business services and per-view visual migration belong to C/D and remain tracked in Backlog.
+`dist/standalone/site/` is the allowlisted runtime; hidden maps and Vite metadata stay in `dist/standalone/debug/`. ZIP/tar.gz run with `node start.cjs`, or `node start.cjs --base /FocusTodo-Local/`, without npm/CDN. Audio and catalogs are local. External networking defaults off; Bing requires explicit opt-in and service restrictions. E17 still governs final distribution notices.
+
+`FOCUS_STANDALONE_ENGINES` selects engines for focused work, never replacing full acceptance. Evidence uses `dist/acceptance/` or `FOCUS_ACCEPTANCE_DIR`, leaving historical archives untouched. There is no service worker: offline means external networking blocked with the local HTTP server running. Test globals are built in memory and excluded from product packages.
+
+Historical verification requires an explicit authorized directory: `node tests/standalone/private-backups.cjs "<authorized-directory>"`. It compares old/new decoding, validation and in-memory database imports, never accesses the daily browser profile, and retains no filenames, task text, images or setting values. CI never scans private directories. Actual database upgrades and system environments remain under V02–V07/F.
 
 ## Source boundaries
 

@@ -1,0 +1,56 @@
+{
+  "date": "2026-11-08",
+  "timezone": "Asia/Shanghai",
+  "platform": "Windows",
+  "node": "24.16.0",
+  "baselineCommit": "139d0f91be0a6e9b28198241d7b9aa463e44bb45",
+  "phase": "C",
+  "contractVersion": 1,
+  "exitCriteria": {
+    "legacySamplesAndRecovery": true,
+    "testedConcurrencyAndRefusalBoundaries": true,
+    "frozenContractsForD": true
+  },
+  "unitTests": {
+    "C": 42,
+    "withSkeletonContractsAndServer": 49,
+    "passed": 49
+  },
+  "browserTests": {
+    "candidateUI": 42,
+    "coreServices": 31,
+    "versions": {
+      "chromium": "157.0.4341.42",
+      "firefox": "153.0",
+      "webkit": "26.5"
+    }
+  },
+  "historicalBackups": {
+    "passed": 10,
+    "total": 10,
+    "mode": "in-memory IndexedDB, no private content retained"
+  },
+  "legacyValidation": {
+    "unitPassed": 92,
+    "unitSkipped": 1,
+    "fullBrowserSuitePassed": true,
+    "releaseGateTests": 5,
+    "pagesTests": 2
+  },
+  "artifacts": [
+    {
+      "name": "FocusTodo-standalone-prototype.zip",
+      "bytes": 16710773,
+      "sha256": "7f6efc1ecb8463364910461c440069a880f16a9482b2372143be369292ea0707"
+    },
+    {
+      "name": "FocusTodo-standalone-prototype.tar.gz",
+      "bytes": 16690923,
+      "sha256": "4b0c720574fd9262c826cb600585469230895e9264ce70bcc99b2b95a91ab807"
+    }
+  ],
+  "remoteCIExecuted": false,
+  "productionEntryChanged": false,
+  "mergedOrPublished": false,
+  "limits": "Real browser-profile upgrades, real Safari/system audio/notifications/service outages and full UI/performance acceptance are not established by these tests."
+}

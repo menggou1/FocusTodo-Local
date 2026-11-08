@@ -10,17 +10,19 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 维护导航：[README](../README.md) → [维护指南](MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
-## 正式入口与 Phase B 候选边界
+## 正式入口与 B/C 候选边界
 
-正式 `src/index.html` 继续加载旧 bundle 和本地模块，下文既有业务流程均描述该入口。独立候选在 `standalone/`，通过 React + TypeScript + Vite 从完整骨架源码构建；它不替换正式页面，也不随正式 Pages 或普通便携包交付。Phase B 的范围与证据见 [工程报告](plan/2.0.0-skeleton.md)，命令见[维护指南](MAINTENANCE.md)。
+正式 `src/index.html` 继续加载旧 bundle 和本地模块，下文既有业务流程均描述该入口。`standalone/` 是独立 React + TypeScript + Vite 候选，从完整源码构建，不替换正式入口或进入正式 Pages/普通便携包。B 的工程证据见[骨架报告](plan/2.0.0-skeleton.md)，C 的服务和兼容证据见[服务报告](plan/2.0.0-services.md)，命令见[维护指南](MAINTENANCE.md)。
 
-候选的 `app/` 负责启动与服务组装，`app/contracts.ts` 定义快照、订阅、偏好命令和环境接口；`features/` 组件只通过注入接口访问服务，导航使用本地 reducer，未引入旧 Redux、路由库或旧全局接口。`services/` 实现隔离检查和合成内存适配器，调用 `domain/` 的纯版本元数据规则；`shared/` 提供中英解析与回退，`styles/`、`assets/` 归属候选展示与本地可选资源。服务和组件依赖合同，领域规则不依赖组件生命周期或浏览器存储。
+`app/` 负责启动，`services/application.mjs` 组合显式能力，`browser.ts` 是原生存储、时钟、媒体、图片、通知、网络和生命周期适配边界。`core.d.mts` 冻结服务合同；给 `features/` 的 `ApplicationServices` 在构造时剔除 repository，组件不取得事务或旧全局。`domain/` 保留计时、重复、日历、报表、成就与版本纯规则；`shared/catalog.json` 从既有词库生成。导航仍是本地 reducer，不依赖旧 Redux 或路由库。
 
-启动时内联首屏先显示，然后校验 loopback 服务器及存储隔离，创建服务并挂载错误边界和组件；必要样式就绪后展示，可选模块和资源异步加载，失败只显示重试，不阻止使用骨架。组件保留启动布局尺寸、红色 accent、亮暗和窄屏规则；这不代表 D 阶段逐视图业务与视觉迁移已完成。
+首屏和必需样式先就绪；隔离校验、协议/数据库导入日志、主题日志、身份/设置、计时恢复、业务快照和调度依次初始化，再挂载错误边界及组件。可选模块异步加载，失败可重试。C 服务在启动和解压包中实际运行，B 的可见页面仍是只读样本；逐视图业务与视觉由 D 接入，不能把骨架显示当作完整界面验收。
 
-候选不打开业务数据库，合成任务仅在内存；只有 `FocusTodoStandalone.` 下的语言和主题偏好使用 localStorage。启动拒绝已有任何 IndexedDB 数据库或命名空间以外的 localStorage，无法使用 `indexedDB.databases()` 时也拒绝启动；因此 Firefox 运行基线为 126+。构建采用相对 `base: './'` 和独立 `scripts/standalone-layout.json` 白名单。`dist/standalone/site/` 为可服务资源，隐藏 sourcemap 与 Vite manifest 留在 `debug/`，不公开、不打包；ZIP/tar.gz 仅用于隔离原型验收。未使用 service worker，离线范围为外网阻断后通过本地 HTTP 服务启动。
+候选只打开 `FocusTodoStandalone.PomodoroDB6` v3 与独立锁库，设置使用 `FocusTodoStandalone.data.`；未知/正式数据库、外部存储、不可枚举数据库及不兼容 schema/protocol 拒绝继续。备份保留 `PomodoroDB6` 逻辑元信息、原键和未知兼容字段。Firefox 需 126+。相对 base、独立运行白名单和私有 debug 目录保持；hidden map 不服务或入包。本地音频/词库随候选构建，外网默认关闭。无 service worker，离线指本地 HTTP 服务可用、实际外网阻断。
 
-版本元数据原型分别识别 1.x 旧完整版本和 2.x 独立三段式，同时保留来源、数据库及备份格式标识；实际应用版本仍为 `7.1.1-local.1.9.3`，没有切换到 2.0.0，也没有由命名触发数据迁移。
+每秒 tick、提醒、音频锁、跨页刷新和恢复由服务管理。无广播时使用有限轮询和焦点/存储事件；无 Web Locks 时维护仍由活 IDB 事务保护，自动背景音关闭。非缓存离开释放资源，缓存恢复只暂停/恢复。旧客户端、并发与降级限制见 C 兼容矩阵。
+
+版本服务分别识别 1.x 完整版本和 2.x 独立三段式，保留来源、schema、备份版本与原已读键。实际应用仍为 `7.1.1-local.1.9.3`；版本命名不触发数据重置，正式版本切换由发布准备处理。
 
 ## 当前计时与数据边界
 
