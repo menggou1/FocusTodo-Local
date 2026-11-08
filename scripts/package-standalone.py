@@ -25,13 +25,14 @@ def build():
     for name in ('standalone-server.cjs', 'standalone-layout.json'):
         entries['scripts/' + name] = (ROOT / 'scripts' / name).read_bytes()
     entries['start.cjs'] = b"const {createStandaloneServer}=require('./scripts/standalone-server.cjs');\nconst args=process.argv.slice(2);\nif(args.length&&(args.length!==2||args[0]!=='--base'))throw Error('Usage: node start.cjs [--base /project/]');\nconst server=createStandaloneServer({root:require('node:path').join(__dirname,'site'),basePath:args[1]||'/'});\nserver.on('error',error=>{console.error(error.message);process.exitCode=1;});\nserver.listen(0,'127.0.0.1',()=>console.log('http://127.0.0.1:'+server.address().port+(args[1]||'/')));\n"
-    entries['README.txt'] = ("FocusTodo isolated engineering candidate / Phase C\n"
+    entries['README.txt'] = ("FocusTodo isolated engineering candidate / Phase D first batch\n"
         "Not a version 2.0.0 release. Core services persist only in an isolated namespace.\n"
         "Node.js 22.12+; no npm install, CDN, account or external network is required to run.\n"
         "Extract fully, run: node start.cjs\n"
         "For a project subpath: node start.cjs --base /FocusTodo-Local/\n"
         "Open the printed loopback URL in a fresh browser context. A random port isolates each run.\n"
-        "The preview UI uses a read-only sample; core services use FocusTodoStandalone.PomodoroDB6 and FocusTodoStandalone.data. settings.\n"
+        "The workspace supports isolated task/list editing; other views are delivered in later batches.\n"
+        "Core services use FocusTodoStandalone.PomodoroDB6 and FocusTodoStandalone.data. settings.\n"
         "Startup rejects foreign localStorage, legacy/unknown databases and unsupported schema/client protocols.\n"
         "Existing data is never reset or migrated. The normal app remains at its existing entry.\n"
         "Offline means external network blocked while this local HTTP server is running; file:// and uncached remote offline startup are unsupported.\n"

@@ -11,7 +11,9 @@ test.before(async () => {
     fs.writeFileSync(path.join(temporary, 'index.html'), '<!doctype html><title>Generated server fixture</title>');
     fs.writeFileSync(path.join(temporary, 'assets', 'entry.js'), 'export const fixture = true;');
     fs.writeFileSync(path.join(temporary, 'assets', 'entry.js.map'), '{"sourcesContent":["private debug fixture"]}');
-    fs.writeFileSync(path.join(temporary, 'runtime-manifest.json'), JSON.stringify({ files: ['index.html', 'assets/entry.js'] }));
+    fs.writeFileSync(path.join(temporary, 'assets', 'font.ttf'), 'font MIME fixture');
+    fs.writeFileSync(path.join(temporary, 'assets', 'icon.png'), 'icon MIME fixture');
+    fs.writeFileSync(path.join(temporary, 'runtime-manifest.json'), JSON.stringify({ files: ['index.html', 'assets/entry.js', 'assets/font.ttf', 'assets/icon.png'] }));
     server = createStandaloneServer({ root: temporary, basePath: '/FocusTodo-Local/' });
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     port = server.address().port;
@@ -48,6 +50,8 @@ test('candidate server attests its exact origin and serves the explicit project-
     assert.equal(asset.headers['cache-control'], 'no-store');
     assert.equal(asset.headers['x-content-type-options'], 'nosniff');
     assert.equal(asset.headers['content-type'], 'text/javascript; charset=utf-8');
+    assert.equal((await request('/FocusTodo-Local/assets/font.ttf')).headers['content-type'], 'font/ttf');
+    assert.equal((await request('/FocusTodo-Local/assets/icon.png')).headers['content-type'], 'image/png');
 });
 
 test('candidate server excludes source maps, checkout files and resources outside its mount', async () => {

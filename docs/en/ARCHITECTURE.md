@@ -4,13 +4,13 @@
 
 The production FocusTodo Local app combines the preserved 7.1.1 React bundle with explicit local modules. Its version remains `7.1.1-local.1.9.3`. Tasks, focus records, sessions and settings are browser-local. External networking is off by default; opting in permits the allowed Bing sources. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
 
-## B/C candidate boundary
+## B/C/D candidate boundary
 
 Production `src/index.html` still loads the legacy bundle/local modules described below. `standalone/` is an independently built React + TypeScript + Vite candidate, excluded from production Pages and normal portable releases. See the [B report](plan/2.0.0-skeleton.md), [C service/compatibility report](plan/2.0.0-services.md) and [Maintenance](MAINTENANCE.md).
 
-`app/` bootstraps; `services/application.mjs` composes explicit capabilities; `browser.ts` adapts native storage/clock/media/images/notifications/network/lifecycle. `core.d.mts` freezes contracts. Components receive `ApplicationServices` with the repository physically omitted, without transactions or legacy globals. `domain/` owns pure timer/recurrence/calendar/report/achievement/version rules. `shared/catalog.json` is generated from existing catalogs. Navigation remains a local reducer without legacy Redux/router dependencies.
+`app/` bootstraps; `services/application.mjs` composes explicit capabilities; `browser.ts` adapts native storage/clock/media/images/notifications/network/lifecycle. `core.d.mts` freezes contracts. Components receive `ApplicationServices` with the repository physically omitted, without transactions or legacy globals. `domain/` owns pure timer/recurrence/calendar/report/achievement/version rules. `shared/catalog.json` is generated from existing catalogs. Navigation uses explicit local state without legacy Redux/router dependencies.
 
-Required startup/styles precede isolation, protocol/DB import recovery, theme recovery, identity/preferences, timer, business snapshots/schedulers, then React/error-boundary mounting. Optional modules load asynchronously with retry. C services run in candidate startup and extracted archives; visible views remain B's read-only sample. D connects business and visual views; shell display does not establish full UI acceptance.
+Required startup/styles precede isolation, protocol/DB import recovery, theme recovery, identity/preferences, timer, business snapshots/schedulers, then React/error-boundary mounting. Local fonts use swap fallback without blocking mount. The first D batch places list editors/managers, task details, shared dialogs and command errors in `features/workspace/`; `App` owns shell/navigation/snapshot projections. UI subscribes to committed snapshots; edits retain their opened revision and writes/reorders use `business.command` with `expected`. Failures retain drafts and incompatibility stops writes. Language/dark mode subscribe to core settings. See the [D first-batch report](plan/2.0.0-ui-batch-1.md); this does not establish whole-UI acceptance.
 
 Only `FocusTodoStandalone.PomodoroDB6` v3 and its separate lock DB are opened; settings use `FocusTodoStandalone.data.`. Foreign/production databases or storage, opaque enumeration and incompatible schema/protocol reject startup. Backups retain legacy logical metadata/keys and unknown fields. Firefox needs 126+. Relative base, a separate runtime allowlist and private debug maps remain. Audio/catalogs are local, networking defaults off, and there is no service worker; offline means local HTTP with Internet blocked.
 
@@ -24,7 +24,7 @@ Version services distinguish legacy full versions from independent three-part ve
 | --- | --- |
 | `src/` | HTML, CSS, `patch.js`, the preserved React bundle `js/main.js` and local modules |
 | `public/` | Icons, images, fonts, audio and translation assets |
-| `standalone/` | B/C candidate entry, contracts, domain rules, services, features, shared messages, styles and optional resources |
+| `standalone/` | B/C/D candidate entry, contracts, domain rules, services, workspace components, messages, styles and resources |
 | `scripts/` | Local launch, generation, bundle maintenance, portable packaging and Pages build |
 | `tests/` | Unit, browser, release and performance suites, plus fixtures |
 | `docs/` | Guides, architecture, maintenance, version reports and historical evidence |

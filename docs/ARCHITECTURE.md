@@ -10,13 +10,13 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 维护导航：[README](../README.md) → [维护指南](MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
 
-## 正式入口与 B/C 候选边界
+## 正式入口与 B/C/D 候选边界
 
 正式 `src/index.html` 继续加载旧 bundle 和本地模块，下文既有业务流程均描述该入口。`standalone/` 是独立 React + TypeScript + Vite 候选，从完整源码构建，不替换正式入口或进入正式 Pages/普通便携包。B 的工程证据见[骨架报告](plan/2.0.0-skeleton.md)，C 的服务和兼容证据见[服务报告](plan/2.0.0-services.md)，命令见[维护指南](MAINTENANCE.md)。
 
-`app/` 负责启动，`services/application.mjs` 组合显式能力，`browser.ts` 是原生存储、时钟、媒体、图片、通知、网络和生命周期适配边界。`core.d.mts` 冻结服务合同；给 `features/` 的 `ApplicationServices` 在构造时剔除 repository，组件不取得事务或旧全局。`domain/` 保留计时、重复、日历、报表、成就与版本纯规则；`shared/catalog.json` 从既有词库生成。导航仍是本地 reducer，不依赖旧 Redux 或路由库。
+`app/` 负责启动，`services/application.mjs` 组合显式能力，`browser.ts` 是原生存储、时钟、媒体、图片、通知、网络和生命周期适配边界。`core.d.mts` 冻结服务合同；给 `features/` 的 `ApplicationServices` 在构造时剔除 repository，组件不取得事务或旧全局。`domain/` 保留计时、重复、日历、报表、成就与版本纯规则；`shared/catalog.json` 从既有词库生成。导航使用显式本地状态，不依赖旧 Redux 或路由库。
 
-首屏和必需样式先就绪；隔离校验、协议/数据库导入日志、主题日志、身份/设置、计时恢复、业务快照和调度依次初始化，再挂载错误边界及组件。可选模块异步加载，失败可重试。C 服务在启动和解压包中实际运行，B 的可见页面仍是只读样本；逐视图业务与视觉由 D 接入，不能把骨架显示当作完整界面验收。
+首屏和必需样式先就绪；隔离校验、协议/数据库导入日志、主题日志、身份/设置、计时恢复、业务快照和调度依次初始化，再挂载错误边界及组件。字体使用本地资源与 swap 回退，不阻塞挂载。D 首批的 `features/workspace/` 负责清单编辑/管理、任务详情、共享弹窗与命令错误；`App` 负责应用壳、导航与快照投影。UI 仅订阅已提交快照，编辑保留打开时的原值，保存/排序通过 `business.command` 的 `expected` 防止覆盖冲突；失败保留草稿，不兼容则停写。语言与亮暗从 `settings` 订阅。实际范围和对照证据见 [D 首批报告](plan/2.0.0-ui-batch-1.md)，不构成全界面验收。
 
 候选只打开 `FocusTodoStandalone.PomodoroDB6` v3 与独立锁库，设置使用 `FocusTodoStandalone.data.`；未知/正式数据库、外部存储、不可枚举数据库及不兼容 schema/protocol 拒绝继续。备份保留 `PomodoroDB6` 逻辑元信息、原键和未知兼容字段。Firefox 需 126+。相对 base、独立运行白名单和私有 debug 目录保持；hidden map 不服务或入包。本地音频/词库随候选构建，外网默认关闭。无 service worker，离线指本地 HTTP 服务可用、实际外网阻断。
 

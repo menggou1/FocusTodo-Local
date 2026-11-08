@@ -54,7 +54,11 @@ async function stop(child) {
                 try {
                     await harness.page.goto(url, { waitUntil: 'domcontentloaded' });
                     await harness.page.getByTestId('app-shell').waitFor();
-                    assert(await harness.page.getByTestId('prototype-task').getByText('Prototype task', { exact: true }).isVisible());
+                    assert(await harness.page.locator('.workspace-empty').isVisible());
+                    const input = harness.page.locator('.workspace-add-task input');
+                    await input.fill('Extracted candidate task'); await input.press('Enter');
+                    await harness.page.getByTestId('task-row').getByText('Extracted candidate task', { exact: true }).waitFor();
+                    await harness.page.reload(); await harness.page.getByTestId('task-row').getByText('Extracted candidate task', { exact: true }).waitFor();
                     assert.deepEqual(harness.errors, []);
                     assert.deepEqual(harness.external, []);
                     await assertNoLegacyRuntime(harness.page, harness.requests);

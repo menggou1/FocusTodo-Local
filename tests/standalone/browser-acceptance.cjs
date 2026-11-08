@@ -1,5 +1,5 @@
 /* Independent origins, fresh browser contexts, and generated data only. */
-const { assert, fs, path, root, evidence, deferred, launch, contextFor, collectFiles, assertNoLegacyRuntime } = require('./helpers.cjs');
+const { assert, fs, path, root, evidence, launch, contextFor, collectFiles, assertNoLegacyRuntime } = require('./helpers.cjs');
 const { createStandaloneServer } = require('../../scripts/standalone-server.cjs');
 const { createRenderErrorServer } = require('./render-error-server.cjs');
 const site = path.join(root, 'dist/standalone/site');
@@ -60,7 +60,7 @@ async function main() {
                                 await page.goto(url, { waitUntil: 'domcontentloaded' });
                                 await ready(page);
                                 await page.waitForFunction(locale => document.documentElement.lang === locale, locale);
-                                assert(await page.getByTestId('prototype-task').getByText('Prototype task', { exact: true }).isVisible());
+                                assert(await page.locator('.workspace-empty').isVisible());
                                 assert.equal(await page.locator('html').getAttribute('lang'), locale);
                                 assert.equal(await page.locator('#prototype-startup').isVisible(), false);
                                 assert(!requests.some(request => !new URL(request).pathname.startsWith(basePath)), 'Relative resources remain within the mounted project path');
@@ -85,7 +85,7 @@ async function main() {
                             await page.locator('[data-view="settings"]').click();
                             await page.getByTestId('prototype-language').selectOption('en');
                             await page.waitForFunction(() => document.documentElement.lang === 'en');
-                            assert.equal(await page.evaluate(() => localStorage.getItem('FocusTodoStandalone.language')), 'en');
+                            assert.equal(await page.evaluate(() => localStorage.getItem('FocusTodoStandalone.data.FocusTodo.language')), 'en');
                         });
                         await run(browser, origin, url, engine + ': language, theme, keyboard navigation and reload continuity', async ({ page }) => {
                             await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -103,11 +103,13 @@ async function main() {
                             const lightColor = await page.locator('body').evaluate(element => getComputedStyle(element).backgroundColor);
                             assert.notEqual(darkColor, lightColor);
                             await page.getByTestId('prototype-theme').selectOption('dark');
+                            // C settings commit asynchronously; reload only after the committed snapshot is visible.
+                            await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark' && !document.querySelector('[data-testid="prototype-theme"]').disabled);
                             await page.reload({ waitUntil: 'domcontentloaded' });
                             await ready(page);
                             await page.waitForFunction(() => document.documentElement.lang === 'en' && document.documentElement.dataset.theme === 'dark');
-                            assert(await page.getByTestId('prototype-task').getByText('Prototype task', { exact: true }).isVisible());
-                            assert.deepEqual(await page.evaluate(() => Object.keys(localStorage).filter(key => !key.startsWith('FocusTodoStandalone.data.')).sort()), ['FocusTodoStandalone.language', 'FocusTodoStandalone.theme']);
+                            assert(await page.locator('.workspace-empty').isVisible());
+                            assert.deepEqual(await page.evaluate(() => Object.keys(localStorage).filter(key => !key.startsWith('FocusTodoStandalone.data.')).sort()), []);
                             await page.screenshot({ path: path.join(evidence, 'standalone-' + engine + '-dark.png') });
                         });
                         await run(browser, origin, url, engine + ': narrow viewport remains navigable without horizontal clipping', async ({ page }) => {
@@ -120,29 +122,12 @@ async function main() {
                             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                             await page.screenshot({ path: path.join(evidence, 'standalone-' + engine + '-narrow.png') });
                         }, { context: { viewport: { width: 375, height: 812 } } });
-                        await run(browser, origin, url, engine + ': optional resource delay and failure never block usable navigation', async ({ page }) => {
-                            const hold = deferred();
-                            const request = page.waitForRequest(/\/assets\/preview[^/]*\.json(?:[?#]|$)/).catch(error => error);
-                            let fail = true;
-                            await page.route(/\/assets\/preview[^/]*\.json(?:[?#]|$)/, async route => {
-                                await hold.promise;
-                                return fail ? route.abort() : route.continue();
-                            });
-                            try {
-                                await page.goto(url, { waitUntil: 'domcontentloaded' });
-                                await ready(page);
-                                const requested = await request;
-                                if (requested instanceof Error) throw requested;
-                                await page.waitForFunction(() => document.querySelector('[data-testid="optional-status"]')?.getAttribute('data-state') === 'loading');
-                                await page.locator('[data-view="settings"]').click();
-                                assert(await page.getByTestId('prototype-language').isVisible());
-                                hold.resolve();
-                                await page.locator('[data-testid="optional-status"][data-state="failed"]').waitFor();
-                                assert(await page.getByTestId('app-shell').isVisible());
-                                fail = false;
-                                await page.getByTestId('optional-retry').click();
-                                await page.locator('[data-testid="optional-status"][data-state="ready"]').waitFor();
-                            } finally { hold.resolve(); }
+                        await run(browser, origin, url, engine + ': unavailable fonts never block usable navigation', async ({ page }) => {
+                            await page.route(/\.ttf(?:[?#]|$)/, route => route.abort());
+                            await page.goto(url, { waitUntil: 'domcontentloaded' });
+                            await ready(page);
+                            await page.locator('[data-view="settings"]').click();
+                            assert(await page.getByTestId('prototype-language').isVisible());
                         });
                         await run(browser, origin, url, engine + ': existing legacy settings are preserved and blocked', async ({ page }) => {
                             await page.addInitScript(() => localStorage.setItem('WorkInterval', '1500'));

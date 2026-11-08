@@ -1,0 +1,225 @@
+{
+  "method": "Temporary loopback origins and fresh contexts; only external networking is blocked. No service-worker or first-visit Internet-origin offline guarantee. WebKit automation is not real Safari.",
+  "engines": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "versions": {
+    "chromium": "157.0.4341.42",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "results": [
+    {
+      "name": "chromium / zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 937
+    },
+    {
+      "name": "chromium / en: cold start without external network",
+      "passed": true,
+      "ms": 545
+    },
+    {
+      "name": "chromium: persisted page lifecycle keeps the restored preview interactive",
+      "passed": true,
+      "ms": 600
+    },
+    {
+      "name": "chromium: language, theme, keyboard navigation and reload continuity",
+      "passed": true,
+      "ms": 1072
+    },
+    {
+      "name": "chromium: narrow viewport remains navigable without horizontal clipping",
+      "passed": true,
+      "ms": 582
+    },
+    {
+      "name": "chromium: unavailable fonts never block usable navigation",
+      "passed": true,
+      "ms": 585
+    },
+    {
+      "name": "chromium: existing legacy settings are preserved and blocked",
+      "passed": true,
+      "ms": 372
+    },
+    {
+      "name": "chromium: existing IndexedDB remains unchanged and blocked",
+      "passed": true,
+      "ms": 500
+    },
+    {
+      "name": "chromium: missing session attestation blocks an ordinary static origin",
+      "passed": true,
+      "ms": 374
+    },
+    {
+      "name": "chromium: failed module exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 691
+    },
+    {
+      "name": "chromium: failed stylesheet exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 640
+    },
+    {
+      "name": "chromium /FocusTodo-Local/ zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 779
+    },
+    {
+      "name": "chromium /FocusTodo-Local/ en: cold start without external network",
+      "passed": true,
+      "ms": 545
+    },
+    {
+      "name": "chromium: React render boundary exposes retry and recovers",
+      "passed": true,
+      "ms": 480
+    },
+    {
+      "name": "firefox / zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 1740
+    },
+    {
+      "name": "firefox / en: cold start without external network",
+      "passed": true,
+      "ms": 873
+    },
+    {
+      "name": "firefox: persisted page lifecycle keeps the restored preview interactive",
+      "passed": true,
+      "ms": 827
+    },
+    {
+      "name": "firefox: language, theme, keyboard navigation and reload continuity",
+      "passed": true,
+      "ms": 1240
+    },
+    {
+      "name": "firefox: narrow viewport remains navigable without horizontal clipping",
+      "passed": true,
+      "ms": 839
+    },
+    {
+      "name": "firefox: unavailable fonts never block usable navigation",
+      "passed": true,
+      "ms": 589
+    },
+    {
+      "name": "firefox: existing legacy settings are preserved and blocked",
+      "passed": true,
+      "ms": 400
+    },
+    {
+      "name": "firefox: existing IndexedDB remains unchanged and blocked",
+      "passed": true,
+      "ms": 508
+    },
+    {
+      "name": "firefox: missing session attestation blocks an ordinary static origin",
+      "passed": true,
+      "ms": 469
+    },
+    {
+      "name": "firefox: failed module exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 754
+    },
+    {
+      "name": "firefox: failed stylesheet exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 773
+    },
+    {
+      "name": "firefox /FocusTodo-Local/ zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 852
+    },
+    {
+      "name": "firefox /FocusTodo-Local/ en: cold start without external network",
+      "passed": true,
+      "ms": 634
+    },
+    {
+      "name": "firefox: React render boundary exposes retry and recovers",
+      "passed": true,
+      "ms": 418
+    },
+    {
+      "name": "webkit / zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 1336
+    },
+    {
+      "name": "webkit / en: cold start without external network",
+      "passed": true,
+      "ms": 1166
+    },
+    {
+      "name": "webkit: persisted page lifecycle keeps the restored preview interactive",
+      "passed": true,
+      "ms": 1383
+    },
+    {
+      "name": "webkit: language, theme, keyboard navigation and reload continuity",
+      "passed": true,
+      "ms": 2689
+    },
+    {
+      "name": "webkit: narrow viewport remains navigable without horizontal clipping",
+      "passed": true,
+      "ms": 1288
+    },
+    {
+      "name": "webkit: unavailable fonts never block usable navigation",
+      "passed": true,
+      "ms": 1262
+    },
+    {
+      "name": "webkit: existing legacy settings are preserved and blocked",
+      "passed": true,
+      "ms": 282
+    },
+    {
+      "name": "webkit: existing IndexedDB remains unchanged and blocked",
+      "passed": true,
+      "ms": 380
+    },
+    {
+      "name": "webkit: missing session attestation blocks an ordinary static origin",
+      "passed": true,
+      "ms": 306
+    },
+    {
+      "name": "webkit: failed module exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 1266
+    },
+    {
+      "name": "webkit: failed stylesheet exposes recovery; reload succeeds",
+      "passed": true,
+      "ms": 1288
+    },
+    {
+      "name": "webkit /FocusTodo-Local/ zh-CN: cold start without external network",
+      "passed": true,
+      "ms": 1295
+    },
+    {
+      "name": "webkit /FocusTodo-Local/ en: cold start without external network",
+      "passed": true,
+      "ms": 1250
+    },
+    {
+      "name": "webkit: React render boundary exposes retry and recovers",
+      "passed": true,
+      "ms": 511
+    }
+  ]
+}

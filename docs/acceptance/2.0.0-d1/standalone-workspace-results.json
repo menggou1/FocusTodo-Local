@@ -1,0 +1,999 @@
+{
+  "method": "Isolated production candidate, synthetic data, external network blocked, DPR 1, reduced motion, Asia/Shanghai. Real pointer/keyboard, IndexedDB reads, two tabs. Partial A geometry/typography; WebKit is not Safari.",
+  "engines": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "versions": {
+    "chromium": "157.0.4341.42",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "results": [
+    {
+      "engine": "chromium",
+      "name": "task fields, subtasks, note search, completion/undo and persistence",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "task pointer/keyboard ordering and reload",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "repeat completion generates the next task and preserves child association",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "storage failure retains task input and retry commits once",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "cross-tab conflict preserves draft and requires reopening the new revision",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "incompatible storage stops UI writes and preserves existing data",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "editing a name preserves unknown fields and sub-minute reminder timestamps",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "zh-CN light: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "name": {
+          "width": 28,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.671875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(138, 138, 138)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(245, 245, 245)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(239, 239, 241)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "chromium",
+      "name": "zh-CN dark: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "name": {
+          "width": 28,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.671875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(181, 181, 181)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(46, 46, 52)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(36, 36, 43)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "chromium",
+      "name": "en light: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "name": {
+          "width": 38.890625,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(138, 138, 138)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(245, 245, 245)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(239, 239, 241)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "chromium",
+      "name": "en dark: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "name": {
+          "width": 38.890625,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(181, 181, 181)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(46, 46, 52)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(36, 36, 43)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "firefox",
+      "name": "task fields, subtasks, note search, completion/undo and persistence",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "task pointer/keyboard ordering and reload",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "repeat completion generates the next task and preserves child association",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "storage failure retains task input and retry commits once",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "cross-tab conflict preserves draft and requires reopening the new revision",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "incompatible storage stops UI writes and preserves existing data",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "editing a name preserves unknown fields and sub-minute reminder timestamps",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "zh-CN light: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "name": {
+          "width": 28,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.6666717529296875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(138, 138, 138)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(245, 245, 245)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(239, 239, 241)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "firefox",
+      "name": "zh-CN dark: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "name": {
+          "width": 28,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.6666717529296875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(181, 181, 181)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(46, 46, 52)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(36, 36, 43)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "firefox",
+      "name": "en light: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "name": {
+          "width": 38.866668701171875,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.866668701171875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(138, 138, 138)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(245, 245, 245)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(239, 239, 241)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "firefox",
+      "name": "en dark: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "name": {
+          "width": 38.866668701171875,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.866668701171875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(181, 181, 181)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(46, 46, 52)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(36, 36, 43)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "webkit",
+      "name": "task fields, subtasks, note search, completion/undo and persistence",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "task pointer/keyboard ordering and reload",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "repeat completion generates the next task and preserves child association",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "storage failure retains task input and retry commits once",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "cross-tab conflict preserves draft and requires reopening the new revision",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "incompatible storage stops UI writes and preserves existing data",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "editing a name preserves unknown fields and sub-minute reminder timestamps",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "zh-CN light: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "name": {
+          "width": 28,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.671875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(138, 138, 138)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(245, 245, 245)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(239, 239, 241)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "webkit",
+      "name": "zh-CN dark: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "name": {
+          "width": 28,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.671875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(181, 181, 181)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(46, 46, 52)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(36, 36, 43)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "webkit",
+      "name": "en light: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "name": {
+          "width": 38.890625,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(138, 138, 138)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(245, 245, 245)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(239, 239, 241)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    },
+    {
+      "engine": "webkit",
+      "name": "en dark: baseline geometry, typography, screenshot, keyboard and narrow viewport",
+      "passed": true,
+      "metrics": {
+        "header": {
+          "width": 1280,
+          "height": 50,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "sidebar": {
+          "width": 280,
+          "height": 850,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "name": {
+          "width": 38.890625,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "count": {
+          "width": 6.875,
+          "height": 34,
+          "fontSize": "12px",
+          "lineHeight": "33px",
+          "fontWeight": "400",
+          "color": "rgb(181, 181, 181)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "nav": {
+          "width": 264,
+          "height": 38,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(46, 46, 52)"
+        },
+        "search": {
+          "width": 264,
+          "height": 34,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(36, 36, 43)"
+        },
+        "input": {
+          "width": 264,
+          "height": 20,
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "fontWeight": "400",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "clipping": false
+      },
+      "reference": "A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity"
+    }
+  ]
+}

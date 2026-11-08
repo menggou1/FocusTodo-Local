@@ -164,6 +164,7 @@ jobs:
         if: matrix.node == '24'
         run: |
           node tests/standalone/browser-acceptance.cjs
+          node tests/standalone/workspace-browser.cjs
           node tests/standalone/services-browser.cjs
           node tests/standalone/package-smoke.cjs
         env:
@@ -182,6 +183,7 @@ jobs:
         if: runner.os == 'Linux' && matrix.node == '24'
         run: |
           node tests/standalone/browser-acceptance.cjs
+          node tests/standalone/workspace-browser.cjs
           node tests/standalone/services-browser.cjs
         env:
           FOCUS_STANDALONE_ENGINES: firefox,webkit

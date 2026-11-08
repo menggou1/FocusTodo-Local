@@ -46,9 +46,9 @@ npm run test:browser
 
 1.9 的独立专项覆盖默认关闭的联网开关、底部提示、版本红点、壁纸重定向/超时/跨日/取消、主题事务归属和原生迷你计时窗口。`npx playwright install firefox webkit` 后运行 `npm run test:compat` 可核对 Firefox/WebKit 在无 BroadcastChannel、Web Locks 和压缩 API 时的启动、任务、计时恢复、主题和备份导入；Linux Node 24 CI 同样运行它。WebKit 自动化不等于真实 Safari 全量验收。
 
-### 2.0.0 隔离候选工程（B/C）
+### 2.0.0 隔离候选工程（B/C/D）
 
-`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。候选启动实际组合数据、计时、任务/日程/报表、备份、设置/语言/资料、森林、主题/网络、通知/提醒和版本服务；页面仍是 B 的只读样本界面。业务与视觉视图由 D 逐项接入。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)及[冻结服务合同](plan/2.0.0-service-contracts.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
+`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 首批界面通过冻结接口接入导航、清单/文件夹、任务/子任务、搜索、排序、任务字段、完成与确认交互，语言/深色改用核心设置服务；其他视图逐批接入。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)、[冻结服务合同](plan/2.0.0-service-contracts.md)及 [D 首批报告](plan/2.0.0-ui-batch-1.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
 
 ```powershell
 npm ci
@@ -62,13 +62,15 @@ npx playwright install chromium firefox webkit
 npm run test:standalone
 # 只验证 C 服务；不需要先构建页面
 npm run test:services
+# 仅首批 D 界面回归，需先 build:standalone
+npm run test:workspace
 ```
 
 启动命令打印随机 loopback 地址；使用独立浏览器上下文。启动先检查专用服务器响应、localStorage 命名空间和数据库清单，仅允许 `FocusTodoStandalone.PomodoroDB6` v3 与同名 `-maintenance-lock` v1；旧库、未知库、未知存储、无法枚举数据库、schema 或客户端协议不兼容均拒绝继续，不删库修复。`indexedDB.databases()` 是隔离前提，Firefox 运行基线为 126+。设置物理前缀为 `FocusTodoStandalone.data.`，备份仍使用旧逻辑键与 `PomodoroDB6` v3 元信息。新旧客户端不能共用正式库，也不能通过改名绕过隔离。
 
 恢复顺序为数据库导入日志 → 主题日志 → 身份/设置 → 计时 → 业务快照和调度。导入默认等待调用方的备份接收器，缺失或失败则取消；日志保留可供新实例恢复。服务管理计时 tick、音频所有权、提醒及订阅释放；组件只消费 `ApplicationServices`，不取得 repository 事务。构建词库 `standalone/shared/catalog.json` 由 `node scripts/build-i18n.cjs`（也由 `build:release` 调用）从同一份 `public/i18n/` 生成，不手工编辑。
 
-输出为 `dist/standalone/site/`，hidden sourcemap 与 Vite manifest 在 `dist/standalone/debug/`，不由服务器公开或入包。`scripts/standalone-layout.json` 限定运行资源。ZIP/tar.gz 完整解压后运行 `node start.cjs`，子路径用 `node start.cjs --base /FocusTodo-Local/`；无 npm/CDN 依赖。本地音频和词库随候选构建，外网默认关闭，Bing 必须显式开启并由服务策略约束。正式发行的素材声明仍按 E17 核对。
+输出为 `dist/standalone/site/`，hidden sourcemap 与 Vite manifest 在 `dist/standalone/debug/`，不由服务器公开或入包。`scripts/standalone-layout.json` 限定运行资源。ZIP/tar.gz 完整解压后运行 `node start.cjs`，子路径用 `node start.cjs --base /FocusTodo-Local/`；无 npm/CDN 依赖。本地音频、词库、清单图标和 Noto 字体随候选构建，Noto OFL 文本位于包内 `licenses/`；字体失败不阻塞可用性。外网默认关闭，Bing 必须显式开启并由服务策略约束。正式发行的素材声明仍按 E17 核对。
 
 `FOCUS_STANDALONE_ENGINES` 可临时筛选引擎，筛选不能代替全量验收；当前证据写 `dist/acceptance/` 或 `FOCUS_ACCEPTANCE_DIR`，不会覆盖历史 `docs/acceptance/`。无 service worker，离线指本地 HTTP 服务运行且外网阻断，不涵盖 `file://` 或未缓存远程网站首次断网启动。服务测试入口在内存构建，其测试全局不入产品包。
 

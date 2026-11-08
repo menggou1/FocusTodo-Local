@@ -2,7 +2,6 @@ import { createRoot } from 'react-dom/client';
 import { App } from '../features/App';
 import { ErrorBoundary } from '../features/ErrorBoundary';
 import { verifyIsolation } from '../services/isolation';
-import { createPrototypeServices } from '../services/prototype';
 import { createBrowserServices } from '../services/browser';
 import { versionMetadata } from '../domain/version';
 import '../styles/app.css';
@@ -28,7 +27,8 @@ try {
   if (window.__prototypeBoot.failed || startup.dataset.state === 'error') throw new Error('Required resource failed');
   await verifyIsolation(abort.signal, true);
   const core = await createBrowserServices(versionMetadata(__LOCAL_VERSION__, __SOURCE_VERSION__).appVersion);
-  const services = createPrototypeServices(core);
+  const { repository, ...services } = core;
+  void repository;
   const root = createRoot(document.getElementById('prototype-root')!);
   root.render(<ErrorBoundary onRetry={() => location.reload()}><App services={services} /></ErrorBoundary>);
   // React acknowledges the commit; a render failure leaves the independent fallback visible.

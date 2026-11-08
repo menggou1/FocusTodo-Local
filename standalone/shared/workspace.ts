@@ -1,0 +1,51 @@
+// UI strings only; user supplied titles, notes and tags never pass through this map.
+const en = {
+  today: 'Today', tomorrow: 'Tomorrow', week: 'This week', planned: 'Planned', all: 'All tasks', someday: 'Someday', overdue: 'Overdue', seven: 'Next 7 days',
+  high: 'High priority', medium: 'Medium priority', low: 'Low priority', completed: 'Completed', tasks: 'Tasks', calendar: 'Schedule', timer: 'Timer', reports: 'Reports', forest: 'Forest', settings: 'Settings',
+  search: 'Search', searchHelp: 'Search tasks, notes and subtasks', empty: 'No tasks', addTask: 'Add a task, press Enter to save',
+  createList: 'Create list', createFolder: 'Create folder', lists: 'Lists', manageLists: 'Manage lists', name: 'Name', folder: 'Folder', none: 'None',
+  save: 'Save', cancel: 'Cancel', close: 'Close', edit: 'Edit', remove: 'Delete', confirmDelete: 'Confirm deletion', deleteTaskHelp: 'Delete this task and its subtasks?',
+  deleteListHelp: 'Deleting a list also deletes its tasks and focus history. Deleting a folder moves its lists to the top level.', preserveHistory: 'Keep focus history',
+  complete: 'Complete task', undo: 'Undo completion', showCompleted: 'Show completed tasks', hideCompleted: 'Hide completed tasks',
+  details: 'Task details', selectTask: 'Select a task to view its details', priority: 'Priority', normal: 'Normal', deadline: 'Due date', reminder: 'Reminder',
+  estimate: 'Estimated pomodoros', interval: 'Pomodoro length (minutes)', remark: 'Notes', project: 'List', subtasks: 'Subtasks', addSubtask: 'Add a subtask',
+  repeat: 'Repeat', cycle: 'Every', days: 'Days', weeks: 'Weeks', months: 'Months', years: 'Years', weekdays: 'Weekdays (0 = Sunday)',
+  repeatNeedsDate: 'Choose a due date before enabling repeat.', invalidWeekdays: 'Enter weekdays as comma separated numbers from 0 to 6.',
+  hidden: 'Hidden', visible: 'Visible', moveUp: 'Move up', moveDown: 'Move down', reorder: 'Drag to reorder; use Arrow Up or Arrow Down',
+  restoreOrder: 'Restore default order', expand: 'Expand folder', collapse: 'Collapse folder', busy: 'Saving…', saved: 'Saved',
+  conflict: 'This item changed in another window. Reopen it to review the latest version before saving.',
+  validation: 'Check the entered values and try again.', failed: 'The change could not be saved. Your entered values are retained.',
+  blocked: 'Writing has stopped because storage or the client is incompatible. Reload with a compatible version. Existing data is preserved.',
+  dismiss: 'Dismiss', reload: 'Reload', pending: 'This view is scheduled for a later batch.',
+  language: 'Language', theme: 'Theme', auto: 'System default', light: 'Light', dark: 'Dark', preview: 'Isolated preview',
+  previewHelp: 'Use this isolated preview for testing. Continue using the current app for everyday work.', navigation: 'Navigation', skip: 'Skip to content',
+  deleteSubtask: 'Delete subtask', editSubtask: 'Edit subtask', toggleSubtask: 'Toggle subtask completion', completedCount: 'completed', activeCount: 'remaining',
+};
+export type WorkspaceText = { [K in keyof typeof en]: string };
+const zh: WorkspaceText = {
+  today: '今天', tomorrow: '明天', week: '本周', planned: '已计划', all: '所有任务', someday: '某天', overdue: '已过期', seven: '未来七天',
+  high: '高优先级', medium: '中优先级', low: '低优先级', completed: '已完成', tasks: '任务', calendar: '日程', timer: '计时', reports: '报表', forest: '森林', settings: '设置',
+  search: '搜索', searchHelp: '搜索任务、备注和子任务', empty: '暂无任务', addTask: '添加一个任务，按回车保存',
+  createList: '创建清单', createFolder: '创建文件夹', lists: '清单', manageLists: '清单管理', name: '名称', folder: '文件夹', none: '无',
+  save: '保存', cancel: '取消', close: '关闭', edit: '编辑', remove: '删除', confirmDelete: '确认删除', deleteTaskHelp: '删除此任务及其子任务？',
+  deleteListHelp: '删除清单会同时删除其中的任务及专注历史；删除文件夹会将其清单移至顶层。', preserveHistory: '保留专注历史',
+  complete: '完成任务', undo: '撤销完成', showCompleted: '显示已完成任务', hideCompleted: '隐藏已完成任务',
+  details: '任务详情', selectTask: '选择任务查看详情', priority: '优先级', normal: '普通', deadline: '到期日', reminder: '提醒',
+  estimate: '预计番茄数', interval: '番茄时长（分钟）', remark: '备注', project: '清单', subtasks: '子任务', addSubtask: '添加子任务',
+  repeat: '重复', cycle: '每隔', days: '天', weeks: '周', months: '月', years: '年', weekdays: '星期（0 为星期日）',
+  repeatNeedsDate: '请先选择到期日再设置重复。', invalidWeekdays: '请用逗号分隔 0 至 6 的星期数字。',
+  hidden: '隐藏', visible: '显示', moveUp: '上移', moveDown: '下移', reorder: '拖动排序；也可按上下方向键',
+  restoreOrder: '恢复默认顺序', expand: '展开文件夹', collapse: '折叠文件夹', busy: '正在保存…', saved: '已保存',
+  conflict: '此项目已在其他窗口发生变化。请重新打开，核对最新内容后保存。',
+  validation: '请检查输入内容后重试。', failed: '未能保存修改，已保留输入内容。',
+  blocked: '存储或客户端不兼容，已停止写入。请使用兼容版本重新加载，已有数据会保留。',
+  dismiss: '关闭提示', reload: '重新加载', pending: '此视图将在后续批次接入。',
+  language: '语言', theme: '主题', auto: '跟随系统', light: '浅色', dark: '深色', preview: '隔离预览',
+  previewHelp: '此隔离预览用于测试，日常使用请继续打开现有应用。', navigation: '导航', skip: '跳至内容',
+  deleteSubtask: '删除子任务', editSubtask: '编辑子任务', toggleSubtask: '切换子任务完成状态', completedCount: '已完成', activeCount: '待完成',
+};
+export const workspaceText = (locale: string): WorkspaceText => locale.startsWith('zh') ? zh : en;
+export const presetKeys: Record<number, keyof WorkspaceText> = {
+  4000: 'today', 4001: 'tomorrow', 4002: 'planned', 4003: 'someday', 4004: 'seven', 4006: 'overdue', 4007: 'week',
+  5001: 'low', 5002: 'medium', 5003: 'high', 7000: 'all', 7001: 'calendar', 7002: 'search', 7003: 'completed', 7005: 'tasks',
+};

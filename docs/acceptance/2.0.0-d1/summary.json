@@ -1,0 +1,90 @@
+{
+  "phase": "D-first-batch",
+  "date": "2026-11-08",
+  "timezone": "Asia/Shanghai",
+  "baseCommit": "6d3512c2850438feb8dd383b12c1b8ded4574600",
+  "branch": "refactor/standalone-app",
+  "sourceDigestMethod": "SHA-256 of sorted source paths and LF-normalized UTF-8 source; standalone text files plus candidate build/server/package/config entry files",
+  "sourceDigest": "479905f35bfc8536b99d17fbf9a7f37eb97bd78f0d5eeba6e8b6924bb4c1ad06",
+  "node": "v24.16.0",
+  "platform": "win32",
+  "os": "10.0.26200",
+  "checks": {
+    "buildAndTypecheck": true,
+    "standaloneUnit": {
+      "passed": 49,
+      "skipped": 0
+    },
+    "legacyUnit": {
+      "passed": 92,
+      "skipped": 1,
+      "reason": "POSIX wrapper test is skipped on Windows"
+    },
+    "syntax": true,
+    "documentationLinks": true,
+    "frozenCoreAndProductionUnchanged": true,
+    "standalone-results.json": {
+      "passed": 42,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "versions": {
+        "chromium": "157.0.4341.42",
+        "firefox": "153.0",
+        "webkit": "26.5"
+      }
+    },
+    "standalone-workspace-results.json": {
+      "passed": 36,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "versions": {
+        "chromium": "157.0.4341.42",
+        "firefox": "153.0",
+        "webkit": "26.5"
+      }
+    },
+    "standalone-services-results.json": {
+      "passed": 31,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "versions": {
+        "chromium": "157.0.4341.42",
+        "firefox": "153.0",
+        "webkit": "26.5"
+      }
+    },
+    "standalone-package-results.json": {
+      "passed": 2
+    }
+  },
+  "archives": [
+    {
+      "file": "FocusTodo-standalone-prototype.zip",
+      "bytes": 36967900,
+      "sha256": "843a328f5279eebf1d1fd02c2c0978588ad50a3d9ccad7ddcd45ece5f4cab4a7"
+    },
+    {
+      "file": "FocusTodo-standalone-prototype.tar.gz",
+      "bytes": 36898811,
+      "sha256": "0b446563f05db3499962c0a59aa44d5d643e3182fdce5ba021f745625136754b"
+    }
+  ],
+  "scope": "Base D01/D02 integration and batch-specific D08/D09; not full D exit",
+  "limits": [
+    "Whole-view visual parity and remaining interactions are tracked only in BACKLOG E09.",
+    "WebKit is automation, not real Safari.",
+    "Synthetic data and fresh temporary origins; no production browser profile or private backup was used.",
+    "Offline startup means the local HTTP server is running with external networking blocked.",
+    "No push, remote CI, merge, production entry switch, tag or release.",
+    "Performance acceptance is not claimed; build-metrics.json records actual candidate bytes."
+  ]
+}
