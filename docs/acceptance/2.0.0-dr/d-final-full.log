@@ -1,0 +1,217 @@
+
+> focustodo@7.1.1-local.1.9.3 test:standalone
+> node --test tests/standalone/*.test.cjs && node tests/standalone/browser-acceptance.cjs && node tests/standalone/workspace-browser.cjs && node tests/standalone/domain-pages.cjs && node tests/standalone/services-browser.cjs && node tests/standalone/package-smoke.cjs
+
+✔ automatic background audio hands off a browser lock, suspends on hide/dispose and never steals ownership (13.064ms)
+✔ no-lock audio fails closed for automatic playback but allows completion effects and manual audition (0.9593ms)
+✔ reminders schedule the nearest future task, persist read keys and only request notification permission explicitly (67.6727ms)
+✔ the service scheduler owns ticks and completion audio; subtask switches settle the prior attribution (35.8008ms)
+✔ audio effects, audition volumes and background lifecycle match the old adapter for the same commands (10.0953ms)
+✔ projects/tasks/subtasks CRUD, completion, search and tombstones match legacy managers (1319.9327ms)
+✔ recurrence matches old calendar arithmetic through leap days, month clamp, weekdays and catch-up (51.8378ms)
+✔ history/report total, fractions, task/project aggregation and local day boundaries match legacy (29.988ms)
+✔ settings defaults, values and clamps match old getters and failed writes retain snapshots (30.0847ms)
+✔ language fallback and release reads agree with old adapters without resetting storage (26.0688ms)
+✔ task detach and history commit atomically, stale edits and duplicate IDs cannot partially complete commands (19.9366ms)
+✔ preset task queries, calendar layout and record progress match legacy rules (55.3802ms)
+✔ project visibility/folders/reordering and schedule/record edits preserve unrelated fields (63.3988ms)
+✔ forest rewards and achievement metrics match the old ledger and remain idempotent (14.6355ms)
+✔ all import commit boundaries either preserve originals or recover a durable journal (125.6439ms)
+✔ every import database transaction and settings-key write boundary survives a one-shot failure (384.0163ms)
+✔ recurring completion aborts parent, next task and copied subtasks as one transaction (55.3349ms)
+✔ newer client protocol and legacy database names reject writers before mutation (14.7215ms)
+✔ version naming migration preserves schema, data, unknown keys and old release read state (38.8644ms)
+✔ v1/v2 imports preserve historical compatibility records and unsupported formats never start maintenance (28.9706ms)
+✔ theme journal failure at each key boundary matches legacy rollback and preserves corrupt journals (9.8074ms)
+✔ candidate origin requires a loopback server attestation before inspecting storage (10.8057ms)
+✔ candidate rejects absent or mismatching attestation and opaque databases (6.5423ms)
+✔ candidate permits its preference namespace and rejects every legacy or unknown key (5.3095ms)
+✔ version metadata models the future independent version without changing DB schema (2.386ms)
+✔ language resolution retains explicit preferences and complete bilingual fallback (3.0021ms)
+✔ D atomic batches roll back every changed row on stale expected values and preserve unknown fields (159.6553ms)
+✔ daily goal changes retain legacy Goals records; launch and reward collection are idempotent (37.9057ms)
+✔ explicit network policy matches legacy same-origin/exact Bing opt-in without wrapping browser globals (170.7462ms)
+✔ network redirects, response size, timeout and cancellation fail without committing settings (56.7991ms)
+✔ wallpaper cache expires across a local day and TTL; offline failure retains cached selection (70.2028ms)
+✔ new theme selection and opt-out cancel in-flight/queued Bing work before persistence (35.567ms)
+✔ opt-out intent cancels a queued cached activation before either operation acquires storage ownership (23.041ms)
+✔ candidate server attests its exact origin and serves the explicit project-path manifest (50.9131ms)
+✔ candidate server excludes source maps, checkout files and resources outside its mount (22.5741ms)
+✔ migrated timer matches legacy states, records, events and errors for deterministic action traces (227.4949ms)
+✔ candidate database schema/indexes, logical backup keys and unknown compatibility fields remain intact (51.5343ms)
+✔ timer persistence publishes only after an atomic records/session commit and allows retry after an abort (15.9025ms)
+✔ reload recovery retains paused rest and never counts a backwards clock interval (18.1379ms)
+✔ pre-import backup failure and row-transaction abort preserve both original datasets (31.9845ms)
+✔ interrupted replacement keeps a durable journal, blocks writes, and resumes settings after recreation (13.6535ms)
+✔ a failed or missing pre-import backup sink cancels replacement before writing target rows (10.9456ms)
+✔ repository business reads and writes reject an orphan maintenance marker (7.5419ms)
+✔ settings quota failure restores the original rows and settings; rollback failures remain recoverable (13.0118ms)
+✔ two instances without Web Locks serialize maintenance and reject writes during import (7.8857ms)
+✔ old/new backup codecs and validation agree for v1/v2, JSON/Gzip, scope and invalid inputs (65.831ms)
+✔ migrated calendar task/plan transactions match legacy fields and reject stale edits (12.1754ms)
+✔ calendar creation aborts task and planned blocks together on a storage constraint failure (5.0147ms)
+✔ reset saves a readable pre-reset backup, keeps language and restores default projects (6.3235ms)
+✔ theme journal differential preserves images, recovers interrupted metadata and rolls back quota errors (8.6411ms)
+✔ schema versionchange and disposed instances reject future writes without deleting data (7.1015ms)
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1941.9598
+PASS chromium / zh-CN: cold start without external network
+PASS chromium / en: cold start without external network
+PASS chromium: persisted page lifecycle keeps the restored preview interactive
+PASS chromium: language, theme, keyboard navigation and reload continuity
+PASS chromium: narrow viewport remains navigable without horizontal clipping
+PASS chromium: unavailable fonts never block usable navigation
+PASS chromium: existing legacy settings are preserved and blocked
+PASS chromium: existing IndexedDB remains unchanged and blocked
+PASS chromium: missing session attestation blocks an ordinary static origin
+PASS chromium: failed module exposes recovery; reload succeeds
+PASS chromium: failed stylesheet exposes recovery; reload succeeds
+PASS chromium /FocusTodo-Local/ zh-CN: cold start without external network
+PASS chromium /FocusTodo-Local/ en: cold start without external network
+PASS chromium: React render boundary exposes retry and recovers
+PASS firefox / zh-CN: cold start without external network
+PASS firefox / en: cold start without external network
+PASS firefox: persisted page lifecycle keeps the restored preview interactive
+PASS firefox: language, theme, keyboard navigation and reload continuity
+PASS firefox: narrow viewport remains navigable without horizontal clipping
+PASS firefox: unavailable fonts never block usable navigation
+PASS firefox: existing legacy settings are preserved and blocked
+PASS firefox: existing IndexedDB remains unchanged and blocked
+PASS firefox: missing session attestation blocks an ordinary static origin
+PASS firefox: failed module exposes recovery; reload succeeds
+PASS firefox: failed stylesheet exposes recovery; reload succeeds
+PASS firefox /FocusTodo-Local/ zh-CN: cold start without external network
+PASS firefox /FocusTodo-Local/ en: cold start without external network
+PASS firefox: React render boundary exposes retry and recovers
+PASS webkit / zh-CN: cold start without external network
+PASS webkit / en: cold start without external network
+PASS webkit: persisted page lifecycle keeps the restored preview interactive
+PASS webkit: language, theme, keyboard navigation and reload continuity
+PASS webkit: narrow viewport remains navigable without horizontal clipping
+PASS webkit: unavailable fonts never block usable navigation
+PASS webkit: existing legacy settings are preserved and blocked
+PASS webkit: existing IndexedDB remains unchanged and blocked
+PASS webkit: missing session attestation blocks an ordinary static origin
+PASS webkit: failed module exposes recovery; reload succeeds
+PASS webkit: failed stylesheet exposes recovery; reload succeeds
+PASS webkit /FocusTodo-Local/ zh-CN: cold start without external network
+PASS webkit /FocusTodo-Local/ en: cold start without external network
+PASS webkit: React render boundary exposes retry and recovers
+PASS chromium: task fields, subtasks, note search, completion/undo and persistence
+PASS chromium: folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation
+PASS chromium: task pointer/keyboard ordering and reload
+PASS chromium: repeat completion generates the next task and preserves child association
+PASS chromium: storage failure retains task input and retry commits once
+PASS chromium: cross-tab conflict preserves draft and requires reopening the new revision
+PASS chromium: incompatible storage stops UI writes and preserves existing data
+PASS chromium: editing a name preserves unknown fields and sub-minute reminder timestamps
+PASS chromium: tags, colors, grouping, sidebar width and cross-list task dragging
+PASS chromium: timer task/subtask start, pause/resume, finish, mode and persisted history
+PASS chromium: timer interrupted gap recovery and unsupported mini fallback remain operable
+PASS chromium: countdown work completion exposes the legacy break/start and break/complete actions
+PASS chromium: native mini window renders the shared timer and controls without a second writer
+PASS chromium: zh-CN light: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS chromium: zh-CN dark: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS chromium: en light: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS chromium: en dark: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS firefox: task fields, subtasks, note search, completion/undo and persistence
+PASS firefox: folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation
+PASS firefox: task pointer/keyboard ordering and reload
+PASS firefox: repeat completion generates the next task and preserves child association
+PASS firefox: storage failure retains task input and retry commits once
+PASS firefox: cross-tab conflict preserves draft and requires reopening the new revision
+PASS firefox: incompatible storage stops UI writes and preserves existing data
+PASS firefox: editing a name preserves unknown fields and sub-minute reminder timestamps
+PASS firefox: tags, colors, grouping, sidebar width and cross-list task dragging
+PASS firefox: timer task/subtask start, pause/resume, finish, mode and persisted history
+PASS firefox: timer interrupted gap recovery and unsupported mini fallback remain operable
+PASS firefox: countdown work completion exposes the legacy break/start and break/complete actions
+PASS firefox: zh-CN light: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS firefox: zh-CN dark: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS firefox: en light: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS firefox: en dark: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS webkit: task fields, subtasks, note search, completion/undo and persistence
+PASS webkit: folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation
+PASS webkit: task pointer/keyboard ordering and reload
+PASS webkit: repeat completion generates the next task and preserves child association
+PASS webkit: storage failure retains task input and retry commits once
+PASS webkit: cross-tab conflict preserves draft and requires reopening the new revision
+PASS webkit: incompatible storage stops UI writes and preserves existing data
+PASS webkit: editing a name preserves unknown fields and sub-minute reminder timestamps
+PASS webkit: tags, colors, grouping, sidebar width and cross-list task dragging
+PASS webkit: timer task/subtask start, pause/resume, finish, mode and persisted history
+PASS webkit: timer interrupted gap recovery and unsupported mini fallback remain operable
+PASS webkit: countdown work completion exposes the legacy break/start and break/complete actions
+PASS webkit: zh-CN light: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS webkit: zh-CN dark: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS webkit: en light: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS webkit: en dark: baseline geometry, typography, screenshot, keyboard and narrow viewport
+PASS chromium: calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month
+PASS chromium: history manual record/edit/delete and cross-midnight report aggregation with goal persistence
+PASS chromium: forest daily/streak/task rewards, one-click collection and achievements remain idempotent
+PASS chromium: all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data
+PASS chromium: reminder read keys and latest-only update read behavior
+PASS chromium: review demo imports through the product UI and secondary pages return to the original task
+PASS chromium: zh-CN light all pages render on desktop and narrow screens
+PASS chromium: zh-CN dark all pages render on desktop and narrow screens
+PASS chromium: en light all pages render on desktop and narrow screens
+PASS chromium: en dark all pages render on desktop and narrow screens
+PASS firefox: calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month
+PASS firefox: history manual record/edit/delete and cross-midnight report aggregation with goal persistence
+PASS firefox: forest daily/streak/task rewards, one-click collection and achievements remain idempotent
+PASS firefox: all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data
+PASS firefox: reminder read keys and latest-only update read behavior
+PASS firefox: review demo imports through the product UI and secondary pages return to the original task
+PASS firefox: zh-CN light all pages render on desktop and narrow screens
+PASS firefox: zh-CN dark all pages render on desktop and narrow screens
+PASS firefox: en light all pages render on desktop and narrow screens
+PASS firefox: en dark all pages render on desktop and narrow screens
+PASS webkit: calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month
+PASS webkit: history manual record/edit/delete and cross-midnight report aggregation with goal persistence
+PASS webkit: forest daily/streak/task rewards, one-click collection and achievements remain idempotent
+PASS webkit: all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data
+PASS webkit: reminder read keys and latest-only update read behavior
+PASS webkit: review demo imports through the product UI and secondary pages return to the original task
+PASS webkit: zh-CN light all pages render on desktop and narrow screens
+PASS webkit: zh-CN dark all pages render on desktop and narrow screens
+PASS webkit: en light all pages render on desktop and narrow screens
+PASS webkit: en dark all pages render on desktop and narrow screens
+PASS chromium: namespaced persistence, timer rollback and reload recovery
+PASS chromium: crash between rows and settings resumes durable import journal
+PASS chromium: two tabs without Web Locks or broadcasts cannot duplicate focus records
+PASS chromium: broadcast refresh and schema versionchange invalidate stale clients
+PASS chromium: maintenance owner page closes and a peer recovers without Web Locks or broadcasts
+PASS chromium: blocked schema upgrade rejects startup, preserves rows and can be retried
+PASS chromium: fixed Phase B client rejects persisted C data and newer protocols reject C writers
+PASS chromium: native fetch rejects redirects before the target is contacted; image conversion and theme persistence work
+PASS chromium: native Web Locks transfer automatic audio ownership when a page suspends
+PASS chromium: no-broadcast polling refreshes peer tasks and no-lock mode preserves manual audio
+PASS chromium: renderer crash releases ownership and a new page recovers the committed import journal
+PASS firefox: namespaced persistence, timer rollback and reload recovery
+PASS firefox: crash between rows and settings resumes durable import journal
+PASS firefox: two tabs without Web Locks or broadcasts cannot duplicate focus records
+PASS firefox: broadcast refresh and schema versionchange invalidate stale clients
+PASS firefox: maintenance owner page closes and a peer recovers without Web Locks or broadcasts
+PASS firefox: blocked schema upgrade rejects startup, preserves rows and can be retried
+PASS firefox: fixed Phase B client rejects persisted C data and newer protocols reject C writers
+PASS firefox: native fetch rejects redirects before the target is contacted; image conversion and theme persistence work
+PASS firefox: native Web Locks transfer automatic audio ownership when a page suspends
+PASS firefox: no-broadcast polling refreshes peer tasks and no-lock mode preserves manual audio
+PASS webkit: namespaced persistence, timer rollback and reload recovery
+PASS webkit: crash between rows and settings resumes durable import journal
+PASS webkit: two tabs without Web Locks or broadcasts cannot duplicate focus records
+PASS webkit: broadcast refresh and schema versionchange invalidate stale clients
+PASS webkit: maintenance owner page closes and a peer recovers without Web Locks or broadcasts
+PASS webkit: blocked schema upgrade rejects startup, preserves rows and can be retried
+PASS webkit: fixed Phase B client rejects persisted C data and newer protocols reject C writers
+PASS webkit: native fetch rejects redirects before the target is contacted; image conversion and theme persistence work
+PASS webkit: native Web Locks transfer automatic audio ownership when a page suspends
+PASS webkit: no-broadcast polling refreshes peer tasks and no-lock mode preserves manual audio
+PASS extracted .zip: offline local resources, project subpath, spaces and Unicode, no npm or Git
+PASS extracted .tar.gz: offline local resources, project subpath, spaces and Unicode, no npm or Git

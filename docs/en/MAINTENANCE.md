@@ -17,7 +17,7 @@ Run `npm ci` to install locked development dependencies. Development requires No
 
 ### Isolated 2.0.0 candidate (B/C/D)
 
-`standalone/` combines the React + TypeScript + Vite skeleton with C core services. The D workspace/timer connect navigation, lists/folders/tags, tasks/subtasks, search, grouping/order, task fields/summaries, timer/recovery/sounds/native mini windows through frozen contracts. Language/dark mode use core preferences. Full functionality/legacy interactions continue under BACKLOG. D-R is a mandatory human gate after all functionality and page rendering pass; no D-V, E or F before explicit user authorization. See the [B report](plan/2.0.0-skeleton.md), [C compatibility report](plan/2.0.0-services.md), [frozen contracts](plan/2.0.0-service-contracts.md), [D first-batch report](plan/2.0.0-ui-batch-1.md) and [second-batch report](plan/2.0.0-ui-batch-2.md). Keep work on `refactor/standalone-app`; merging into other branches is prohibited. Production, Pages and normal portable packages retain the existing entry.
+`standalone/` combines the React + TypeScript + Vite skeleton with C core services. D connects all workspace, task/list, timer, calendar/reminder, history/report, forest/achievement, settings/theme/profile/backup and notification/update views. Field autosave and batch ordering use conflict checks and atomic commands. Compatible v1.1 additions supply existing feature needs without changing schema/protocol. D-R is a mandatory human gate after all functionality and page rendering pass; no D-V, E or F before explicit user authorization. See the [B report](plan/2.0.0-skeleton.md), [C compatibility report](plan/2.0.0-services.md), [frozen contracts](plan/2.0.0-service-contracts.md), [D first-batch report](plan/2.0.0-ui-batch-1.md) and [second-batch report](plan/2.0.0-ui-batch-2.md). See the [D-R handoff](plan/2.0.0-dr.md) for run instructions, observed differences and review entries. Keep work on `refactor/standalone-app`; merging into other branches is prohibited. Production, Pages and normal portable packages retain the existing entry.
 
 ```bash
 npm ci
@@ -30,15 +30,15 @@ npx playwright install chromium firefox webkit
 npm run test:standalone
 # C services only; no site build required
 npm run test:services
-# First D batch only; build the candidate first
+# D workspace/timer; build the candidate first
 npm run test:workspace
 ```
 
-Use a separate browser context at the printed random URL. Startup checks server attestation, storage and database inventory. Only `FocusTodoStandalone.PomodoroDB6` v3 and its `-maintenance-lock` v1 are allowed. Foreign/legacy databases or storage, opaque database enumeration, incompatible schemas and client protocols reject startup without deletion. Firefox needs 126+ for enumeration. Physical settings use `FocusTodoStandalone.data.`; backups retain logical legacy keys and `PomodoroDB6` v3 metadata. Never share the production database or bypass isolation by renaming databases.
+start:standalone prints a random loopback URL; preview:review uses http://127.0.0.1:5512/, excluding production 5500. Different ports have separate data. Use a separate browser context. Startup checks server attestation, storage and database inventory. Only `FocusTodoStandalone.PomodoroDB6` v3 and its `-maintenance-lock` v1 are allowed. Foreign/legacy databases or storage, opaque database enumeration, incompatible schemas and client protocols reject startup without deletion. Firefox needs 126+ for enumeration. Physical settings use `FocusTodoStandalone.data.`; backups retain logical legacy keys and `PomodoroDB6` v3 metadata. Never share the production database or bypass isolation by renaming databases.
 
 Recovery order is database import journal, theme journal, identity/preferences, timer, then business snapshots/schedulers. Imports await the caller's backup sink and cancel if missing or failed. Durable logs support recreation. Services own ticks, audio locks, reminders and cleanup. Components consume `ApplicationServices` without repository transactions. `standalone/shared/catalog.json` is generated from `public/i18n/` by `node scripts/build-i18n.cjs` (also called by `build:release`); do not hand-edit it.
 
-`dist/standalone/site/` is the allowlisted runtime; hidden maps and Vite metadata stay in `dist/standalone/debug/`. ZIP/tar.gz run with `node start.cjs`, or `node start.cjs --base /FocusTodo-Local/`, without npm/CDN. Audio, catalogs, list icons and Noto fonts are local. Noto OFL text is included in `licenses/`; failed fonts do not block usability. External networking defaults off; Bing requires explicit opt-in and service restrictions. E17 still governs final distribution notices.
+`dist/standalone/site/` is the allowlisted runtime; hidden maps and Vite metadata stay in `dist/standalone/debug/`. ZIP/tar.gz run with `node start.cjs`, or `node start.cjs --base /FocusTodo-Local/`, without npm/CDN. Audio, catalogs, list icons, forest/theme images and Noto fonts are local. Noto OFL text is included in `licenses/`; failed fonts do not block usability. External networking defaults off; Bing requires explicit opt-in and service restrictions. E17 still governs final distribution notices.
 
 `FOCUS_STANDALONE_ENGINES` selects engines for focused work, never replacing full acceptance. Evidence uses `dist/acceptance/` or `FOCUS_ACCEPTANCE_DIR`, leaving historical archives untouched. There is no service worker: offline means external networking blocked with the local HTTP server running. Test globals are built in memory and excluded from product packages.
 

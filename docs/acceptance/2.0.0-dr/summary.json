@@ -1,0 +1,99 @@
+{
+  "recordedAt": "2026-11-08T11:39:55.696Z",
+  "branch": "refactor/standalone-app",
+  "sourceBase": "ebdb4130583e91ad01cd9e24d58b703a004c2516",
+  "workingSourceDigest": "9494918037ae7a7aebd458aa3d9686226f3bd08ad0ced41c97546ffa9770f155",
+  "sourceDigestAlgorithm": "SHA256 of sorted relative filename + NUL + file SHA256 + LF; see source-hashes.json (working bytes before commit)",
+  "baseline": "1.9.3, f102da8919e810006b6611aabcef5f0159057d61; A audit/views",
+  "node": "v24.16.0",
+  "platform": "win32",
+  "versions": {
+    "chromium": "157.0.4341.42",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "checks": {
+    "standaloneUnit": {
+      "passed": 51,
+      "failed": 0
+    },
+    "suites": [
+      {
+        "file": "standalone-results.json",
+        "passed": 42,
+        "failed": 0
+      },
+      {
+        "file": "standalone-workspace-results.json",
+        "passed": 49,
+        "failed": 0
+      },
+      {
+        "file": "standalone-domain-results.json",
+        "passed": 30,
+        "failed": 0
+      },
+      {
+        "file": "standalone-services-results.json",
+        "passed": 31,
+        "failed": 0
+      },
+      {
+        "file": "standalone-package-results.json",
+        "passed": 2,
+        "failed": 0
+      }
+    ],
+    "totalStandalonePassed": 205,
+    "legacyUnit": {
+      "passed": 92,
+      "skipped": 1,
+      "failed": 0,
+      "note": "POSIX-only launcher case skipped on Windows"
+    },
+    "typescript": true,
+    "build": true,
+    "syntax": true,
+    "packageExtraction": true,
+    "extraDomainRerun": "30 passed, including real pointer resize and synthetic demo import/return behavior"
+  },
+  "build": {
+    "runtimeBytes": 62000425,
+    "files": 114,
+    "metrics": "build-metrics.json",
+    "archives": "prototype-SHA256SUMS.txt"
+  },
+  "livePreview": {
+    "url": "http://127.0.0.1:5512/",
+    "http": 200,
+    "realBrowserAppShell": true,
+    "record": "d-live-preview.json"
+  },
+  "data": "Only synthetic fixture/test data, ephemeral contexts/origins; no daily profile or private backups",
+  "screenshots": [
+    "screenshots/workspace-chromium-zh-CN-light.png",
+    "screenshots/d-chromium-demo-reports.png",
+    "screenshots/d-chromium-demo-forest.png",
+    "screenshots/d-live-preview.png",
+    "screenshots/standalone-extracted-zip.png",
+    "screenshots/standalone-extracted-tar.png",
+    "screenshots/d-chromium-zh-CN-light-1280-settings.png",
+    "screenshots/d-chromium-zh-CN-light-1280-reports.png",
+    "screenshots/d-chromium-zh-CN-light-1280-forest.png",
+    "screenshots/d-chromium-zh-CN-light-1280-calendar.png",
+    "screenshots/d-chromium-zh-CN-light-1280-completed.png",
+    "screenshots/d-chromium-zh-CN-light-1280-timer.png",
+    "screenshots/d-chromium-en-dark-375-settings.png",
+    "screenshots/d-chromium-en-dark-375-reports.png",
+    "screenshots/d-chromium-en-dark-375-forest.png",
+    "screenshots/d-chromium-en-dark-375-calendar.png",
+    "screenshots/d-chromium-en-dark-375-completed.png",
+    "screenshots/d-chromium-en-dark-375-timer.png"
+  ],
+  "evidenceLimits": [
+    "D-R delivered for user review; no human approval or D-V authorization is recorded",
+    "No whole-view visual parity assertion; observed differences are in the D-R handoff and open feedback lives in BACKLOG E09",
+    "Windows local checks only; no remote CI run, push, merge, PR or Release",
+    "Playwright WebKit is not real Safari; system audio/notifications, real-profile upgrades, fully remote offline startup and release-wide performance are not certified"
+  ]
+}

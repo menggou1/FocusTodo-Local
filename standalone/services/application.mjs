@@ -74,7 +74,7 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
     });
     const network = createNetworkService({ fetch: transport, origin, settings, setTimeout: schedule, clearTimeout: cancel });
     const wallpaper = createWallpaperService({ themes, settings, network, image, parseImage: themeFactory.bingImageFromResponse, now, randomUUID });
-    reminders = createReminderService({ business, storage, data, notifications, now, setTimeout: schedule, clearTimeout: cancel, onError: report });
+    reminders = createReminderService({ business, storage, data, notifications, now, setTimeout: schedule, clearTimeout: cancel, onError: report, title: () => language.locale.startsWith('zh') ? '任务到时提醒' : 'Task reminder' });
     const release = createReleaseService({ metadata: releases, storage, data, language });
     const forest = createForestService({ data, storage, now });
     const unobserve = observe({ refresh: () => refresh().catch(report), suspend: () => audio?.suspend(),

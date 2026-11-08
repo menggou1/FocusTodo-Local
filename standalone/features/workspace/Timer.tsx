@@ -5,6 +5,7 @@ import { Dialog } from './Dialog';
 import { useWorkspace } from './Context';
 import { number, string } from './model';
 import { SoundSettings } from './SoundSettings';
+import { themeURL } from './Settings';
 
 type MiniAPI = { requestWindow(options: {width: number; height: number}): Promise<Window> };
 export function formatClock(seconds: number) {
@@ -18,7 +19,7 @@ function localTime(value: number) {
 }
 
 /** All timer projections and mutations use the C service. UI owns only windows/confirmation drafts. */
-export function Timer({ expanded, openExpanded }: { expanded: boolean; openExpanded(): void }) {
+export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boolean; openExpanded(): void;closeExpanded():void }) {
   const { services, text, run, busy, blocked } = useWorkspace();
   const session = useSyncExternalStore(services.timer.subscribe, services.timer.getSnapshot);
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
@@ -26,6 +27,10 @@ export function Timer({ expanded, openExpanded }: { expanded: boolean; openExpan
   const [confirmation, setConfirmation] = useState(false);
   const [mini, setMini] = useState<Window | null>(null), [miniError, setMiniError] = useState('');
   const opening = useRef(false), mounted = useRef(true);
+  const fullscreen=useRef<HTMLDialogElement>(null);
+  useEffect(()=>{if(expanded){fullscreen.current?.showModal();return()=>fullscreen.current?.close()}},[expanded]);
+  const [themeVersion,setThemeVersion]=useState(0);void themeVersion;
+  useEffect(()=>{const update=()=>setThemeVersion(v=>v+1),observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','lang']});window.addEventListener('storage',update);return()=>{observer.disconnect();window.removeEventListener('storage',update)}},[]);
   const [sound, setSound] = useState(false);
   const [recoveryCollapsed, setRecoveryCollapsed] = useState(false);
   const [cutoff, setCutoff] = useState(0), [keepRunning, setKeepRunning] = useState(false);
@@ -37,7 +42,7 @@ export function Timer({ expanded, openExpanded }: { expanded: boolean; openExpan
     if (!mini || mini.closed) return;
     mini.document.documentElement.lang = services.language.locale;
     mini.document.documentElement.dataset.theme = document.documentElement.dataset.theme;
-  }, [mini, services, preferences.language, preferences.isDarkMode, session]);
+  }, [mini, services, preferences.language, preferences.isDarkMode, session, themeVersion]);
   const projection = services.timer.view();
   const state = session?.state || 'initial', mode = session?.mode || (preferences.isCountdown ? 'countdown' : 'countup');
   const rest = state === 'rest' || state === 'waitingForRest' || session?.pausedFrom === 'rest';
@@ -78,13 +83,14 @@ export function Timer({ expanded, openExpanded }: { expanded: boolean; openExpan
     </>}
   </div>;
   const taskLabel = subtask ? `${task?.name || text.noTask} / ${subtask.name}` : task?.name || text.noTask;
-  return <>
-    <section className={expanded ? 'workspace-timer-expanded' : 'workspace-floating-timer'} aria-label={text.timer} data-testid={expanded ? 'timer-expanded' : 'timer-floating'} data-state={state}
+  const theme=services.themes.read(),wallpaper=theme.active?services.wallpaper.read()[theme.active]:null;
+  const surface=<section className={expanded ? 'workspace-timer-expanded' : 'workspace-floating-timer'} aria-label={text.timer} data-testid={expanded ? 'timer-expanded' : 'timer-floating'} data-state={state}
       onDoubleClick={event => { if (!expanded && !(event.target as Element).closest('button')) openExpanded(); }}>
       {expanded && <header><button disabled={busy || blocked || state === 'recovery'} onClick={() => { const nextMode = mode === 'countdown' ? 'countup' : 'countdown'; void run(async () => {
         await services.timer.command({ type: 'mode', mode: nextMode, expectedSession: session?.sessionId }); await services.settings.set('isCountdown', nextMode === 'countdown');
       }); }}>{mode === 'countdown' ? text.countdown : text.countup}</button></header>}
       <p className="workspace-timer-task">{taskLabel}</p>
+      {expanded&&<div className="domain-toolbar"><select aria-label={text.tasks} disabled={busy||blocked||state==='recovery'} value={session?.taskId||''} onChange={e=>{const id=e.target.value;if(id)void run(()=>services.startForTask(id));else void command({type:'detach',config:services.settings.timerConfig()})}}><option value="">{text.noTask}</option>{business.tasks.filter(task=>task.state===0&&!task.isFinished).map(task=><option key={task.id} value={task.id}>{task.name}</option>)}</select><select aria-label={text.subtasks} disabled={!task||busy||blocked||state==='recovery'} value={session?.subtaskId||''} onChange={e=>{if(task)void run(()=>services.startForTask(task.id,e.target.value))}}><option value="">{text.none}</option>{business.subtasks.filter(child=>child.taskId===task?.id&&child.state===0&&!child.isFinished).map(child=><option key={child.id} value={child.id}>{child.name}</option>)}</select><button aria-label={text.close} onClick={closeExpanded}>×</button></div>}
       {expanded && task && !task.isFinished && <button type="button" disabled={busy || blocked || state === 'recovery'} onClick={() => { void run(async () => {
         await services.business.command(subtask && !subtask.isFinished ? { type: 'toggleSubtask', id: subtask.id, expected: subtask } : { type: 'completeTask', id: task.id, expected: task });
         if (preferences.completeSoundEnabled) { try { services.audio?.effect('Complete.m4a', preferences.ringtoneVolume / 100); } catch { /* Already committed. */ } }
@@ -100,7 +106,9 @@ export function Timer({ expanded, openExpanded }: { expanded: boolean; openExpan
           await services.timer.command({ type: 'configure', mode, expectedSession: session?.sessionId, config: { ...services.settings.timerConfig(task), interval: value } });
         }); }} /></label>}
       {miniError && expanded && <p role="status">{miniError}</p>}
-    </section>
+    </section>;
+  return <>
+    {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`linear-gradient(#0005,#0005),url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`}}>{surface}</dialog>:surface}
     {mini && !mini.closed && createPortal(<section className="workspace-mini-native" aria-label={text.mini}><p className="workspace-timer-task">{taskLabel}</p><strong>{time}</strong>{controls(true)}<button aria-label={text.closeMini} onClick={() => mini.close()}>×</button></section>, mini.document.body)}
     {confirmation && <Dialog title={text.stop} close={() => setConfirmation(false)}>
       <p>{text.stopHelp}</p><footer><button onClick={() => setConfirmation(false)}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {

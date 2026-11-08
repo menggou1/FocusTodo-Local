@@ -105,11 +105,13 @@ export interface CoreServices {
     readonly themes: { read(): ThemeState; commit(changes: Partial<ThemeState>): Promise<ThemeState> };
     readonly settings: SnapshotSource<Readonly<PreferenceState>> & {
         refresh(): Readonly<PreferenceState>; set<K extends WritablePreference>(field: K, value: PreferenceState[K]): Promise<Readonly<PreferenceState>>;
+        goals(): readonly {time: number; type: string; value: number; [key: string]: unknown}[]; setGoal(minutes: number): Promise<void>;
         timerConfig(task?: CompatibleRecord): TimerConfig; profile(): {name: string; avatar: string; account: string};
         initializeIdentity(localName: string): Promise<void>; saveProfile(field: 'name' | 'avatar', value: string): Promise<{name: string; avatar: string; account: string}>;
         dispose(): void;
     };
     readonly business: SnapshotSource<Readonly<BusinessSnapshot>> & {
+        batch(commands: BusinessCommand[]): Promise<CompatibleRecord[]>;
         refresh(): Promise<Readonly<BusinessSnapshot>>; command(input: BusinessCommand): Promise<CompatibleRecord | CompatibleRecord[]>;
         search(keyword: string): readonly Entity[]; report(start: number, end: number): Report;
         tasksInView(view: {id: string; type: number}, finished?: boolean): readonly Entity[];
@@ -129,7 +131,7 @@ export interface CoreServices {
         add(blob: Blob, name?: string): Promise<string>; select(id: string): Promise<void>; classic(id: string): Promise<void>;
         remove(id: string): Promise<void>; bing(): Promise<CompatibleRecord>; dispose(): void };
     readonly audio: AudioService | undefined;
-    readonly forest: { read(): CompatibleRecord; get(field: string): string | number; set(field: string, value: string | number): Promise<void>;
+    readonly forest: { dailyLaunch(): Promise<void>; rewards(): Promise<{itemType: 0 | 1 | 2 | 3; id: string; date: number; powerValue: number}[]>; read(): CompatibleRecord; get(field: string): string | number; set(field: string, value: string | number): Promise<void>;
         collect(item: {itemType: 0 | 1 | 2 | 3; id: string; date: number; powerValue: number}): Promise<CompatibleRecord>;
         syncAchievements(): Promise<{metrics: {seconds: number; tasks: number; days: number}; earned: Record<string, number>; reward: number; unlocked: string[]}> };
     readonly calendar: {

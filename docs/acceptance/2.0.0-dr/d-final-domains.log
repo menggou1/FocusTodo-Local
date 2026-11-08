@@ -1,0 +1,30 @@
+PASS chromium: calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month
+PASS chromium: history manual record/edit/delete and cross-midnight report aggregation with goal persistence
+PASS chromium: forest daily/streak/task rewards, one-click collection and achievements remain idempotent
+PASS chromium: all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data
+PASS chromium: reminder read keys and latest-only update read behavior
+PASS chromium: review demo imports through the product UI and secondary pages return to the original task
+PASS chromium: zh-CN light all pages render on desktop and narrow screens
+PASS chromium: zh-CN dark all pages render on desktop and narrow screens
+PASS chromium: en light all pages render on desktop and narrow screens
+PASS chromium: en dark all pages render on desktop and narrow screens
+PASS firefox: calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month
+PASS firefox: history manual record/edit/delete and cross-midnight report aggregation with goal persistence
+PASS firefox: forest daily/streak/task rewards, one-click collection and achievements remain idempotent
+PASS firefox: all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data
+PASS firefox: reminder read keys and latest-only update read behavior
+PASS firefox: review demo imports through the product UI and secondary pages return to the original task
+PASS firefox: zh-CN light all pages render on desktop and narrow screens
+PASS firefox: zh-CN dark all pages render on desktop and narrow screens
+PASS firefox: en light all pages render on desktop and narrow screens
+PASS firefox: en dark all pages render on desktop and narrow screens
+PASS webkit: calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month
+PASS webkit: history manual record/edit/delete and cross-midnight report aggregation with goal persistence
+PASS webkit: forest daily/streak/task rewards, one-click collection and achievements remain idempotent
+PASS webkit: all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data
+PASS webkit: reminder read keys and latest-only update read behavior
+PASS webkit: review demo imports through the product UI and secondary pages return to the original task
+PASS webkit: zh-CN light all pages render on desktop and narrow screens
+PASS webkit: zh-CN dark all pages render on desktop and narrow screens
+PASS webkit: en light all pages render on desktop and narrow screens
+PASS webkit: en dark all pages render on desktop and narrow screens

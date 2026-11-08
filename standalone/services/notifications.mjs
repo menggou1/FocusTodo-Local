@@ -15,7 +15,7 @@ export function createNotificationService({ api, focus, onError, icon = './favic
         dispose() { disposed = true; for (const notification of active) notification.close(); active.clear(); state.dispose(); },
     });
 }
-export function createReminderService({ business, storage, data, notifications, now, setTimeout: schedule, clearTimeout: cancel, onError }) {
+export function createReminderService({ business, storage, data, notifications, now, setTimeout: schedule, clearTimeout: cancel, onError, title = () => '任务到时提醒' }) {
     const key = 'FocusTodo.taskRemindersRead', announced = new Set(), state = snapshotSource({ due: [], unread: [], next: Infinity }, onError);
     let handle, disposed = false;
     const seen = () => { try { const value = JSON.parse(storage.getItem(key) || '[]'); return Array.isArray(value) ? value : []; } catch (_) { return []; } };
@@ -24,7 +24,7 @@ export function createReminderService({ business, storage, data, notifications, 
         const result = business.reminders(seen()); state.publish(result);
         if (notify) for (const task of result.unread) {
             const identity = JSON.stringify([task.id, task.reminderDate]);
-            if (!announced.has(identity)) { notifications.show('任务到时提醒', task.name); announced.add(identity); }
+            if (!announced.has(identity)) { notifications.show(title(), task.name); announced.add(identity); }
         }
         const delay = Number.isFinite(result.next) ? Math.min(Math.max(1, result.next - now()), 86400000) : 86400000;
         handle = schedule(() => refresh(true), delay); return state.getSnapshot();

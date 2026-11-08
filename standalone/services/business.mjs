@@ -32,10 +32,12 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
     const subtaskDefaults = () => ({ id: randomUUID(), objType: 'SUBTASK', creationDate: now(), name: '', state: 0,
         estimatedPomoNum: 0, taskId: '', isFinished: false, finishedDate: 0, order: 0, sync: 0 });
     const command = async request => {
-        invariant(!disposed, 'Service disposed', 'disposed'); const input = structuredClone(request);
+        invariant(!disposed, 'Service disposed', 'disposed'); let input = structuredClone(request);
+        const batch = input.type === 'batch' ? input.commands : null;
+        if (batch) invariant(Array.isArray(batch) && batch.length > 0 && batch.length <= 2000 && batch.every(item => ['updateTask','updateSubtask','updateProject','removeProject'].includes(item.type)), 'Invalid atomic command batch');
         const result = await data.write(tables, (tx, done, fail) => collect(tx, done, fail, values => {
             const find = (name, id) => { const row = values[name].find(row => row.id === id && row.state !== -1); invariant(row, 'Record no longer exists', 'conflict'); return row; };
-            const put = (table, row) => { tx.objectStore(table).put(row); return row; };
+            const put = (table, row) => { tx.objectStore(table).put(row); const list = values[names[tables.indexOf(table)]]; const index = list.findIndex(item => item.id === row.id); if (index >= 0) list[index] = row; else list.push(row); return row; };
             const update = (table, row, changes) => put(table, { ...row, ...changes, id: row.id, sync: 0 });
             const check = row => {
                 if (input.expected) invariant(Object.entries(input.expected).every(([key, value]) => JSON.stringify(row[key]) === JSON.stringify(value)), 'Record changed; refresh and retry', 'conflict');
@@ -57,7 +59,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 return { ...task, state: -1, sync: 0 };
             };
             const title = row => invariant(typeof row.name === 'string' && row.name.trim() && row.name.length <= 1000, 'Name must contain 1–1000 characters');
-            switch (input.type) {
+            const apply = request => { input = request; switch (input.type) {
             case 'addProject': {
                 const row = { ...projectDefaults(), ...input.values }; title(row);
                 invariant([1000, 2000, 3000].includes(row.type), 'Unsupported project type');
@@ -160,12 +162,13 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 return next;
             }
             default: invariant(false, 'Unknown business command');
-            }
+            }}; return batch ? batch.map(apply) : apply(input);
         }, tx => fault('business-commit', { transaction: tx })));
         await refresh(); data.changed('timer'); return result;
     };
     return Object.freeze({
         getSnapshot: state.getSnapshot, subscribe: state.subscribe, refresh, command,
+        batch: commands => command({type:'batch',commands}),
         search(keyword) {
             const query = String(keyword).trim().toLowerCase(); if (!query) return [];
             const value = state.getSnapshot(), tags = new Map(value.projects.filter(row => row.type === 3000 && row.state === 0).map(row => [row.id, row.name.toLowerCase()]));

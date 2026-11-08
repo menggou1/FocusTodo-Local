@@ -48,7 +48,7 @@ npm run test:browser
 
 ### 2.0.0 隔离候选工程（B/C/D）
 
-`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 工作区和计时通过冻结接口接入导航、清单/文件夹/标签、任务/子任务、搜索、分组/排序、任务字段、四项统计、计时/中断恢复/声音/原生迷你窗口，语言/深色使用核心设置服务；完整功能与原交互继续按 BACKLOG 实施。D-R 是全部功能及全页面渲染通过后的强制人工门禁，用户明确授权前不得进入 D-V、E 或 F。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)、[冻结服务合同](plan/2.0.0-service-contracts.md)、[D 首批报告](plan/2.0.0-ui-batch-1.md)及 [D 第二批报告](plan/2.0.0-ui-batch-2.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
+`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 通过服务合同接入全部工作区、任务/清单、计时、日程/提醒、历史/报表、森林/成就、设置/主题/资料/备份和通知/更新页面；逐字段自动保存及批量排序使用冲突检查和原子命令，v1.1 仅兼容增补已有功能所需接口。D-R 是全部功能及全页面渲染通过后的强制人工门禁，用户明确授权前不得进入 D-V、E 或 F。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)、[冻结服务合同](plan/2.0.0-service-contracts.md)、[D 首批报告](plan/2.0.0-ui-batch-1.md)及 [D 第二批报告](plan/2.0.0-ui-batch-2.md)；本次运行、已知差异与人工核查入口见 [D-R 交接](plan/2.0.0-dr.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
 
 ```powershell
 npm ci
@@ -62,15 +62,15 @@ npx playwright install chromium firefox webkit
 npm run test:standalone
 # 只验证 C 服务；不需要先构建页面
 npm run test:services
-# 仅首批 D 界面回归，需先 build:standalone
+# D 工作区/计时回归，需先 build:standalone
 npm run test:workspace
 ```
 
-启动命令打印随机 loopback 地址；使用独立浏览器上下文。启动先检查专用服务器响应、localStorage 命名空间和数据库清单，仅允许 `FocusTodoStandalone.PomodoroDB6` v3 与同名 `-maintenance-lock` v1；旧库、未知库、未知存储、无法枚举数据库、schema 或客户端协议不兼容均拒绝继续，不删库修复。`indexedDB.databases()` 是隔离前提，Firefox 运行基线为 126+。设置物理前缀为 `FocusTodoStandalone.data.`，备份仍使用旧逻辑键与 `PomodoroDB6` v3 元信息。新旧客户端不能共用正式库，也不能通过改名绕过隔离。
+start:standalone 打印随机 loopback 地址，preview:review 固定使用 http://127.0.0.1:5512/（不使用正式 5500）；不同端口数据隔离。使用独立浏览器上下文。启动先检查专用服务器响应、localStorage 命名空间和数据库清单，仅允许 `FocusTodoStandalone.PomodoroDB6` v3 与同名 `-maintenance-lock` v1；旧库、未知库、未知存储、无法枚举数据库、schema 或客户端协议不兼容均拒绝继续，不删库修复。`indexedDB.databases()` 是隔离前提，Firefox 运行基线为 126+。设置物理前缀为 `FocusTodoStandalone.data.`，备份仍使用旧逻辑键与 `PomodoroDB6` v3 元信息。新旧客户端不能共用正式库，也不能通过改名绕过隔离。
 
 恢复顺序为数据库导入日志 → 主题日志 → 身份/设置 → 计时 → 业务快照和调度。导入默认等待调用方的备份接收器，缺失或失败则取消；日志保留可供新实例恢复。服务管理计时 tick、音频所有权、提醒及订阅释放；组件只消费 `ApplicationServices`，不取得 repository 事务。构建词库 `standalone/shared/catalog.json` 由 `node scripts/build-i18n.cjs`（也由 `build:release` 调用）从同一份 `public/i18n/` 生成，不手工编辑。
 
-输出为 `dist/standalone/site/`，hidden sourcemap 与 Vite manifest 在 `dist/standalone/debug/`，不由服务器公开或入包。`scripts/standalone-layout.json` 限定运行资源。ZIP/tar.gz 完整解压后运行 `node start.cjs`，子路径用 `node start.cjs --base /FocusTodo-Local/`；无 npm/CDN 依赖。本地音频、词库、清单图标和 Noto 字体随候选构建，Noto OFL 文本位于包内 `licenses/`；字体失败不阻塞可用性。外网默认关闭，Bing 必须显式开启并由服务策略约束。正式发行的素材声明仍按 E17 核对。
+输出为 `dist/standalone/site/`，hidden sourcemap 与 Vite manifest 在 `dist/standalone/debug/`，不由服务器公开或入包。`scripts/standalone-layout.json` 限定运行资源。ZIP/tar.gz 完整解压后运行 `node start.cjs`，子路径用 `node start.cjs --base /FocusTodo-Local/`；无 npm/CDN 依赖。本地音频、词库、清单图标、森林/主题图片和 Noto 字体随候选构建，Noto OFL 文本位于包内 `licenses/`；字体失败不阻塞可用性。外网默认关闭，Bing 必须显式开启并由服务策略约束。正式发行的素材声明仍按 E17 核对。
 
 `FOCUS_STANDALONE_ENGINES` 可临时筛选引擎，筛选不能代替全量验收；当前证据写 `dist/acceptance/` 或 `FOCUS_ACCEPTANCE_DIR`，不会覆盖历史 `docs/acceptance/`。无 service worker，离线指本地 HTTP 服务运行且外网阻断，不涵盖 `file://` 或未缓存远程网站首次断网启动。服务测试入口在内存构建，其测试全局不入产品包。
 

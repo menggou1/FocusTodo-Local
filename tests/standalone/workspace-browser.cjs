@@ -20,8 +20,8 @@ async function add(page, name) {
 }
 async function open(page, name) { await task(page, name).getByRole('button', { name, exact: true }).click(); }
 async function save(page) {
-    await page.locator('.workspace-details').getByRole('button', { name: 'Save', exact: true }).click();
-    await page.waitForFunction(() => !document.querySelector('.workspace-details fieldset').disabled);
+    await page.evaluate(() => document.activeElement?.blur());
+    await page.waitForFunction(() => document.querySelector('.workspace-details')?.dataset.pending === '0');
     await page.locator('.workspace-details').getByText('Saved', { exact: true }).waitFor();
 }
 async function rows(page, store) {
@@ -179,7 +179,7 @@ async function createProject(page, name, folder = false, parent) {
                     const other = await context.newPage(); await other.goto(url); await ready(other); await open(other, 'Shared task');
                     await other.getByLabel('Name', { exact: true }).fill('Remote title'); await save(other);
                     await task(page, 'Remote title').waitFor();
-                    await page.locator('.workspace-details').getByRole('button', { name: 'Save', exact: true }).click();
+                    await page.evaluate(() => document.activeElement?.blur());
                     await page.getByRole('alert').waitFor(); assert.match(await page.getByRole('alert').innerText(), /changed in another window/);
                     assert.equal(await page.getByLabel('Notes', { exact: true }).inputValue(), 'Unsaved draft');
                     const stored = (await rows(page, 'Task'))[0]; assert.equal(stored.name, 'Remote title'); assert.equal(stored.remark, '');
@@ -244,19 +244,21 @@ async function createProject(page, name, folder = false, parent) {
                 });
                 await run(browser, engine, 'timer task/subtask start, pause/resume, finish, mode and persisted history', async ({ page }) => {
                     await page.clock.install();
+                    // Freeze wall time too: rendering/driver latency must not add a spurious second.
+                    await page.clock.pauseAt(new Date(Date.now()+1000));
                     await add(page, 'Timer sample'); await open(page, 'Timer sample');
                     await page.getByLabel('Add a subtask', { exact: true }).fill('Timer child'); await page.getByLabel('Add a subtask', { exact: true }).press('Enter');
                     await page.getByRole('button', { name: 'Start subtask: Timer child' }).click();
                     await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
                     assert.equal((await rows(page, 'TimerSession'))[0].subtaskId, (await rows(page, 'Subtask'))[0].id);
                     await page.clock.fastForward(30000);
-                    await page.locator('[data-view="timer"]').click();
+                    if(!await page.getByTestId('timer-expanded').isVisible()) await page.locator('[data-view="timer"]').click();
                     const timer = page.getByTestId('timer-expanded');
                     await timer.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
                     assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 30);
                     await timer.getByRole('button', { name: 'Continue', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
                     await page.clock.fastForward(10000); await timer.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor(); await timer.getByRole('button', { name: 'Stop', exact: true }).click();
-                    await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click(); await page.getByRole('dialog').waitFor({ state: 'hidden' });
+                    await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click(); await page.getByRole('dialog',{name:'Stop',exact:true}).waitFor({ state: 'hidden' });
                     assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 30, 'A separate resumed 10-second span is below the legacy 25-second threshold');
                     await timer.getByRole('button', { name: 'Countdown', exact: true }).click();
                     await timer.getByRole('button', { name: 'Stopwatch', exact: true }).waitFor();
@@ -291,11 +293,14 @@ async function createProject(page, name, folder = false, parent) {
                     assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 60);
                 });
                 if (engine === 'chromium') await run(browser, engine, 'native mini window renders the shared timer and controls without a second writer', async ({ page, context }) => {
+                    await page.emulateMedia({colorScheme:'light'});
                     assert(await page.evaluate(() => !!window.documentPictureInPicture?.requestWindow));
                     await page.locator('[data-view="timer"]').click(); await page.getByTestId('timer-expanded').getByRole('button', { name: 'Mini timer', exact: true }).click();
                     await page.waitForFunction(() => documentPictureInPicture.window?.document.querySelector('.workspace-mini-native'));
                     const mini = context.pages().find(other => other !== page); assert(mini);
                     const miniErrors = []; mini.on('pageerror', error => miniErrors.push(error.message));
+                    await page.emulateMedia({colorScheme:'dark'});
+                    await mini.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
                     await mini.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
                     await mini.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
                     await mini.getByRole('button', { name: 'Stop', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="initial"]').waitFor();
@@ -307,8 +312,9 @@ async function createProject(page, name, folder = false, parent) {
                 for (const locale of ['zh-CN', 'en']) for (const dark of [false, true]) {
                     await run(browser, engine, `${locale} ${dark ? 'dark' : 'light'}: baseline geometry, typography, screenshot, keyboard and narrow viewport`, async ({ page }) => {
                         await page.locator('[data-view="settings"]').click();
-                        await page.getByTestId('prototype-theme').selectOption(dark ? 'dark' : 'light');
+                        if(!await page.getByTestId('prototype-theme').isVisible())await page.getByRole('button',{name:locale==='en'?'Appearance':'外观',exact:true}).click(); await page.getByTestId('prototype-theme').selectOption(dark ? 'dark' : 'light');
                         await page.waitForFunction(dark => document.documentElement.dataset.theme === (dark ? 'dark' : 'light'), dark);
+                        await page.getByTestId('close-page').click();
                         await page.locator('[data-project-id="id-deadline-today"]').click();
                         await add(page, 'Audit sample'); await open(page, 'Audit sample');
                         await page.evaluate(() => document.fonts.ready);
@@ -324,9 +330,9 @@ async function createProject(page, name, folder = false, parent) {
                         await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}.png`) });
                         await page.locator('[data-view="timer"]').click();
                         assert(await page.getByTestId('timer-expanded').isVisible());
-                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 50), true, 'Expanded timer must render in the first visible viewport');
+                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 0), true, 'Expanded timer must render in the first visible viewport');
                         await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-timer.png`) });
-                        await page.locator('[data-project-id="id-deadline-today"]').click(); await open(page, 'Audit sample');
+                        await page.getByTestId('timer-expanded').getByRole('button',{name:locale==='en'?'Close':'关闭',exact:true}).click(); await page.locator('[data-project-id="id-deadline-today"]').click(); await open(page, 'Audit sample');
                         const injected = await page.addStyleTag({ content: '.workspace-nav-name {font-size:30px!important}' });
                         const badSize = await page.locator('.workspace-nav-name').first().evaluate(element => getComputedStyle(element).fontSize);
                         assert.throws(() => assertTypography({ ...metrics, name: { ...metrics.name, fontSize: badSize } }), /name.fontSize/);
@@ -341,7 +347,7 @@ async function createProject(page, name, folder = false, parent) {
                         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                         await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-narrow.png`) });
                         await page.locator('[data-view="timer"]').click();
-                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 50), true, 'Narrow timer must open above the fold');
+                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 0), true, 'Narrow timer must open above the fold');
                         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
                         await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-timer-narrow.png`) });
                         return { metrics, reference: 'A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity' };

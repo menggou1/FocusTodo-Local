@@ -31,6 +31,8 @@ export function ProjectEditor({ row, type, projects, close }: { row?: Entity; ty
 export function ProjectManager({ projects, close }: { projects: readonly Entity[]; close(): void }) {
   const { services, text, run, busy, blocked } = useWorkspace();
   const [editor, setEditor] = useState<Entity | null>(null);
+  const [selected,setSelected]=useState<string[]>([]),[parent,setParent]=useState('');
+  const t=(zh:string,en:string)=>services.language.locale.startsWith('zh')?zh:en;
   const drag = useRef<{ from: string; snapshot: { id: string; order: number }[] } | null>(null);
   const [active, setActive] = useState('');
   const rows = ordered(projects.filter(row => row.state !== -1 && row.type !== 7002));
@@ -39,6 +41,7 @@ export function ProjectManager({ projects, close }: { projects: readonly Entity[
   function cancelDrag() { drag.current = null; setActive(''); }
   return <>
     <Dialog title={text.manageLists} close={close}>
+      <div className="domain-toolbar"><select aria-label={text.folder} value={parent} onChange={e=>setParent(e.target.value)}><option value="">{text.none}</option>{projects.filter(p=>p.type===2000&&p.state===0).map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select><button disabled={!projects.some(p=>selected.includes(p.id)&&p.type===1000)||busy||blocked} onClick={()=>{void run(()=>services.business.batch(projects.filter(p=>selected.includes(p.id)&&p.type===1000).map(p=>({type:'updateProject',id:p.id,changes:{parentId:parent},expected:p}))))}}>{t('移动所选清单','Move selected lists')}</button><button className="danger" disabled={!selected.length||busy||blocked} onClick={()=>{if(window.confirm(text.deleteListHelp))void run(async()=>{await services.business.batch(projects.filter(p=>selected.includes(p.id)).map(p=>({type:'removeProject',id:p.id,expected:p})));setSelected([])})}}>{t('删除所选','Delete selected')}</button></div>
       <div className="workspace-project-manager" onKeyDown={event => { if (event.key === 'Escape' && drag.current) { event.preventDefault(); event.stopPropagation(); cancelDrag(); } }}>
         {rows.map(row => {
           const peers = rows.filter(other => group(other) === group(row));
@@ -53,6 +56,7 @@ export function ProjectManager({ projects, close }: { projects: readonly Entity[
                 const target = peers[peers.findIndex(other => other.id === row.id) + (event.key === 'ArrowUp' ? -1 : 1)];
                 if (target) void reorder(row.id, target.id, snapshot());
               }}>☰</button>
+            {Number(row.type)<4000&&<input type="checkbox" aria-label={t('选择','Select')+': '+row.name} checked={selected.includes(row.id)} onChange={e=>setSelected(previous=>e.target.checked?[...previous,row.id]:previous.filter(id=>id!==row.id))}/>}
             <span className="workspace-project-title">{projectName(row, text)}</span>
             <label className="workspace-check"><input type="checkbox" aria-label={text.visible + ': ' + projectName(row, text)} checked={row.state === 0} disabled={busy || blocked}
               onChange={event => { void run(() => services.business.command({ type: 'setProjectHidden', id: row.id, hidden: !event.target.checked, expected: expected(row, ['state']) })); }} />{text.visible}</label>

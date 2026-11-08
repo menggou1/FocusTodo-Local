@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
-import type { ApplicationServices, LanguagePreference } from '../app/contracts';
+import type { ApplicationServices } from '../app/contracts';
 import type { Entity } from '../services/core.mjs';
 import { workspaceText } from '../shared/workspace';
 import { WorkspaceProvider, useWorkspace } from './workspace/Context';
@@ -8,6 +8,12 @@ import { TaskDetails } from './workspace/TaskDetails';
 import { ProjectIcon } from './workspace/ProjectIcon';
 import { taskGroups } from './workspace/TaskGroups';
 import { Timer } from './workspace/Timer';
+import { Calendar } from './workspace/Calendar';
+import { History, Reports } from './workspace/Reports';
+import { Forest } from './workspace/Forest';
+import { Settings } from './workspace/Settings';
+import { Updates } from './workspace/Updates';
+import { PageOverlay } from './workspace/Dialog';
 import { dateInput, expected, number, ordered, projectName } from './workspace/model';
 import '../styles/app.css';
 
@@ -28,9 +34,11 @@ export function App({ services }: { services: ApplicationServices }) {
 }
 
 function Workspace() {
-  const { services, text, run, busy, blocked } = useWorkspace();
+  const { services, text, run, report, busy, blocked } = useWorkspace();
   const snapshot = useSyncExternalStore(services.business.subscribe, services.business.getSnapshot);
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
+  const [timerOpen,setTimerOpen]=useState(false);
+  const [overlay,setOverlay]=useState<'settings'|'reports'|'forest'|null>(null),[settingsTab,setSettingsTab]=useState('general');
   const [view, setView] = useState<View>({ kind: 'project', id: 'id-deadline-today' });
   const [query, setQuery] = useState(''), [name, setName] = useState(''), [selected, select] = useState('');
   const [showCompleted, setShowCompleted] = useState(preferences.showFinishedTasksInToday);
@@ -41,6 +49,10 @@ function Workspace() {
   const taskDrag = useRef<{ row: Entity; rows: Entity[] } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusHeading = useRef(false);
+  const timerReturn=useRef<{view:View;selected:string}>({view:{kind:'project',id:'id-deadline-today'},selected:''});
+  useEffect(()=>{void services.forest.dailyLaunch().catch(report)},[services]);
+  const achievementKey=snapshot.tasks.filter(row=>row.state!==-1&&row.isFinished).length+'|'+snapshot.records.map(row=>[row.id,row.state,row.endDate,row.interval].join(':')).join(',');
+  useEffect(()=>{const timer=setTimeout(()=>{void services.forest.syncAchievements().catch(report)},100);return()=>clearTimeout(timer)},[services,achievementKey]);
   useEffect(() => {
     if (focusHeading.current && !mobileNav) { focusHeading.current = false; heading.current?.focus(); }
   }, [view, mobileNav]);
@@ -60,7 +72,9 @@ function Workspace() {
   const taskIds = new Set([...active, ...completedTasks].map(row => row.id));
   const spentSeconds = snapshot.records.filter(row => row.state !== -1 && taskIds.has(String(row.taskId))).reduce((total, row) => total + number(row.interval), 0);
   const customOrder = project?.orderingRule === 3 && !completedView;
-  function navigate(next: View) { focusHeading.current = true; setView(next); select(''); setMobileNav(false); }
+  function navigate(next: View) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('general');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = true; setView(next); select(''); setMobileNav(false); }
+  function openTask(id:string) { navigate({kind:'project',id:'id-task-tasks'});select(id); }
+  async function startTask(id:string,child?:string) { if(await run(()=>id?services.startForTask(id,child):services.timer.command({type:'switchTask',taskId:'',subtaskId:'',mode:preferences.isCountdown?'countdown':'countup',config:services.settings.timerConfig(),expectedSession:services.timer.getSnapshot()?.sessionId})))navigate({kind:'timer'}); }
   function cancelDrag() { taskDrag.current = null; setDragId(''); }
   async function reorder(to: Entity, source = taskDrag.current) {
     cancelDrag(); if (!source || source.row.id === to.id) return;
@@ -68,12 +82,8 @@ function Workspace() {
     if (index < 0) return;
     const from = source.rows.findIndex(row => row.id === source.row.id), originalTo = source.rows.findIndex(row => row.id === to.id);
     const insert = index + (from < originalTo ? 1 : 0);
-    const before = rows[insert - 1], after = rows[insert];
-    const order = before && after ? (number(before.order) + number(after.order)) / 2 : before ? number(before.order) + 10000 : number(after?.order) - 10000;
-    if (before && order <= number(before.order) || after && order >= number(after.order)) {
-      await run(async () => { throw Object.assign(new Error('Order slots overlap'), { code: 'conflict' }); }); return;
-    }
-    await run(() => services.business.command({ type: 'updateTask', id: source.row.id, changes: { order }, expected: source.row }));
+    rows.splice(insert,0,source.row);
+    await run(()=>services.business.batch(rows.map((row,index)=>({type:'updateTask',id:row.id,changes:{order:(index+1)*10000},expected:row}))));
   }
   const taskRow = (task: Entity, rows: Entity[]) => <li key={task.id} className="workspace-task" data-testid="task-row" data-task-id={task.id} data-selected={selected === task.id || undefined} data-dragging={dragId === task.id || undefined}
     onDragOver={event => { if (customOrder && taskDrag.current?.rows.some(row => row.id === task.id)) event.preventDefault(); }}
@@ -95,6 +105,8 @@ function Workspace() {
     {!task.isFinished && <button type="button" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}>▷</button>}
     {number(task.priority) > 0 && <span className="workspace-priority" aria-label={text.priority + ': ' + task.priority}>⚑</span>}
     <span className="workspace-task-date">{dateInput(task.deadline)}</span>
+    {snapshot.subtasks.some(child=>child.taskId===task.id&&child.state===0)&&<button aria-label={task.isExpanded?text.collapse:text.expand} aria-expanded={!!task.isExpanded} disabled={busy||blocked} onClick={()=>{void run(()=>services.business.command({type:'updateTask',id:task.id,changes:{isExpanded:!task.isExpanded},expected:{isExpanded:task.isExpanded}}))}}>▾</button>}
+    {!!task.isExpanded&&<ul className="domain-inline-subtasks">{ordered(snapshot.subtasks.filter(child=>child.taskId===task.id&&child.state===0)).map(child=><li key={child.id}><input type="checkbox" checked={!!child.isFinished} aria-label={text.toggleSubtask+': '+child.name} disabled={busy||blocked} onChange={()=>{void run(()=>services.business.command({type:'toggleSubtask',id:child.id,expected:child}))}}/><button onClick={()=>select(task.id)}>{child.name}</button>{!child.isFinished&&<button aria-label={text.focusSubtask+': '+child.name} disabled={busy||blocked} onClick={()=>{void startTask(task.id,child.id)}}>▷</button>}</li>)}</ul>}
   </li>;
   const navigationRow = (row: Entity, nested = false) => {
     const folder = row.type === 2000;
@@ -124,8 +136,8 @@ function Workspace() {
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
     <header className="workspace-header">
       <button className="workspace-mobile-toggle" aria-label={text.navigation} aria-expanded={mobileNav} onClick={() => setMobileNav(value => !value)}>☰</button>
-      <span className="workspace-avatar" aria-hidden="true">♙</span><span>FocusTodo</span><span className="workspace-preview" title={text.previewHelp}>{text.preview}</span>
-      <nav aria-label={text.navigation}>{(['timer', 'forest', 'reports', 'settings'] as const).map(item => <button key={item} data-view={item} aria-current={view.kind === item ? 'page' : undefined} onClick={() => navigate({ kind: item })}>{text[item]}</button>)}</nav>
+      <button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} onClick={()=>{setSettingsTab('account');setOverlay('settings')}}>{services.settings.profile().avatar?<img className="workspace-avatar" src={services.settings.profile().avatar} alt=""/>:<span className="workspace-avatar" aria-hidden="true">♙</span>}<span>{services.settings.profile().name}</span></button><span className="workspace-preview" title={text.previewHelp}>{text.preview}</span>
+      <nav aria-label={text.navigation}>{(['timer', 'forest', 'reports', 'settings'] as const).map(item => <button key={item} data-view={item} aria-current={(item==='timer'?timerOpen:overlay===item)?'page':undefined} onClick={() => navigate({ kind: item })}>{text[item]}</button>)}<Updates openTask={openTask}/></nav>
     </header>
     <div className={'workspace-layout' + (selectedTask && isTasks ? ' has-details' : '')}>
       <nav className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': (resizeWidth ?? preferences.projectRegionWidth) + 'px' } as CSSProperties}>
@@ -164,18 +176,14 @@ function Workspace() {
           {!active.length && <p className="workspace-empty">{text.empty}</p>}
           {project && !completedView && <><button className="workspace-completed-toggle" onClick={() => setShowCompleted(value => !value)}>{showCompleted ? text.hideCompleted : text.showCompleted}</button>
             <ul className="workspace-tasks" aria-label={text.completed}>{finished.map(task => taskRow(task, finished))}</ul></>}
-        </> : view.kind === 'settings' ? <section className="workspace-settings">
-          <label>{text.language}<select data-testid="prototype-language" value={preferences.language} disabled={busy || blocked} onChange={event => { void run(() => services.language.setPreference(event.target.value as LanguagePreference)); }}>
-            <option value="auto">{text.auto}</option><option value="zh-CN">简体中文</option><option value="en">English</option></select></label>
-          <label>{text.theme}<select data-testid="prototype-theme" value={preferences.isDarkMode === null ? 'auto' : preferences.isDarkMode ? 'dark' : 'light'} disabled={busy || blocked}
-            onChange={event => { void run(() => services.settings.set('isDarkMode', event.target.value === 'auto' ? null : event.target.value === 'dark')); }}>
-            <option value="auto">{text.auto}</option><option value="light">{text.light}</option><option value="dark">{text.dark}</option></select></label>
-        </section> : view.kind !== 'timer' && <p className="workspace-empty">{text.pending}</p>}
-        <Timer expanded={view.kind === 'timer'} openExpanded={() => navigate({ kind: 'timer' })} />
+          {completedView&&<History openTask={openTask}/>}
+        </> : view.kind === 'settings' ? <Settings/> : view.kind==='reports'?<Reports openTask={openTask}/>:view.kind==='forest'?<Forest/>:project?.type===7001?<Calendar startTask={(id,child)=>{void startTask(id,child)}} openTask={openTask}/>:null}
+        <Timer expanded={timerOpen} openExpanded={() => navigate({ kind: 'timer' })} closeExpanded={()=>{setTimerOpen(false);focusHeading.current=true;setView({...timerReturn.current.view});select(timerReturn.current.selected)}} />
       </main>
       {selectedTask && isTasks && <TaskDetails key={selectedTask.id} task={selectedTask} projects={projects} subtasks={snapshot.subtasks} close={() => select('')} onStart={() => navigate({ kind: 'timer' })} />}
     </div>
     {projectEditor && <ProjectEditor type={projectEditor} projects={projects} close={() => setProjectEditor(null)} />}
     {manager && <ProjectManager projects={projects} close={() => setManager(false)} />}
+  {overlay&&<PageOverlay title={text[overlay]} full={overlay!=='settings'} close={()=>setOverlay(null)}>{overlay==='settings'?<Settings initialTab={settingsTab}/>:overlay==='reports'?<Reports openTask={openTask}/>:<Forest/>}</PageOverlay>}
   </div>;
 }

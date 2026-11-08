@@ -21,6 +21,7 @@ export function createBrowserServices(appVersion: string) {
             const url = URL.createObjectURL(new Blob([JSON.stringify(snapshot)], { type: 'application/json' }));
             try { const link = document.createElement('a'); link.href = url; link.download = prefix + '-' + Date.now() + '.json';
                 document.body.appendChild(link); link.click(); link.remove();
+                if (!window.confirm(document.documentElement.lang.startsWith('zh') ? '请确认完整备份已保存并可读取，然后继续覆盖。取消将保留当前数据。' : 'Confirm the complete backup has been saved and is readable before replacement. Cancel to preserve current data.')) throw Object.assign(new Error('Backup confirmation cancelled'), {code:'cancelled'});
             } finally { window.setTimeout(() => URL.revokeObjectURL(url), 30000); }
         },
         observe(handlers) {

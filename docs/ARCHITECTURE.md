@@ -16,7 +16,7 @@ FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后�
 
 `app/` 负责启动，`services/application.mjs` 组合显式能力，`browser.ts` 是原生存储、时钟、媒体、图片、通知、网络和生命周期适配边界。`core.d.mts` 冻结服务合同；给 `features/` 的 `ApplicationServices` 在构造时剔除 repository，组件不取得事务或旧全局。`domain/` 保留计时、重复、日历、报表、成就与版本纯规则；`shared/catalog.json` 从既有词库生成。导航使用显式本地状态，不依赖旧 Redux 或路由库。
 
-首屏和必需样式先就绪；隔离校验、协议/数据库导入日志、主题日志、身份/设置、计时恢复、业务快照和调度依次初始化，再挂载错误边界及组件。字体使用本地资源与 swap 回退，不阻塞挂载。D 首批的 `features/workspace/` 负责清单编辑/管理、任务详情、共享弹窗与命令错误；`App` 负责应用壳、导航与快照投影。UI 仅订阅已提交快照，编辑保留打开时的原值，保存/排序通过 `business.command` 的 `expected` 防止覆盖冲突；失败保留草稿，不兼容则停写。语言与亮暗从 `settings` 订阅。`Timer` 保持在导航外挂载，投影同一个 C 会话；原生 PiP 使用 React portal，共享命令且不另开数据库写入者。`SoundSettings` 只提交偏好与显式试听，后台音频归 C。实际范围和对照证据见 [D 首批报告](plan/2.0.0-ui-batch-1.md)、[第二批报告](plan/2.0.0-ui-batch-2.md)，不构成全界面验收；D-R 及 D-V 授权门禁见实施路线。
+首屏和必需样式先就绪；隔离校验、协议/数据库导入日志、主题日志、身份/设置、计时恢复、业务快照和调度依次初始化，再挂载错误边界及组件。字体使用本地资源与 swap 回退，不阻塞挂载。`features/workspace/` 负责任务/清单、计时、日程、历史/报表、森林/成就、设置/备份与通知/更新等完整本地领域 UI；`App` 负责应用壳、导航与快照投影。UI 仅订阅已提交快照，编辑保留打开时的原值，逐字段自动保存通过 `business.command` 的 `expected` 防止覆盖冲突，多行排序/清单管理用 `business.batch` 在同一事务提交；失败保留草稿，不兼容则停写。语言与亮暗从 `settings` 订阅。`Timer` 保持在导航外挂载，投影同一个 C 会话；原生 PiP 使用 React portal，共享命令且不另开数据库写入者。`SoundSettings` 只提交偏好与显式试听，后台音频归 C。实际范围和对照证据见 [D 首批报告](plan/2.0.0-ui-batch-1.md)、[第二批报告](plan/2.0.0-ui-batch-2.md)，本次功能交接见 [D-R 报告](plan/2.0.0-dr.md)，不构成人工视觉验收。设置弹窗、报表/森林与计时全屏保留底层工作区，关闭恢复选中状态；后台奖励刷新不占用用户命令锁。D-R 及 D-V 授权门禁见实施路线。
 
 候选只打开 `FocusTodoStandalone.PomodoroDB6` v3 与独立锁库，设置使用 `FocusTodoStandalone.data.`；未知/正式数据库、外部存储、不可枚举数据库及不兼容 schema/protocol 拒绝继续。备份保留 `PomodoroDB6` 逻辑元信息、原键和未知兼容字段。Firefox 需 126+。相对 base、独立运行白名单和私有 debug 目录保持；hidden map 不服务或入包。本地音频/词库随候选构建，外网默认关闭。无 service worker，离线指本地 HTTP 服务可用、实际外网阻断。
 

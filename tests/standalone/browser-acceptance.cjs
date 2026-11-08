@@ -95,7 +95,7 @@ async function main() {
                             assert.equal(await page.locator('[data-view="settings"]').getAttribute('aria-current'), 'page');
                             await page.getByTestId('prototype-language').selectOption('en');
                             await page.waitForFunction(() => document.documentElement.lang === 'en');
-                            await page.getByTestId('prototype-theme').selectOption('dark');
+                            if(!await page.getByTestId('prototype-theme').isVisible())await page.getByRole('button',{name:/^(Appearance|外观)$/}).click(); await page.getByTestId('prototype-theme').selectOption('dark');
                             await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
                             const darkColor = await page.locator('body').evaluate(element => getComputedStyle(element).backgroundColor);
                             await page.getByTestId('prototype-theme').selectOption('light');

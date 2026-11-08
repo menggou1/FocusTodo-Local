@@ -1,0 +1,165 @@
+{
+  "method": "Production build, synthetic isolated sources, real UI/IDB/downloads, local HTTP and external network blocked. WebKit is not Safari; system media/manual download confirmation is not certified.",
+  "engines": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "versions": {
+    "chromium": "157.0.4341.42",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "results": [
+    {
+      "engine": "chromium",
+      "name": "calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "history manual record/edit/delete and cross-midnight report aggregation with goal persistence",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "forest daily/streak/task rewards, one-click collection and achievements remain idempotent",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "reminder read keys and latest-only update read behavior",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "review demo imports through the product UI and secondary pages return to the original task",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "zh-CN light all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "zh-CN dark all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "en light all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "en dark all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "history manual record/edit/delete and cross-midnight report aggregation with goal persistence",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "forest daily/streak/task rewards, one-click collection and achievements remain idempotent",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "reminder read keys and latest-only update read behavior",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "review demo imports through the product UI and secondary pages return to the original task",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "zh-CN light all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "zh-CN dark all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "en light all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "en dark all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "calendar creates task/schedules atomically, edits, duplicates, resizes and switches day/week/month",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "history manual record/edit/delete and cross-midnight report aggregation with goal persistence",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "forest daily/streak/task rewards, one-click collection and achievements remain idempotent",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "reminder read keys and latest-only update read behavior",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "review demo imports through the product UI and secondary pages return to the original task",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "zh-CN light all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "zh-CN dark all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "en light all pages render on desktop and narrow screens",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "en dark all pages render on desktop and narrow screens",
+      "passed": true
+    }
+  ]
+}
