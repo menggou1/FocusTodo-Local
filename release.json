@@ -1,10 +1,25 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "1.9.3",
+  "localVersion": "1.9.4",
   "author": "Lexible",
-  "date": "2026-11-07",
+  "date": "2026-11-09",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "7.1.1-local.1.9.4",
+      "date": "2026-11-09",
+      "title": "修正文档与正式发布流程",
+      "titleEn": "Correct documentation and stable release workflow",
+      "items": [
+        "修复上一版本中长期开发分支名称和归档版本说明的文档错误。",
+        "版本 Tag 通过验证后直接发布为正式版并设为 Latest。"
+      ],
+      "itemsEn": [
+        "Correct documentation errors in the previous version concerning the long-lived development branch and archived version.",
+        "Publish a verified version tag directly as a stable Release and mark it Latest."
+      ],
+      "report": "docs/releases/UPDATE-7.1.1-local.1.9.4.md"
+    },
     {
       "version": "7.1.1-local.1.9.3",
       "date": "2026-11-07",

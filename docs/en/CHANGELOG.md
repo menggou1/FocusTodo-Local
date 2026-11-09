@@ -2,7 +2,14 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.9.3**, author Lexible.
+Current application: **7.1.1-local.1.9.4**, author Lexible.
+
+## 7.1.1-local.1.9.4 · 2026-11-09
+
+- Correct documentation errors in the previous version concerning the long-lived development branch and archived version.
+- Publish a verified version tag directly as a stable Release and mark it Latest.
+
+[English report](releases/UPDATE-7.1.1-local.1.9.4.md).
 
 ## 7.1.1-local.1.9.3 · 2026-11-07
 

@@ -9,10 +9,10 @@ on:
   workflow_dispatch:
     inputs:
       release_channel:
-        description: 'Release channel for a version tag (stable only after acceptance)'
+        description: 'Release channel for a version tag'
         type: choice
-        options: [prerelease, stable]
-        default: prerelease
+        options: [stable, prerelease]
+        default: stable
 
 permissions:
   contents: read
@@ -241,7 +241,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
-          CHANNEL: ${{ github.event_name == 'workflow_dispatch' && inputs.release_channel || 'prerelease' }}
+          CHANNEL: ${{ github.event_name == 'workflow_dispatch' && inputs.release_channel || 'stable' }}
         run: |
           if gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/existing-release.json" 2> "$RUNNER_TEMP/release-error"; then
             if [[ "$CHANNEL" != stable ]] || ! python -c "import json,sys; r=json.load(open(sys.argv[1])); sys.exit(not (r['prerelease'] and not r['draft']))" "$RUNNER_TEMP/existing-release.json"; then
@@ -250,11 +250,11 @@ jobs:
             mkdir "$RUNNER_TEMP/published-assets"
             gh release download "$RELEASE_TAG" --dir "$RUNNER_TEMP/published-assets"
             python scripts/verify-release-workflows.py "$RELEASE_TAG" "$RUNNER_TEMP/published-assets" --reference dist
-            gh release edit "$RELEASE_TAG" --prerelease=false --latest=false
+            gh release edit "$RELEASE_TAG" --prerelease=false --latest
           else
             if ! grep -q 'HTTP 404' "$RUNNER_TEMP/release-error"; then cat "$RUNNER_TEMP/release-error"; exit 1; fi
-            flags=(--prerelease --latest=false)
-            if [[ "$CHANNEL" == stable ]]; then flags=(--latest=false); fi
+            flags=(--latest)
+            if [[ "$CHANNEL" == prerelease ]]; then flags=(--prerelease --latest=false); fi
             gh release create "$RELEASE_TAG" dist/*.zip dist/*.tar.gz dist/SHA256SUMS.txt \
               --verify-tag --title "FocusTodo $RELEASE_TAG" --notes-file dist/release-notes.md "${flags[@]}"
           fi
