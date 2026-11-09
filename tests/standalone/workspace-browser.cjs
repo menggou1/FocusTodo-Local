@@ -1,363 +1,118 @@
-/* D01/D02: real commands on fresh temporary origins; no production profile or private data. */
-const { assert, fs, path, root, evidence, launch, contextFor, assertNoLegacyRuntime } = require('./helpers.cjs');
-const { createStandaloneServer } = require('../../scripts/standalone-server.cjs');
-const typography = require('../fixtures/sidebar-typography-cfd6449.json').metrics;
-const auditViews = require('../../docs/acceptance/2.0.0-a/views/views.json');
-const results = [], versions = {};
-const ready = page => page.getByTestId('app-shell').waitFor();
-const task = (page, name) => page.getByTestId('task-row').filter({ has: page.getByRole('button', { name, exact: true }) });
-function assertTypography(metrics) {
-    for (const [key, legacy] of [['name', '.ProjectItem-name-3IyjO'], ['count', '.ProjectItem-taskQuantity-2TAGR'], ['nav', '.ProjectItem-root-1iGkr'], ['search', '.SearchItem-searchContainer-33crx'], ['input', '.SearchItem-searchInput-a6ypV']]) {
-        for (const prop of ['height', 'fontSize', 'fontWeight', 'lineHeight']) assert.equal(typeof metrics[key][prop] === 'number' ? metrics[key][prop] + 'px' : metrics[key][prop], typography[legacy][prop], key + '.' + prop);
-    }
-}
-async function add(page, name) {
-    const input = page.locator('.workspace-add-task input');
-    await input.fill(name); await input.press('Enter'); await task(page, name).waitFor();
-    await input.waitFor({ state: 'visible' });
-    await page.waitForFunction(() => !document.querySelector('.workspace-add-task input').disabled);
-    await page.waitForFunction(() => document.activeElement === document.querySelector('.workspace-add-task input'));
-}
-async function open(page, name) { await task(page, name).getByRole('button', { name, exact: true }).click(); }
-async function save(page) {
-    await page.evaluate(() => document.activeElement?.blur());
-    await page.waitForFunction(() => document.querySelector('.workspace-details')?.dataset.pending === '0');
-    await page.locator('.workspace-details').getByText('Saved', { exact: true }).waitFor();
-}
-async function rows(page, store) {
-    return page.evaluate(store => new Promise((resolve, reject) => {
-        const request = indexedDB.open('FocusTodoStandalone.PomodoroDB6', 3);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => {
-            const db = request.result, tx = db.transaction(store, 'readonly'), get = tx.objectStore(store).getAll();
-            get.onsuccess = () => resolve(get.result); get.onerror = () => reject(get.error); tx.oncomplete = () => db.close();
-        };
-    }), store);
-}
-async function createProject(page, name, folder = false, parent) {
-    await page.getByRole('button', { name: folder ? 'Create folder' : /Create list/ }).click();
-    const dialog = page.getByRole('dialog'); await dialog.getByLabel('Name', { exact: true }).fill(name);
-    if (parent) await dialog.getByLabel('Folder', { exact: true }).selectOption({ label: parent });
-    await dialog.getByRole('button', { name: 'Save', exact: true }).click(); await dialog.waitFor({ state: 'hidden' });
-}
-
-(async () => {
-    fs.mkdirSync(evidence, { recursive: true });
-    const server = createStandaloneServer({ root: path.join(root, 'dist/standalone/site'), basePath: '/FocusTodo-Local/' });
-    await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-    const origin = 'http://127.0.0.1:' + server.address().port, url = origin + '/FocusTodo-Local/';
-    const engines = process.env.FOCUS_STANDALONE_ENGINES?.split(',').map(value => value.trim()).filter(Boolean) || ['chromium', 'firefox', 'webkit'];
-    assert(engines.length && engines.every(engine => ['chromium', 'firefox', 'webkit'].includes(engine)));
-    async function run(browser, engine, name, body, options = {}) {
-        const h = await contextFor(browser, origin, { locale: 'en', ...options });
-        try {
-            await h.page.goto(url, { waitUntil: 'domcontentloaded' }); await ready(h.page);
-            const detail = await body(h);
-            assert.deepEqual(h.errors, []); assert.deepEqual(h.external, []); await assertNoLegacyRuntime(h.page, h.requests);
-            results.push({ engine, name, passed: true, ...detail }); console.log('PASS ' + engine + ': ' + name);
-        } catch (error) {
-            await h.page.screenshot({ path: path.join(evidence, `workspace-failure-${engine}-${results.length}.png`) }).catch(() => {});
-            results.push({ engine, name, passed: false, error: error.stack }); console.error('FAIL ' + engine + ': ' + name + '\n' + error.stack);
-        } finally { await h.context.close(); }
-    }
-    try {
-        for (const engine of engines) {
-            const browser = await launch(engine); versions[engine] = browser.version();
-            try {
-                await run(browser, engine, 'task fields, subtasks, note search, completion/undo and persistence', async ({ page }) => {
-                    await add(page, 'Audit task'); await open(page, 'Audit task');
-                    const detail = page.locator('.workspace-details');
-                    await detail.getByLabel('Notes', { exact: true }).fill('Searchable note');
-                    await detail.getByLabel('Priority', { exact: true }).selectOption('3');
-                    await detail.getByLabel('Estimated pomodoros', { exact: true }).fill('3');
-                    await detail.getByLabel('Pomodoro length (minutes)', { exact: true }).fill('30');
-                    await save(page);
-                    await detail.getByLabel('Add a subtask', { exact: true }).fill('Child sample');
-                    await detail.getByLabel('Add a subtask', { exact: true }).press('Enter');
-                    await detail.getByRole('button', { name: 'Edit subtask: Child sample', exact: true }).waitFor();
-                    await detail.getByRole('checkbox', { name: 'Toggle subtask completion: Child sample' }).click();
-                    await page.waitForFunction(() => !document.querySelector('.workspace-subtask input').disabled);
-                    await detail.getByRole('button', { name: 'Edit subtask: Child sample', exact: true }).click();
-                    await page.getByRole('dialog').getByLabel('Name', { exact: true }).fill('Renamed child');
-                    await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click();
-                    await page.getByRole('dialog').waitFor({ state: 'hidden' });
-                    const stored = (await rows(page, 'Task')).find(row => row.name === 'Audit task');
-                    assert.equal(stored.remark, 'Searchable note'); assert.equal(stored.priority, 3); assert.equal(stored.estimatePomoNum, 3); assert.equal(stored.pomodoroInterval, 1800);
-                    const child = (await rows(page, 'Subtask')).find(row => row.taskId === stored.id); assert.equal(child.name, 'Renamed child'); assert.equal(child.isFinished, true);
-                    await page.getByRole('searchbox').fill('searchable'); await task(page, 'Audit task').waitFor();
-                    await page.getByRole('searchbox').fill('Renamed child'); await task(page, 'Audit task').waitFor();
-                    await page.getByRole('searchbox').fill('unmatched'); assert.equal(await page.getByTestId('task-row').count(), 0);
-                    await page.locator('[data-view="tasks"]').click();
-                    await task(page, 'Audit task').getByRole('checkbox').click();
-                    await page.waitForFunction(() => document.querySelector('[data-testid="completed-total"]').textContent === '1');
-                    await page.getByRole('button', { name: 'Hide completed tasks', exact: true }).click();
-                    assert.equal(await page.getByTestId('completed-total').innerText(), '1');
-                    assert.equal(await page.getByTestId('task-row').count(), 0);
-                    await page.getByRole('button', { name: 'Completed', exact: true }).click();
-                    await task(page, 'Audit task').getByRole('checkbox').click();
-                    await page.locator('[data-view="tasks"]').click(); await task(page, 'Audit task').waitFor();
-                    await page.reload(); await ready(page); await open(page, 'Audit task');
-                    assert.equal(await page.getByLabel('Notes', { exact: true }).inputValue(), 'Searchable note');
-                    assert(await page.getByRole('checkbox', { name: 'Toggle subtask completion: Renamed child' }).isChecked());
-                });
-                await run(browser, engine, 'folders, list edit/hide/reveal, pointer and keyboard ordering, focus and confirmation', async ({ page }) => {
-                    await createProject(page, 'Folder sample', true); await createProject(page, 'List alpha', false, 'Folder sample'); await createProject(page, 'List beta');
-                    await page.getByRole('button', { name: 'List alpha', exact: true }).click(); await add(page, 'Nested task');
-                    await page.getByRole('button', { name: 'Folder sample', exact: true }).click();
-                    await page.getByRole('button', { name: 'List alpha', exact: true }).waitFor({ state: 'hidden' });
-                    await page.getByRole('button', { name: 'Folder sample', exact: true }).click();
-                    await page.getByRole('button', { name: 'Manage lists', exact: true }).click();
-                    const dialog = page.getByRole('dialog');
-                    await dialog.getByRole('checkbox', { name: 'Visible: List alpha', exact: true }).click();
-                    await page.waitForFunction(() => !document.querySelector('.workspace-project-manager input').disabled);
-                    await dialog.getByRole('checkbox', { name: 'Visible: List alpha', exact: true }).click();
-                    await page.waitForFunction(() => !document.querySelector('.workspace-project-manager input').disabled);
-                    const manager = page.locator('.workspace-project-manager');
-                    const order = await manager.locator('[data-project-id]').evaluateAll(items => items.map(item => item.dataset.projectId));
-                    const first = manager.locator('[data-project-id]').first();
-                    await first.locator('.workspace-handle').focus(); await page.keyboard.press('ArrowDown');
-                    await page.waitForFunction(id => document.querySelector('.workspace-project-manager [data-project-id]').dataset.projectId !== id, order[0]);
-                    assert.equal(await page.locator(':focus').evaluate(element => element.closest('[data-project-id]').dataset.projectId), order[0]);
-                    await manager.locator('[data-project-id]').first().locator('.workspace-handle').dragTo(manager.locator('[data-project-id]').nth(1));
-                    await page.waitForFunction(id => document.querySelector('.workspace-project-manager [data-project-id]').dataset.projectId === id, order[0]);
-                    await dialog.getByRole('button', { name: 'Edit: List beta', exact: true }).click();
-                    const editor = page.getByRole('dialog').last(); await editor.getByLabel('Name', { exact: true }).fill('List renamed');
-                    await editor.getByRole('button', { name: 'Save', exact: true }).click(); await page.waitForFunction(() => document.querySelectorAll('dialog[open]').length === 1);
-                    await dialog.getByRole('button', { name: 'Close', exact: true }).last().click();
-                    await page.getByRole('button', { name: 'List renamed', exact: true }).waitFor();
-                    await page.getByRole('button', { name: 'Manage lists', exact: true }).click(); await page.keyboard.press('Escape');
-                    assert.equal(await page.locator(':focus').getAttribute('aria-label'), 'Manage lists');
-                    await page.getByRole('button', { name: 'List alpha', exact: true }).click(); await open(page, 'Nested task');
-                    await page.locator('.workspace-details').getByRole('button', { name: 'Delete', exact: true }).click();
-                    await page.keyboard.press('Escape'); assert(await task(page, 'Nested task').isVisible());
-                    await page.locator('.workspace-details').getByRole('button', { name: 'Delete', exact: true }).click();
-                    await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click();
-                    await page.getByRole('dialog').waitFor({ state: 'hidden' }); assert.equal(await page.getByTestId('task-row').count(), 0);
-                    assert.equal((await rows(page, 'Task')).find(row => row.name === 'Nested task').state, -1);
-                });
-                await run(browser, engine, 'task pointer/keyboard ordering and reload', async ({ page }) => {
-                    await page.locator('[data-view="tasks"]').click(); await add(page, 'Order A'); await add(page, 'Order B'); await add(page, 'Order C');
-                    const names = () => page.getByTestId('task-row').locator('.workspace-task-name').allTextContents();
-                    assert.deepEqual(await names(), ['Order C', 'Order B', 'Order A']);
-                    await task(page, 'Order C').locator('.workspace-handle').focus(); await page.keyboard.press('ArrowDown');
-                    await page.waitForFunction(() => document.querySelector('.workspace-task-name').textContent === 'Order B');
-                    await task(page, 'Order A').locator('.workspace-handle').dragTo(task(page, 'Order B'));
-                    await page.waitForFunction(() => document.querySelector('.workspace-task-name').textContent === 'Order A');
-                    await page.reload(); await ready(page); await page.locator('[data-view="tasks"]').click();
-                    assert.deepEqual(await names(), ['Order A', 'Order B', 'Order C']);
-                });
-                await run(browser, engine, 'repeat completion generates the next task and preserves child association', async ({ page }) => {
-                    await add(page, 'Repeat sample'); await open(page, 'Repeat sample');
-                    await page.getByLabel('Due date', { exact: true }).fill('2026-11-20');
-                    await page.getByLabel('Repeat', { exact: true }).selectOption('days');
-                    await page.getByLabel('Every', { exact: true }).fill('2'); await save(page);
-                    await page.locator('.workspace-details').getByLabel('Add a subtask', { exact: true }).fill('Repeat child');
-                    await page.locator('.workspace-details').getByLabel('Add a subtask', { exact: true }).press('Enter');
-                    await page.getByRole('button', { name: 'Edit subtask: Repeat child' }).waitFor();
-                    await page.locator('[data-view="tasks"]').click(); await task(page, 'Repeat sample').getByRole('checkbox').click();
-                    await page.waitForFunction(() => !document.querySelector('.workspace-add-task input').disabled);
-                    const tasks = (await rows(page, 'Task')).filter(row => row.name === 'Repeat sample');
-                    assert.equal(tasks.length, 2); assert.equal(tasks.filter(row => row.isFinished).length, 1);
-                    const next = tasks.find(row => !row.isFinished); assert.equal(new Date(next.deadline).getDate(), 22);
-                    assert((await rows(page, 'Subtask')).some(row => row.taskId === next.id && row.name === 'Repeat child'));
-                });
-                await run(browser, engine, 'storage failure retains task input and retry commits once', async ({ page }) => {
-                    await page.evaluate(() => {
-                        const add = IDBObjectStore.prototype.add;
-                        IDBObjectStore.prototype.add = function(value, ...rest) {
-                            if (this.name === 'Task') { IDBObjectStore.prototype.add = add; throw new DOMException('Synthetic write failure', 'QuotaExceededError'); }
-                            return add.call(this, value, ...rest);
-                        };
-                    });
-                    const input = page.locator('.workspace-add-task input'); await input.fill('Retained task'); await input.press('Enter');
-                    await page.getByRole('alert').waitFor(); assert.equal(await input.inputValue(), 'Retained task'); assert.equal(await page.getByTestId('task-row').count(), 0);
-                    assert.equal((await rows(page, 'Task')).length, 0);
-                    await input.press('Enter'); await task(page, 'Retained task').waitFor(); assert.equal((await rows(page, 'Task')).length, 1);
-                });
-                await run(browser, engine, 'cross-tab conflict preserves draft and requires reopening the new revision', async ({ page, context }) => {
-                    await add(page, 'Shared task'); await open(page, 'Shared task'); await page.getByLabel('Notes', { exact: true }).fill('Unsaved draft');
-                    const other = await context.newPage(); await other.goto(url); await ready(other); await open(other, 'Shared task');
-                    await other.getByLabel('Name', { exact: true }).fill('Remote title'); await save(other);
-                    await task(page, 'Remote title').waitFor();
-                    await page.evaluate(() => document.activeElement?.blur());
-                    await page.getByRole('alert').waitFor(); assert.match(await page.getByRole('alert').innerText(), /changed in another window/);
-                    assert.equal(await page.getByLabel('Notes', { exact: true }).inputValue(), 'Unsaved draft');
-                    const stored = (await rows(page, 'Task'))[0]; assert.equal(stored.name, 'Remote title'); assert.equal(stored.remark, '');
-                    await page.locator('.workspace-details').getByRole('button', { name: 'Close', exact: true }).click();
-                    await open(page, 'Remote title'); assert.equal(await page.getByLabel('Name', { exact: true }).inputValue(), 'Remote title');
-                    await other.close();
-                });
-                await run(browser, engine, 'incompatible storage stops UI writes and preserves existing data', async ({ page }) => {
-                    await add(page, 'Preserved task');
-                    await page.evaluate(() => {
-                        const add = IDBObjectStore.prototype.add;
-                        IDBObjectStore.prototype.add = function(value, ...rest) {
-                            if (this.name === 'Task') { IDBObjectStore.prototype.add = add; throw new DOMException('Synthetic incompatible storage', 'VersionError'); }
-                            return add.call(this, value, ...rest);
-                        };
-                    });
-                    const input = page.locator('.workspace-add-task input'); await input.fill('Blocked task'); await input.press('Enter');
-                    await page.getByRole('alert').waitFor(); assert.match(await page.getByRole('alert').innerText(), /Writing has stopped/);
-                    assert(await input.isDisabled()); assert.equal((await rows(page, 'Task')).length, 1);
-                    assert.equal(await input.inputValue(), 'Blocked task'); await page.getByRole('button', { name: 'Reload', exact: true }).click();
-                    await ready(page); await task(page, 'Preserved task').waitFor(); assert.equal((await rows(page, 'Task')).length, 1);
-                });
-                await run(browser, engine, 'editing a name preserves unknown fields and sub-minute reminder timestamps', async ({ page }) => {
-                    await page.evaluate(() => {
-                        const add = IDBObjectStore.prototype.add;
-                        IDBObjectStore.prototype.add = function(value, ...rest) {
-                            if (this.name === 'Task') { IDBObjectStore.prototype.add = add; value = { ...value, reminderDate: new Date('2026-12-01T12:34:56.789+08:00').getTime(), compatibleUnknown: { retained: true } }; }
-                            return add.call(this, value, ...rest);
-                        };
-                    });
-                    await add(page, 'Compatibility task'); const before = (await rows(page, 'Task'))[0]; await open(page, 'Compatibility task');
-                    await page.getByLabel('Name', { exact: true }).fill('Edited compatibility task'); await save(page);
-                    const after = (await rows(page, 'Task'))[0]; assert.deepEqual(after, { ...before, name: 'Edited compatibility task', sync: 0 });
-                });
-                await run(browser, engine, 'tags, colors, grouping, sidebar width and cross-list task dragging', async ({ page }) => {
-                    await createProject(page, 'Destination list');
-                    await page.getByRole('button', { name: 'Create tag', exact: true }).click();
-                    await page.getByRole('dialog').getByLabel('Name', { exact: true }).fill('Urgent tag');
-                    await page.getByRole('dialog').getByLabel('Color', { exact: true }).fill('#ee3366');
-                    await page.getByRole('dialog').getByRole('button', { name: 'Save', exact: true }).click(); await page.getByRole('dialog').waitFor({ state: 'hidden' });
-                    await page.locator('[data-view="tasks"]').click(); await add(page, 'Move sample');
-                    await open(page, 'Move sample'); await page.locator('.workspace-tags').getByRole('checkbox', { name: 'Urgent tag' }).click(); await save(page);
-                    const childInput = page.getByLabel('Add a subtask', { exact: true });
-                    for (const name of ['Order child A', 'Order child B']) { await childInput.fill(name); await childInput.press('Enter'); await page.getByRole('button', { name: 'Edit subtask: ' + name, exact: true }).waitFor(); }
-                    const children = page.locator('.workspace-subtask');
-                    await children.first().locator('.workspace-handle').focus(); await page.keyboard.press('ArrowDown');
-                    await page.waitForFunction(() => document.querySelector('.workspace-subtask .workspace-task-name').textContent === 'Order child B');
-                    await children.last().locator('.workspace-handle').dragTo(children.first());
-                    await page.waitForFunction(() => document.querySelector('.workspace-subtask .workspace-task-name').textContent === 'Order child A');
-                    const tag = (await rows(page, 'Project')).find(row => row.name === 'Urgent tag'); assert.equal(tag.color, 'EE3366');
-                    await page.getByRole('button', { name: 'Urgent tag', exact: true }).click(); await task(page, 'Move sample').waitFor();
-                    await page.getByRole('combobox', { name: 'Order tasks by', exact: true }).selectOption('2');
-                    await page.waitForFunction(() => !document.querySelector('.workspace-sort select').disabled);
-                    assert(await page.locator('.workspace-task-group h2').filter({ hasText: 'Normal' }).isVisible());
-                    await page.locator('[data-view="tasks"]').click();
-                    await task(page, 'Move sample').locator('.workspace-handle').dragTo(page.getByRole('button', { name: 'Destination list', exact: true }));
-                    await page.getByRole('button', { name: 'Destination list', exact: true }).click(); await task(page, 'Move sample').waitFor();
-                    assert.equal((await rows(page, 'Task')).find(row => row.name === 'Move sample').projectId, (await rows(page, 'Project')).find(row => row.name === 'Destination list').id);
-                    const separator = page.getByRole('separator', { name: 'Sidebar width' }); await separator.focus(); await page.keyboard.press('ArrowRight');
-                    await page.waitForFunction(() => document.querySelector('.workspace-sidebar').getBoundingClientRect().width === 290);
-                    await page.reload(); await ready(page); assert.equal(await page.locator('.workspace-sidebar').evaluate(element => element.getBoundingClientRect().width), 290);
-                });
-                await run(browser, engine, 'timer task/subtask start, pause/resume, finish, mode and persisted history', async ({ page }) => {
-                    await page.clock.install();
-                    // Freeze wall time too: rendering/driver latency must not add a spurious second.
-                    await page.clock.pauseAt(new Date(Date.now()+1000));
-                    await add(page, 'Timer sample'); await open(page, 'Timer sample');
-                    await page.getByLabel('Add a subtask', { exact: true }).fill('Timer child'); await page.getByLabel('Add a subtask', { exact: true }).press('Enter');
-                    await page.getByRole('button', { name: 'Start subtask: Timer child' }).click();
-                    await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
-                    assert.equal((await rows(page, 'TimerSession'))[0].subtaskId, (await rows(page, 'Subtask'))[0].id);
-                    await page.clock.fastForward(30000);
-                    if(!await page.getByTestId('timer-expanded').isVisible()) await page.locator('[data-view="timer"]').click();
-                    const timer = page.getByTestId('timer-expanded');
-                    await timer.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
-                    assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 30);
-                    await timer.getByRole('button', { name: 'Continue', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
-                    await page.clock.fastForward(10000); await timer.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor(); await timer.getByRole('button', { name: 'Stop', exact: true }).click();
-                    await page.getByRole('dialog').getByRole('button', { name: 'Confirm', exact: true }).click(); await page.getByRole('dialog',{name:'Stop',exact:true}).waitFor({ state: 'hidden' });
-                    assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 30, 'A separate resumed 10-second span is below the legacy 25-second threshold');
-                    await timer.getByRole('button', { name: 'Countdown', exact: true }).click();
-                    await timer.getByRole('button', { name: 'Stopwatch', exact: true }).waitFor();
-                    await page.reload(); await ready(page); await page.locator('[data-view="timer"]').click(); await page.getByTestId('timer-expanded').getByRole('button', { name: 'Stopwatch', exact: true }).waitFor();
-                    assert.equal((await rows(page, 'Pomodoro')).length, 1);
-                });
-                await run(browser, engine, 'timer interrupted gap recovery and unsupported mini fallback remain operable', async ({ page }) => {
-                    await page.clock.install();
-                    await page.locator('[data-view="timer"]').click(); const timer = page.getByTestId('timer-expanded');
-                    await timer.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
-                    await page.clock.fastForward(360000); await page.getByRole('dialog', { name: 'Confirm interrupted time', exact: true }).waitFor();
-                    await page.getByRole('dialog').getByRole('button', { name: 'Exclude interrupted time', exact: true }).click();
-                    await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor(); assert.equal((await rows(page, 'Pomodoro')).length, 0);
-                    await page.evaluate(() => Object.defineProperty(window, 'documentPictureInPicture', { configurable: true, value: undefined }));
-                    await timer.getByRole('button', { name: 'Mini timer', exact: true }).click(); await timer.getByText(/floating timer remains available/).waitFor();
-                    await timer.getByRole('button', { name: 'Continue', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
-                    await timer.getByRole('button', { name: 'Sound', exact: true }).click(); const sound = page.getByRole('dialog', { name: 'Sound', exact: true });
-                    await sound.getByRole('combobox').first().selectOption('bgm_Rain');
-                    await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.BgMusic') === 'bgm_Rain');
-                    await sound.getByRole('button', { name: 'Stop preview', exact: true }).click(); await sound.getByRole('button', { name: 'Close', exact: true }).last().click();
-                    await page.getByTestId('timer-expanded').getByRole('button', { name: 'Pause', exact: true }).click();
-                    await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
-                });
-                await run(browser, engine, 'countdown work completion exposes the legacy break/start and break/complete actions', async ({ page }) => {
-                    await page.clock.install(); await page.locator('[data-view="timer"]').click(); const timer = page.getByTestId('timer-expanded');
-                    await timer.getByLabel('Pomodoro length (minutes)', { exact: true }).fill('1');
-                    await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.WorkInterval') === '60' && !document.querySelector('.workspace-timer-expanded input').disabled);
-                    await timer.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
-                    await page.clock.fastForward(61000); await page.locator('[data-testid="timer-expanded"][data-state="waitingForRest"]').waitFor();
-                    await timer.getByRole('button', { name: 'Start break', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="rest"]').waitFor();
-                    await timer.getByRole('button', { name: 'Complete', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="initial"]').waitFor();
-                    assert.equal(Math.round((await rows(page, 'Pomodoro')).reduce((total, row) => total + row.interval, 0)), 60);
-                });
-                if (engine === 'chromium') await run(browser, engine, 'native mini window renders the shared timer and controls without a second writer', async ({ page, context }) => {
-                    await page.emulateMedia({colorScheme:'light'});
-                    assert(await page.evaluate(() => !!window.documentPictureInPicture?.requestWindow));
-                    await page.locator('[data-view="timer"]').click(); await page.getByTestId('timer-expanded').getByRole('button', { name: 'Mini timer', exact: true }).click();
-                    await page.waitForFunction(() => documentPictureInPicture.window?.document.querySelector('.workspace-mini-native'));
-                    const mini = context.pages().find(other => other !== page); assert(mini);
-                    const miniErrors = []; mini.on('pageerror', error => miniErrors.push(error.message));
-                    await page.emulateMedia({colorScheme:'dark'});
-                    await mini.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
-                    await mini.getByRole('button', { name: 'Start', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="work"]').waitFor();
-                    await mini.getByRole('button', { name: 'Pause', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="pause"]').waitFor();
-                    await mini.getByRole('button', { name: 'Stop', exact: true }).click(); await page.locator('[data-testid="timer-expanded"][data-state="initial"]').waitFor();
-                    await mini.getByRole('button', { name: 'Close mini timer', exact: true }).click();
-                    await page.waitForFunction(() => !documentPictureInPicture.window);
-                    assert.equal((await rows(page, 'TimerSession')).length, 1);
-                    assert.deepEqual(miniErrors, []);
-                });
-                for (const locale of ['zh-CN', 'en']) for (const dark of [false, true]) {
-                    await run(browser, engine, `${locale} ${dark ? 'dark' : 'light'}: baseline geometry, typography, screenshot, keyboard and narrow viewport`, async ({ page }) => {
-                        await page.locator('[data-view="settings"]').click();
-                        if(!await page.getByTestId('prototype-theme').isVisible())await page.getByRole('button',{name:locale==='en'?'Appearance':'外观',exact:true}).click(); await page.getByTestId('prototype-theme').selectOption(dark ? 'dark' : 'light');
-                        await page.waitForFunction(dark => document.documentElement.dataset.theme === (dark ? 'dark' : 'light'), dark);
-                        await page.getByTestId('close-page').click();
-                        await page.locator('[data-project-id="id-deadline-today"]').click();
-                        await add(page, 'Audit sample'); await open(page, 'Audit sample');
-                        await page.evaluate(() => document.fonts.ready);
-                        const metrics = await page.evaluate(() => {
-                            const metric = selector => { const element = document.querySelector(selector), style = getComputedStyle(element), rect = element.getBoundingClientRect(); return { width: rect.width, height: rect.height, fontSize: style.fontSize, lineHeight: style.lineHeight, fontWeight: style.fontWeight, color: style.color, background: style.backgroundColor }; };
-                            return { header: metric('.workspace-header'), sidebar: metric('.workspace-sidebar'), name: metric('.workspace-nav-name'), count: metric('.workspace-nav-count'), nav: metric('.workspace-nav'), search: metric('.workspace-search'), input: metric('.workspace-search input'), clipping: document.documentElement.scrollWidth > innerWidth };
-                        });
-                        assert.equal(metrics.header.height, 50); assert.equal(metrics.sidebar.width, 280); assert.equal(metrics.clipping, false);
-                        assertTypography(metrics);
-                        const baseline = auditViews.results.find(row => row.locale === locale && row.dark === dark && row.scene === 'task-detail').metrics['[class*=HomeHeader-root]'];
-                        assert.equal(metrics.header.background, baseline.background);
-                        assert.equal(metrics.header.color, baseline.color);
-                        await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}.png`) });
-                        await page.locator('[data-view="timer"]').click();
-                        assert(await page.getByTestId('timer-expanded').isVisible());
-                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 0), true, 'Expanded timer must render in the first visible viewport');
-                        await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-timer.png`) });
-                        await page.getByTestId('timer-expanded').getByRole('button',{name:locale==='en'?'Close':'关闭',exact:true}).click(); await page.locator('[data-project-id="id-deadline-today"]').click(); await open(page, 'Audit sample');
-                        const injected = await page.addStyleTag({ content: '.workspace-nav-name {font-size:30px!important}' });
-                        const badSize = await page.locator('.workspace-nav-name').first().evaluate(element => getComputedStyle(element).fontSize);
-                        assert.throws(() => assertTypography({ ...metrics, name: { ...metrics.name, fontSize: badSize } }), /name.fontSize/);
-                        await injected.evaluate(element => element.remove());
-                        await page.setViewportSize({ width: 375, height: 812 });
-                        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-                        assert(await page.getByLabel(locale === 'en' ? 'Notes' : '备注', { exact: true }).isVisible());
-                        await page.locator('.workspace-header .workspace-mobile-toggle').click();
-                        const target = page.locator('[data-project-id="id-deadline-tomorrow"]'); await target.waitFor({ state: 'visible' }); await target.focus(); await page.keyboard.press('Enter');
-                        await page.waitForFunction(() => document.querySelector('[data-project-id="id-deadline-tomorrow"]').getAttribute('aria-current') === 'page');
-                        await page.waitForFunction(() => document.activeElement.tagName === 'H1');
-                        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-                        await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-narrow.png`) });
-                        await page.locator('[data-view="timer"]').click();
-                        assert.equal(await page.getByTestId('timer-expanded').evaluate(element => element.getBoundingClientRect().top < innerHeight && element.getBoundingClientRect().top >= 0), true, 'Narrow timer must open above the fold');
-                        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-                        await page.screenshot({ path: path.join(evidence, `workspace-${engine}-${locale}-${dark ? 'dark' : 'light'}-timer-narrow.png`) });
-                        return { metrics, reference: 'A views + cfd6449 sidebar fixture; partial geometry/typography comparison, not whole-view visual parity' };
-                    }, { locale });
-                }
-            } finally { await browser.close(); }
-        }
-    } finally {
-        await new Promise(resolve => server.close(resolve));
-        fs.writeFileSync(path.join(evidence, 'standalone-workspace-results.json'), JSON.stringify({ method: 'Isolated production candidate, synthetic data, external network blocked, DPR 1, reduced motion, Asia/Shanghai. Real pointer/keyboard, IndexedDB reads, two tabs. Partial A geometry/typography; WebKit is not Safari.', engines, versions, results }, null, 2) + '\n');
-    }
-    if (results.some(row => !row.passed)) throw new Error('Workspace acceptance failed');
-})().catch(error => { console.error(error); process.exitCode = 1; });
+/* Real UI commands on temporary origins. Interaction paths follow restored 1.9.3 controls. */
+const {assert,fs,path,root,evidence,launch,contextFor,assertNoLegacyRuntime}=require('./helpers.cjs');
+const {createStandaloneServer}=require('../../scripts/standalone-server.cjs');
+const typography=require('../fixtures/sidebar-typography-cfd6449.json').metrics;
+const results=[],versions={};
+const ready=page=>page.getByTestId('app-shell').waitFor();
+const task=(page,name)=>page.getByTestId('task-row').filter({has:page.getByRole('button',{name,exact:true})});
+async function rows(page,store){return page.evaluate(store=>new Promise((resolve,reject)=>{const r=indexedDB.open('FocusTodoStandalone.PomodoroDB6',3);r.onerror=()=>reject(r.error);r.onsuccess=()=>{const db=r.result,q=db.transaction(store).objectStore(store).getAll();q.onsuccess=()=>{db.close();resolve(q.result)}}}),store)}
+async function add(page,name){const input=page.locator('.workspace-add-task input');await input.fill(name);await input.press('Enter');await task(page,name).waitFor();await page.waitForFunction(()=>!document.querySelector('.workspace-add-task input').disabled)}
+async function open(page,name){await task(page,name).getByRole('button',{name,exact:true}).click()}
+async function save(page){const confirm=page.locator('.workspace-details details[open]').getByRole('button',{name:'Confirm',exact:true});if(await confirm.isVisible())await confirm.click();await page.evaluate(()=>document.activeElement?.blur());await page.waitForFunction(()=>document.querySelector('.workspace-details')?.dataset.pending==='0');await page.waitForFunction(()=>!document.querySelector('.workspace-add-task input')?.disabled)}
+async function reveal(page,label){const details=page.locator('.workspace-details details').filter({has:page.getByLabel(label,{exact:true})}).first();if(await details.count()&&await details.getAttribute('open')===null)await details.locator('summary').click()}
+async function expand(page){if(!await page.getByTestId('timer-expanded').isVisible()){await page.getByTestId('timer-floating').hover();await page.getByRole('button',{name:'Expand timer',exact:true}).click()}}
+async function settings(page,tab){await page.locator('[data-view=settings]').click();await page.locator('.legacy-settings>nav>button').filter({hasText:tab}).click()}
+async function project(page,name,folder=false,parent){await page.getByRole('button',{name:folder?'Create folder':'Create list',exact:true}).click();let dialog=page.getByRole('dialog').last();await dialog.getByLabel('Name',{exact:true}).fill(name);if(parent)await dialog.getByLabel('Folder',{exact:true}).selectOption({label:parent});await dialog.getByRole('button',{name:'Save',exact:true}).click();await dialog.waitFor({state:'hidden'})}
+(async()=>{fs.mkdirSync(evidence,{recursive:true});const server=createStandaloneServer({root:path.join(root,'dist/standalone/site'),basePath:'/FocusTodo-Local/'});await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port,url=origin+'/FocusTodo-Local/';const engines=process.env.FOCUS_STANDALONE_ENGINES?.split(',')||['chromium','firefox','webkit'];
+async function run(browser,engine,name,fn,options={}){if(process.env.FOCUS_TEST_FILTER&&!new RegExp(process.env.FOCUS_TEST_FILTER,'i').test(name))return;const h=await contextFor(browser,origin,{locale:'en',...options});try{await h.page.goto(url);await ready(h.page);await fn(h);assert.deepEqual(h.errors,[]);assert.deepEqual(h.external,[]);await assertNoLegacyRuntime(h.page,h.requests);results.push({engine,name,passed:true});console.log('PASS '+engine+': '+name)}catch(error){results.push({engine,name,passed:false,error:error.stack});await h.page.screenshot({path:path.join(evidence,'workspace-failure-'+engine+'-'+results.length+'.png')}).catch(()=>{});console.error('FAIL '+engine+': '+name+'\n'+error.stack)}finally{await h.context.close()}}
+try{for(const engine of engines){const browser=await launch(engine);versions[engine]=browser.version();try{
+ await run(browser,engine,'task fields and picker cancel/confirm, subtasks, notes, search, completion/undo and persistence',async({page})=>{await add(page,'Audit task');await open(page,'Audit task');await page.getByLabel('Notes',{exact:true}).fill('Searchable note');await save(page);await page.locator('.legacy-priority-picker summary').click();await page.getByRole('menuitemradio',{name:'High priority'}).click();await reveal(page,'Estimated pomodoros');await page.getByLabel('Estimated pomodoros',{exact:true}).fill('7');await page.locator('.legacy-pomodoro-picker').getByRole('button',{name:'Cancel',exact:true}).click();assert.equal((await rows(page,'Task'))[0].estimatePomoNum,0);await reveal(page,'Estimated pomodoros');await page.getByLabel('Estimated pomodoros',{exact:true}).fill('3');await page.getByLabel('Pomodoro length (minutes)',{exact:true}).fill('30');await save(page);await reveal(page,'Due date');await page.getByLabel('Due date',{exact:true}).fill('2026-11-20');await save(page);await reveal(page,'Repeat');await page.getByLabel('Repeat',{exact:true}).selectOption('days');await page.getByLabel('Every',{exact:true}).fill('2');await save(page);
+ const child=page.getByLabel('Add a subtask',{exact:true});await child.fill('Child sample');await child.press('Enter');await page.getByRole('button',{name:'Edit subtask: Child sample',exact:true}).click();await page.getByRole('dialog').getByLabel('Name',{exact:true}).fill('Renamed child');await page.getByRole('dialog').getByRole('button',{name:'Save',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});await page.getByRole('checkbox',{name:'Toggle subtask completion: Renamed child'}).click();await page.waitForFunction(()=>!document.querySelector('.workspace-subtask input').disabled);let row=(await rows(page,'Task'))[0];assert.equal(row.remark,'Searchable note');assert.equal(row.priority,3);assert.equal(row.estimatePomoNum,3);assert.equal(row.pomodoroInterval,1800);assert.equal(row.rCycle,2);assert.equal(row.rUnit,'days');assert((await rows(page,'Subtask'))[0].isFinished);
+ await page.getByRole('searchbox').fill('Renamed child');await task(page,'Audit task').waitFor();await page.getByRole('searchbox').fill('unmatched');assert.equal(await page.getByTestId('task-row').count(),0);await page.locator('[data-view=tasks]').click();await task(page,'Audit task').getByRole('checkbox').click();await page.waitForFunction(()=>!document.querySelector('.workspace-add-task input').disabled);let next=(await rows(page,'Task')).find(row=>!row.isFinished);assert.equal(new Date(next.deadline).getDate(),22);assert.equal((await rows(page,'Task')).filter(row=>row.isFinished).length,1);await page.getByRole('button',{name:'Completed',exact:true}).click();await task(page,'Audit task').getByRole('checkbox').click();await page.locator('[data-view=tasks]').click();await page.reload();await ready(page);await page.locator('[data-view=tasks]').click();await task(page,'Audit task').first().getByRole('button',{name:'Audit task',exact:true}).click();assert.equal(await page.getByLabel('Notes',{exact:true}).inputValue(),'Searchable note');});
+ await run(browser,engine,'task row selects from blank/name while independent controls keep their action',async({page})=>{
+  await add(page,'Row click task');await add(page,'Row start task');
+  const row=task(page,'Row click task'),startRow=task(page,'Row start task'),details=page.locator('.workspace-details');
+  const unfinished=async(name)=>{const record=(await rows(page,'Task')).find(item=>item.name===name);assert.equal(record.isFinished,false)};
+  await row.click({position:{x:5,y:22}});await details.waitFor();await unfinished('Row click task');assert.equal(await page.getByTestId('timer-expanded').count(),0);
+  await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await row.locator('.workspace-task-name').click();await details.waitFor();await unfinished('Row click task');assert.equal(await page.getByTestId('timer-expanded').count(),0);
+  await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await page.getByRole('button',{name:'Create tag',exact:true}).click();const tagDialog=page.getByRole('dialog').last();await tagDialog.getByLabel('Name',{exact:true}).fill('Row tag');await tagDialog.getByRole('button',{name:'Save',exact:true}).click();await tagDialog.waitFor({state:'hidden'});
+  await row.locator('.workspace-task-date').click();await details.waitFor();await page.locator('.legacy-detail-tags summary').click();await page.getByRole('checkbox',{name:'Row tag',exact:true}).click();await save(page);await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await row.locator('.legacy-task-tags button').filter({hasText:'#Row tag'}).click();await details.waitFor();assert.equal(await row.getAttribute('data-selected'),'true');assert.equal(await page.locator('.workspace-details').count(),1);assert.equal(await page.locator('.workspace-view-heading h1').innerText(),'Today');assert.equal(await page.locator('.workspace-nav[aria-current=page]').filter({hasText:'Row tag'}).count(),0);await unfinished('Row click task');
+  await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});await row.locator('.legacy-task-tags button').filter({hasText:'#Row tag'}).focus();await page.keyboard.press('Enter');await details.waitFor();assert.equal(await row.getAttribute('data-selected'),'true');assert.equal(await page.locator('.workspace-view-heading h1').innerText(),'Today');await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await row.hover();await row.locator('.workspace-handle').click();assert.equal(await details.count(),0);
+  await row.locator('.workspace-task-date').click();await details.waitFor();await page.getByLabel('Add a subtask',{exact:true}).fill('Row child');await page.getByLabel('Add a subtask',{exact:true}).press('Enter');await page.getByRole('button',{name:'Edit subtask: Row child',exact:true}).waitFor();await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await row.locator('button[aria-expanded]').click();await row.locator('.domain-inline-subtasks').waitFor();assert.equal(await details.count(),0);await unfinished('Row click task');
+  await row.locator('input[type=checkbox]').first().click();await page.waitForTimeout(300);assert.equal(await details.count(),0);assert.equal((await rows(page,'Task')).find(item=>item.name==='Row click task').isFinished,true);
+  await startRow.locator('.workspace-task-start').click();await page.getByTestId('timer-expanded').waitFor();assert.equal((await rows(page,'Task')).find(item=>item.name==='Row start task').isFinished,false);assert.equal(await details.count(),0);
+ });
+ await run(browser,engine,'task context menu estimated pomodoros edit, bounds and save timing',async({page})=>{
+  await add(page,'Estimate task');const row=task(page,'Estimate task');await row.click({button:'right',position:{x:100,y:22}});const menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);
+  const estimate=menu.locator('.legacy-estimate-menu'),priority=menu.locator('.legacy-priority-menu');assert(await estimate.isVisible());assert(await priority.isVisible());const ebox=await estimate.boundingBox(),pbox=await priority.boundingBox();assert(ebox.y<pbox.y);assert(await menu.getByText('Estimated pomodoros',{exact:true}).isVisible());
+  const input=estimate.locator('input[type=number]');assert.equal(await input.inputValue(),'0');await estimate.hover();assert(await input.evaluate(element=>document.activeElement===element));
+  await estimate.locator('.legacy-pomodoro-plus').click();assert.equal(await input.inputValue(),'1');await estimate.locator('.legacy-pomodoro-minus').click();assert.equal(await input.inputValue(),'0');
+  await estimate.locator('.legacy-pomodoro-selection').hover();await page.mouse.wheel(0,-51);await page.waitForFunction(()=>document.querySelector('.legacy-estimate-menu input[type=number]')?.value==='5');
+  await input.fill('3.9');assert.equal(await input.inputValue(),'3');await input.fill('1001');assert.equal(await input.inputValue(),'1000');await estimate.locator('.legacy-pomodoro-plus').click();assert.equal(await input.inputValue(),'1000');
+  await input.fill('-5');assert.equal(await input.inputValue(),'0');await estimate.locator('.legacy-pomodoro-minus').click();assert.equal(await input.inputValue(),'0');
+  await input.fill('7');await menu.getByText('Priority',{exact:true}).hover();await page.waitForTimeout(200);assert.equal((await rows(page,'Task')).find(item=>item.name==='Estimate task').estimatePomoNum,7);await page.waitForFunction(()=>document.querySelector('[data-testid=task-row] .workspace-task-pomos small')?.textContent==='7');await page.keyboard.press('Escape');await menu.waitFor({state:'detached'});
+  await row.click({button:'right',position:{x:100,y:22}});const menu2=page.getByRole('menu');await menu2.waitFor();await page.waitForTimeout(300);const input2=menu2.locator('.legacy-estimate-menu input[type=number]');assert.equal(await input2.inputValue(),'7');await input2.fill('8');await input2.press('Enter');await menu2.waitFor({state:'detached'});await page.waitForTimeout(200);assert.equal((await rows(page,'Task')).find(item=>item.name==='Estimate task').estimatePomoNum,8);
+  await row.click({button:'right',position:{x:100,y:22}});const menu3=page.getByRole('menu');await menu3.waitFor();await page.waitForTimeout(300);const input3=menu3.locator('.legacy-estimate-menu input[type=number]');await input3.fill('9');await page.mouse.click(20,450);await menu3.waitFor({state:'detached'});await page.waitForTimeout(200);assert.equal((await rows(page,'Task')).find(item=>item.name==='Estimate task').estimatePomoNum,9);await page.waitForFunction(()=>document.querySelector('[data-testid=task-row] .workspace-task-pomos small')?.textContent==='9');
+  await row.click({button:'right',position:{x:100,y:22}});const menu4=page.getByRole('menu');await menu4.waitFor();await page.waitForTimeout(300);assert.equal(await menu4.locator('.legacy-estimate-menu input[type=number]').inputValue(),'9');await menu4.getByRole('menuitemradio',{name:'High priority'}).click();await menu4.waitFor({state:'detached'});await page.waitForTimeout(200);const finalTask=(await rows(page,'Task')).find(item=>item.name==='Estimate task');assert.equal(finalTask.priority,3);assert.equal(finalTask.estimatePomoNum,9);
+  assert.equal((await rows(page,'Task')).find(item=>item.name==='Estimate task').isFinished,false);assert.equal(await page.getByTestId('timer-expanded').count(),0);
+ });
+ await run(browser,engine,'task context menu estimate, priority and deadline consecutive updates are retained',async({page})=>{
+  await page.locator('[data-view=tasks]').click();await add(page,'Combined task');const row=task(page,'Combined task');await page.clock.setFixedTime(new Date('2026-11-30T23:30:00+08:00'));const expectedTomorrow=await page.evaluate(()=>{const date=new Date(2026,11,1);date.setHours(23,59,59,999);return date.getTime()});
+  await row.click({button:'right',position:{x:100,y:22}});const menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);const estimate=menu.locator('.legacy-estimate-menu');await estimate.hover();await estimate.locator('input[type=number]').fill('6');await menu.getByRole('menuitemradio',{name:'High priority'}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(500);
+  let record=(await rows(page,'Task')).find(item=>item.name==='Combined task');assert.equal(record.estimatePomoNum,6);assert.equal(record.priority,3);
+  await row.click({button:'right',position:{x:100,y:22}});const menu2=page.getByRole('menu');await menu2.waitFor();await page.waitForTimeout(300);await menu2.getByRole('menuitem',{name:'Due Tomorrow',exact:true}).click();await menu2.waitFor({state:'detached'});await page.waitForTimeout(300);record=(await rows(page,'Task')).find(item=>item.name==='Combined task');assert.equal(record.estimatePomoNum,6);assert.equal(record.priority,3);assert.equal(record.deadline,expectedTomorrow);
+ });
+ await run(browser,engine,'task context menu deadline quick actions, existing dates and boundaries',async({page})=>{
+  await page.locator('[data-view=tasks]').click();await add(page,'Deadline task');const row=task(page,'Deadline task'),details=page.locator('.workspace-details');await page.clock.setFixedTime(new Date('2026-11-30T23:30:00+08:00'));
+  const expected=await page.evaluate(()=>{const end=value=>{const date=new Date(value);date.setHours(23,59,59,999);return date.getTime()};const base=new Date(2026,10,30,23,30);const tomorrow=new Date(base);tomorrow.setDate(tomorrow.getDate()+1);const next=new Date(base);next.setDate(next.getDate()+7);return{today:end(base),tomorrow:end(tomorrow),next:end(next)}});
+  const format=value=>page.evaluate(value=>{const date=new Date(value),pad=part=>String(part).padStart(2,'0');return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}`},value);
+  const deadline=async()=> (await rows(page,'Task')).find(item=>item.name==='Deadline task').deadline;
+  await row.click({button:'right',position:{x:100,y:22}});let menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);
+  const deadlineGroup=menu.locator('.legacy-deadline-menu'),priorityGroup=menu.locator('.legacy-priority-menu'),estimateGroup=menu.locator('.legacy-estimate-menu');for(const label of ['Due Today','Due Tomorrow','Due next week','Someday'])assert(await menu.getByRole('menuitem',{name:label,exact:true}).isVisible());assert.equal(await menu.getByRole('menuitem',{name:'Set due date',exact:true}).count(),0);const ebox=await estimateGroup.boundingBox(),dbox=await deadlineGroup.boundingBox(),pbox=await priorityGroup.boundingBox();assert(ebox.y<dbox.y&&dbox.y<pbox.y);
+  await menu.getByRole('menuitem',{name:'Due Tomorrow',exact:true}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(200);assert.equal(await deadline(),expected.tomorrow);const tomorrowText=await format(expected.tomorrow);assert.equal(await row.locator('.workspace-task-date').innerText(),tomorrowText);await page.waitForFunction(()=>document.activeElement?.closest?.('[data-testid=task-row]'));
+  await row.locator('.workspace-task-name').click();await details.waitFor();assert((await details.locator('.legacy-detail-field').filter({hasText:'Due date'}).innerText()).includes(tomorrowText));await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await row.click({button:'right',position:{x:100,y:22}});menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);await menu.getByRole('menuitem',{name:'Due Today',exact:true}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(200);assert.equal(await deadline(),expected.today);assert.equal(await row.locator('.workspace-task-date').innerText(),'Today');
+  await row.click({button:'right',position:{x:100,y:22}});menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);await menu.getByRole('menuitem',{name:'Due next week',exact:true}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(200);assert.equal(await deadline(),expected.next);assert.equal(await row.locator('.workspace-task-date').innerText(),await format(expected.next));
+  await row.click({button:'right',position:{x:100,y:22}});menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);await menu.getByRole('menuitem',{name:'Someday',exact:true}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(200);assert.equal(await deadline(),0);assert.equal(await row.locator('.workspace-task-date').count(),0);
+  await row.locator('.workspace-task-name').click();await details.waitFor();assert((await details.locator('.legacy-detail-field').filter({hasText:'Due date'}).innerText()).includes('None'));await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await row.click({button:'right',position:{x:100,y:22}});menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);for(const label of ['Due Today','Due Tomorrow','Due next week','Someday'])assert(await menu.getByRole('menuitem',{name:label,exact:true}).isVisible());await page.keyboard.press('Escape');await menu.waitFor({state:'detached'});const record=(await rows(page,'Task')).find(item=>item.name==='Deadline task');assert.equal(record.isFinished,false);assert.equal(await page.getByTestId('timer-expanded').count(),0);
+ });
+ await run(browser,engine,'repeating task deadline actions preserve or clear repeat fields',async({page})=>{
+  await page.locator('[data-view=tasks]').click();await add(page,'Repeat task');let row=task(page,'Repeat task'),details=page.locator('.workspace-details');await row.locator('.workspace-task-name').click();await details.waitFor();const child=page.getByLabel('Add a subtask',{exact:true});await child.fill('Repeat child');await child.press('Enter');await page.getByRole('button',{name:'Edit subtask: Repeat child',exact:true}).waitFor();await page.locator('.legacy-detail-bottom button').first().click();await details.waitFor({state:'detached'});
+  await page.evaluate(name=>new Promise((resolve,reject)=>{const request=indexedDB.open('FocusTodoStandalone.PomodoroDB6',3);request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,tx=db.transaction('Task','readwrite'),store=tx.objectStore('Task'),all=store.getAll();all.onsuccess=()=>{const task=all.result.find(item=>item.name===name);store.put({...task,rCycle:2,rUnit:'days',rValue:'1,3',rFirstDeadline:task.deadline,rId:'repeat-chain'});};tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>reject(tx.error)}}),'Repeat task');
+  await page.reload();await ready(page);await page.locator('[data-view=tasks]').click();await task(page,'Repeat task').waitFor();row=task(page,'Repeat task');await page.clock.setFixedTime(new Date('2026-11-30T23:30:00+08:00'));
+  const expected=await page.evaluate(()=>{const end=value=>{const date=new Date(value);date.setHours(23,59,59,999);return date.getTime()};const base=new Date(2026,10,30,23,30),tomorrow=new Date(base),next=new Date(base);tomorrow.setDate(tomorrow.getDate()+1);next.setDate(next.getDate()+7);return{today:end(base),tomorrow:end(tomorrow),next:end(next)}});
+  const readTask=async()=> (await rows(page,'Task')).find(item=>item.name==='Repeat task');const baseline=await readTask(),baselineChildren=(await rows(page,'Subtask')).filter(item=>item.taskId===baseline.id).length;
+  const choose=async label=>{await row.click({button:'right',position:{x:100,y:22}});const menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);await menu.getByRole('menuitem',{name:label,exact:true}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(200)};
+  for(const [label,value] of [['Due Tomorrow',expected.tomorrow],['Due Today',expected.today],['Due next week',expected.next]]){await choose(label);const record=await readTask();assert.equal(record.deadline,value);assert.equal(record.rFirstDeadline,value);assert.equal(record.rCycle,2);assert.equal(record.rUnit,'days');assert.equal(record.rValue,'1,3');assert.equal(record.rId,'repeat-chain')}
+  await choose('Someday');const cleared=await readTask();assert.equal(cleared.deadline,0);assert.equal(cleared.rFirstDeadline,0);assert.equal(cleared.rCycle,0);assert.equal(cleared.rUnit,'');assert.equal(cleared.rValue,'');assert.equal(cleared.rId,'');assert.equal(cleared.name,'Repeat task');assert.equal(cleared.rStartDate,baseline.rStartDate);assert.equal(cleared.rEndDate,baseline.rEndDate);assert.equal((await rows(page,'Task')).length,1);assert.equal((await rows(page,'Subtask')).filter(item=>item.taskId===baseline.id).length,baselineChildren);
+ });
+ await run(browser,engine,'task context menu deadline preserves concurrent fields and reports failure',async({page,context})=>{
+  await page.locator('[data-view=tasks]').click();await add(page,'Concurrent task');let row=task(page,'Concurrent task');await page.clock.setFixedTime(new Date('2026-11-30T23:30:00+08:00'));const expectedTomorrow=await page.evaluate(()=>{const date=new Date(2026,11,1);date.setHours(23,59,59,999);return date.getTime()});
+  await row.click({button:'right',position:{x:100,y:22}});let menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);
+  const other=await context.newPage();await other.goto(url);await ready(other);await other.locator('[data-view=tasks]').click();await open(other,'Concurrent task');await other.getByLabel('Name',{exact:true}).fill('Concurrent renamed');await save(other);await page.getByTestId('task-row').filter({hasText:'Concurrent renamed'}).waitFor();
+  if(await page.getByRole('menu').count()===0){row=page.getByTestId('task-row').filter({hasText:'Concurrent renamed'});await row.click({button:'right',position:{x:100,y:22}});menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300)}
+  await menu.getByRole('menuitem',{name:'Due Tomorrow',exact:true}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(300);let record=(await rows(page,'Task')).find(item=>item.name==='Concurrent renamed');assert.equal(record.deadline,expectedTomorrow);assert.equal(await page.locator('.workspace-error').count(),0);
+  await other.close();
+  await page.evaluate(()=>{const original=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value,...rest){if(this.name==='Task'){IDBObjectStore.prototype.put=original;throw new DOMException('Synthetic failure','QuotaExceededError')}return original.call(this,value,...rest)}});
+  row=page.getByTestId('task-row').filter({hasText:'Concurrent renamed'});await row.click({button:'right',position:{x:100,y:22}});menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);await menu.getByRole('menuitem',{name:'Due Today',exact:true}).click();await menu.waitFor({state:'detached'});await page.getByRole('alert').waitFor();record=(await rows(page,'Task')).find(item=>item.name==='Concurrent renamed');assert.equal(record.deadline,expectedTomorrow);
+ });
+ await run(browser,engine,'task context menu priority, boundary position, outside and Escape dismissal',async({page})=>{
+  await add(page,'Menu task');const row=task(page,'Menu task'),details=page.locator('.workspace-details');const box=await row.boundingBox();const clickX=box.x+box.width-5,clickY=box.y+20;
+  await page.mouse.click(clickX,clickY,{button:'right'});const menu=page.getByRole('menu');await menu.waitFor();await page.waitForTimeout(300);
+  assert.equal(await details.count(),0);assert.equal(await page.getByTestId('timer-expanded').count(),0);assert.equal((await rows(page,'Task')).find(item=>item.name==='Menu task').isFinished,false);
+  const viewport=page.viewportSize(),menuBox=await menu.boundingBox();assert(menuBox.x>=0&&menuBox.y>=0&&menuBox.x+menuBox.width<=viewport.width+1&&menuBox.y+menuBox.height<=viewport.height+1);assert(Math.abs(menuBox.x-clickX)<2||Math.abs(menuBox.x+menuBox.width-clickX)<2);
+  const style=await menu.evaluate(element=>({z:getComputedStyle(element).zIndex,transition:getComputedStyle(element).transitionDuration}));assert(Number(style.z)>=10000);assert(style.transition.includes('0.25s'));assert(await menu.getByText('Priority',{exact:true}).isVisible());assert.equal(await menu.getByRole('menuitemradio',{name:'Normal'}).getAttribute('aria-checked'),'true');
+  await menu.getByRole('menuitemradio',{name:'High priority'}).click();await menu.waitFor({state:'detached'});await page.waitForTimeout(150);assert.equal((await rows(page,'Task')).find(item=>item.name==='Menu task').priority,3);
+  await row.click({button:'right',position:{x:20,y:20}});const menu2=page.getByRole('menu');await menu2.waitFor();await page.waitForTimeout(300);assert.equal(await menu2.getByRole('menuitemradio',{name:'High priority'}).getAttribute('aria-checked'),'true');
+  await page.mouse.click(10,400);await menu2.waitFor({state:'detached'});await page.waitForFunction(()=>document.activeElement?.closest?.('[data-testid=task-row]'));assert.equal(await details.count(),0);
+  await row.click({button:'right',position:{x:20,y:20}});const menu3=page.getByRole('menu');await menu3.waitFor();await page.keyboard.press('Escape');await menu3.waitFor({state:'detached'});await page.waitForFunction(()=>document.activeElement?.closest?.('[data-testid=task-row]'));
+  await row.locator('.workspace-task-name').focus();await page.keyboard.press('Shift+F10');const menu4=page.getByRole('menu');await menu4.waitFor();await page.keyboard.press('Escape');await menu4.waitFor({state:'detached'});await page.waitForFunction(()=>document.activeElement?.classList.contains('workspace-task-name'));
+  await row.locator('.workspace-task-name').click();await details.waitFor();await page.locator('.legacy-detail-bottom button').first().click();
+ }, {reducedMotion:'no-preference'});
+ await run(browser,engine,'folders/lists/tags, visibility, atomic list ordering and edit/delete confirmation',async({page})=>{await project(page,'Folder sample',true);await project(page,'List alpha',false,'Folder sample');await project(page,'List beta');await page.getByRole('button',{name:'List alpha',exact:true}).click();await add(page,'Nested task');await page.getByRole('button',{name:'Folder sample',exact:true}).click();await page.getByRole('button',{name:'List alpha',exact:true}).waitFor({state:'hidden'});await page.getByRole('button',{name:'Folder sample',exact:true}).click();await settings(page,'Projects');const manager=page.locator('.workspace-project-manager'),alpha=manager.locator('[data-project-id]').filter({hasText:'List alpha'});await alpha.getByRole('checkbox',{name:'Visible: List alpha'}).click();await page.waitForFunction(()=>!document.querySelector('.workspace-project-manager input').disabled);assert.equal((await rows(page,'Project')).find(row=>row.name==='List alpha').state,1);await alpha.getByRole('checkbox',{name:'Visible: List alpha'}).click();await page.waitForFunction(()=>!document.querySelector('.workspace-project-manager input').disabled);await alpha.getByRole('button',{name:'Edit: List alpha'}).click();await page.getByRole('dialog').last().getByLabel('Name',{exact:true}).fill('List renamed');await page.getByRole('dialog').last().getByRole('button',{name:'Save',exact:true}).click();await page.getByTestId('close-page').click();await page.getByRole('button',{name:'List renamed',exact:true}).click();await open(page,'Nested task');await page.locator('.legacy-detail-bottom').getByRole('button',{name:'Delete',exact:true}).click();await page.keyboard.press('Escape');assert(await task(page,'Nested task').isVisible());await page.locator('.legacy-detail-bottom').getByRole('button',{name:'Delete',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:'Delete',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});assert.equal((await rows(page,'Task'))[0].state,-1);});
+ await run(browser,engine,'task pointer/keyboard ordering, cross-list drop, color tags and sidebar resize persist',async({page})=>{await project(page,'Destination');await page.getByRole('button',{name:'Create tag',exact:true}).click();await page.getByRole('dialog').getByLabel('Name',{exact:true}).fill('Urgent');await page.getByRole('dialog').getByLabel('Color',{exact:true}).fill('#ee3366');await page.getByRole('dialog').getByRole('button',{name:'Save',exact:true}).click();await page.getByRole('dialog').waitFor({state:'hidden'});await page.locator('[data-view=tasks]').click();for(const name of ['Order A','Order B','Order C'])await add(page,name);await task(page,'Order C').locator('.workspace-handle').focus();await page.keyboard.press('ArrowDown');await page.waitForFunction(()=>document.querySelector('.workspace-task-name').textContent==='Order B');await task(page,'Order A').locator('.workspace-handle').dragTo(task(page,'Order B'));await page.waitForFunction(()=>document.querySelector('.workspace-task-name').textContent==='Order A');await open(page,'Order A');await page.locator('.legacy-detail-tags summary').click();await page.getByRole('checkbox',{name:'Urgent',exact:true}).click();await save(page);assert.equal((await rows(page,'Project')).find(row=>row.name==='Urgent').color,'EE3366');await task(page,'Order A').locator('.workspace-handle').dragTo(page.getByRole('button',{name:'Destination',exact:true}));await page.getByRole('button',{name:'Destination',exact:true}).click();await task(page,'Order A').waitFor();const separator=page.getByRole('separator',{name:'Sidebar width'});await separator.focus();await page.keyboard.press('ArrowRight');await page.waitForFunction(()=>document.querySelector('.workspace-sidebar').getBoundingClientRect().width===290);await page.reload();await ready(page);assert.equal(await page.locator('.workspace-sidebar').evaluate(e=>e.getBoundingClientRect().width),290);await page.getByRole('button',{name:'Destination',exact:true}).click();await task(page,'Order A').waitFor();});
+ await run(browser,engine,'storage failure retains draft and retry commits exactly once',async({page})=>{await page.evaluate(()=>{const original=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(value,...rest){if(this.name==='Task'){IDBObjectStore.prototype.add=original;throw new DOMException('Synthetic failure','QuotaExceededError')}return original.call(this,value,...rest)}});const input=page.locator('.workspace-add-task input');await input.fill('Retained task');await input.press('Enter');await page.getByRole('alert').waitFor();assert.equal(await input.inputValue(),'Retained task');assert.equal((await rows(page,'Task')).length,0);await input.press('Enter');await task(page,'Retained task').waitFor();assert.equal((await rows(page,'Task')).length,1)});
+ await run(browser,engine,'cross-tab conflict retains draft until reopened; unknown fields and precise reminder timestamps survive name edits',async({page,context})=>{await page.evaluate(()=>{const original=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(value,...rest){if(this.name==='Task'){IDBObjectStore.prototype.add=original;value={...value,reminderDate:new Date('2026-12-01T12:34:56.789+08:00').getTime(),compatibleUnknown:{retained:true}}}return original.call(this,value,...rest)}});await add(page,'Shared task');const before=(await rows(page,'Task'))[0];await open(page,'Shared task');await page.getByLabel('Notes',{exact:true}).fill('Unsaved draft');const other=await context.newPage();await other.goto(url);await ready(other);await open(other,'Shared task');await other.getByLabel('Name',{exact:true}).fill('Remote title');await save(other);await task(page,'Remote title').waitFor();await page.evaluate(()=>document.activeElement?.blur());await page.getByRole('alert').waitFor();assert.match(await page.getByRole('alert').innerText(),/changed in another window/);assert.equal(await page.getByLabel('Notes',{exact:true}).inputValue(),'Unsaved draft');const after=(await rows(page,'Task'))[0];assert.deepEqual(after,{...before,name:'Remote title',sync:0});await other.close()});
+ await run(browser,engine,'incompatible storage stops writes without removing existing data',async({page})=>{await add(page,'Preserved task');await page.evaluate(()=>{const original=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(value,...rest){if(this.name==='Task'){IDBObjectStore.prototype.add=original;throw new DOMException('Synthetic incompatibility','VersionError')}return original.call(this,value,...rest)}});const input=page.locator('.workspace-add-task input');await input.fill('Blocked task');await input.press('Enter');await page.getByRole('alert').waitFor();assert(await input.isDisabled());assert.equal((await rows(page,'Task')).length,1);assert.equal(await input.inputValue(),'Blocked task');await page.getByRole('button',{name:'Reload',exact:true}).click();await ready(page);await task(page,'Preserved task').waitFor()});
+ await run(browser,engine,'timer task/subtask start, pause/resume, partial finish, mode and committed history',async({page})=>{await page.clock.install();await page.clock.pauseAt(new Date(Date.now()+1000));await add(page,'Timer task');await open(page,'Timer task');await page.getByLabel('Add a subtask',{exact:true}).fill('Timer child');await page.getByLabel('Add a subtask',{exact:true}).press('Enter');await page.getByRole('button',{name:'Start subtask: Timer child'}).click();const timer=page.getByTestId('timer-expanded');await page.locator('[data-testid=timer-expanded][data-state=work]').waitFor();await page.clock.fastForward(30000);await timer.getByRole('button',{name:'Pause',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=pause]').waitFor();await page.clock.fastForward(5000);await timer.getByRole('button',{name:'Continue',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=work]').waitFor();await page.clock.fastForward(10000);await timer.getByRole('button',{name:'Pause',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=pause]').waitFor();await timer.getByRole('button',{name:'Stop',exact:true}).click();await page.getByRole('dialog',{name:'Stop',exact:true}).getByRole('button',{name:'Confirm',exact:true}).click();await page.getByRole('dialog',{name:'Stop',exact:true}).waitFor({state:'hidden'});assert.equal((await rows(page,'Pomodoro')).reduce((n,row)=>n+row.interval,0),30,'Separate resumed 10-second span remains below the legacy 25-second threshold');assert((await rows(page,'Pomodoro')).every(row=>row.subtaskId));await timer.getByRole('button',{name:'Timer Mode',exact:true}).click();await page.locator('.legacy-timer-mode-selector').getByRole('radio',{name:'Stopwatch',exact:true}).click();await page.locator('.legacy-timer-mode-selector footer').getByRole('button').last().click();await page.waitForFunction(()=>localStorage.getItem('FocusTodoStandalone.data.Countdown')==='false');});
+ await run(browser,engine,'recovery excludes interrupted time and short work does not create records',async({page})=>{await page.clock.install();await expand(page);const timer=page.getByTestId('timer-expanded');await timer.getByRole('button',{name:'Start',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=work]').waitFor();await page.clock.fastForward(360000);await page.getByRole('dialog',{name:'Confirm interrupted time',exact:true}).waitFor();await page.getByRole('dialog').getByRole('button',{name:'Exclude interrupted time',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=pause]').waitFor();assert.equal((await rows(page,'Pomodoro')).length,0)});
+ await run(browser,engine,'automatic rest and finish persist complete pomodoros',async({page})=>{await page.clock.install();await expand(page);const timer=page.getByTestId('timer-expanded');await timer.locator('.legacy-timer-duration-trigger').click();await timer.getByRole('spinbutton',{name:'Pomodoro length (minutes)',exact:true}).press('Home');await timer.getByRole('button',{name:'Start',exact:true}).click();await page.waitForFunction(()=>localStorage.getItem('FocusTodoStandalone.data.WorkInterval')==='60');await page.locator('[data-testid=timer-expanded][data-state=work]').waitFor();await page.clock.fastForward(61000);await page.locator('[data-testid=timer-expanded][data-state=waitingForRest]').waitFor();await timer.getByRole('button',{name:'Start break',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=rest]').waitFor();await timer.getByRole('button',{name:'Complete',exact:true}).click();await page.locator('[data-testid=timer-expanded][data-state=initial]').waitFor();assert.equal((await rows(page,'Pomodoro'))[0].interval,60)});
+ for(const locale of ['zh-CN','en'])for(const dark of [false,true])await run(browser,engine,locale+' '+(dark?'dark':'light')+' restored geometry, typography, narrow canvas and a failing injected font counterexample',async({page})=>{await page.locator('[data-view=settings]').click();await page.locator('.legacy-settings>nav>button').filter({hasText:locale==='en'?'Appearance':'外观'}).click();await page.getByTestId('prototype-theme').selectOption(dark?'dark':'light');await page.waitForFunction(dark=>document.documentElement.dataset.theme===(dark?'dark':'light'),dark);await page.getByTestId('close-page').click();await page.evaluate(()=>document.fonts.ready);assert.equal(await page.locator('.workspace-header').evaluate(e=>e.getBoundingClientRect().height),50);assert.equal(await page.locator('.workspace-sidebar').evaluate(e=>e.getBoundingClientRect().width),280);const check=async()=>{const style=await page.locator('.workspace-nav-name').first().evaluate(e=>({size:getComputedStyle(e).fontSize,height:e.getBoundingClientRect().height}));assert.equal(style.size,typography['.ProjectItem-name-3IyjO'].fontSize);assert.equal(style.height,34)};await check();const injected=await page.addStyleTag({content:'.workspace-nav-name{font-size:30px!important}'});await assert.rejects(check,/30px/);await injected.evaluate(e=>e.remove());for(const width of [1280,1000,768,375]){await page.setViewportSize({width,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth),Math.max(1000,width));assert.equal(await page.locator('.workspace-header').evaluate(e=>e.getBoundingClientRect().width),width);await page.screenshot({path:path.join(evidence,`workspace-${engine}-${locale}-${dark?'dark':'light'}-${width}.png`)})}}, {locale});
+ }finally{await browser.close()}}}finally{await new Promise(r=>server.close(r));fs.writeFileSync(path.join(evidence,process.env.FOCUS_TEST_FILTER?'standalone-workspace-filtered.json':'standalone-workspace-results.json'),JSON.stringify({engines,versions,method:'Isolated real UI operations, original style fixture, IndexedDB assertions, synthetic failures and narrow behavior matching executable legacy; no production profiles.',results},null,2)+'\n')}if(results.some(row=>!row.passed))throw Error('Workspace acceptance failed')
+})().catch(error=>{console.error(error.stack);process.exitCode=1});

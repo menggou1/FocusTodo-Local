@@ -60,7 +60,7 @@ async function main() {
                                 await page.goto(url, { waitUntil: 'domcontentloaded' });
                                 await ready(page);
                                 await page.waitForFunction(locale => document.documentElement.lang === locale, locale);
-                                assert(await page.locator('.workspace-empty').isVisible());
+                                assert(await page.locator('.workspace-add-task input').isVisible()); assert.equal(await page.getByTestId('task-row').count(),0);
                                 assert.equal(await page.locator('html').getAttribute('lang'), locale);
                                 assert.equal(await page.locator('#prototype-startup').isVisible(), false);
                                 assert(!requests.some(request => !new URL(request).pathname.startsWith(basePath)), 'Relative resources remain within the mounted project path');
@@ -83,7 +83,7 @@ async function main() {
                             });
                             assert(await page.getByTestId('app-shell').isVisible());
                             await page.locator('[data-view="settings"]').click();
-                            await page.getByTestId('prototype-language').selectOption('en');
+                            await page.locator('.legacy-settings>nav>button').filter({hasText:/^(通用|General)$/}).click(); await page.getByTestId('prototype-language').selectOption('en');
                             await page.waitForFunction(() => document.documentElement.lang === 'en');
                             assert.equal(await page.evaluate(() => localStorage.getItem('FocusTodoStandalone.data.FocusTodo.language')), 'en');
                         });
@@ -93,7 +93,7 @@ async function main() {
                             await page.locator('[data-view="settings"]').focus();
                             await page.keyboard.press('Enter');
                             assert.equal(await page.locator('[data-view="settings"]').getAttribute('aria-current'), 'page');
-                            await page.getByTestId('prototype-language').selectOption('en');
+                            await page.locator('.legacy-settings>nav>button').filter({hasText:/^(通用|General)$/}).click(); await page.getByTestId('prototype-language').selectOption('en');
                             await page.waitForFunction(() => document.documentElement.lang === 'en');
                             if(!await page.getByTestId('prototype-theme').isVisible())await page.getByRole('button',{name:/^(Appearance|外观)$/}).click(); await page.getByTestId('prototype-theme').selectOption('dark');
                             await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
@@ -108,25 +108,25 @@ async function main() {
                             await page.reload({ waitUntil: 'domcontentloaded' });
                             await ready(page);
                             await page.waitForFunction(() => document.documentElement.lang === 'en' && document.documentElement.dataset.theme === 'dark');
-                            assert(await page.locator('.workspace-empty').isVisible());
+                            assert(await page.locator('.workspace-add-task input').isVisible()); assert.equal(await page.getByTestId('task-row').count(),0);
                             assert.deepEqual(await page.evaluate(() => Object.keys(localStorage).filter(key => !key.startsWith('FocusTodoStandalone.data.')).sort()), []);
                             await page.screenshot({ path: path.join(evidence, 'standalone-' + engine + '-dark.png') });
                         });
-                        await run(browser, origin, url, engine + ': narrow viewport remains navigable without horizontal clipping', async ({ page }) => {
+                        await run(browser, origin, url, engine + ': narrow viewport preserves original 1000px desktop canvas', async ({ page }) => {
                             await page.goto(url, { waitUntil: 'domcontentloaded' });
                             await ready(page);
-                            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-                            await page.locator('[data-view="settings"]').click();
-                            await page.getByTestId('prototype-language').selectOption('en');
+                            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth === 1000), true);
+                            await page.setViewportSize({width:1280,height:812}); await page.locator('[data-view="settings"]').click();
+                            await page.locator('.legacy-settings>nav>button').filter({hasText:/^(通用|General)$/}).click(); await page.getByTestId('prototype-language').selectOption('en');
                             assert(await page.getByTestId('prototype-language').isVisible());
-                            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+                            assert.equal(await page.evaluate(() => document.documentElement.scrollWidth === 1280), true);
                             await page.screenshot({ path: path.join(evidence, 'standalone-' + engine + '-narrow.png') });
                         }, { context: { viewport: { width: 375, height: 812 } } });
                         await run(browser, origin, url, engine + ': unavailable fonts never block usable navigation', async ({ page }) => {
                             await page.route(/\.ttf(?:[?#]|$)/, route => route.abort());
                             await page.goto(url, { waitUntil: 'domcontentloaded' });
                             await ready(page);
-                            await page.locator('[data-view="settings"]').click();
+                            await page.locator('[data-view="settings"]').click(); await page.locator('.legacy-settings>nav>button').filter({hasText:/^(通用|General)$/}).click();
                             assert(await page.getByTestId('prototype-language').isVisible());
                         });
                         await run(browser, origin, url, engine + ': existing legacy settings are preserved and blocked', async ({ page }) => {

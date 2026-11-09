@@ -7,6 +7,7 @@ export const preferenceDefinitions = Object.freeze({
     workAlarm: ['WorkAlarm', 'alm_Timer'], breakAlarm: ['BreakAlarm', 'alm_Timer'], bgMusic: ['BgMusic', 'bgm_Mute'],
     ringtoneVolume: ['RtnVol', 100], whiteNoiseVolume: ['WNVol', 100], projectRegionWidth: ['ProjectRegionWidth', 280],
     language: ['FocusTodo.language', 'auto'], externalNetwork: ['FocusTodo.externalNetwork', false], isDarkMode: ['DarkMode', null],
+    widgetOrder: ['AllWidgets', [0,1,2]], visibleWidgets: ['Widgets', [0,1,2]], widgetExpanded: ['WidgetExpanded', true],
 });
 export function createPreferencesService({ data, storage, now, randomUUID, encodeBase64, decodeBase64, onError, onIntent = () => {} }) {
     const read = () => {
@@ -14,7 +15,8 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
         for (const [field, [key, fallback]] of Object.entries(preferenceDefinitions)) {
             const raw = storage.getItem(key);
             let value = raw;
-            if (field === 'isDarkMode') value = raw ? raw === 'true' : null;
+            if (field === 'widgetOrder' || field === 'visibleWidgets') value = raw === null || field==='widgetOrder'&&!raw ? [...fallback] : [...new Set(String(raw).split(',').filter(value=>value!=='').map(Number).filter(value=>[0,1,2].includes(value)))];
+            else if (field === 'isDarkMode') value = raw ? raw === 'true' : null;
             else if (typeof fallback === 'boolean') value = !raw ? fallback : raw === 'true';
             else if (typeof fallback === 'number') {
                 value = Number(raw) || fallback;
@@ -46,8 +48,9 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
         if (['workAlarm','breakAlarm','bgMusic'].includes(field)) invariant(typeof value === 'string' && /^[A-Za-z0-9_]+$/.test(value) && value.startsWith(field === 'bgMusic' ? 'bgm_' : 'alm_'), 'Invalid audio preference');
         if (field === 'isDarkMode') invariant(value === null || typeof value === 'boolean', 'Invalid theme preference');
         if (field === 'defaultDeadline') invariant(Number.isFinite(value) && Math.abs(value) <= 8.64e15, 'Invalid default deadline');
+        if (field === 'widgetOrder' || field === 'visibleWidgets') invariant(Array.isArray(value) && value.every(item=>[0,1,2].includes(item)) && new Set(value).size===value.length, 'Invalid timer widgets');
         onIntent(field, value);
-        await data.themeStorageOperation(() => value === null ? storage.removeItem(definition[0]) : storage.setItem(definition?.[0] || 'DefaultDeadline', String(value)));
+        await data.themeStorageOperation(() => value === null ? storage.removeItem(definition[0]) : storage.setItem(definition?.[0] || 'DefaultDeadline', Array.isArray(value)?value.join(','):String(value)));
         const result = refresh(); data.changed('settings'); return result;
     };
     const profile = () => {
@@ -57,6 +60,12 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
     };
     return Object.freeze({
         getSnapshot: state.getSnapshot, subscribe: state.subscribe, refresh, set, profile,
+        async setWidgetLayout(order, visible) {
+            for (const values of [order,visible]) invariant(Array.isArray(values)&&values.every(value=>[0,1,2].includes(value))&&new Set(values).size===values.length,'Invalid timer widgets');
+            invariant(visible.every(value=>order.includes(value)),'Visible timer widgets must belong to the ordered list');
+            await data.themeStorageOperation(()=>{storage.setItem('AllWidgets',order.join(','));storage.setItem('Widgets',visible.join(','));});
+            const result=refresh();data.changed('settings');return result;
+        },
         goals() { const raw = storage.getItem('Goals'); const rows = raw ? JSON.parse(raw) : [{time:0,type:'TIME',value:180,default:true}]; invariant(Array.isArray(rows) && rows.every(row=>Number.isFinite(row.time)&&Number.isFinite(row.value)&&row.value>=0), 'Invalid daily goals'); return rows; },
         setGoal: minutes => data.themeStorageOperation(()=>{ invariant(Number.isInteger(minutes)&&minutes>=0&&minutes<=1440,'Invalid daily goal'); const rows = JSON.parse(storage.getItem('Goals')||'[]'), time=now(); invariant(Array.isArray(rows),'Invalid daily goals'); const last=rows.at(-1); if(last && time-last.time<86400000)rows.pop(); rows.push({time,type:'TIME',value:minutes,sync:false}); storage.setItem('Goals',JSON.stringify(rows)); data.changed('settings'); }),
         timerConfig: task => ({ interval: task?.pomodoroInterval || state.getSnapshot().workInterval,

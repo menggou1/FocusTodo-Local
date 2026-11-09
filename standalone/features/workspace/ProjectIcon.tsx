@@ -16,4 +16,4 @@ import project from '../../../public/img/project.png';
 import folder from '../../../public/img/folder.png';
 
 const icons: Record<number, string> = { 1000: project, 2000: folder, 4000: today, 4001: tomorrow, 4002: planned, 4003: someday, 4004: seven, 4006: overdue, 4007: week, 5001: low, 5002: medium, 5003: high, 7000: all, 7001: calendar, 7003: history, 7005: tasks };
-export function ProjectIcon({ type }: { type: number }) { return <img className="workspace-nav-icon" src={icons[type] || project} alt="" />; }
+export function ProjectIcon({type,color}:{type:number;color?:string}){if(type===2000)return <span className="workspace-nav-icon legacy-folder-color" style={{backgroundColor:'#'+(color||'aebdc3').replace('#','')}}/>;if(type===3000)return <span className="workspace-nav-icon workspace-tag-color" style={{backgroundColor:'#'+(color||'aeaeae').replace('#','')}}/>;if(type===1000&&color)return <span className="workspace-nav-icon workspace-project-color"><i style={{background:'#'+color.replace('#','')}}/></span>;return <img className="workspace-nav-icon" src={icons[type]||project} alt=""/>;}

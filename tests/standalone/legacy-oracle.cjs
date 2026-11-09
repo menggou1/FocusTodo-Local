@@ -15,6 +15,9 @@ function legacyOracle({ db, storage, now, uuid }) {
         if (id === 77) return { default: { shared: { db } }, __esModule: true };
         if (id === 65 || id === 14) return { default: { shared: sync, Event: {} }, __esModule: true };
         if (id === 134 || id === 32) return {};
+        // Widget preference 299 imports its React view only for registration.
+        // The oracle exercises the original getters, never that DOM component.
+        if (id === 674) return {};
         if (id === 254) return { default: { shared: { defaultPriceInfo: {} } }, __esModule: true };
         if (cache.has(id)) return cache.get(id).exports;
         const module = { exports: {} }; cache.set(id, module);

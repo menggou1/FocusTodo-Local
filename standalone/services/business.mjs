@@ -34,7 +34,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
     const command = async request => {
         invariant(!disposed, 'Service disposed', 'disposed'); let input = structuredClone(request);
         const batch = input.type === 'batch' ? input.commands : null;
-        if (batch) invariant(Array.isArray(batch) && batch.length > 0 && batch.length <= 2000 && batch.every(item => ['updateTask','updateSubtask','updateProject','removeProject'].includes(item.type)), 'Invalid atomic command batch');
+        if (batch) invariant(Array.isArray(batch) && batch.length > 0 && batch.length <= 2000 && batch.every(item => ['updateTask','addSubtask','updateSubtask','removeSubtask','updateProject','removeProject'].includes(item.type)), 'Invalid atomic command batch');
         const result = await data.write(tables, (tx, done, fail) => collect(tx, done, fail, values => {
             const find = (name, id) => { const row = values[name].find(row => row.id === id && row.state !== -1); invariant(row, 'Record no longer exists', 'conflict'); return row; };
             const put = (table, row) => { tx.objectStore(table).put(row); const list = values[names[tables.indexOf(table)]]; const index = list.findIndex(item => item.id === row.id); if (index >= 0) list[index] = row; else list.push(row); return row; };
@@ -50,6 +50,18 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                     tx.objectStore('TimerSession').put(result.session);
                     values.records.push(...result.records); values.sessions = [result.session];
                 }
+            };
+            const spawnRepetition = task => {
+                let next;
+                    const deadline = repetitionDeadline(task, now());
+                    next = { ...taskDefaults(), ...Object.fromEntries(['name','estimatePomoNum','projectId','rCycle','rFirstDeadline','rUnit','rValue','tags','remark','priority','pomodoroInterval'].map(key => [key, task[key]])),
+                        deadline, rId: task.rId || randomUUID() };
+                    if (task.reminderDate) next.reminderDate = task.reminderDate + new Date(deadline).setHours(23,59,59,999) - new Date(task.deadline).setHours(23,59,59,999);
+                    const peers = values.tasks.filter(row => row.projectId === task.projectId && row.state === 0 && !row.isFinished);
+                    if (peers.length) next.order = peers.reduce((minimum, task) => Math.min(minimum, task.order), Infinity) - 10000;
+                    tx.objectStore('Task').add(next);
+                    for (const child of values.subtasks.filter(child => child.taskId === task.id && child.state === 0)) tx.objectStore('Subtask').add({ ...subtaskDefaults(), name: child.name, order: child.order, taskId: next.id });
+                return next;
             };
             const removeTask = (task, preserveHistory = false) => {
                 detach(session => session.taskId === task.id);
@@ -110,20 +122,13 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 if (changes.projectId) invariant([1000, 7005].includes(find('projects', changes.projectId).type), 'Invalid task project');
                 return update('Task', row, changes);
             }
-            case 'removeTask': { const row = find('tasks', input.id); check(row); return removeTask(row, !!input.preserveHistory); }
+            case 'removeTask': { const row = find('tasks', input.id); check(row); if(input.repeat==='current'&&row.rCycle&&!row.isFinished)spawnRepetition(row); return removeTask(row, !!input.preserveHistory); }
             case 'completeTask': {
                 const row = find('tasks', input.id); check(row); let next = null;
                 invariant(!row.isFinished, 'Task already completed', 'conflict');
                 detach(session => session.taskId === row.id);
                 if (row.rCycle) {
-                    const deadline = repetitionDeadline(row, now());
-                    next = { ...taskDefaults(), ...Object.fromEntries(['name','estimatePomoNum','projectId','rCycle','rFirstDeadline','rUnit','rValue','tags','remark','priority','pomodoroInterval'].map(key => [key, row[key]])),
-                        deadline, rId: row.rId || randomUUID() };
-                    if (row.reminderDate) next.reminderDate = row.reminderDate + new Date(deadline).setHours(23,59,59,999) - new Date(row.deadline).setHours(23,59,59,999);
-                    const peers = values.tasks.filter(task => task.projectId === row.projectId && task.state === 0 && !task.isFinished);
-                    if (peers.length) next.order = peers.reduce((minimum, task) => Math.min(minimum, task.order), Infinity) - 10000;
-                    tx.objectStore('Task').add(next);
-                    for (const child of values.subtasks.filter(child => child.taskId === row.id && child.state === 0)) tx.objectStore('Subtask').add({ ...subtaskDefaults(), name: child.name, order: child.order, taskId: next.id });
+                    next = spawnRepetition(row);
                 }
                 const finished = update('Task', row, { isFinished: true, finishedDate: now(), rCycle: 0, rUnit: '', rValue: '', rFirstDeadline: 0 });
                 return { finishedTask: finished, newTask: next };

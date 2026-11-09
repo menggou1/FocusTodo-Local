@@ -74,9 +74,12 @@ test('history/report total, fractions, task/project aggregation and local day bo
 });
 test('settings defaults, values and clamps match old getters and failed writes retain snapshots', async t => {
     const h = await pair(t), {preferenceDefinitions}=await import('../../standalone/services/preferences.mjs');
+    const widgetLegacy=h.oracle.module(299).default.shared;
+    const oldValue=field=>field==='widgetOrder'?clone(widgetLegacy.allWidgets).map(Number):field==='visibleWidgets'?clone(widgetLegacy.widgets).map(Number):field==='widgetExpanded'?widgetLegacy.expanded:h.oracle.settings()[field];
     for(const [field,[key]] of Object.entries(preferenceDefinitions)){
         if(['language','externalNetwork'].includes(field))continue;
-        assert.deepEqual(h.app.settings.getSnapshot()[field], h.oracle.settings()[field],field);
+        assert.deepEqual(h.app.settings.getSnapshot()[field], oldValue(field),field);
+        if(['widgetOrder','visibleWidgets','widgetExpanded'].includes(field))for(const value of field==='widgetExpanded'?['true','false','']:['2,0,1','1','']){h.storage.setItem(key,value);h.old.storage.setItem(key,value);h.app.settings.refresh();assert.deepEqual(h.app.settings.getSnapshot()[field],oldValue(field),field+' '+value)}
         if(['workInterval','shortBreakInterval','longBreakInterval','longBreakPomodoros','ringtoneVolume','whiteNoiseVolume','projectRegionWidth'].includes(field)){
             for(const value of ['1','900','-5','0','100000']){
                 h.storage.setItem(key,value);h.old.storage.setItem(key,value);h.app.settings.refresh();

@@ -123,6 +123,7 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
                 config: settings.timerConfig(task), expectedSession: timer.getSnapshot()?.sessionId });
         },
         backup: Object.freeze({ export: async options => codec.encode(await data.snapshot(), options),
+            async inspect(input) { const decoded = await codec.decode(input); data.validate(decoded.data); return decoded; },
             async reset() { wallpaper.cancel();network.cancel();audio?.suspend();const backup=await data.reset();await refresh();audio?.resume();return backup; },
             async restore(input, options) { const decoded = await codec.decode(input); wallpaper.cancel(); network.cancel(); audio?.suspend();
                 const backup = await data.replace(decoded.data, options); await refresh(); audio?.resume(); return backup; },

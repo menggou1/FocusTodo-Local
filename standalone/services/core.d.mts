@@ -35,6 +35,9 @@ export interface BackupSnapshot {
     localStorage: Record<string, string>;
 }
 export interface BackupOptions { format?: 'json' | 'gzip'; includeWallpapers?: boolean }
+export interface BackupInspection {
+    data: BackupSnapshot; format: 'json' | 'gzip'; scope: 'full' | 'without-wallpapers'; decodedBytes: number;
+}
 export interface EncodedBackup {
     data: BackupSnapshot; bytes: Uint8Array; rawBytes: number; size: number;
     format: 'json' | 'gzip'; fallback: boolean; extension: '.json' | '.json.gz';
@@ -74,7 +77,7 @@ export type BusinessCommand =
     | { type: 'addProject' | 'addTask' | 'addSubtask' | 'addSchedule' | 'addRecord'; values: CompatibleRecord }
     | { type: 'updateProject' | 'updateTask' | 'updateSubtask' | 'updateSchedule' | 'updateRecord'; id: string; changes: CompatibleRecord; expected?: CompatibleRecord }
     | { type: 'removeProject' | 'removeSubtask' | 'removeSchedule' | 'removeRecord' | 'completeTask' | 'uncompleteTask' | 'toggleSubtask'; id: string; expected?: CompatibleRecord }
-    | { type: 'removeTask'; id: string; preserveHistory?: boolean; expected?: CompatibleRecord }
+    | { type: 'removeTask'; id: string; preserveHistory?: boolean; repeat?: 'current'; expected?: CompatibleRecord }
     | { type: 'setProjectHidden'; id: string; hidden: boolean; expected?: CompatibleRecord }
     | { type: 'reorderProjects'; snapshot: {id: string; order: number}[]; from: string; to: string }
     | { type: 'restoreProjectOrder' };
@@ -85,6 +88,7 @@ export interface PreferenceState {
     newTaskOnTop: boolean; isCountdown: boolean; showFinishedTasksInToday: boolean; forestEnabled: boolean;
     workAlarm: string; breakAlarm: string; bgMusic: string; ringtoneVolume: number; whiteNoiseVolume: number;
     projectRegionWidth: number; language: 'auto' | 'en' | 'zh-CN'; externalNetwork: boolean; isDarkMode: boolean | null; defaultDeadline: number;
+    widgetOrder: readonly number[]; visibleWidgets: readonly number[]; widgetExpanded: boolean;
     groupEnabled: false; rankingListEnabled: false;
 }
 export type WritablePreference = Exclude<keyof PreferenceState, 'groupEnabled' | 'rankingListEnabled'>;
@@ -105,6 +109,7 @@ export interface CoreServices {
     readonly themes: { read(): ThemeState; commit(changes: Partial<ThemeState>): Promise<ThemeState> };
     readonly settings: SnapshotSource<Readonly<PreferenceState>> & {
         refresh(): Readonly<PreferenceState>; set<K extends WritablePreference>(field: K, value: PreferenceState[K]): Promise<Readonly<PreferenceState>>;
+        setWidgetLayout(order: readonly number[], visible: readonly number[]): Promise<Readonly<PreferenceState>>;
         goals(): readonly {time: number; type: string; value: number; [key: string]: unknown}[]; setGoal(minutes: number): Promise<void>;
         timerConfig(task?: CompatibleRecord): TimerConfig; profile(): {name: string; avatar: string; account: string};
         initializeIdentity(localName: string): Promise<void>; saveProfile(field: 'name' | 'avatar', value: string): Promise<{name: string; avatar: string; account: string}>;
@@ -153,6 +158,7 @@ export interface CoreServices {
     startForTask(taskId: string, subtaskId?: string, mode?: 'countup' | 'countdown'): Promise<TimerResult>;
     readonly backup: {
         export(options?: BackupOptions): Promise<EncodedBackup>;
+        inspect(input: string | Blob | ArrayBuffer | ArrayBufferView): Promise<BackupInspection>;
         reset(): Promise<BackupSnapshot>;
         restore(input: string | Blob | ArrayBuffer | ArrayBufferView, options?: { backup?: boolean }): Promise<BackupSnapshot>;
     };

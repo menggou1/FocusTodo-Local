@@ -1,6 +1,6 @@
 // UI strings only; user supplied titles, notes and tags never pass through this map.
 const en = {
-  today: 'Today', tomorrow: 'Tomorrow', week: 'This week', planned: 'Planned', all: 'All tasks', someday: 'Someday', overdue: 'Overdue', seven: 'Next 7 days',
+  today: 'Today', tomorrow: 'Tomorrow', week: 'This Week', planned: 'Planned', all: 'All tasks', someday: 'Someday', overdue: 'Overdue', seven: 'Next 7 days',
   high: 'High priority', medium: 'Medium priority', low: 'Low priority', completed: 'Completed', tasks: 'Tasks', calendar: 'Schedule', timer: 'Timer', reports: 'Reports', forest: 'Forest', settings: 'Settings',
   search: 'Search', searchHelp: 'Search tasks, notes and subtasks', empty: 'No tasks', addTask: 'Add a task, press Enter to save',
   createList: 'Create list', createFolder: 'Create folder', lists: 'Lists', manageLists: 'Manage lists', name: 'Name', folder: 'Folder', none: 'None',

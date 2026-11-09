@@ -4,8 +4,13 @@ import type { TimerAction } from '../../services/core.mjs';
 import { Dialog } from './Dialog';
 import { useWorkspace } from './Context';
 import { number, string } from './model';
-import { SoundSettings } from './SoundSettings';
+import { noiseOptions, soundImage } from './SoundSettings';
 import { themeURL } from './Settings';
+import { RecordEditor } from './RecordEditor';
+import type { Entity } from '../../services/core.mjs';
+import { LegacyIcon } from './LegacyIcon';
+const timerArtwork=import.meta.glob<string>('../../../public/img/{timer-*,tmr_*,fullscreen-*,float-timer-*,widget_empty,task-start,task_no_priority,new-task-project-selected,setting-play,folder_project_checked,folder_project_unchecked,drag_flag,add_widget}.png',{eager:true,query:'?url',import:'default'});
+const timerImage=(name:string)=>timerArtwork['../../../public/img/'+name+'.png'];
 
 type MiniAPI = { requestWindow(options: {width: number; height: number}): Promise<Window> };
 export function formatClock(seconds: number) {
@@ -18,20 +23,69 @@ function localTime(value: number) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${pad(date.getMilliseconds(), 3)}`;
 }
 
+function FlipDigit({value,size}:{value:string;size:number}) {
+  const [previous,setPrevious]=useState(value);
+  useEffect(()=>{if(previous===value)return;const timer=setTimeout(()=>setPrevious(value),700);return()=>clearTimeout(timer)},[previous,value]);
+  const moving=previous!==value&&!matchMedia('(prefers-reduced-motion: reduce)').matches,gap=2*Math.ceil(Math.floor(size/60)/2);
+  const upper={width:size,height:size/2,fontSize:Math.round(.9*size),lineHeight:size+'px'},lower={width:size,height:size/2,fontSize:Math.round(.9*size)};
+  return <div className="legacy-flip-digit" style={{width:size,height:size}}><div className={'legacy-flip-front-top'+(moving?' animating':'')} style={upper}>{moving?previous:value}</div><div className="legacy-flip-back-top" style={upper}>{value}</div><div className="legacy-flip-front-bottom" style={lower}>{moving?previous:value}</div><div className={'legacy-flip-back-bottom'+(moving?' animating':'')} style={lower}>{value}</div><i style={{top:(size-gap)/2,height:gap}}/></div>;
+}
+
+/** The timer uses the original draft/confirm selector, independently of Settings. */
+function WhiteNoiseSelector({close}:{close():void}) {
+ const {services,text,run,busy,blocked}=useWorkspace(),preferences=services.settings.getSnapshot(),ref=useRef<HTMLDialogElement>(null);
+ const [draft,setDraft]=useState(preferences.bgMusic),[volume,setVolume]=useState(preferences.whiteNoiseVolume);
+ useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.showModal();return()=>{services.audio?.stopAudition();ref.current?.close();if(previous?.isConnected)previous.focus()}},[services]);
+ return <dialog ref={ref} className="legacy-timer-noise" aria-labelledby="legacy-timer-noise-title" onCancel={event=>{event.preventDefault();if(!busy)close()}}><h2 id="legacy-timer-noise-title">{services.language.legacyText('bgm')}</h2><label className="legacy-timer-noise-volume"><span>{services.language.legacyText('alm_volume')}</span><input aria-label={services.language.legacyText('alm_volume')} type="range" min={0} max={100} value={volume} style={{'--noise-volume':volume+'%'} as React.CSSProperties} disabled={busy||blocked} onChange={event=>{setVolume(event.target.valueAsNumber);services.audio?.auditionVolume(event.target.valueAsNumber/100)}}/></label><div className="legacy-timer-noise-options" role="radiogroup" aria-label={services.language.legacyText('bgm')}>{noiseOptions.map(([name,image])=>{const value='bgm_'+name;return <div className="legacy-timer-noise-option" key={name} data-selected={draft===value}><button type="button" role="radio" aria-checked={draft===value} disabled={busy||blocked} onClick={()=>setDraft(value)}><img src={soundImage('wn-'+image)} alt=""/><span>{services.language.legacyText(value)}</span>{draft===value&&<img className="legacy-timer-noise-checked" src={timerImage('new-task-project-selected')} alt=""/>}</button>{name!=='Mute'&&<button type="button" className="legacy-timer-noise-preview" aria-label={text.previewSound+': '+services.language.legacyText(value)} disabled={!services.audio||busy||blocked} onClick={()=>services.audio?.audition(value+'.m4a',volume/100)}><img src={timerImage('setting-play')} alt=""/></button>}</div>})}</div><footer><button type="button" disabled={busy} onClick={close}>{text.cancel}</button><button type="button" className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(async()=>{await services.settings.set('bgMusic',draft);await services.settings.set('whiteNoiseVolume',volume)}))close()}}>{services.language.legacyText('cmm_ok')}</button></footer></dialog>;
+}
+
+function TimerModeSelector({mode,interval,confirm,close}:{mode:'countdown'|'countup';interval:number;confirm(value:'countdown'|'countup'):Promise<void>;close():void}) {
+ const {services,text,busy,blocked}=useWorkspace(),[draft,setDraft]=useState(mode),ref=useRef<HTMLDialogElement>(null);
+ useEffect(()=>{ref.current?.showModal();return()=>ref.current?.close()},[]);
+ return <dialog ref={ref} className="legacy-timer-mode-selector" aria-labelledby="legacy-timer-mode-title" onCancel={event=>{event.preventDefault();if(!busy)close()}}><h2 id="legacy-timer-mode-title">{services.language.legacyText('tmr_mode')}</h2><div role="radiogroup" aria-label={services.language.legacyText('tmr_mode')}>{(['countdown','countup']as const).map(value=><button key={value} type="button" role="radio" aria-label={text[value]} aria-checked={draft===value} disabled={busy||blocked} onClick={()=>setDraft(value)}><span><strong>{value==='countdown'?formatClock(interval)+' ➟ 00:00':'00:00 ➟  ∞'}</strong><small>{services.language.legacyText(value==='countdown'?'tmr_mode_countdown_desc':'tmr_mode_count_desc',formatClock(interval))}</small></span><i style={draft===value?{backgroundImage:`url("${timerImage('new-task-project-selected')}")`}:undefined}/></button>)}</div><footer><button disabled={busy} onClick={close}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={()=>{void confirm(draft)}}>{services.language.legacyText('cmm_ok')}</button></footer></dialog>;
+}
+
+function TimeWheel({minutes,change,label,close}:{minutes:number;change(value:number):void;label:string;close():void}) {
+ const ref=useRef<HTMLDivElement>(null),[selected,setSelected]=useState(Math.round(minutes)),closing=useRef<ReturnType<typeof setTimeout>|null>(null),latestClose=useRef(close),drag=useRef<{y:number;scroll:number}|null>(null);latestClose.current=close;
+ const resetClose=()=>{if(closing.current)clearTimeout(closing.current);closing.current=setTimeout(()=>latestClose.current(),1000)};
+ useEffect(()=>{if(ref.current)ref.current.scrollTop=(minutes-1)*60;resetClose();return()=>{if(closing.current)clearTimeout(closing.current)}},[]);
+ const choose=(value:number)=>{const next=Math.max(1,Math.min(480,value));setSelected(next);change(next);if(ref.current)ref.current.scrollTop=(next-1)*60};
+ return <div className="legacy-timer-time-picker" data-testid="timer-duration-wheel" onPointerDown={event=>{if(closing.current)clearTimeout(closing.current);if(ref.current){drag.current={y:event.clientY,scroll:ref.current.scrollTop};event.currentTarget.setPointerCapture(event.pointerId)}}} onPointerMove={event=>{if(drag.current&&ref.current)ref.current.scrollTop=drag.current.scroll-event.clientY+drag.current.y}} onPointerUp={()=>{drag.current=null;choose(selected);resetClose()}}><div ref={ref} role="spinbutton" aria-label={label} aria-valuemin={1} aria-valuemax={480} aria-valuenow={selected} tabIndex={0} onWheel={resetClose} onKeyDown={event=>{const next=event.key==='ArrowUp'?selected-1:event.key==='ArrowDown'?selected+1:event.key==='Home'?1:event.key==='End'?480:null;if(next!==null){event.preventDefault();choose(next);resetClose()}}} onScroll={event=>{const value=Math.max(1,Math.min(480,Math.round(event.currentTarget.scrollTop/60)+1));if(value!==selected){setSelected(value);change(value)}}}><div style={{height:180}}/>{Array.from({length:480},(_,index)=>{const value=index+1,delta=selected-value,opacity=delta===0?1:Math.max(0,.6-Math.abs(delta)*2/15);return <div className="legacy-timer-time-option" key={value} style={{opacity,transform:`rotateX(${delta*20}deg) translateZ(170px) translateY(${delta*60}px)`,transformOrigin:`50% ${delta*60+30}px`}} onClick={()=>{choose(value);resetClose()}}>{String(value).padStart(2,'0')}:00</div>})}<div style={{height:180}}/></div></div>;
+}
+
+function WidgetEditor({close}:{close():void}) {
+ const {services,text,run,busy,blocked}=useWorkspace(),preferences=services.settings.getSnapshot(),ref=useRef<HTMLDialogElement>(null);
+ const [order,setOrder]=useState<number[]>([...preferences.widgetOrder]),[visible,setVisible]=useState<number[]>([...preferences.visibleWidgets]),source=useRef<number|null>(null);
+ const titles=[services.language.legacyText('rpt_time_today'),services.language.legacyText('cmm_today'),services.language.legacyText('tmr_today_detail').replaceAll("''","'")];
+ useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.showModal();return()=>{ref.current?.close();if(previous?.isConnected)previous.focus()}},[]);
+ function move(id:number,target:number){const next=order.filter(value=>value!==id);next.splice(Math.max(0,Math.min(next.length,target)),0,id);setOrder(next)}
+ return <dialog ref={ref} className="legacy-widget-editor" aria-labelledby="legacy-widget-editor-title" onCancel={event=>{event.preventDefault();if(!busy)close()}}><h2 id="legacy-widget-editor-title">{services.language.legacyText('tmr_edit_widget')}</h2><ul>{order.map((type,index)=><li key={type} data-widget-type={type} draggable={!busy&&!blocked} onDragStart={event=>{source.current=type;event.dataTransfer.setData('text/plain',String(type))}} onDragEnd={()=>{source.current=null}} onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(source.current!==null)move(source.current,index);source.current=null}}><input type="checkbox" aria-label={titles[type]} checked={visible.includes(type)} disabled={busy||blocked} onChange={()=>setVisible(visible.includes(type)?visible.filter(value=>value!==type):[...visible,type])}/><span>{titles[type]}</span><button type="button" aria-label={text.reorder+': '+titles[type]} disabled={busy||blocked} onKeyDown={event=>{if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();move(type,index+(event.key==='ArrowUp'?-1:1))}}}><img src={timerImage('drag_flag')} alt=""/></button></li>)}</ul><footer><button type="button" disabled={busy} onClick={close}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(()=>services.settings.setWidgetLayout(order,order.filter(type=>visible.includes(type)))))close()}}>{services.language.legacyText('cmm_ok')}</button></footer></dialog>;
+}
+
 /** All timer projections and mutations use the C service. UI owns only windows/confirmation drafts. */
 export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boolean; openExpanded(): void;closeExpanded():void }) {
   const { services, text, run, busy, blocked } = useWorkspace();
   const session = useSyncExternalStore(services.timer.subscribe, services.timer.getSnapshot);
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
+  const [widgetSurface,setWidgetSurface]=useState(preferences.widgetExpanded),[widgetReveal,setWidgetReveal]=useState(false),previousWidgets=useRef(preferences.widgetExpanded);
+  useEffect(()=>{if(previousWidgets.current===preferences.widgetExpanded)return;previousWidgets.current=preferences.widgetExpanded;let timer:ReturnType<typeof setTimeout>;if(preferences.widgetExpanded){setWidgetSurface(true);setWidgetReveal(true);timer=setTimeout(()=>setWidgetReveal(false),150)}else{setWidgetReveal(false);timer=setTimeout(()=>setWidgetSurface(false),150)}return()=>clearTimeout(timer)},[preferences.widgetExpanded]);
   const business = useSyncExternalStore(services.business.subscribe, services.business.getSnapshot);
   const [confirmation, setConfirmation] = useState(false);
   const [mini, setMini] = useState<Window | null>(null), [miniError, setMiniError] = useState('');
   const opening = useRef(false), mounted = useRef(true);
   const fullscreen=useRef<HTMLDialogElement>(null);
+  const previousExpanded=useRef(expanded),collapsing=!expanded&&previousExpanded.current;
+  useEffect(()=>{previousExpanded.current=expanded},[expanded]);
   useEffect(()=>{if(expanded){fullscreen.current?.showModal();return()=>fullscreen.current?.close()}},[expanded]);
   const [themeVersion,setThemeVersion]=useState(0);void themeVersion;
   useEffect(()=>{const update=()=>setThemeVersion(v=>v+1),observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','lang']});window.addEventListener('storage',update);return()=>{observer.disconnect();window.removeEventListener('storage',update)}},[]);
-  const [sound, setSound] = useState(false);
+  const [sound, setSound] = useState(false),[modePicker,setModePicker]=useState(false),[modePrompt,setModePrompt]=useState(false),[flip,setFlip]=useState(false),[flipControls,setFlipControls]=useState(true),[widgetEditor,setWidgetEditor]=useState(false),[recordEditor,setRecordEditor]=useState<Entity|null>(null);
+  const [timePicker,setTimePicker]=useState(false),[draftMinutes,setDraftMinutes]=useState(25);
+  const [viewport,setViewport]=useState({width:innerWidth,height:innerHeight}),flipHide=useRef<ReturnType<typeof setTimeout>|null>(null);
+  useEffect(()=>{const resize=()=>setViewport({width:innerWidth,height:innerHeight});addEventListener('resize',resize);return()=>removeEventListener('resize',resize)},[]);
+  useEffect(()=>()=>{if(flipHide.current)clearTimeout(flipHide.current)},[]);
+  useEffect(()=>{if(!miniError)return;const timer=setTimeout(()=>setMiniError(''),5000);return()=>clearTimeout(timer)},[miniError]);
+  useEffect(()=>{if(!modePrompt)return;const timer=setTimeout(()=>setModePrompt(false),3000);return()=>clearTimeout(timer)},[modePrompt]);
   const [recoveryCollapsed, setRecoveryCollapsed] = useState(false);
   const [cutoff, setCutoff] = useState(0), [keepRunning, setKeepRunning] = useState(false);
   const pending = session?.pendingRecovery;
@@ -43,15 +97,20 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
     mini.document.documentElement.lang = services.language.locale;
     mini.document.documentElement.dataset.theme = document.documentElement.dataset.theme;
   }, [mini, services, preferences.language, preferences.isDarkMode, session, themeVersion]);
+  useEffect(()=>{if(expanded)requestAnimationFrame(()=>{const element=document.querySelector('.legacy-timer-history-hours');if(element)element.scrollTop=Math.max(0,(new Date().getHours()-4)*120)})},[expanded]);
   const projection = services.timer.view();
   const state = session?.state || 'initial', mode = session?.mode || (preferences.isCountdown ? 'countdown' : 'countup');
   const rest = state === 'rest' || state === 'waitingForRest' || session?.pausedFrom === 'rest';
-  const elapsed = projection?.elapse || 0, interval = projection?.interval || preferences.workInterval;
-  const time = formatClock(mode === 'countup' && !rest ? elapsed : interval - elapsed);
   const task = business.tasks.find(row => row.id === session?.taskId), subtask = business.subtasks.find(row => row.id === session?.subtaskId);
+  const elapsed = projection?.elapse || 0, interval = state==='initial'?(number(task?.pomodoroInterval)||preferences.workInterval):(projection?.interval||preferences.workInterval);
+  const time = formatClock(mode === 'countup' && !rest ? elapsed : interval - elapsed);
+  const remaining=interval-elapsed,floatingMinutes=mode==='countdown'||rest?(remaining>0?Math.max(1,Math.floor(remaining/60)):0):Math.round(elapsed/60);
+  const floatingClock=()=> <strong className="workspace-clock" aria-label={time}><canvas className="legacy-floating-progress" width={40} height={40} aria-hidden="true" ref={canvas=>{const context=canvas?.getContext('2d');if(!context)return;context.clearRect(0,0,40,40);context.strokeStyle=state==='rest'?'#00A8F9':'#fd5553';context.lineWidth=2;context.beginPath();context.arc(20,20,19,-Math.PI/2,-Math.PI/2+(elapsed%Math.max(1,interval))/Math.max(1,interval)*2*Math.PI);context.stroke()}}/><span>{floatingMinutes}</span></strong>;
   const label = state === 'work' ? text.working : state === 'rest' ? text.resting : state === 'pause' ? text.paused : state === 'waitingForRest' ? text.waiting : state === 'recovery' ? text.recovery : text.idle;
   const command = (action: TimerAction) => run(() => services.timer.command({ ...action, expectedSession: session?.sessionId }));
-  const start = () => command({ type: state === 'pause' ? 'resume' : 'start', mode, taskId: string(task?.id), subtaskId: string(subtask?.id), config: services.settings.timerConfig(task) });
+  async function commitTime(){if(!timePicker)return;setTimePicker(false);const value=draftMinutes*60;if(value===interval)return;await run(async()=>{if(task)await services.business.command({type:'updateTask',id:task.id,changes:{pomodoroInterval:value},expected:{pomodoroInterval:task.pomodoroInterval}});else await services.settings.set('workInterval',value);await services.timer.command({type:'configure',mode,expectedSession:session?.sessionId,config:{...services.settings.timerConfig(task),interval:value}})})}
+  const start = async () => {await commitTime();return command({ type: state === 'pause' ? 'resume' : 'start', mode, taskId: string(task?.id), subtaskId: string(subtask?.id), config: services.settings.timerConfig(task) })};
+  useEffect(()=>{if(!timePicker)return;const outside=(event:PointerEvent)=>{if(!(event.target as Element).closest('.legacy-timer-time-picker,.legacy-timer-duration-trigger,button,input'))void commitTime()};document.addEventListener('pointerdown',outside);return()=>document.removeEventListener('pointerdown',outside)},[timePicker,draftMinutes,interval,task]);
   async function openMini() {
     if (mini && !mini.closed) { mini.focus(); return; }
     if (opening.current) return;
@@ -59,57 +118,50 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
     if (!api) { setMiniError(text.miniUnavailable); return; }
     opening.current = true;
     try {
-      const target = await api.requestWindow({ width: task || subtask ? 320 : 260, height: 120 });
+      const target = await api.requestWindow({ width: task || subtask ? 232 : 147, height: 58 });
       if (!mounted.current) { target.close(); return; }
       const doc = target.document;
-      doc.title = text.mini; doc.documentElement.lang = services.language.locale;
+      doc.title = text.mini; doc.documentElement.lang = services.language.locale;doc.documentElement.classList.add('legacy-mini-document');
       for (const sheet of document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')) { const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = sheet.href; doc.head.appendChild(link); }
       const style = doc.createElement('style');
-      style.textContent = 'body{margin:0}.workspace-mini-native{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px;font:14px system-ui;background:var(--workspace-panel,#fff);color:var(--workspace-text,#525252)}.workspace-mini-native button{font:inherit;cursor:pointer}.workspace-mini-native strong{font:24px monospace}.workspace-mini-native .workspace-timer-task{width:100%;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.workspace-mini-native .workspace-timer-controls{display:flex;gap:4px}';
+      style.textContent = 'html,body{margin:0!important;min-width:0!important;min-height:0!important;width:100%;height:100%;overflow:hidden}.workspace-mini-native.workspace-floating-timer{position:relative;inset:0;transform:none;margin:0!important;width:100%;height:100%;min-height:58px;border-radius:0;padding:8px 12px}.workspace-mini-native .workspace-timer-controls button{border:0;background:transparent;padding:0;width:26px;height:26px;cursor:pointer}.workspace-mini-native .legacy-mini-close{position:absolute;right:3px;top:2px;width:12px;height:12px;padding:0;border:0;background:transparent;color:white;cursor:pointer;opacity:0}.workspace-mini-native:hover .legacy-mini-close,.workspace-mini-native:focus-within .legacy-mini-close{opacity:1}.legacy-mini-close img{width:12px;height:12px}';
       doc.head.appendChild(style); target.addEventListener('pagehide', () => { if (mounted.current) setMini(null); }, { once: true });
       setMini(target); setMiniError('');
     } catch { setMiniError(text.miniFailed); }
     finally { opening.current = false; }
   }
   const controls = (compact = false) => <div className="workspace-timer-controls">
-    {state === 'rest' ? <button disabled={busy || blocked} onClick={() => { void command({ type: 'stop' }); }}>{text.finish}</button>
-      : state === 'waitingForRest' ? <button className="primary" disabled={busy || blocked} onClick={() => { void command({ type: 'rest' }); }}>{text.rest}</button>
-      : state === 'work' ? <button disabled={busy || blocked} onClick={() => { void command({ type: 'pause' }); }}>{text.pause}</button>
+    {state === 'rest' ? <button aria-label={text.finish} disabled={busy || blocked} onClick={() => { void command({ type: 'stop' }); }}>{compact?<img src={timerImage('timer-complete')} alt=""/>:text.finish}</button>
+      : state === 'waitingForRest' ? <button className="primary" aria-label={text.rest} disabled={busy || blocked} onClick={() => { void command({ type: 'rest' }); }}>{compact?<img src={timerImage('timer-start')} alt=""/>:text.rest}</button>
+      : state === 'work' ? <button aria-label={text.pause} disabled={busy || blocked} onClick={() => { void command({ type: 'pause' }); }}>{compact?<img src={timerImage('timer-pause')} alt=""/>:text.pause}</button>
       : state === 'recovery' ? <button onClick={() => setRecoveryCollapsed(false)}>{text.recovery}</button>
-      : <button className="primary" disabled={busy || blocked} onClick={() => { void start(); }}>{state === 'pause' ? text.resume : text.start}</button>}
-    {state === 'pause' && <button disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); if (compact) void command({ type: 'stop' }); else setConfirmation(true); }}>{text.stop}</button>}
-    {!compact && state !== 'recovery' && <>
-      {session?.taskId && <button disabled={busy || blocked} onClick={() => { void command({ type: 'detach', config: services.settings.timerConfig() }); }}>{text.noTask}</button>}
-    </>}
+      : <button className="primary" aria-label={state==='pause'?text.resume:text.start} disabled={busy || blocked} onClick={() => { void start(); }}>{compact?<img src={timerImage('timer-start')} alt=""/>:<><img src={timerImage('timer-start-big')} alt=""/>{state==='pause'?text.resume:(services.language.locale.startsWith('zh')?'开始专注':'Start Focus')}</>}</button>}
+    {state === 'pause' && <button aria-label={text.stop} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); if (compact) void command({ type: 'stop' }); else setConfirmation(true); }}>{compact?<img src={timerImage('timer-stop')} alt=""/>:text.stop}</button>}
   </div>;
-  const taskLabel = subtask ? `${task?.name || text.noTask} / ${subtask.name}` : task?.name || text.noTask;
   const theme=services.themes.read(),wallpaper=theme.active?services.wallpaper.read()[theme.active]:null;
-  const surface=<section className={expanded ? 'workspace-timer-expanded' : 'workspace-floating-timer'} aria-label={text.timer} data-testid={expanded ? 'timer-expanded' : 'timer-floating'} data-state={state}
-      onDoubleClick={event => { if (!expanded && !(event.target as Element).closest('button')) openExpanded(); }}>
-      {expanded && <header><button disabled={busy || blocked || state === 'recovery'} onClick={() => { const nextMode = mode === 'countdown' ? 'countup' : 'countdown'; void run(async () => {
-        await services.timer.command({ type: 'mode', mode: nextMode, expectedSession: session?.sessionId }); await services.settings.set('isCountdown', nextMode === 'countdown');
-      }); }}>{mode === 'countdown' ? text.countdown : text.countup}</button></header>}
-      <p className="workspace-timer-task">{taskLabel}</p>
-      {expanded&&<div className="domain-toolbar"><select aria-label={text.tasks} disabled={busy||blocked||state==='recovery'} value={session?.taskId||''} onChange={e=>{const id=e.target.value;if(id)void run(()=>services.startForTask(id));else void command({type:'detach',config:services.settings.timerConfig()})}}><option value="">{text.noTask}</option>{business.tasks.filter(task=>task.state===0&&!task.isFinished).map(task=><option key={task.id} value={task.id}>{task.name}</option>)}</select><select aria-label={text.subtasks} disabled={!task||busy||blocked||state==='recovery'} value={session?.subtaskId||''} onChange={e=>{if(task)void run(()=>services.startForTask(task.id,e.target.value))}}><option value="">{text.none}</option>{business.subtasks.filter(child=>child.taskId===task?.id&&child.state===0&&!child.isFinished).map(child=><option key={child.id} value={child.id}>{child.name}</option>)}</select><button aria-label={text.close} onClick={closeExpanded}>×</button></div>}
-      {expanded && task && !task.isFinished && <button type="button" disabled={busy || blocked || state === 'recovery'} onClick={() => { void run(async () => {
-        await services.business.command(subtask && !subtask.isFinished ? { type: 'toggleSubtask', id: subtask.id, expected: subtask } : { type: 'completeTask', id: task.id, expected: task });
-        if (preferences.completeSoundEnabled) { try { services.audio?.effect('Complete.m4a', preferences.ringtoneVolume / 100); } catch { /* Already committed. */ } }
-      }); }}>{subtask && !subtask.isFinished ? text.toggleSubtask : text.complete}</button>}
-      <strong className="workspace-clock" aria-label={time}>{time}</strong>{expanded && <p role="status">{label}</p>}
-      {controls(!expanded)}
-      {expanded ? <button onClick={() => { void openMini(); }}>{text.mini}</button> : <button aria-label={text.expandTimer} onClick={openExpanded}>↗</button>}
-      {expanded && <button type="button" onClick={event => { event.currentTarget.focus(); setSound(true); }}>{text.audio}</button>}
-      {expanded && <label>{text.interval}<input type="number" min={1} max={480} step="any" disabled={!['initial', 'waitingForRest'].includes(state) || busy || blocked} value={(['initial', 'waitingForRest'].includes(state) ? number(task?.pomodoroInterval) || preferences.workInterval : interval) / 60}
-        onChange={event => { const value = event.target.valueAsNumber * 60; if (value >= 60 && value <= 28800) void run(async () => {
-          if (task) await services.business.command({ type: 'updateTask', id: task.id, changes: { pomodoroInterval: value }, expected: { pomodoroInterval: task.pomodoroInterval } });
-          else await services.settings.set('workInterval', value);
-          await services.timer.command({ type: 'configure', mode, expectedSession: session?.sessionId, config: { ...services.settings.timerConfig(task), interval: value } });
-        }); }} /></label>}
-      {miniError && expanded && <p role="status">{miniError}</p>}
-    </section>;
+  const t=(zh:string,en:string)=>services.language.locale.startsWith('zh')?zh:en;
+  const backdrop=string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf');
+  const today=new Date();today.setHours(0,0,0,0);const tomorrow=new Date(today);tomorrow.setDate(today.getDate()+1);
+  const report=services.business.report(+today,+tomorrow),todayTasks=services.business.tasksInView({id:'id-deadline-today',type:4000});
+  const showFlipControls=()=>{setFlipControls(true);if(flipHide.current)clearTimeout(flipHide.current);if(!['initial','pause','waitingForRest'].includes(state))flipHide.current=setTimeout(()=>setFlipControls(false),5000)};
+  useEffect(()=>{if(flip)showFlipControls()},[flip,state]);
+  const flipParts=time.split(':');if(mode==='countdown'&&interval>=3600&&flipParts.length===2)flipParts.unshift('00');
+  const flipSize=2*Math.floor(Math.round(Math.min(viewport.width/(flipParts.length+1),viewport.height/2))/2);
+  const widgetCards:Record<number,React.ReactNode>={0:<section key={0} data-widget-type={0}><h3>{services.language.legacyText('rpt_time_today')}</h3><p><strong>{Math.round(report.time/60)}</strong><small>{text.minutes}</small></p></section>,1:<section key={1} data-widget-type={1} className="legacy-timer-today"><h3>{text.today}</h3>{todayTasks.length?todayTasks.map(row=><div key={row.id}><input type="checkbox" aria-label={text.complete+': '+row.name} disabled={busy||blocked} checked={!!row.isFinished} onChange={()=>{void run(()=>services.business.command({type:row.isFinished?'uncompleteTask':'completeTask',id:row.id,expected:row}))}}/><button className="legacy-timer-widget-start" aria-label={text.focusTask+': '+row.name} onClick={()=>{void run(()=>services.startForTask(row.id))}}><img src={timerImage('task-start')} alt=""/></button><button onClick={()=>{void run(()=>services.startForTask(row.id))}}>{row.name}</button></div>):<div className="legacy-timer-widget-empty"><img src={timerImage('widget_empty')} alt=""/><p>{t('无任务','No tasks')}</p></div>}</section>,2:<section key={2} data-widget-type={2} className="legacy-timer-history"><h3>{services.language.legacyText('tmr_today_detail').replaceAll("''","'")}</h3><div className="legacy-timer-history-summary"/><div className="legacy-timer-history-hours" ref={element=>{if(element&&!element.dataset.ready){element.scrollTop=Math.max(0,(new Date().getHours()-1)*120);element.dataset.ready='true'}}}><div>{Array.from({length:24},(_,i)=><div className="legacy-timer-hour" key={i}>{String(i).padStart(2,'0')}:00</div>)}{business.records.filter(row=>row.state!==-1&&number(row.endDate)>+today&&number(row.endDate)-number(row.interval)*1000<+tomorrow).map(row=><button key={row.id} style={{top:Math.max(0,(number(row.endDate)-number(row.interval)*1000-+today)/30000),height:Math.max(4,number(row.interval)/30)}} onClick={()=>setRecordEditor(row)} title={number(row.interval)/60+' '+text.minutes}>{business.tasks.find(task=>task.id===row.taskId)?.name||text.noTask}</button>)}</div></div></section>};
+  const surface=<section className={expanded?'workspace-timer-expanded'+(preferences.widgetExpanded?' with-widgets':''):'workspace-floating-timer'+(task?' has-task':'')+(collapsing?' is-collapsing':'')} aria-label={text.timer} data-testid={expanded?'timer-expanded':'timer-floating'} data-state={state} style={!expanded?{backgroundImage:`url("${backdrop}")`,'--float-size':task?'232px':'147px','--float-offset':task?'-108px':'-60px'} as React.CSSProperties:undefined} onDoubleClick={event=>{if(!expanded&&!(event.target as Element).closest('button'))openExpanded()}}>
+    {expanded?<><button className="legacy-timer-close" aria-label={text.close} onClick={async()=>{await commitTime();closeExpanded()}}><img src={timerImage('timer-zoomdown')} alt=""/></button><div className="legacy-timer-main"><div className="legacy-timer-center"><div className="legacy-timer-clock-group"><div className={'legacy-timer-task-selection'+(task?' has-task':'')}>{task?<><button className="legacy-timer-selected-complete" type="button" aria-label={subtask?text.toggleSubtask:text.complete} disabled={busy||blocked||state==='recovery'} onClick={()=>{void run(()=>services.business.command(subtask?{type:'toggleSubtask',id:subtask.id,expected:subtask}:{type:task.isFinished?'uncompleteTask':'completeTask',id:task.id,expected:task}))}}><LegacyIcon name={(subtask?.isFinished??task.isFinished)?'task_done_no_priority':'task_no_priority'}/></button><div className="legacy-timer-selected-name"><span>{subtask?.name||task.name}</span>{(number(task.estimatePomoNum)>0||number(task.actualPomoNum)>0||state==='work'||state==='pause')&&<small><LegacyIcon name="task-pomo-actual"/>{number(task.actualPomoNum)}{number(task.estimatePomoNum)>0&&<> / <LegacyIcon name="task-pomo-estimate"/>{number(task.estimatePomoNum)}</>}</small>}</div><button className="legacy-timer-selected-detach" aria-label={text.noTask} disabled={busy||blocked||state==='recovery'} onClick={()=>{void command({type:'detach',config:services.settings.timerConfig()})}}><img src={timerImage('timer-task-delete')} alt=""/></button></>:<span>{t('请选择一个任务...','Please select a task...')}</span>}</div>
+    <div className="legacy-timer-dial"><div className="legacy-timer-scales" aria-hidden="true">{Array.from({length:120},(_,i)=><i key={i} style={{transform:`rotate(${i*3}deg) translateY(-210px)`,opacity:i<elapsed/Math.max(1,interval)*120?1:.3}}/>)}</div><strong className="workspace-clock" aria-label={time} style={timePicker?{visibility:'hidden'}:undefined}>{time}</strong><button className="legacy-timer-duration-trigger" type="button" aria-label={text.interval} disabled={!['initial','waitingForRest'].includes(state)||busy||blocked} onClick={()=>{if(timePicker)void commitTime();else{setDraftMinutes(Math.round(interval/60));setTimePicker(true)}}}/>{timePicker&&<TimeWheel minutes={draftMinutes} change={setDraftMinutes} label={text.interval} close={()=>{void commitTime()}}/>}</div><div className="legacy-timer-actions">{controls(false)}</div></div></div>
+    <div className="legacy-timer-menus"><button onClick={async()=>{await commitTime();setFlip(!flip)}}><img src={timerImage('tmr_flipclock')} alt=""/><span>{t('全屏','Fullscreen')}</span></button><div className="legacy-timer-mode-menu"><button aria-label={services.language.legacyText('tmr_mode')} onClick={async()=>{await commitTime();if(state==='initial'||state==='waitingForRest')setModePicker(true);else setModePrompt(true)}}><img src={timerImage(mode==='countdown'?'tmr_mode_countdown':'tmr_mode_count')} alt=""/><span>{services.language.legacyText('tmr_mode')}</span></button></div>{modePrompt&&<div className="legacy-timer-mode-prompt" role="status">{services.language.legacyText('tmr_mode_prompt')}</div>}<button aria-label={text.audio} onClick={async()=>{await commitTime();setSound(true)}}><img src={timerImage('tmr_bgm')} alt=""/><span>{t('白噪音','White noise')}</span></button></div></div>
+    {widgetSurface&&<aside className={'legacy-timer-widgets'+(!preferences.visibleWidgets.length?' is-empty':'')+(widgetReveal?' is-revealing':'')} data-expanded={preferences.widgetExpanded} inert={!preferences.widgetExpanded}>{preferences.visibleWidgets.length?preferences.visibleWidgets.map(type=>widgetCards[type]):<div className="legacy-timer-widget-blank"><button onClick={()=>setWidgetEditor(true)}><img src={timerImage('add_widget')} alt=""/>{services.language.legacyText('tmr_add_widget')}</button></div>}{!!preferences.visibleWidgets.length&&<footer className="legacy-timer-edit-widgets"><button onClick={()=>setWidgetEditor(true)}>{services.language.legacyText('tmr_edit_widget')}</button></footer>}</aside>}
+    <button className="legacy-timer-widget-toggle" aria-label={t('切换组件','Toggle widgets')} onClick={()=>{void run(()=>services.settings.set('widgetExpanded',!preferences.widgetExpanded))}}>{preferences.widgetExpanded?'›':'‹'}</button><p className="workspace-sr" role="status">{label}</p>
+    {flip&&<div className="legacy-flip-clock" data-testid="timer-flip" onMouseMove={showFlipControls} onTouchStart={showFlipControls} onDoubleClick={event=>event.stopPropagation()}><button className="legacy-flip-close" hidden={!flipControls} aria-label={text.close} onClick={()=>setFlip(false)} style={{backgroundImage:`url("${timerImage('fullscreen-close')}")`}}/><div className="legacy-flip-content"><div className="legacy-flip-digits" aria-label={time}>{flipParts.map((part,index)=><FlipDigit key={index} value={part} size={flipSize}/>)}</div><div className={'legacy-flip-actions'+(flipControls?'':' hidden')}>
+      {state==='work'?<button aria-label={text.pause} onClick={()=>{void command({type:'pause'})}} style={{backgroundImage:`url("${timerImage('fullscreen-pause')}")`}}/>:state==='rest'?<button aria-label={text.finish} onClick={()=>{void command({type:'stop'})}} style={{backgroundImage:`url("${timerImage('fullscreen-complete-break')}")`}}/>:<button aria-label={state==='pause'?text.resume:state==='waitingForRest'?text.rest:text.start} disabled={state==='recovery'||busy||blocked} onClick={()=>{if(state==='waitingForRest')void command({type:'rest'});else void start()}} style={{backgroundImage:`url("${timerImage('fullscreen-play')}")`}}/>}
+      {state==='pause'&&<button aria-label={text.stop} onClick={()=>setConfirmation(true)} style={{backgroundImage:`url("${timerImage('fullscreen-stop')}")`}}/>}</div></div></div>}</>:<>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-timer-float-expand" aria-label={text.expandTimer} onClick={openExpanded}><img src={timerImage('timer-zoomup')} alt=""/></button><button className="legacy-timer-float-mini" aria-label={text.mini} onClick={()=>{void openMini()}}><img src={timerImage('float-timer-float')} alt=""/></button></>}
+  </section>;
   return <>
-    {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`linear-gradient(#0005,#0005),url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`}}>{surface}</dialog>:surface}
-    {mini && !mini.closed && createPortal(<section className="workspace-mini-native" aria-label={text.mini}><p className="workspace-timer-task">{taskLabel}</p><strong>{time}</strong>{controls(true)}<button aria-label={text.closeMini} onClick={() => mini.close()}>×</button></section>, mini.document.body)}
+    {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`,'--float-size':task?'232px':'147px','--float-offset':task?'-108px':'-60px'} as React.CSSProperties}>{surface}</dialog>:surface}
+    {mini && !mini.closed && createPortal(<section className={'workspace-mini-native workspace-floating-timer'+(task?' has-task':'')} aria-label={text.mini} data-state={state} style={{backgroundImage:`url("${backdrop}")`}}>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={timerImage('float-timer-close')} alt=""/></button></section>, mini.document.body)}
+    {miniError&&<div className="legacy-timer-notice" role="status">{miniError}</div>}
     {confirmation && <Dialog title={text.stop} close={() => setConfirmation(false)}>
       <p>{text.stopHelp}</p><footer><button onClick={() => setConfirmation(false)}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {
         if (await run(async () => {
@@ -117,7 +169,10 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
         })) setConfirmation(false);
       }}>{text.confirm}</button></footer>
     </Dialog>}
-    {sound && <SoundSettings close={() => setSound(false)} />}
+    {recordEditor&&<RecordEditor kind="record" row={recordEditor} close={()=>setRecordEditor(null)}/>}
+    {modePicker&&<TimerModeSelector mode={mode} interval={interval} close={()=>setModePicker(false)} confirm={async value=>{if(await run(async()=>{await services.timer.command({type:'mode',mode:value,expectedSession:session?.sessionId});await services.settings.set('isCountdown',value==='countdown')}))setModePicker(false)}}/>}
+    {widgetEditor&&<WidgetEditor close={()=>setWidgetEditor(false)}/>}
+    {sound && <WhiteNoiseSelector close={() => setSound(false)} />}
     {pending && !recoveryCollapsed && <Dialog title={text.recovery} close={() => setRecoveryCollapsed(true)}>
       <p>{text.recoveryHelp}</p><p>{new Date(pending.from).toLocaleString(services.language.locale)} — {new Date(pending.to).toLocaleString(services.language.locale)}</p>
       <form onSubmit={async event => { event.preventDefault(); await command({ type: 'resolve', cutoff, continue: keepRunning }); }}>
