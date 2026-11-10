@@ -36,7 +36,7 @@ export function WorkspaceProvider({ services, text, children }: { services: Appl
     else setError(previous=>previous||'failed');
   };
   return <Context value={{ services, text, run, queue, report, busy, blocked, error }}>
-    {error && <div className="workspace-error" role="alert"><span>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</span>
+    {error && <div className="workspace-error" role="alert"><span data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</span>
       {blocked ? <button onClick={() => location.reload()}>{text.reload}</button> : <button onClick={() => setError('')}>{text.dismiss}</button>}</div>}
     <span className="workspace-sr" role="status">{busy ? text.busy : ''}</span>
     {children}

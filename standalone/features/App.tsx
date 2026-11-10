@@ -19,6 +19,7 @@ import { Settings } from './workspace/Settings';
 import { Updates } from './workspace/Updates';
 import { PageOverlay } from './workspace/Dialog';
 import { LegacyScrollbars } from './workspace/LegacyScrollbars';
+import { AppInteractions } from './workspace/AppInteractions';
 import { dateInput, expected, number, ordered, projectName } from './workspace/model';
 import '../styles/app.css';
 
@@ -35,7 +36,7 @@ export function App({ services }: { services: ApplicationServices }) {
     const apply = () => { document.documentElement.dataset.theme = (preferences.isDarkMode ?? media.matches) ? 'dark' : 'light'; };
     apply(); media.addEventListener('change', apply); return () => media.removeEventListener('change', apply);
   }, [preferences.isDarkMode]);
-  return <WorkspaceProvider services={services} text={text}><Workspace /></WorkspaceProvider>;
+  return <WorkspaceProvider services={services} text={text}><AppInteractions/><Workspace /></WorkspaceProvider>;
 }
 
 function Workspace() {

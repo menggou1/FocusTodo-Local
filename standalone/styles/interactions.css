@@ -1,0 +1,17 @@
+/* 1.9.3 defaults to a non-selectable app, with explicit editable/copy regions.
+   Portal roots opt into the same policy without changing document/body. */
+:is(#prototype-root,[data-app-interaction-root]),
+:is(#prototype-root,[data-app-interaction-root]) dialog {
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  user-select:none;
+}
+:is(#prototype-root,[data-app-interaction-root]) :is(input,textarea,[contenteditable]:not([contenteditable="false"]),[data-selectable]),
+:is(#prototype-root,[data-app-interaction-root]) [data-selectable] * {
+  -webkit-user-select:text;
+  -moz-user-select:text;
+  user-select:text;
+}
+:is(#prototype-root,[data-app-interaction-root]) img:not([draggable="true"]) {
+  -webkit-user-drag:none;
+}

@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
+import interactionCSS from '../../styles/interactions.css?inline';
+import { observeApplicationImages } from './AppInteractions';
 import type { TimerAction } from '../../services/core.mjs';
 import { Dialog, useWindowClose } from './Dialog';
 import { TimerProgress } from './TimerProgress';
@@ -72,23 +74,33 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
   // Legacy DialView is a PureComponent: toggling widgets never rebuilds its static ticks.
   const dialScales=useMemo(()=><div className="legacy-timer-scales" aria-hidden="true">{Array.from({length:120},(_,i)=><i key={i} style={{transform:`rotate(${i*3}deg) translateY(-210px)`,opacity:.3}}/>)}</div>,[]);
-  const [widgetExpanded,setWidgetExpanded]=useState(preferences.widgetExpanded),[widgetPending,setWidgetPending]=useState(false),widgetWrite=useRef(false);
-  useEffect(()=>{if(!widgetWrite.current)setWidgetExpanded(preferences.widgetExpanded)},[preferences.widgetExpanded]);
+  const [widgetExpanded,setWidgetExpanded]=useState(preferences.widgetExpanded),widgetTarget=useRef(widgetExpanded),widgetWrite=useRef(false),widgetToggle=useRef<HTMLButtonElement>(null);
+  useEffect(()=>{if(!widgetWrite.current){widgetTarget.current=preferences.widgetExpanded;setWidgetExpanded(preferences.widgetExpanded)}},[preferences.widgetExpanded]);
   async function toggleWidgets(){
-    if(widgetWrite.current||busy||blocked)return;
-    widgetWrite.current=true;setWidgetPending(true);setWidgetExpanded(!widgetExpanded);
-    try{await services.settings.set('widgetExpanded',!widgetExpanded)}catch(error){report(error)}
-    finally{widgetWrite.current=false;if(mounted.current){setWidgetExpanded(services.settings.getSnapshot().widgetExpanded);setWidgetPending(false)}}
+    if(busy||blocked)return;
+    const next=!widgetTarget.current;widgetTarget.current=next;if(next)setWidgetSurface(true);setWidgetExpanded(next);
+    // A rapid reversal must respond while the previous preference is saving.
+    // Serialize writes and commit the latest intent, rather than dropping clicks.
+    if(widgetWrite.current)return;
+    widgetWrite.current=true;widgetToggle.current?.setAttribute('aria-busy','true');
+    try{
+      do{const target=widgetTarget.current;
+        try{await services.settings.set('widgetExpanded',target)}catch(error){report(error);if(widgetTarget.current===target){widgetTarget.current=services.settings.getSnapshot().widgetExpanded;if(mounted.current)setWidgetExpanded(widgetTarget.current)}}
+      }while(widgetTarget.current!==services.settings.getSnapshot().widgetExpanded);
+    }finally{widgetWrite.current=false;widgetToggle.current?.setAttribute('aria-busy','false')}
   }
   const [widgetSurface,setWidgetSurface]=useState(widgetExpanded);
-  useEffect(()=>{if(widgetExpanded){setWidgetSurface(true);return}const timer=setTimeout(()=>setWidgetSurface(false),150);return()=>clearTimeout(timer)},[widgetExpanded]);
+  // Module 674 mounts content in the same frame as expansion, retaining it
+  // for 150ms on collapse. Layout effect prevents a blank expansion frame.
+  useLayoutEffect(()=>{if(widgetExpanded){setWidgetSurface(true);return}const timer=setTimeout(()=>setWidgetSurface(false),150);return()=>clearTimeout(timer)},[widgetExpanded]);
+  const widgetCards=useMemo(()=><TimerWidgetCards/>,[]);
   const business = useSyncExternalStore(services.business.subscribe, services.business.getSnapshot);
   const [confirmation, setConfirmation] = useState(false);
   const [mini, setMini] = useState<Window | null>(null), [miniError, setMiniError] = useState('');
   const opening = useRef(false), mounted = useRef(true);
   const fullscreen=useRef<HTMLDialogElement>(null);
-  const previousExpanded=useRef(expanded),collapsing=!expanded&&previousExpanded.current;
-  useEffect(()=>{previousExpanded.current=expanded},[expanded]);
+  const previousExpanded=useRef(expanded),[exitMotion,setExitMotion]=useState(false),collapsing=exitMotion||!expanded&&previousExpanded.current;
+  useLayoutEffect(()=>{const leaving=previousExpanded.current&&!expanded;previousExpanded.current=expanded;setExitMotion(leaving);if(leaving){const timer=setTimeout(()=>setExitMotion(false),250);return()=>clearTimeout(timer)}},[expanded]);
   useLayoutEffect(()=>{if(expanded){fullscreen.current?.showModal();return()=>fullscreen.current?.close()}},[expanded]);
   const [themeVersion,setThemeVersion]=useState(0);void themeVersion;
   useEffect(()=>{const update=()=>setThemeVersion(v=>v+1),observer=new MutationObserver(update);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','lang']});window.addEventListener('storage',update);return()=>{observer.disconnect();window.removeEventListener('storage',update)}},[]);
@@ -137,8 +149,9 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
       doc.title = text.mini; doc.documentElement.lang = services.language.locale;doc.documentElement.classList.add('legacy-mini-document');
       for (const sheet of document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')) { const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = sheet.href; doc.head.appendChild(link); }
       const style = doc.createElement('style');
-      style.textContent = 'html,body{margin:0!important;min-width:0!important;min-height:0!important;width:100%;height:100%;overflow:hidden}.workspace-mini-native.workspace-floating-timer{position:relative;inset:0;transform:none;margin:0!important;width:100%;height:100%;min-height:58px;border-radius:0;padding:8px 12px}.workspace-mini-native .workspace-timer-controls button{border:0;background:transparent;padding:0;width:26px;height:26px;cursor:pointer}.workspace-mini-native .legacy-mini-close{position:absolute;right:3px;top:2px;width:12px;height:12px;padding:0;border:0;background:transparent;color:white;cursor:pointer;opacity:0}.workspace-mini-native:hover .legacy-mini-close,.workspace-mini-native:focus-within .legacy-mini-close{opacity:1}.legacy-mini-close img{width:12px;height:12px}';
-      doc.head.appendChild(style); target.addEventListener('pagehide', () => { if (mounted.current) setMini(null); }, { once: true });
+      style.textContent = interactionCSS+'html,body{margin:0!important;min-width:0!important;min-height:0!important;width:100%;height:100%;overflow:hidden}.workspace-mini-native.workspace-floating-timer{position:relative;inset:0;transform:none;margin:0!important;width:100%;height:100%;min-height:58px;border-radius:0;padding:8px 12px}.workspace-mini-native .workspace-timer-controls button{border:0;background:transparent;padding:0;width:26px;height:26px;cursor:pointer}.workspace-mini-native .legacy-mini-close{position:absolute;right:3px;top:2px;width:12px;height:12px;padding:0;border:0;background:transparent;color:white;cursor:pointer;opacity:0}.workspace-mini-native:hover .legacy-mini-close,.workspace-mini-native:focus-within .legacy-mini-close{opacity:1}.legacy-mini-close img{width:12px;height:12px}';
+      const disposeImages=observeApplicationImages(doc.body);
+      doc.head.appendChild(style); target.addEventListener('pagehide', () => { disposeImages();if (mounted.current) setMini(null); }, { once: true });
       setMini(target); setMiniError('');
     } catch { setMiniError(text.miniFailed); }
     finally { opening.current = false; }
@@ -163,15 +176,15 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
     <div className="legacy-timer-dial">{dialScales}<TimerProgress readElapsed={()=>services.timer.view()?.elapse||0} elapsed={elapsed} interval={interval} mode={mode} state={state} rest={rest}/><strong className="workspace-clock" aria-label={time} style={timePicker?{visibility:'hidden'}:undefined}>{time}</strong><button className="legacy-timer-duration-trigger" type="button" aria-label={text.interval} disabled={!['initial','waitingForRest'].includes(state)||busy||blocked} onClick={()=>{if(timePicker)void commitTime();else{setDraftMinutes(Math.round(interval/60));setTimePicker(true)}}}/>{timePicker&&<TimeWheel minutes={draftMinutes} change={setDraftMinutes} label={text.interval} close={()=>{void commitTime()}}/>}</div><div className="legacy-timer-actions">{controls(false)}</div></div></div>
     <div className="legacy-timer-menus"><button onClick={async()=>{await commitTime();setFlip(!flip)}}><img src={timerImage('tmr_flipclock')} alt=""/><span>{t('全屏','Fullscreen')}</span></button><div className="legacy-timer-mode-menu"><button aria-label={services.language.legacyText('tmr_mode')} onClick={async()=>{await commitTime();if(state==='initial'||state==='waitingForRest')setModePicker(true);else setModePrompt(true)}}><img src={timerImage(mode==='countdown'?'tmr_mode_countdown':'tmr_mode_count')} alt=""/><span>{services.language.legacyText('tmr_mode')}</span></button></div>{modePrompt&&<div className="legacy-timer-mode-prompt" role="status">{services.language.legacyText('tmr_mode_prompt')}</div>}<button aria-label={text.audio} onClick={async()=>{await commitTime();setSound(true)}}><img src={timerImage('tmr_bgm')} alt=""/><span>{t('白噪音','White noise')}</span></button></div></div></div>
     <aside className="legacy-timer-widget-rail" data-expanded={widgetExpanded}>
-    {widgetSurface&&<aside className={'legacy-timer-widgets'+(!preferences.visibleWidgets.length?' is-empty':'')} data-expanded={widgetExpanded} data-timer-scroll data-timer-scrollbar="hidden" inert={!widgetExpanded}>{preferences.visibleWidgets.length?<TimerWidgetCards/>:<div className="legacy-timer-widget-blank"><button onClick={()=>setWidgetEditor(true)}><img src={timerImage('add_widget')} alt=""/>{services.language.legacyText('tmr_add_widget')}</button></div>}{!!preferences.visibleWidgets.length&&<footer className="legacy-timer-edit-widgets"><button onClick={()=>setWidgetEditor(true)}>{services.language.legacyText('tmr_edit_widget')}</button></footer>}</aside>}
-    <button className="legacy-timer-widget-toggle" aria-label={t('切换组件','Toggle widgets')} aria-busy={widgetPending} onClick={()=>{void toggleWidgets()}}><span style={{backgroundImage:`url("${timerImage(widgetExpanded?'widget_hide':'widget_show')}")`}}/></button></aside><p className="workspace-sr" role="status">{label}</p>
+    {widgetSurface&&<aside className={'legacy-timer-widgets'+(!preferences.visibleWidgets.length?' is-empty':'')} data-expanded={widgetExpanded} data-timer-scroll data-timer-scrollbar="hidden" inert={!widgetExpanded}>{preferences.visibleWidgets.length?widgetCards:<div className="legacy-timer-widget-blank"><button onClick={()=>setWidgetEditor(true)}><img src={timerImage('add_widget')} alt=""/>{services.language.legacyText('tmr_add_widget')}</button></div>}{!!preferences.visibleWidgets.length&&<footer className="legacy-timer-edit-widgets"><button onClick={()=>setWidgetEditor(true)}>{services.language.legacyText('tmr_edit_widget')}</button></footer>}</aside>}
+    <button ref={widgetToggle} className="legacy-timer-widget-toggle" aria-label={t('切换组件','Toggle widgets')} aria-busy={false} onClick={()=>{void toggleWidgets()}}><span style={{backgroundImage:`url("${timerImage(widgetExpanded?'widget_hide':'widget_show')}")`}}/></button></aside><p className="workspace-sr" role="status">{label}</p>
     {flip&&<div className="legacy-flip-clock" data-testid="timer-flip" onMouseMove={showFlipControls} onTouchStart={showFlipControls} onDoubleClick={event=>event.stopPropagation()}><button className="legacy-flip-close" hidden={!flipControls} aria-label={text.close} onClick={()=>setFlip(false)} style={{backgroundImage:`url("${timerImage('fullscreen-close')}")`}}/><div className="legacy-flip-content"><div className="legacy-flip-digits" aria-label={time}>{flipParts.map((part,index)=><FlipDigit key={index} value={part} size={flipSize}/>)}</div><div className={'legacy-flip-actions'+(flipControls?'':' hidden')}>
       {state==='work'?<button aria-label={text.pause} onClick={()=>{void command({type:'pause'})}} style={{backgroundImage:`url("${timerImage('fullscreen-pause')}")`}}/>:state==='rest'?<button aria-label={text.finish} onClick={()=>{void command({type:'stop'})}} style={{backgroundImage:`url("${timerImage('fullscreen-complete-break')}")`}}/>:<button aria-label={state==='pause'?text.resume:state==='waitingForRest'?text.rest:text.start} disabled={state==='recovery'||busy||blocked} onClick={()=>{if(state==='waitingForRest')void command({type:'rest'});else void start()}} style={{backgroundImage:`url("${timerImage('fullscreen-play')}")`}}/>}
       {state==='pause'&&<button aria-label={text.stop} onClick={()=>setConfirmation(true)} style={{backgroundImage:`url("${timerImage('fullscreen-stop')}")`}}/>}</div></div></div>}</>:<>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-timer-float-expand" aria-label={text.expandTimer} onClick={openExpanded}><img src={timerImage('timer-zoomup')} alt=""/></button><button className="legacy-timer-float-mini" aria-label={text.mini} onClick={()=>{void openMini()}}><img src={timerImage('float-timer-float')} alt=""/></button></>}
   </section>;
   return <>
     {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`,'--float-size':task?'232px':'147px','--float-offset':task?'-108px':'-60px'} as React.CSSProperties}>{surface}</dialog>:surface}
-    {mini && !mini.closed && createPortal(<section className={'workspace-mini-native workspace-floating-timer'+(task?' has-task':'')} aria-label={text.mini} data-state={state} style={{backgroundImage:`url("${backdrop}")`}}>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={timerImage('float-timer-close')} alt=""/></button></section>, mini.document.body)}
+    {mini && !mini.closed && createPortal(<section data-app-interaction-root className={'workspace-mini-native workspace-floating-timer'+(task?' has-task':'')} aria-label={text.mini} data-state={state} style={{backgroundImage:`url("${backdrop}")`}}>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={timerImage('float-timer-close')} alt=""/></button></section>, mini.document.body)}
     {miniError&&<div className="legacy-timer-notice" role="status">{miniError}</div>}
     {confirmation && <Dialog title={text.stop} close={() => setConfirmation(false)}>
       <p>{text.stopHelp}</p><footer><button onClick={() => setConfirmation(false)}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {

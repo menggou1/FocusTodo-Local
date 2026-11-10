@@ -189,7 +189,7 @@ export function TaskContextMenu({ task, x, y, close, remove }: { task: Entity; x
     focusable[event.key === 'Home' ? 0 : focusable.length - 1]?.focus();
   }
 
-  return createPortal(<div className="legacy-context-layer" onContextMenu={event => { event.preventDefault(); event.stopPropagation(); }}>
+  return createPortal(<div data-app-interaction-root className="legacy-context-layer" onContextMenu={event => { event.preventDefault(); event.stopPropagation(); }}>
     <div className="legacy-context-mask" onClick={requestClose} onContextMenu={event => { event.preventDefault(); event.stopPropagation(); requestClose(); }} />
     <div ref={menu} role="menu" aria-label={services.language.locale.startsWith('zh') ? '任务操作' : 'Task actions'} className={'legacy-context-menu' + (ready ? ' ready' : '') + (open ? ' is-open' : '') + (closing ? ' is-closing' : '')}
       style={{ left: position.left, top: position.top, transformOrigin: position.originX + ' ' + position.originY }} onKeyDown={navigate}>

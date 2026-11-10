@@ -27,7 +27,7 @@ export function Dialog({ title, close, children, className='',inline=false, moti
   if(inline)return <section className={'legacy-inline-dialog '+className} aria-label={title}>{children}</section>;
   return <dialog ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { event.preventDefault(); if (!busy) requestClose(); }}>
     <header><h2 id={heading}>{title}</h2><button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button></header>
-    {error && <p className="danger" role="alert">{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</p>}
+    {error && <p className="danger" role="alert" data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</p>}
     {children}
   </dialog>;
 }

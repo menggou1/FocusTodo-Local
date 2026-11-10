@@ -29,8 +29,8 @@ export function LegacyScrollbars() {
         Object.assign(track.style, { left: r.right - 8 + 'px', top: r.top + 'px', height: view.clientHeight + 'px' });
         thumb.style.height = height + 'px'; thumb.style.transform = `translateY(${maxScroll > 0 ? travel * view.scrollTop / maxScroll : 0}px)`;
       }
-      const move = (e: MouseEvent) => { if (Math.abs(view.getBoundingClientRect().right - e.clientX) < 10) show(true); else if (track.dataset.highlight === 'true') show(false); };
-      const wheel = (e: WheelEvent) => { e.stopPropagation(); show(Math.abs(view.getBoundingClientRect().right - e.clientX) < 10); };
+      const move = (e: MouseEvent) => { if(view.dataset.timerScrollbar==='hidden')return;if (Math.abs(view.getBoundingClientRect().right - e.clientX) < 10) show(true); else if (track.dataset.highlight === 'true') show(false); };
+      const wheel = (e: WheelEvent) => { e.stopPropagation();if(view.dataset.timerScrollbar==='hidden')return;show(Math.abs(view.getBoundingClientRect().right - e.clientX) < 10); };
       const enterTrack = () => show(true, false), leaveTrack = () => { if (!dragging) show(false); };
       const drag = (e: PointerEvent) => { if (dragging && travel > 0) { e.preventDefault(); view.scrollTop = Math.max(0, Math.min(maxScroll, startScroll + (e.clientY - startY) * maxScroll / travel)); update(); } };
       const end = () => { dragging = false; show(true); };
@@ -42,9 +42,12 @@ export function LegacyScrollbars() {
       window.addEventListener('resize', update); window.addEventListener('scroll', update, true); update();
       return { refresh: update, dispose() { clear(); resize.disconnect(); window.removeEventListener('resize', update); window.removeEventListener('scroll', update, true); view.classList.remove('legacy-scroll-view'); track.remove(); view.removeEventListener('mousemove', move); view.removeEventListener('mouseleave', hide); view.removeEventListener('wheel', wheel); view.removeEventListener('scroll', update); } };
     }
-    function sync() {
+    function sync(records?:MutationRecord[]) {
+      // Rail children are absolutely positioned over the workspace: their
+      // mount/unmount cannot move the underlying workspace scroll regions.
+      const timerOnly=!!records?.length&&records.every(record=>record.target instanceof Element&&!!record.target.closest('.legacy-timer-widget-rail'));
       for (const [view, binding] of bound) if (!view.isConnected || !view.matches(selectors)) { binding.dispose(); bound.delete(view); }
-      document.querySelectorAll<HTMLElement>(selectors).forEach(view => { if (!bound.has(view)) bound.set(view, bind(view)); else bound.get(view)!.refresh(); });
+      document.querySelectorAll<HTMLElement>(selectors).forEach(view => { if (!bound.has(view)) bound.set(view, bind(view)); else if(!timerOnly||view.closest('.legacy-timer-widget-rail'))bound.get(view)!.refresh(); });
     }
     const observer = new MutationObserver(sync); observer.observe(document.getElementById('prototype-root')!, { childList: true, subtree: true }); sync();
     return () => { observer.disconnect(); for (const binding of bound.values()) binding.dispose(); };

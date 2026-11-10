@@ -269,8 +269,8 @@ function SidebarMenu({ row, x, y, close, edit, hide, remove }: { row: Entity; x:
   }, [close, closing]);
   const legacy = (key: string) => services.language.legacyText(key);
   const type = number(row.type);
-  return createPortal(<><button type="button" className="sidebar-menu-mask" aria-label={text.close} tabIndex={-1} onClick={() => requestClose()} />
-    <div ref={ref} className={'legacy-context-menu sidebar-context-menu' + (ready ? ' ready is-open' : '') + (closing ? ' is-closing' : '')} role="menu" style={{ left: position.left, top: position.top }}>
+  return createPortal(<><button data-app-interaction-root type="button" className="sidebar-menu-mask" aria-label={text.close} tabIndex={-1} onClick={() => requestClose()} />
+    <div data-app-interaction-root ref={ref} className={'legacy-context-menu sidebar-context-menu' + (ready ? ' ready is-open' : '') + (closing ? ' is-closing' : '')} role="menu" style={{ left: position.left, top: position.top }}>
       <div className="legacy-context-group">
         <button type="button" role="menuitem" onClick={() => requestClose(edit)}>{type === 2000 ? legacy('fld_edit') : type === 3000 ? legacy('tag_edit') : legacy('prj_edit')}</button>
         {type === 1000 && <button type="button" role="menuitem" onClick={() => requestClose(hide)}>{legacy('prj_hide')}</button>}

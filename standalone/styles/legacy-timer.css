@@ -1,5 +1,5 @@
 @font-face{font-family:HelveticaNeue-Light;src:url('../../public/font/HelveticaNeueLight.otf') format('opentype');font-weight:100;font-display:swap}
-.workspace-floating-timer{position:fixed;left:calc(50% + 13px);bottom:16px;transform:translateX(-50%);width:147px;height:58px;max-width:none;padding:8px 12px;gap:0;flex-wrap:nowrap;display:flex;align-items:center;border:0;border-radius:8px;background-size:cover;background-position:center;color:#fff;box-shadow:0 2px 12px #0002;z-index:2}
+.workspace-floating-timer{position:fixed;left:calc(50% + 13px);bottom:16px;transform:translateX(-50%);width:147px;height:58px;max-width:none;padding:8px 12px;gap:0;flex-wrap:nowrap;display:flex;align-items:center;border:0;border-radius:8px;background-size:cover;background-position:center;color:#fff;box-shadow:0 2px 12px #0002;z-index:800}
 .workspace-floating-timer .workspace-clock{font:24px/40px DINCond;color:#fff;border:2px solid #ffffff4d;border-radius:50%;width:42px;height:42px;text-align:center;flex:none;margin:0;padding:0}
 .workspace-floating-timer .workspace-timer-controls{margin-left:auto;gap:0}.workspace-shell .workspace-floating-timer .workspace-timer-controls button{background:transparent;width:26px;height:26px;min-width:26px;border:0;padding:0;border-radius:50%;color:#fff;font-size:12px;line-height:26px}.workspace-floating-timer .workspace-timer-controls img{width:26px;height:26px;display:block}
 .workspace-shell .workspace-floating-timer>.legacy-timer-float-expand,.workspace-shell .workspace-floating-timer>.legacy-timer-float-mini{position:absolute;top:2px;width:20px;height:20px;padding:0;border:0;background:transparent;opacity:0}.legacy-timer-float-expand{right:0}.legacy-timer-float-mini{right:20px}.legacy-timer-float-expand img,.legacy-timer-float-mini img{width:20px;height:20px}.workspace-floating-timer:hover>.legacy-timer-float-expand,.workspace-floating-timer:hover>.legacy-timer-float-mini,.workspace-floating-timer>button:focus-visible{opacity:1}
@@ -60,6 +60,17 @@
 @keyframes legacy-timer-surface-in{from{opacity:0}to{opacity:1}}
 @keyframes legacy-timer-expand{from{left:50%;top:calc(100dvh - 74px);bottom:auto;margin-left:var(--float-offset,-60px);width:var(--float-size,147px);height:58px;min-width:0;min-height:0;border-radius:8px}to{left:0;top:0;bottom:auto;margin-left:0;width:max(1000px,100vw);height:100dvh;min-width:0;min-height:0;border-radius:0}}
 @keyframes legacy-timer-collapse{from{left:0;bottom:0;margin-left:0;width:100%;height:100%;border-radius:0}to{left:50%;bottom:16px;margin-left:var(--float-offset,-60px);width:var(--float-size,147px);height:58px;border-radius:8px}}
+/* FloatTimer's 58px table stays at the top of the shrinking background. */
+.workspace-floating-timer.is-collapsing{align-items:flex-start}
+.workspace-floating-timer.is-collapsing>.workspace-clock{margin-top:1px}
+.workspace-floating-timer.is-collapsing>.workspace-timer-controls{margin-top:8px}
+.workspace-floating-timer.is-collapsing>.legacy-floating-task{margin-top:-4px}
+/* The old 41px action cell has 20px padding: its single 26px icon
+   overflows by 5px when a task occupies the table's flexible column. */
+.workspace-floating-timer:not(.workspace-mini-native)>.legacy-floating-task{margin-right:3px}
+.workspace-floating-timer.has-task:not(.workspace-mini-native):not([data-state=pause])>.workspace-timer-controls{left:5px}
+.workspace-floating-timer:not(.workspace-mini-native)[data-state=pause]>.workspace-timer-controls{gap:6px}
+.workspace-floating-timer.has-task:not(.workspace-mini-native)[data-state=pause]>.legacy-floating-task{margin-right:11px}
 .legacy-flip-clock{animation:legacy-flip-in 250ms ease-out}@keyframes legacy-flip-in{from{opacity:.01}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.domain-full-timer,.domain-full-timer>.workspace-timer-expanded,.workspace-floating-timer,.workspace-floating-timer.is-collapsing,.workspace-floating-timer>.workspace-clock,.workspace-floating-timer>.legacy-floating-task,.workspace-floating-timer>.workspace-timer-controls,.legacy-flip-clock{animation:none!important;transition:none!important}}
 .legacy-timer-main{transition:margin-right 150ms linear}@keyframes legacy-widget-reveal{from{width:0}to{width:330px}}

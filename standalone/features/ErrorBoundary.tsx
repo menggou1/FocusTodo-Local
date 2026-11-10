@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<Props, { failed: boolean }> {
     return (
       <main className="prototype-error" data-testid="error-boundary" role="alert">
         <h1>{text.errorTitle}</h1>
-        <p>{text.errorHelp}</p>
+        <p data-selectable>{text.errorHelp}</p>
         <button className="prototype-button prototype-button-primary" onClick={this.retry}>{text.reload}</button>
       </main>
     );
