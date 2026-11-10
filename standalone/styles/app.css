@@ -11,3 +11,5 @@
 @import './legacy-pickers.css';
 @import './legacy-context-menu.css';
 @import './legacy-sidebar.css';
+@import './legacy-window-motion.css';
+@import './timer-widgets.css';

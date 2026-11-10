@@ -4,7 +4,7 @@ const {createServer}=require('../../scripts/server.cjs');
 const {createStandaloneServer}=require('../../scripts/standalone-server.cjs');
 const {execFileSync}=require('node:child_process');
 const baseline='f102da8919e810006b6611aabcef5f0159057d61';
-async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMotion='reduce'}={}){
+async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMotion='reduce',recordVideo}={}){
  assert.equal(execFileSync('git',['diff','--name-only',baseline,'--','src','public','scripts/server.cjs','scripts/runtime-layout.json'],{cwd:root,encoding:'utf8'}).trim(),'','Legacy oracle must remain the audited 1.9.3 runtime');
  const shared=process.env.FOCUS_RESTORE_SHARED==='1';
  const servers=shared?[]:[createServer(),createStandaloneServer()];
@@ -12,7 +12,7 @@ async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMo
  const browser=await launch('chromium'),handles=[];
  try{for(let i=0;i<2;i++){
   const origin=shared?'http://127.0.0.1:'+(i?Number(process.env.FOCUS_RESTORE_NEW_PORT||5511):5513):'http://127.0.0.1:'+servers[i].address().port;
-  const h=await contextFor(browser,origin,{locale,viewport:{width,height},colorScheme:dark?'dark':'light',reducedMotion});
+  const h=await contextFor(browser,origin,{locale,viewport:{width,height},colorScheme:dark?'dark':'light',reducedMotion,...(recordVideo?{recordVideo}:{})});
   handles.push(h);await h.page.clock.setFixedTime(new Date('2026-11-08T12:00:00+08:00'));
   await h.context.addInitScript(({prefix,locale,dark})=>{localStorage.setItem(prefix+'FocusTodo.language',locale);localStorage.setItem(prefix+'DarkMode',String(dark))},{prefix:i?'FocusTodoStandalone.data.':'',locale,dark});
   await h.page.goto(origin);if(i)await h.page.getByTestId('app-shell').waitFor();else{await h.page.waitForFunction(()=>window.FocusLocalReady&&!document.documentElement.classList.contains('focus-starting'));await h.page.evaluate(()=>FocusLocalReady)}

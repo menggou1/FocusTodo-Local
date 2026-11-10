@@ -18,6 +18,7 @@ import { Forest } from './workspace/Forest';
 import { Settings } from './workspace/Settings';
 import { Updates } from './workspace/Updates';
 import { PageOverlay } from './workspace/Dialog';
+import { LegacyScrollbars } from './workspace/LegacyScrollbars';
 import { dateInput, expected, number, ordered, projectName } from './workspace/model';
 import '../styles/app.css';
 
@@ -167,6 +168,7 @@ function Workspace() {
     {!!task.hasSubtask&&!!task.isExpanded&&<ul className="domain-inline-subtasks">{ordered(snapshot.subtasks.filter(child=>child.taskId===task.id&&child.state===0)).map(child=><li key={child.id}><input type="checkbox" checked={!!child.isFinished} aria-label={text.toggleSubtask+': '+child.name} disabled={busy||blocked} onChange={()=>{void run(()=>services.business.command({type:'toggleSubtask',id:child.id,expected:child}))}}/><button onClick={()=>select(task.id)}>{child.name}</button>{!child.isFinished&&<button aria-label={text.focusSubtask+': '+child.name} disabled={busy||blocked} onClick={()=>{void startTask(task.id,child.id)}}>▷</button>}</li>)}</ul>}
   </li>;
   return <div className="workspace-shell" data-testid="app-shell">
+    <LegacyScrollbars />
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
     <header className="workspace-header">
       <button className="workspace-mobile-toggle" aria-label={text.navigation} aria-expanded={mobileNav} onClick={() => setMobileNav(value => !value)}>☰</button>

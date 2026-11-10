@@ -36,12 +36,12 @@ const near = (a, b, tolerance = 1) => Math.abs(Number(a) - Number(b)) <= toleran
       }
       const target = document.querySelector(phase === 'open' ? sel.root : sel.float);
       const root = document.querySelector(sel.root), surface = document.querySelector(sel.surface);
-      const animations = [...new Set([root, target, surface, document.querySelector(sel.float)].filter(Boolean).flatMap(element => element.getAnimations()))];
+      const animations = [...new Set([root, target, surface, document.querySelector(sel.float), !isOld && phase === 'close' ? document.querySelector('.workspace-floating-timer>.workspace-clock') : null].filter(Boolean).flatMap(element => element.getAnimations()))];
       for (const animation of animations) animation.pause();
       return [0, 125, 250].map(time => {
         for (const animation of animations) { animation.pause(); animation.currentTime = time; }
         const rect = target.getBoundingClientRect();
-        return { rect: [rect.x, rect.y, rect.width, rect.height], opacity: phase === 'open' && surface ? getComputedStyle(surface).opacity : getComputedStyle(target).opacity };
+        return { rect: [rect.x, rect.y, rect.width, rect.height], opacity: phase === 'open' && surface ? getComputedStyle(surface).opacity : getComputedStyle(!isOld && phase === 'close' ? document.querySelector('.workspace-floating-timer>.workspace-clock') : target).opacity };
       });
     }, { isOld, phase });
     const oldOpen = await freeze(old, true, 'open'), newOpen = await freeze(next, false, 'open');
@@ -65,7 +65,7 @@ const near = (a, b, tolerance = 1) => Math.abs(Number(a) - Number(b)) <= toleran
     const oldWidgetStart = await old.locator(selectors(true).widget).evaluate(e => getComputedStyle(e).width);
     const newWidgetStart = await next.locator(selectors(false).widget).evaluate(e => getComputedStyle(e).width);
     const oldTransition = await old.locator(selectors(true).widget).evaluate(e => getComputedStyle(e).transitionDuration);
-    const newTransition = await next.locator(selectors(false).widget).evaluate(e => getComputedStyle(e).transitionDuration);
+    const newTransition = await next.locator('.legacy-timer-widget-rail').evaluate(e => getComputedStyle(e).transitionDuration);
     assert.equal(oldTransition, '0.15s'); assert.equal(newTransition, '0.15s');
     const newWidgetMid = await next.evaluate(() => { document.querySelector('.legacy-timer-widget-toggle').click(); return new Promise(resolve => setTimeout(() => resolve(document.querySelector('.legacy-timer-widgets') ? getComputedStyle(document.querySelector('.legacy-timer-widgets')).width : null), 75)); });
     assert(parseFloat(newWidgetStart) > parseFloat(newWidgetMid) && parseFloat(newWidgetMid) > 0, 'new widget rail progresses through its width: '+newWidgetStart+' -> '+newWidgetMid);
