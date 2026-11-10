@@ -9,7 +9,8 @@ html:lang(zh),html:lang(zh-CN) { --workspace-font:'Noto Sans SC','PingFang SC','
 body { font:14px/20px var(--workspace-font); background:var(--workspace-bg); color:var(--workspace-text); }
 .workspace-shell { min-height:100dvh; }
 .workspace-shell button,.workspace-dialog button { font:inherit; background:transparent; color:inherit; border:0; border-radius:4px; padding:5px 8px; }
-.workspace-shell button:hover,.workspace-dialog button:hover { background:var(--workspace-selected); }
+/* Hover belongs to the legacy control that defines it. A blanket button rule
+   paints icon/close/primary controls that had no such feedback in 1.9.3. */
 .workspace-shell input,.workspace-shell select,.workspace-shell textarea,.workspace-dialog input,.workspace-dialog select { font:inherit; color:inherit; background:var(--workspace-panel); border:1px solid var(--workspace-line); border-radius:4px; min-width:0; max-width:100%; padding:6px 8px; }
 .workspace-shell input:focus-visible,.workspace-shell textarea:focus-visible,.workspace-dialog input:focus-visible { outline:2px solid var(--workspace-accent); outline-offset:1px; }
 .workspace-shell button:disabled,.workspace-dialog button:disabled { opacity:.5; cursor:default; }

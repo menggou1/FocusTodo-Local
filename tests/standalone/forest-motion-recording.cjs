@@ -1,0 +1,19 @@
+/* Unpaused recordings, separate from the deterministic keyframe inspection. */
+const {paired,fixture,open,sel,out}=require('./forest-parity.cjs');
+const {assert,fs,path}=require('./ui-restore-helpers.cjs');
+const results=[];
+async function observe(page,key,kind){
+ await page.evaluate(({s,kind,key})=>{window.__natural=[];window.__naturalStop=false;const start=performance.now();let previous=start;function frame(){const now=performance.now(),drawer=document.querySelector(s.drawer),tree=document.querySelector(s.tree),state=JSON.parse(localStorage.getItem((key==='new'?'FocusTodoStandalone.data.':'')+'FocusTodo.forestState'));const suns=[...document.querySelectorAll(s.sun)].filter(e=>e.getAnimations().some(a=>a.effect.getTiming().duration===1000));window.__natural.push({time:now-start,gap:now-previous,drawer:drawer?{x:drawer.getBoundingClientRect().x,opacity:getComputedStyle(drawer).opacity}:null,flying:suns.length,flightTimes:suns.map(e=>e.getAnimations().find(a=>a.effect.getTiming().duration===1000)?.currentTime),sunlight:Number(state.fields.Sunlight),counter:document.querySelector(key==='old'?'[class*=ForestSection-expBarText]':'.legacy-forest-exp span').textContent,treePulse:tree.getAnimations().some(a=>a.effect.getTiming().duration===800)});previous=now;if(!window.__naturalStop)requestAnimationFrame(frame)}requestAnimationFrame(frame)},{s:sel[key],kind,key});
+}
+async function end(page){return page.evaluate(()=>{window.__naturalStop=true;return window.__natural})}
+(async()=>{for(const locale of ['zh-CN','en'])for(const dark of [false,true]){
+ const prefix=locale+'-'+(dark?'dark':'light'),p=await paired({locale,dark,reducedMotion:'no-preference',recordVideo:{dir:path.join(out,'continuous-videos'),size:{width:1280,height:900}}}),r={prefix};
+ try{await fixture(p);for(const key of ['old','new']){
+  const page=p[key];await open(page,key);r[key]={};
+  for(const kind of ['achievements','help']){await observe(page,key,kind);await page.locator(sel[key].actions).nth(kind==='achievements'?0:1).click();await page.waitForTimeout(500);await page.screenshot({path:path.join(out,`${prefix}-${kind}-continuous-full-${key}.png`)});await page.locator(sel[key][kind]).evaluate(e=>{e.scrollTop=e.scrollHeight});await page.waitForTimeout(80);await page.screenshot({path:path.join(out,`${prefix}-${kind}-bottom-${key}.png`)});assert(await page.locator(sel[key][kind]).evaluate(e=>e.scrollHeight-e.scrollTop-e.clientHeight<2),'all panel content is reachable');await page.locator(sel[key][kind]).evaluate(e=>e.scrollTop=0);await page.locator(sel[key].close).click();await page.waitForTimeout(500);r[key][kind]=await end(page)}
+  for(const bulk of [false,true]){const name=bulk?'multiple':'single';await observe(page,key,name);await (bulk?page.locator(sel[key].actions).last():page.locator(sel[key].sun).filter({hasText:'60g'})).click();await page.waitForTimeout(2100);r[key][name]=await end(page);assert(r[key][name].some(f=>f.flying>0),key+' natural flight visible');assert(r[key][name].some(f=>f.treePulse),key+' natural pulse observed');assert.equal(r[key][name].at(-1).sunlight,bulk?348:200)}
+ }
+ for(const key of ['old','new'])for(const kind of ['achievements','help']){const frames=r[key][kind].filter(f=>f.drawer);assert(frames.some(f=>f.drawer.x>700&&f.drawer.x<970),key+' '+kind+' intermediate slide');assert(frames.every(f=>f.drawer.opacity==='1'),key+' drawer does not fade')}
+ r.passed=true;console.log('PASS '+prefix+' uninterrupted drawer/flight recordings and counter timing');
+ }catch(e){r.error=e.stack;throw e}finally{results.push(r);fs.writeFileSync(path.join(out,'continuous-results.json'),JSON.stringify(results,null,2));const videos=p.handles.map(h=>h.page.video());for(const h of p.handles)await h.context.close();for(let i=0;i<videos.length;i++)await videos[i].saveAs(path.join(out,`${prefix}-continuous-${i?'new':'old'}.webm`));await p.close()}
+}})().catch(e=>{console.error(e);process.exitCode=1});

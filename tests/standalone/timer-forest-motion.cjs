@@ -113,7 +113,7 @@ const near = (a, b, tolerance = 1) => Math.abs(Number(a) - Number(b)) <= toleran
     await mature.click();
     await next.waitForFunction(() => document.querySelector('.legacy-forest-sun.collecting'));
     const sunAnimation = await next.locator('.legacy-forest-sun.collecting').evaluate(e => e.getAnimations().map(a => ({ name: a.animationName, duration: a.effect.getTiming().duration, easing: a.effect.getTiming().easing })));
-    assert.equal(sunAnimation[0].name, 'legacy-sun-flight'); assert.equal(sunAnimation[0].duration, 1000);
+    assert.equal(sunAnimation[0].duration, 1000); assert.equal(sunAnimation[0].easing, 'ease-in-out');
     await next.waitForTimeout(500);
     const midSun = await next.locator('.legacy-forest-sun.collecting').evaluate(e => getComputedStyle(e).transform);
     assert.notEqual(midSun, beforeSun);
