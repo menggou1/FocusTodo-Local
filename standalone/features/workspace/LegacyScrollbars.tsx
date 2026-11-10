@@ -20,6 +20,9 @@ export function LegacyScrollbars() {
         if (timeout) timer = setTimeout(hide, 1000);
       }
       function update() {
+        // Timer's hidden tracks never paint or accept input. Avoid forcing
+        // layout on every frame of its rail-width transition for these tracks.
+        if (view.dataset.timerScrollbar === 'hidden') return;
         const r = view.getBoundingClientRect(), height = Math.max(view.clientHeight / view.scrollHeight * view.clientHeight, 30);
         maxScroll = view.scrollHeight - view.clientHeight; travel = Math.max(view.clientHeight - height, 0);
         track.hidden = maxScroll <= 1;

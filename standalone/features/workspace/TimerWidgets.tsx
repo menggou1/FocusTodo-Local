@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { useWorkspace } from './Context';
 import { number, ordered } from './model';
 import type { Entity } from '../../services/core.mjs';
@@ -41,29 +41,43 @@ function TaskRow({row,parent}:{row:Entity;parent?:Entity}) {
  </li>{!!row.isExpanded&&children.map(child=><TaskRow key={child.id} row={child} parent={row}/>)}</>;
 }
 
-function History({now}:{now:number}) {
- const {services,text}=useWorkspace(),business=services.business.getSnapshot(),canvas=useRef<HTMLCanvasElement>(null),summary=useRef<HTMLCanvasElement>(null),scroll=useRef<HTMLDivElement>(null);
- const day=new Date(now);day.setHours(0,0,0,0);const lower=+day,upper=new Date(day).setDate(day.getDate()+1);
- const records=business.records.filter(r=>r.state!==-1&&number(r.endDate)>lower&&number(r.endDate)<=Math.min(upper,now)),contentX=useMemo(()=>{const ctx=document.createElement('canvas').getContext('2d')!;ctx.font="12px Helvetica,Tahoma,Arial,'Microsoft YaHei','微软雅黑',SimSun,Heiti,'黑体',sans-serif,STXihei,'华文细黑'";return Math.ceil(ctx.measureText('00:00').width)+4},[]);
- const color=(r:Entity)=>'#'+(business.projects.find(p=>p.id===business.tasks.find(t=>t.id===r.taskId)?.projectId)?.color||'AEBDC3');
+type HistoryItem = {id:string;start:number;seconds:number;color:string;name:string;duration:string};
+const History = memo(function History({now,lower,items,dark,locale}:{now:number;lower:number;items:readonly HistoryItem[];dark:boolean;locale:string}) {
+ const {services}=useWorkspace(),canvas=useRef<HTMLCanvasElement>(null),summary=useRef<HTMLCanvasElement>(null),scroll=useRef<HTMLDivElement>(null);
+ const contentX=useMemo(()=>{const ctx=document.createElement('canvas').getContext('2d')!;ctx.font="12px Helvetica,Tahoma,Arial,'Microsoft YaHei','微软雅黑',SimSun,Heiti,'黑体',sans-serif,STXihei,'华文细黑'";return Math.ceil(ctx.measureText('00:00').width)+4},[]);
  useLayoutEffect(()=>{
-  for(const [el,height]of [[canvas.current,2900],[summary.current,8]] as const){if(!el)continue;el.width=290*devicePixelRatio;el.height=height*devicePixelRatio;const ctx=el.getContext('2d')!;ctx.scale(devicePixelRatio,devicePixelRatio);if(height===8){for(const r of records){ctx.fillStyle=color(r);ctx.fillRect(Math.max(0,(number(r.endDate)-number(r.interval)*1000-lower)/86400000)*290,0,number(r.interval)/86400*290,8)}continue;}
-   ctx.font="12px Helvetica,Tahoma,Arial,'Microsoft YaHei','微软雅黑',SimSun,Heiti,'黑体',sans-serif,STXihei,'华文细黑'";const x=Math.ceil(ctx.measureText('00:00').width)+4;ctx.lineWidth=.5;const desc=services.settings.getSnapshot().isDarkMode?'#8f8f91':'#aeaeae';ctx.strokeStyle=desc+'4D';ctx.beginPath();for(let h=0;h<=24;h++){ctx.moveTo(x+16,h*120+10);ctx.lineTo(290,h*120+10)}ctx.stroke();ctx.textAlign='right';ctx.fillStyle=desc;ctx.textBaseline='middle';for(let h=0;h<=24;h++)ctx.fillText(String(h).padStart(2,'0')+':00',x-4,h*120+10);
-   const y=120*(now-lower)/3600000+10;ctx.strokeStyle='#ff3333';ctx.beginPath();ctx.moveTo(x+16,y);ctx.lineTo(290,y);ctx.stroke();ctx.fillStyle='#ff3333';ctx.beginPath();ctx.arc(x+16,y,3,0,2*Math.PI);ctx.fill();el.dataset.nowY=String(y);
-  }
- },[business,now,lower,services]);
+  const el=summary.current!;el.width=290*devicePixelRatio;el.height=8*devicePixelRatio;const ctx=el.getContext('2d')!;ctx.scale(devicePixelRatio,devicePixelRatio);
+  for(const r of items){ctx.fillStyle=r.color;ctx.fillRect((r.start-lower)/86400000*290,0,r.seconds/86400*290,8)}
+ },[items,lower]);
+ useLayoutEffect(()=>{
+  const el=canvas.current!;el.width=290*devicePixelRatio;el.height=2900*devicePixelRatio;const ctx=el.getContext('2d')!;ctx.scale(devicePixelRatio,devicePixelRatio);
+  ctx.font="12px Helvetica,Tahoma,Arial,'Microsoft YaHei','微软雅黑',SimSun,Heiti,'黑体',sans-serif,STXihei,'华文细黑'";ctx.lineWidth=.5;const desc=dark?'#8f8f91':'#aeaeae';ctx.strokeStyle=desc+'4D';ctx.beginPath();for(let h=0;h<=24;h++){ctx.moveTo(contentX+16,h*120+10);ctx.lineTo(290,h*120+10)}ctx.stroke();ctx.textAlign='right';ctx.fillStyle=desc;ctx.textBaseline='middle';for(let h=0;h<=24;h++)ctx.fillText(String(h).padStart(2,'0')+':00',contentX-4,h*120+10);
+  const y=120*(Date.now()-lower)/3600000+10;ctx.strokeStyle='#ff3333';ctx.beginPath();ctx.moveTo(contentX+16,y);ctx.lineTo(290,y);ctx.stroke();ctx.fillStyle='#ff3333';ctx.beginPath();ctx.arc(contentX+16,y,3,0,2*Math.PI);ctx.fill();el.dataset.nowY=String(y);
+ },[now,lower,dark,contentX,items]);
  useEffect(()=>{const id=requestAnimationFrame(()=>{if(scroll.current)scroll.current.scrollTop=120*Math.max(Math.ceil((now-lower)/3600000)-4,0)});return()=>cancelAnimationFrame(id)},[lower]);
- return <section data-widget-type={2} className="legacy-timer-history"><h3>{services.language.legacyText('tmr_today_detail').replaceAll("''","'")}</h3><div className="legacy-timer-history-summary"><canvas ref={summary}/></div><div ref={scroll} className="legacy-timer-history-hours" data-timer-scroll data-timer-scrollbar="hidden"><div className="timer-history-canvas-content"><canvas ref={canvas}/>{records.map(r=>{const start=Math.max(lower,number(r.endDate)-number(r.interval)*1000),seconds=(number(r.endDate)-start)/1000,task=business.tasks.find(t=>t.id===r.taskId),name=seconds>=480?(business.subtasks.find(t=>t.id===r.subtaskId)?.name||task?.name||text.noTask):'';return <div key={r.id} className="timer-history-record" style={{left:contentX+16,top:(start-lower)/30000+10,height:seconds/30,background:color(r)}}><span>{name}</span>{seconds>=480&&<span>{Math.floor(seconds/3600)>0&&services.language.legacyText('cmm_local_hour',Math.floor(seconds/3600))}{Math.floor(seconds/60)%60>0&&services.language.legacyText('cmm_local_minute',Math.floor(seconds/60)%60)}</span>}</div>})}</div></div></section>;
-}
+ return <section data-widget-type={2} className="legacy-timer-history" lang={locale}><h3><span className="timer-widget-heading-marker"/>{services.language.legacyText('tmr_today_detail').replaceAll("''","'")}</h3><div className="legacy-timer-history-summary"><canvas ref={summary}/></div><div ref={scroll} className="legacy-timer-history-hours" data-timer-scroll data-timer-scrollbar="hidden"><div className="timer-history-canvas-content"><canvas ref={canvas}/>{items.map(r=>{const height=r.seconds/30,compact=height<33,lines=compact?1:Math.floor((height-16)/17);return <div key={r.id} data-record-id={r.id} data-compact={compact} className="timer-history-record" style={{left:contentX+16,top:(r.start-lower)/30000+10,height,background:r.color}}><div className="timer-history-record-name"><div style={{WebkitLineClamp:lines,WebkitBoxOrient:'vertical'}}>{r.name}</div></div><div className="timer-history-record-value"><div>{r.duration}</div></div></div>})}</div></div></section>;
+});
 
 export function TimerWidgetCards() {
  const {services}=useWorkspace(),business=useSyncExternalStore(services.business.subscribe,services.business.getSnapshot),preferences=useSyncExternalStore(services.settings.subscribe,services.settings.getSnapshot),[now,setNow]=useState(Date.now());
  useEffect(()=>{const tick=()=>setNow(Date.now()),id=setInterval(tick,60000);window.addEventListener('focus',tick);return()=>{clearInterval(id);window.removeEventListener('focus',tick)}},[]);
- const day=new Date(now);day.setHours(0,0,0,0);const tomorrow=new Date(day);tomorrow.setDate(day.getDate()+1);
+ const day=new Date(Date.now());day.setHours(0,0,0,0);const tomorrow=new Date(day);tomorrow.setDate(day.getDate()+1);
  const total=Math.round(services.business.report(+day,+tomorrow).time/60),hours=Math.floor(total/60),minutes=total%60;
  const project=business.projects.find(p=>p.type===4000),unfinished=[...services.business.tasksInView({id:'id-deadline-today',type:4000})];
  unfinished.sort((a,b)=>number(project?.orderingRule)===2?number(b.priority)-number(a.priority)||number(a.order)-number(b.order):number(project?.orderingRule)===0?number(a.order)-number(b.order):(number(b.deadline)-number(a.deadline)||number(a.order)-number(b.order)));
  const finished=business.tasks.filter(t=>t.state===0&&t.isFinished&&number(t.finishedDate)>=+day&&number(t.finishedDate)<+tomorrow).sort((a,b)=>number(a.finishedDate)-number(b.finishedDate)),tasks=[...unfinished,...finished];
- const cards:Record<number,React.ReactNode>={0:<section key={0} data-widget-type={0}><h3>{services.language.legacyText('rpt_time_today')}</h3><p>{hours>0&&<><strong>{hours}</strong><small>{services.language.legacyText('cmm_local_hour','')}</small></>}{(minutes>0||hours===0)&&<><strong>{minutes}</strong><small>{services.language.legacyText('cmm_local_minute','')}</small></>}</p></section>,1:<section key={1} data-widget-type={1} className="legacy-timer-today"><h3>{services.language.legacyText('prj_today')}</h3>{tasks.length?<div className="timer-widget-task-scroll" data-timer-scroll><ul>{tasks.map(row=><TaskRow row={row} key={row.id}/>)}</ul></div>:<div className="legacy-timer-widget-empty"><img draggable={false} src={image('widget_empty')} alt=""/><p>{services.language.legacyText('pomo_no_task')}</p></div>}</section>,2:<History key={2} now={now}/>};
+ const current=Date.now();
+ // Legacy endDate cursor is ascending and upper-exclusive. Commit events must
+ // use the current clock, not the minute-old timeline timestamp.
+ const records=business.records.filter(r=>r.state!==-1&&number(r.endDate)>=+day&&number(r.endDate)<Math.min(+tomorrow,current)).sort((a,b)=>number(a.endDate)-number(b.endDate)||(String(a.id)<String(b.id)?-1:String(a.id)>String(b.id)?1:0));
+ const projected=records.map(r=>{
+  const start=Math.max(+day,number(r.endDate)-number(r.interval)*1000),seconds=number(r.endDate)-number(r.interval)*1000<+day?Math.round((number(r.endDate)-start)/1000):number(r.interval),task=business.tasks.find(t=>t.id===r.taskId),color='#'+(business.projects.find(p=>p.id===task?.projectId)?.color||'AEBDC3');
+  const name=seconds>=480?(business.subtasks.find(t=>t.id===r.subtaskId)?.name||task?.name||services.language.legacyText('pomo_without_task')):'';
+  const rounded=Math.round(seconds/60),h=Math.floor(rounded/60),m=rounded%60;
+  const duration=seconds<480?'':h>0&&m>0?services.language.legacyText('cmm_local_h_m',h,m):h>0?services.language.legacyText('cmm_local_hour',h):services.language.legacyText('cmm_local_minute',m);
+  return{id:String(r.id),start,seconds,color,name,duration};
+ });
+ const historyKey=JSON.stringify(projected),historyItems=useMemo(()=>projected,[historyKey]);
+ const cards:Record<number,React.ReactNode>={0:<section key={0} data-widget-type={0}><h3><span className="timer-widget-heading-marker"/>{services.language.legacyText('rpt_time_today')}</h3><p>{hours>0&&<><strong>{hours}</strong><small>{services.language.legacyText('cmm_local_hour','')}</small></>}{(minutes>0||hours===0)&&<><strong>{minutes}</strong><small>{services.language.legacyText('cmm_local_minute','')}</small></>}</p></section>,1:<section key={1} data-widget-type={1} className="legacy-timer-today"><h3><span className="timer-widget-heading-marker"/>{services.language.legacyText('prj_today')}</h3>{tasks.length?<div className="timer-widget-task-scroll" data-timer-scroll><ul>{tasks.map(row=><TaskRow row={row} key={row.id}/>)}</ul></div>:<div className="legacy-timer-widget-empty"><img draggable={false} src={image('widget_empty')} alt=""/><p>{services.language.legacyText('pomo_no_task')}</p></div>}</section>,2:<History key={2} now={now} lower={+day} items={historyItems} dark={document.documentElement.dataset.theme==='dark'} locale={services.language.locale}/>};
  return <>{preferences.visibleWidgets.map(type=>cards[type])}</>;
 }

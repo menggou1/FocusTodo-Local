@@ -7,10 +7,10 @@
 .legacy-timer-widgets{height:100%;min-width:0;flex:1;overflow-y:scroll;overflow-x:hidden;display:flex;flex-direction:column;align-items:flex-end;color:white}
 .legacy-timer-widgets>section{flex:none;width:330px;padding:20px;border-radius:10px;background:rgba(40,40,45,.9);margin:16px 0 0}
 .legacy-timer-widgets>section:first-child{margin-top:0}
-.legacy-timer-widgets h3{margin:0;color:#fff;font:500 12px/17px var(--workspace-font);height:17px;padding-left:12px;position:relative}
-.legacy-timer-widgets h3:before{content:'';position:absolute;left:0;top:3px;width:4px;height:10px;border-radius:2px;background:#fd5553}
-.legacy-timer-widgets p{margin:0}.legacy-timer-widgets>section[data-widget-type="0"]{height:103px}.legacy-timer-widgets>section[data-widget-type="0"] p{height:34px;margin-top:12px;line-height:34px}
-.legacy-timer-widgets strong{font:30px/34px DINCond;color:#fd5553}.legacy-timer-widgets small{font:12px/20px var(--workspace-font);color:#aeaeae;margin-left:1px;margin-right:4px;margin-top:19px;transform:scale(.91);transform-origin:left}
+.legacy-timer-widgets h3{margin:0;color:#fff;font:500 12px/1.42857143 var(--workspace-font);position:relative}
+.timer-widget-heading-marker{display:inline-block;width:4px;height:10px;border-radius:2px;margin:0 8px 2px 0;vertical-align:text-bottom;background:#fd5553}
+.legacy-timer-widgets p{margin:0}.legacy-timer-widgets>section[data-widget-type="0"]{padding-bottom:12px}.legacy-timer-widgets>section[data-widget-type="0"] p{display:flex;padding-top:11px;line-height:20px}
+.legacy-timer-widgets strong{font:30px/1.42857143 DINCond;color:#fd5553}.legacy-timer-widgets small{font:12px/1.42857143 var(--workspace-font);color:#aeaeae;margin-left:1px;margin-right:4px;margin-top:19px;transform:scale(.91);transform-origin:left}
 .domain-full-timer .legacy-timer-widget-toggle{flex:0 0 26px;width:26px;height:100%;padding:0 6px 0 0;position:static;background:transparent;border:0;border-radius:0;display:flex;align-items:center;justify-content:center}
 .legacy-timer-widget-toggle>span{display:block;width:12px;height:38px;border-radius:6px;background:rgba(40,40,45,.9) center/12px 9px no-repeat}
 .timer-widget-task-scroll{margin-top:20px;max-height:400px;min-height:180px;overflow-y:scroll;position:relative;flex:1}.timer-widget-task-scroll>ul{padding:0;margin:0;list-style:none}
@@ -24,16 +24,19 @@
 .legacy-timer-widget-empty{height:236px;padding:0;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#aeaeae}.legacy-timer-widget-empty img{width:65px;height:70px}.legacy-timer-widget-empty p{margin-top:-8px;font:14px/20px var(--workspace-font)}
 .legacy-timer-history-summary{position:relative;height:8px;margin:22px 0 12px;border-radius:2px;background:#414144;overflow:hidden}.legacy-timer-history-summary canvas{width:100%;height:8px;position:absolute}
 .legacy-timer-history-hours{height:500px;overflow:auto;position:relative}.timer-history-canvas-content{position:relative;height:2900px}.timer-history-canvas-content>canvas{position:absolute;top:0;left:0;width:100%;height:2900px}
-.domain-full-timer .timer-history-record{position:absolute;right:0;display:flex;color:white;padding:0 12px;border:0;border-radius:6px;text-align:left;overflow:hidden;font:12px/17px var(--workspace-font)}.timer-history-record>span{padding:8px 8px 8px 0;flex:1;overflow:hidden}.timer-history-record>span+span{flex:none;padding-right:0}
+.domain-full-timer .timer-history-record{position:absolute;right:0;display:flex;color:white;padding:0 12px;border:0;border-radius:6px;text-align:left;font:12px/17px var(--workspace-font)}
+.timer-history-record-name{flex:1;min-width:0;padding:8px 8px 8px 0;display:flex;flex-direction:column;justify-content:flex-start}
+.timer-history-record-name>div{max-height:100%;overflow:hidden;word-break:break-word;text-overflow:ellipsis;display:-webkit-box}
+.timer-history-record-value{flex-shrink:0;display:flex;flex-direction:column;justify-content:flex-start;overflow:hidden;padding:8px 0}.timer-history-record-value>div{max-height:100%}
+.timer-history-record[data-compact=true] .timer-history-record-name{padding:0 8px 0 0;justify-content:center}.timer-history-record[data-compact=true] .timer-history-record-value{padding:0;justify-content:center}
 /* The old controls have no generic button hover fill. Editable regions remain selectable. */
 .domain-full-timer{user-select:none}.domain-full-timer :is(input,textarea,[contenteditable=true]){user-select:text}
 .domain-full-timer button:hover{background-color:transparent}.domain-full-timer .workspace-timer-controls>button.primary:hover{background-color:white}
 .domain-full-timer .legacy-timer-duration-trigger:hover{background:transparent}.domain-full-timer img{-webkit-user-drag:none}
 .domain-full-timer .workspace-timer-controls>button:disabled{cursor:default}.domain-full-timer .timer-widget-play:disabled{opacity:1}
-.domain-full-timer .workspace-timer-controls>button{min-width:100px}.domain-full-timer .legacy-timer-selected-name{color:#fd5553}
+.domain-full-timer .workspace-timer-controls>button{min-width:100px}.domain-full-timer .legacy-timer-selected-name{color:var(--workspace-text)}
 .domain-full-timer .workspace-timer-controls>button:last-child:not(:first-child){font-size:16px}
 .legacy-timer-selected-name .timer-selected-pomos{margin-top:0;height:14px;gap:2px}.timer-selected-pomos>img{width:12px;height:12px}
-.legacy-timer-widgets>section[data-widget-type="0"] p{display:flex;align-items:flex-start;padding-top:11px;height:34px;margin-top:0}
 .legacy-timer-noise,.legacy-timer-mode-selector,.legacy-widget-editor{user-select:none}
 :is(.legacy-timer-noise,.legacy-timer-mode-selector,.legacy-widget-editor) :is(input,textarea,[contenteditable=true]){user-select:text}
 @media(prefers-reduced-motion:reduce){.legacy-timer-widget-rail{transition:none}}
