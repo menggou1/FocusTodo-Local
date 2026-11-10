@@ -22,7 +22,7 @@ export default defineConfig({
       return context.server ? html.replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*") : html;
     },
   }],
-  server: { host: '127.0.0.1', port: 0, strictPort: true },
+  server: { host: '127.0.0.1', port: 5511, strictPort: true },
   define: {
     __LOCAL_VERSION__: JSON.stringify(release.localVersion),
     __SOURCE_VERSION__: JSON.stringify(release.officialVersion),

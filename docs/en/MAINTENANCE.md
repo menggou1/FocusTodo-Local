@@ -23,8 +23,10 @@ Run `npm ci` to install locked development dependencies. Development requires No
 npm ci
 npm run build:standalone
 npm run start:standalone
-# Source debugging and hot reload on another random loopback port
-npm run dev:standalone
+# Source debugging and HMR on the fixed isolated port
+npm run dev -- --host 127.0.0.1 --port 5511 --strictPort
+# Windows PowerShell shortcut (the same development server)
+.\scripts\preview-standalone.ps1
 npm run package:standalone
 npx playwright install chromium firefox webkit
 npm run test:standalone
@@ -33,6 +35,8 @@ npm run test:services
 # D workspace/timer; build the candidate first
 npm run test:workspace
 ```
+
+The development preview uses `http://127.0.0.1:5511/`; `dev:standalone` uses the same Vite configuration. Run `npm ci` once if dependencies are missing. Later starts require no cleaning or production build. Components and CSS update through HMR; open the URL in a normal browser. The PowerShell script runs in the foreground; Ctrl+C stops this server. Port conflicts fail without selecting another port or terminating other processes.
 
 start:standalone prints a random loopback URL; preview:review uses http://127.0.0.1:5512/, excluding production 5500. Different ports have separate data. Use a separate browser context. Startup checks server attestation, storage and database inventory. Only `FocusTodoStandalone.PomodoroDB6` v3 and its `-maintenance-lock` v1 are allowed. Foreign/legacy databases or storage, opaque database enumeration, incompatible schemas and client protocols reject startup without deletion. Firefox needs 126+ for enumeration. Physical settings use `FocusTodoStandalone.data.`; backups retain logical legacy keys and `PomodoroDB6` v3 metadata. Never share the production database or bypass isolation by renaming databases.
 
