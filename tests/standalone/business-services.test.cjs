@@ -153,6 +153,10 @@ test('project visibility/folders/reordering and schedule/record edits preserve u
     assert.deepEqual(clone(h.app.business.getSnapshot().tasks),clone((await h.old.data.snapshot()).indexedDB.Task));
     await h.app.business.command({type:'removeProject',id:'folder'});await h.oracle.projects().deleteProject(await h.oracle.projects().fetchProjectById('folder'));
     assert.equal(h.app.business.getSnapshot().projects.find(row=>row.id==='a').parentId,'');
+    await h.app.business.command({type:'addProject',values:{id:'tag',name:'Tag',type:3000,order:4}});
+    await h.app.business.command({type:'addTask',values:{id:'tagtask',name:'Tagged',projectId:'a',tags:'tag,keep'}});
+    await h.app.business.command({type:'removeProject',id:'tag'});
+    assert.equal(h.app.business.getSnapshot().tasks.find(row=>row.id==='tagtask').tags,'keep');
     await h.app.business.command({type:'updateProject',id:'a',changes:{name:'Updated',future:'preserve'}});await h.oracle.projects().updateProjectInfo('a',{name:'Updated',future:'preserve'});
     const snapshot=[{id:'a',order:2},{id:'b',order:3}];await h.app.business.command({type:'reorderProjects',snapshot,from:'a',to:'b'});
     assert.equal(h.app.business.getSnapshot().projects.find(row=>row.id==='a').order,3);

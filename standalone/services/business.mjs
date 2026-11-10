@@ -89,6 +89,9 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 const row = find('projects', input.id); check(row); invariant(row.type < 4000, 'Preset views cannot be deleted');
                 if (row.type === 1000) for (const task of values.tasks.filter(task => task.projectId === row.id && task.state === 0)) removeTask(task);
                 if (row.type === 2000) for (const child of values.projects.filter(child => child.parentId === row.id && child.state !== -1)) update('Project', child, { parentId: '' });
+                if (row.type === 3000) for (const task of values.tasks.filter(task => task.state !== -1 && String(task.tags || '').split(',').includes(row.id))) {
+                    update('Task', task, { tags: String(task.tags || '').split(',').filter(id => id && id !== row.id).join(',') });
+                }
                 return update('Project', row, { state: -1 });
             }
             case 'setProjectHidden': {

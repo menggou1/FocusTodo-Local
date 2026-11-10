@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import type { ApplicationServices } from '../app/contracts';
 import type { Entity } from '../services/core.mjs';
 import { workspaceText } from '../shared/workspace';
 import { WorkspaceProvider, useWorkspace } from './workspace/Context';
-import { ProjectEditor } from './workspace/Projects';
+import { Sidebar, type SidebarView } from './workspace/Sidebar';
 import { TaskDetails } from './workspace/TaskDetails';
 import { ProjectIcon } from './workspace/ProjectIcon';
 import { LegacyIcon } from './workspace/LegacyIcon';
@@ -21,7 +21,7 @@ import { PageOverlay } from './workspace/Dialog';
 import { dateInput, expected, number, ordered, projectName } from './workspace/model';
 import '../styles/app.css';
 
-type View = { kind: 'project'; id: string } | { kind: 'search' | 'timer' | 'reports' | 'forest' | 'settings' };
+type View = SidebarView;
 export function App({ services }: { services: ApplicationServices }) {
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
   const text = workspaceText(services.language.locale);
@@ -49,7 +49,6 @@ function Workspace() {
   const [view, setView] = useState<View>({ kind: 'project', id: 'id-deadline-today' });
   const [query, setQuery] = useState(''), [name, setName] = useState(''), [selected, select] = useState('');
   const [showCompleted, setShowCompleted] = useState(preferences.showFinishedTasksInToday);
-  const [projectEditor, setProjectEditor] = useState<1000 | 2000 | 3000 | null>(null);
   const [taskMenu, setTaskMenu] = useState<{ task: Entity; x: number; y: number } | null>(null);
   const taskMenuReturn = useRef<HTMLElement | null>(null);
   const [resizeWidth, setResizeWidth] = useState<number | null>(null);
@@ -71,7 +70,7 @@ function Workspace() {
   const selectedTask = snapshot.tasks.find(row => row.id === selected && row.state === 0);
   const isTasks = view.kind === 'search' || view.kind === 'project' && ![7001].includes(number(project?.type));
   const completedView = project?.type === 7003;
-  const title = project ? projectName(project, text) : text[view.kind === 'project' ? 'tasks' : view.kind];
+  const title = project ? projectName(project, text) : view.kind === 'search' ? services.language.legacyText('tsk_search_result') : text[view.kind];
   const active = view.kind === 'search' ? ordered(services.business.search(query)) : project?.type === 3000 ? ordered(snapshot.tasks.filter(row => row.state === 0 && !row.isFinished && String(row.tags).split(',').includes(project.id))) : project && isTasks
     ? ordered(services.business.tasksInView({ id: completedView ? '' : project.id, type: completedView ? 7000 : number(project.type) }, !!completedView)) : [];
   const completedTasks = project?.type === 3000 ? ordered(snapshot.tasks.filter(row => row.state === 0 && row.isFinished && String(row.tags).split(',').includes(project.id))) : project && !completedView && isTasks ? ordered(services.business.tasksInView({ id: project.id, type: number(project.type) }, true)) : [];
@@ -80,13 +79,16 @@ function Workspace() {
   const actualPomodoros=(task:Entity)=>snapshot.records.filter(row=>row.state!==-1&&row.taskId===task.id).reduce((sum,row)=>sum+Math.min(number(row.interval)/(number(row.pomodoroInterval)||preferences.workInterval),1),0);
   const remaining=(task:Entity)=>Math.max(0,number(task.estimatePomoNum)-actualPomodoros(task))*(number(task.pomodoroInterval)||preferences.workInterval);
   const navTasks=(row:Entity):readonly Entity[]=>row.type===3000?snapshot.tasks.filter(task=>task.state===0&&!task.isFinished&&String(task.tags||'').split(',').includes(row.id)):row.type===2000?snapshot.tasks.filter(task=>task.state===0&&!task.isFinished&&projects.some(child=>child.id===task.projectId&&child.parentId===row.id)):services.business.tasksInView({id:row.id,type:number(row.type)});
+  const sidebarSummary=(row:Entity)=>{const tasks=navTasks(row);return {count:tasks.length,minutes:Math.round(tasks.reduce((total,task)=>total+remaining(task),0)/60)}};
+  const canDropTask=(row:Entity)=>{const source=taskDrag.current?.row;return !!source&&!source.isFinished&&[1000,7005,3000,4000,4001,4003,5001,5002,5003].includes(number(row.type))};
+  function dropTask(row:Entity){const source=taskDrag.current?.row;cancelDrag();if(!source||source.isFinished)return;const type=number(row.type),date=new Date(),changes:Record<string,unknown>={};if([1000,7005].includes(type))changes.projectId=row.id;else if(type===3000)changes.tags=[...new Set([...String(source.tags||'').split(',').filter(Boolean),row.id])].join(',');else if([4000,4001,4003].includes(type)){if(type===4001)date.setDate(date.getDate()+1);changes.deadline=type===4003?0:date.setHours(23,59,59,999)}else if([5001,5002,5003].includes(type))changes.priority=type-5000;else return;void run(()=>services.business.command({type:'updateTask',id:source.id,changes,expected:source}))}
   const estimatedSeconds = active.filter(row => !row.isFinished).reduce((total, row) => total + remaining(row), 0);
   const taskIds = new Set([...active, ...completedTasks].map(row => row.id));
   let spentSeconds = snapshot.records.filter(row => row.state !== -1 && taskIds.has(String(row.taskId))).reduce((total, row) => total + number(row.interval), 0);
   if([4000,4007].includes(number(project?.type))){const lower=new Date();lower.setHours(0,0,0,0);const upper=new Date();if(project?.type===4007){lower.setDate(lower.getDate()-(lower.getDay()+6)%7);upper.setTime(+lower);upper.setDate(upper.getDate()+7)}spentSeconds=services.business.report(+lower,+upper).time}else if([4001,4002,4003,4004,4006].includes(number(project?.type)))spentSeconds=0;
   const quickProject=projects.find(row=>row.id===quickProjectId)||([1000,7005].includes(number(project?.type))?project:fallback);
   const customOrder = project?.orderingRule === 3 && !completedView;
-  function navigate(next: View) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = true; setView(next);setQuickProjectId(''); select(''); setMobileNav(false); }
+  function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; setView(next);setQuickProjectId(''); select(''); setMobileNav(false); }
   function openTask(id:string) { navigate({kind:'project',id:'id-task-tasks'});select(id); }
   async function startTask(id:string,child?:string) { if(await run(()=>id?services.startForTask(id,child):services.timer.command({type:'switchTask',taskId:'',subtaskId:'',mode:preferences.isCountdown?'countdown':'countup',config:services.settings.timerConfig(),expectedSession:services.timer.getSnapshot()?.sessionId})))navigate({kind:'timer'}); }
   function cancelDrag() { taskDrag.current = null; setDragId(''); }
@@ -164,30 +166,6 @@ function Workspace() {
     {!!task.hasSubtask&&<button aria-label={task.isExpanded?text.collapse:text.expand} aria-expanded={!!task.isExpanded} disabled={busy||blocked} onClick={()=>{void run(()=>services.business.command({type:'updateTask',id:task.id,changes:{isExpanded:!task.isExpanded},expected:{isExpanded:task.isExpanded}}))}}>▾</button>}
     {!!task.hasSubtask&&!!task.isExpanded&&<ul className="domain-inline-subtasks">{ordered(snapshot.subtasks.filter(child=>child.taskId===task.id&&child.state===0)).map(child=><li key={child.id}><input type="checkbox" checked={!!child.isFinished} aria-label={text.toggleSubtask+': '+child.name} disabled={busy||blocked} onChange={()=>{void run(()=>services.business.command({type:'toggleSubtask',id:child.id,expected:child}))}}/><button onClick={()=>select(task.id)}>{child.name}</button>{!child.isFinished&&<button aria-label={text.focusSubtask+': '+child.name} disabled={busy||blocked} onClick={()=>{void startTask(task.id,child.id)}}>▷</button>}</li>)}</ul>}
   </li>;
-  const navigationRow = (row: Entity, nested = false) => {
-    const folder = row.type === 2000;
-    return <div key={row.id} data-custom={number(row.type)<4000||undefined} className={nested ? 'workspace-nested' : undefined}>
-      <button className="workspace-nav" aria-label={projectName(row, text)} data-project-id={row.id} data-view={row.type === 7005 ? 'tasks' : undefined}
-        onDragOver={event => { if (taskDrag.current && [1000, 7005, 3000, 4000, 4001, 4003, 5001, 5002, 5003].includes(number(row.type))) event.preventDefault(); }}
-        onDrop={event => {
-          event.preventDefault(); const source = taskDrag.current?.row; cancelDrag(); if (!source || source.isFinished) return;
-          const type = number(row.type), date = new Date(), changes: Record<string, unknown> = {};
-          if ([1000, 7005].includes(type)) changes.projectId = row.id;
-          else if (type === 3000) changes.tags = [...new Set([...String(source.tags || '').split(',').filter(Boolean), row.id])].join(',');
-          else if ([4000, 4001, 4003].includes(type)) { if (type === 4001) date.setDate(date.getDate() + 1); changes.deadline = type === 4003 ? 0 : date.setHours(23, 59, 59, 999); }
-          else if ([5001, 5002, 5003].includes(type)) changes.priority = type - 5000; else return;
-          void run(() => services.business.command({ type: 'updateTask', id: source.id, changes, expected: source }));
-        }}
-        aria-current={view.kind === 'project' && project?.id === row.id ? 'page' : undefined}
-        aria-expanded={folder ? row.expanded !== false : undefined} disabled={folder && (busy || blocked)}
-        onClick={() => folder ? void run(() => services.business.command({ type: 'updateProject', id: row.id, changes: { expanded: row.expanded === false }, expected: expected(row, ['expanded', 'state']) })) : navigate({ kind: 'project', id: row.id })}>
-        <ProjectIcon type={number(row.type)} color={String(row.color||'')} />
-        <span className="workspace-nav-name">{projectName(row, text)}</span>
-        {![7001, 7003].includes(number(row.type)) && <><span className="workspace-nav-estimate">{Math.round(navTasks(row).reduce((n,t)=>n+remaining(t),0)/60)}m</span><span className="workspace-nav-count">{navTasks(row).length}</span></>}{folder&&<span className="legacy-folder-arrow" aria-hidden="true">{row.expanded===false?'⌄':'⌃'}</span>}
-      </button>
-      {folder && row.expanded !== false && projects.filter(child => child.type === 1000 && child.parentId === row.id && child.state === 0).map(child => navigationRow(child, true))}
-    </div>;
-  };
   return <div className="workspace-shell" data-testid="app-shell">
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
     <header className="workspace-header">
@@ -196,16 +174,8 @@ function Workspace() {
       <nav aria-label={text.navigation}>{(['forest','reports'] as const).map(item=><button key={item} title={text[item]} aria-label={text[item]} data-view={item} aria-current={overlay===item?'page':undefined} onClick={()=>navigate({kind:item})}><LegacyIcon name={item==='forest'?'header-forest':'header-report'}/>{item==='forest'&&forestReward>0&&<small className="legacy-forest-header-count">{forestReward}</small>}</button>)}<Updates openTask={openTask}/><button title={text.settings} aria-label={text.settings} data-view="settings" aria-current={overlay==='settings'?'page':undefined} onClick={()=>navigate({kind:'settings'})}><LegacyIcon name="header-setting"/></button></nav>
     </header>
     <div className={'workspace-layout' + (selectedTask && isTasks ? ' has-details' : '')}>
-      <nav className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': (resizeWidth ?? preferences.projectRegionWidth) + 'px' } as CSSProperties}>
-        <label className="workspace-search"><LegacyIcon name="search-icon"/><span className="workspace-sr">{text.search}</span><input type="search" placeholder={text.search} title={text.searchHelp} value={query}
-          onFocus={() => { setView({ kind: 'search' }); select(''); }} onChange={event => { setQuery(event.target.value); setView({ kind: 'search' }); }}
-          onKeyDown={event => { if (event.key === 'Enter') { setMobileNav(false); heading.current?.focus(); } }} /></label>
-        <div className="workspace-projects">{projects.filter(row => row.state === 0 && row.type !== 7002 && (!row.parentId || !projects.some(parent => parent.id === row.parentId && parent.state === 0))).map(row => navigationRow(row))}</div>
-        <footer><button aria-label={text.createList} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setProjectEditor(1000); }}><span className="workspace-plus">＋</span>{services.language.locale.startsWith('zh')?'创建清单':'Add Project'}</button>
-          <button disabled={busy || blocked} aria-label={text.createTag} title={text.createTag} onClick={event => { event.currentTarget.focus(); setProjectEditor(3000); }}><LegacyIcon name="tag-new"/></button>
-          <button disabled={busy || blocked} aria-label={text.createFolder} title={text.createFolder} onClick={event => { event.currentTarget.focus(); setProjectEditor(2000); }}><LegacyIcon name="folder-new"/></button>
-</footer>
-      </nav>
+      <Sidebar projects={projects} view={view} navigate={navigate} query={query} setQuery={setQuery} summary={sidebarSummary}
+        width={resizeWidth ?? preferences.projectRegionWidth} mobileNav={mobileNav} canDropTask={canDropTask} dropTask={dropTask} />
       <div className="workspace-resize" role="separator" aria-label={text.sidebarWidth} aria-orientation="vertical" aria-valuemin={180} aria-valuemax={380} aria-valuenow={resizeWidth ?? preferences.projectRegionWidth} tabIndex={0}
         onPointerDown={event => { if (busy || blocked) return; resizeStart.current = { x: event.clientX, width: preferences.projectRegionWidth }; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={event => { if (resizeStart.current) setResizeWidth(Math.min(380, Math.max(180, resizeStart.current.width + event.clientX - resizeStart.current.x))); }}
@@ -237,7 +207,6 @@ function Workspace() {
       </main>
       {selectedTask && isTasks && <TaskDetails key={selectedTask.id} task={selectedTask} projects={projects} subtasks={snapshot.subtasks} close={() => select('')} onStart={() => navigate({ kind: 'timer' })} />}
     </div>
-    {projectEditor && <ProjectEditor type={projectEditor} projects={projects} close={() => setProjectEditor(null)} />}
     {taskMenu && <TaskContextMenu remove={setDeletingTask} key={taskMenu.task.id} task={taskMenu.task} x={taskMenu.x} y={taskMenu.y} close={closeTaskMenu} />}
   {deletingTask&&<TaskDeleteDialog task={deletingTask} close={()=>{setDeletingTask(null)}}/>}
   {overlay&&<PageOverlay title={overlay==='forest'?(services.language.locale.startsWith('zh')?'专注森林':'Focus forest'):text[overlay]} full={overlay==='reports'} close={()=>setOverlay(null)}>{overlay==='settings'?<Settings initialTab={settingsTab}/>:overlay==='reports'?<Reports openTask={openTask}/>:<Forest/>}</PageOverlay>}
