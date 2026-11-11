@@ -1,5 +1,5 @@
 /* Legacy 1.9.3 ProjectRegion geometry and interaction states. */
-.workspace-sidebar{padding-top:12px}
+.workspace-sidebar{padding-top:0}
 .workspace-search{height:42px;margin:0;padding:0 8px;background:transparent;display:flex;align-items:center}
 .workspace-search-box{display:flex;align-items:center;width:100%;height:34px;border-radius:6px;background:var(--workspace-search);padding:0 6px 0 8px;gap:8px}
 .workspace-search .workspace-search-clear{display:flex;flex:none;align-items:center;justify-content:center;width:24px;height:24px;margin:0 0 0 4px;border:0;background:center/24px 24px no-repeat url("../../public/img/clear-search-content.png")}
@@ -7,19 +7,25 @@
 .workspace-search input{background:transparent;border:0;outline:0;flex:1;min-width:0;height:24px;padding:0;color:var(--workspace-text);font:14px/20px var(--workspace-font)}
 .workspace-search input::-webkit-search-cancel-button,.workspace-search input::-webkit-search-decoration{-webkit-appearance:none;display:none}
 .workspace-search .legacy-icon{width:24px;height:24px;flex:none}
-.workspace-sidebar .workspace-projects{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;padding:0}
+.workspace-sidebar .workspace-projects{overflow-y:auto;overflow-x:hidden;flex:1;min-height:0;padding:12px 0 0}
 .sidebar-presets,.sidebar-customs{list-style:none;margin:0;padding:0}
-.sidebar-custom-separator{height:1px;margin:16px 16px;border-top:1px solid var(--workspace-line)}
+.sidebar-custom-separator{height:1px;margin:16px 16px;border-top:1px solid #f4f4f4}
+[data-theme=dark] .sidebar-custom-separator{border-top-color:rgba(255,255,255,.08)}
 .sidebar-item{position:relative;display:flex;align-items:center;height:38px;min-width:0;padding-right:8px;background:var(--workspace-panel)}
-.workspace-sidebar .sidebar-nav-main{flex:1;min-width:0;width:auto;margin:0 0 0 8px;padding:0 0 0 1px;gap:0;background:transparent;border-radius:6px}
-.sidebar-nav-icon-slot{display:flex;flex:0 0 33px;align-items:center;height:34px;padding-left:8px;box-sizing:border-box}
-.sidebar-nav-icon-slot .workspace-nav-icon{width:24px;height:24px;margin:0}
-.workspace-sidebar .sidebar-nav-main[aria-current=page]{background:var(--workspace-selected)}
+.workspace-sidebar .sidebar-nav-main{flex:1;min-width:0;width:auto;margin:0 0 0 8px;padding:0 0 0 1px;gap:0;background:transparent;border:0;border-top:1px solid transparent;border-bottom:1px solid transparent;border-right:1px solid transparent;background-clip:padding-box;border-radius:6px}
+.sidebar-child .sidebar-nav-main{max-width:235px}
+.sidebar-nav-icon-slot{display:block;flex:0 0 auto;height:34px;padding-left:8px;box-sizing:border-box;overflow:hidden}
+.sidebar-nav-icon-slot .workspace-nav-icon{display:inline-block;width:24px;height:24px;margin:5px 0 0}
+.sidebar-nav-icon-slot .workspace-project-color{display:inline-block;width:11px;height:11px;margin:12px 7px 11px 7px}
+.sidebar-nav-icon-slot .workspace-project-color>i{display:block;width:11px;height:11px;border-radius:50%}
+.sidebar-nav-icon-slot .legacy-folder-color{mask:url("../../public/img/folder.png") 0 0/24px 24px repeat}
+.sidebar-nav-icon-slot .workspace-tag-color{mask:url("../../public/img/tag.png") center/24px 24px no-repeat}
+.workspace-sidebar .sidebar-nav-main[aria-current=page]{background-color:var(--workspace-selected);background-clip:padding-box}
 .workspace-sidebar .sidebar-item .sidebar-nav-main:hover:not([aria-current=page]){background:transparent}
-.sidebar-item .workspace-nav-estimate{width:33px;height:34px;line-height:33px;padding:0 0 0 0;font-size:12px;text-align:right;color:var(--workspace-muted);white-space:nowrap}
-.sidebar-item .workspace-nav-count{width:16.67px;height:34px;line-height:33px;margin:0;padding:0;text-align:right;color:var(--workspace-muted)}
+.sidebar-item .workspace-nav-estimate{width:33px;height:34px;line-height:33px;padding:1px 14px 0 0;font-size:12px;text-align:right;color:var(--workspace-muted);white-space:nowrap}
+.sidebar-item .workspace-nav-count{width:16.67px;height:34px;line-height:33px;margin:0;padding:1px 10px 0 0;text-align:right;color:var(--workspace-muted)}
 .sidebar-custom:hover .workspace-nav-estimate,.sidebar-custom:hover .workspace-nav-count{display:none}
-.sidebar-custom .sidebar-menu-button{display:none;flex:none;align-items:center;justify-content:center;width:32px;height:38px;border:0;background:transparent;cursor:default}
+.sidebar-custom .sidebar-menu-button{display:none;flex:none;align-items:center;justify-content:flex-start;width:32px;height:38px;padding:0;border:0;background:transparent;cursor:default}
 .workspace-sidebar .sidebar-menu-button:hover,.workspace-sidebar .sidebar-folder-toggle:hover{background:transparent}
 .sidebar-custom:hover .sidebar-menu-button,.sidebar-custom.sidebar-menu-open .sidebar-menu-button{display:flex}
 .sidebar-menu-icon{display:block;width:24px;height:24px;background:center/24px 24px no-repeat url("../../public/img/project-hover-menu.png")}
@@ -35,7 +41,8 @@
 .sidebar-item[data-over=true] .sidebar-nav-main{outline:1px solid var(--workspace-accent);outline-offset:-1px}
 .sidebar-item.sidebar-menu-open .sidebar-nav-main{outline:1px solid var(--workspace-accent);outline-offset:-1px}
 .sidebar-custom .sidebar-nav-main{cursor:default}
-.workspace-sidebar footer{margin-top:0;padding:8px 12px 10px;background:var(--workspace-panel)}
+.workspace-sidebar footer{margin-top:0;padding:8px 12px 10px;background:var(--workspace-panel);border-top-color:#f4f4f4}
+[data-theme=dark] .workspace-sidebar footer{border-top-color:rgba(255,255,255,.08)}
 .workspace-sidebar footer button:first-child{padding-left:0}
 .workspace-sidebar footer button:hover{background:transparent}
 .workspace-sidebar .workspace-search-clear:hover{background:transparent}

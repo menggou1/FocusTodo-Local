@@ -218,15 +218,15 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
 
   const menuRow = menu?.row;
   return <nav className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': width + 'px' } as CSSProperties}>
-    <div className="workspace-search">
-      <div className="workspace-search-box">
-        <LegacyIcon name="search-icon" />
-        <span className="workspace-sr">{text.search}</span>
-        <input ref={input} type="search" placeholder={text.search} title={text.searchHelp} value={query} onChange={event => changeSearch(event.target.value)} onKeyDown={searchKey} />
-        {!!query && <button type="button" className="workspace-search-clear" aria-label={projectSearchLabel()} title={projectSearchLabel()} onClick={() => restoreSearch()}><span /></button>}
-      </div>
-    </div>
     <div className="workspace-projects">
+      <div className="workspace-search">
+        <div className="workspace-search-box">
+          <LegacyIcon name="search-icon" />
+          <span className="workspace-sr">{text.search}</span>
+          <input ref={input} type="search" placeholder={text.search} title={text.searchHelp} value={query} onChange={event => changeSearch(event.target.value)} onKeyDown={searchKey} />
+          {!!query && <button type="button" className="workspace-search-clear" aria-label={projectSearchLabel()} title={projectSearchLabel()} onClick={() => restoreSearch()}><span /></button>}
+        </div>
+      </div>
       <div className="sidebar-presets">{presets.map(project => row({ id: project.id, project, parent: null }))}</div>
       {items.length > 0 && <div className="sidebar-custom-separator" />}
       <div className="sidebar-customs">{items.map(item => row(item))}</div>

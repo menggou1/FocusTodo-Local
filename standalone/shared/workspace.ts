@@ -34,7 +34,7 @@ const en = {
 };
 export type WorkspaceText = { [K in keyof typeof en]: string };
 const zh: WorkspaceText = {
-  today: '今天', tomorrow: '明天', week: '本周', planned: '已计划', all: '所有任务', someday: '某天', overdue: '已过期', seven: '未来七天',
+  today: '今天', tomorrow: '明天', week: '本周', planned: '已计划', all: '所有任务', someday: '待定', overdue: '已过期', seven: '未来七天',
   high: '高优先级', medium: '中优先级', low: '低优先级', completed: '已完成', tasks: '任务', calendar: '日程', timer: '计时', reports: '报表', forest: '森林', settings: '设置',
   search: '搜索', searchHelp: '搜索任务、备注和子任务', empty: '暂无任务', addTask: '添加一个任务，按回车保存',
   createList: '创建清单', createFolder: '创建文件夹', lists: '清单', manageLists: '清单管理', name: '名称', folder: '文件夹', none: '无',
