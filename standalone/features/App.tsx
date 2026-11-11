@@ -11,7 +11,7 @@ import { QuickEstimate } from './workspace/QuickEstimate';
 import { TaskName } from './workspace/TaskName';
 import { TaskDeleteDialog } from './workspace/TaskDeleteDialog';
 import { TaskContextMenu } from './workspace/TaskContextMenu';
-import { taskGroups } from './workspace/TaskGroups';
+import { formatMinutesDuration, formatTaskDate, taskGroups } from './workspace/TaskGroups';
 import { Timer } from './workspace/Timer';
 import { Calendar } from './workspace/Calendar';
 import { History, Reports } from './workspace/Reports';
@@ -21,7 +21,7 @@ import { Updates } from './workspace/Updates';
 import { PageOverlay } from './workspace/Dialog';
 import { LegacyScrollbars } from './workspace/LegacyScrollbars';
 import { AppInteractions } from './workspace/AppInteractions';
-import { dateInput, expected, number, ordered, projectName } from './workspace/model';
+import { expected, number, ordered, projectName } from './workspace/model';
 import '../styles/app.css';
 
 type View = SidebarView;
@@ -56,10 +56,12 @@ function Workspace() {
   const taskMenuReturn = useRef<HTMLElement | null>(null);
   const [resizeWidth, setResizeWidth] = useState<number | null>(null);
   const resizeStart = useRef<{x: number; width: number} | null>(null);
-  const [mobileNav, setMobileNav] = useState(false), [dragId, setDragId] = useState('');
+  const [mobileNav, setMobileNav] = useState(false), [dragId, setDragId] = useState(''), [sortOpen, setSortOpen] = useState(false);
   const taskDrag = useRef<{ row: Entity; rows: Entity[] } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusHeading = useRef(false);
+  useEffect(()=>{setSortOpen(false);setShowCompleted(view.kind==='project'&&view.id==='id-deadline-today'?preferences.showFinishedTasksInToday:false)},[view]);
+  useEffect(()=>{if(!sortOpen)return;const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.preventDefault();setSortOpen(false)}};document.addEventListener('keydown',onKey);return()=>document.removeEventListener('keydown',onKey)},[sortOpen]);
   const timerReturn=useRef<{view:View;selected:string}>({view:{kind:'project',id:'id-deadline-today'},selected:''});
   const quickInput=useRef<HTMLInputElement>(null);
   useEffect(()=>{void services.forest.dailyLaunch().catch(report)},[services]);
@@ -81,6 +83,7 @@ function Workspace() {
   const completedInRange=(type:number)=>{const [lower,upper]=completionRange(type);return snapshot.tasks.filter(row=>row.state===0&&row.isFinished&&number(row.finishedDate)>=lower&&number(row.finishedDate)<upper).slice().sort((a,b)=>number(b.finishedDate)-number(a.finishedDate)||a.id.localeCompare(b.id))};
   const completedTasks = project?.type === 3000 ? ordered(snapshot.tasks.filter(row => row.state === 0 && row.isFinished && String(row.tags).split(',').includes(project.id))) : project && !completedView && isTasks ? [4000,4007].includes(number(project.type)) ? completedInRange(number(project.type)) : ordered(services.business.tasksInView({ id: project.id, type: number(project.type) }, true)) : [];
   const summaryPresetOnly = [4001,4002,4003,4004,4006].includes(number(project?.type));
+  const completedSection = !!project && view.kind==='project' && ![4001,4002,4003,4006,7001,7003].includes(number(project.type));
   const duration=(seconds:number)=>{const total=Math.round(seconds/60),hours=Math.floor(total/60),minutes=Math.round(total%60),zh=services.language.locale.startsWith('zh');const parts=hours>0?(minutes>0?[[hours,zh?'小时':'h'],[minutes,zh?'分钟':'m']]:[[hours,zh?'小时':'h']]):[[minutes,zh?'分钟':'m']];return <span className="workspace-duration">{parts.map(([value,unit])=><span key={String(value)+String(unit)}><strong>{value}</strong><small>{unit}</small></span>)}</span>};
   const finished = showCompleted ? completedTasks : [];
   const completedCount = completedView || view.kind === 'search' ? active.filter(row => row.isFinished).length : completedTasks.length;
@@ -133,6 +136,16 @@ function Workspace() {
     taskMenuReturn.current = name;
     setTaskMenu({ task, x: rect.left + 8, y: rect.bottom + 4 });
   }
+  const sortOptions=(row:Entity)=>{
+    const type=number(row.type),zh=services.language.locale.startsWith('zh');
+    const overdueVisible=projects.some(item=>item.type===4006&&item.state===0);
+    const order:[number,string][]=[1000,7005].includes(type)?[[1,zh?'按到期日排序':'Sort by due date'],[2,zh?'按任务优先级排序':'Sort by task priority'],[3,zh?'自定义排序':'Custom']]:
+      type===4000?(overdueVisible?[[0,zh?'按清单排序':'Sort by project'],[2,zh?'按任务优先级排序':'Sort by task priority']]:[[0,zh?'按清单排序':'Sort by project'],[1,zh?'按到期日排序':'Sort by due date'],[2,zh?'按任务优先级排序':'Sort by task priority']]):
+      [4001,4003].includes(type)?[[0,zh?'按清单排序':'Sort by project'],[2,zh?'按任务优先级排序':'Sort by task priority']]:
+      [5001,5002,5003].includes(type)?[[0,zh?'按清单排序':'Sort by project'],[1,zh?'按到期日排序':'Sort by due date']]:
+      [[0,zh?'按清单排序':'Sort by project'],[1,zh?'按到期日排序':'Sort by due date'],[2,zh?'按任务优先级排序':'Sort by task priority']];
+    return order.map(([value,label])=>({value,label}));
+  };
   const taskRow = (task: Entity, rows: Entity[]) => <li key={task.id} className="workspace-task" data-testid="task-row" data-task-id={task.id} data-priority={number(task.priority)} data-selected={selected === task.id || undefined} data-dragging={dragId === task.id || undefined}
     onContextMenu={event => openTaskMenu(task, event)}
     onKeyDown={event => openTaskMenuFromKeyboard(task, event)}
@@ -170,7 +183,7 @@ function Workspace() {
     {!task.isFinished && <button type="button" className="workspace-task-start" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}><LegacyIcon name="task-start"/></button>}
     <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
     {!!task.remark&&<LegacyIcon name="task-remark"/>}
-    {number(task.deadline)>0&&<span className="workspace-task-date">{dateInput(task.deadline)===dateInput(new Date().setHours(23,59,59,999))?text.today:dateInput(task.deadline)}</span>}
+    {number(task.deadline)>0&&<span className="workspace-task-date" data-overdue={number(task.deadline)<new Date().setHours(0,0,0,0)||undefined}>{formatTaskDate(number(task.deadline), services.language.locale)}</span>}
     {!!task.hasSubtask&&<button aria-label={task.isExpanded?text.collapse:text.expand} aria-expanded={!!task.isExpanded} disabled={busy||blocked} onClick={()=>{void run(()=>services.business.command({type:'updateTask',id:task.id,changes:{isExpanded:!task.isExpanded},expected:{isExpanded:task.isExpanded}}))}}>▾</button>}
     {!!task.hasSubtask&&!!task.isExpanded&&<ul className="domain-inline-subtasks">{ordered(snapshot.subtasks.filter(child=>child.taskId===task.id&&child.state===0)).map(child=><li key={child.id}><input type="checkbox" checked={!!child.isFinished} aria-label={text.toggleSubtask+': '+child.name} disabled={busy||blocked} onChange={()=>{void run(()=>services.business.command({type:'toggleSubtask',id:child.id,expected:child}))}}/><button onClick={()=>select(task.id)}>{child.name}</button>{!child.isFinished&&<button aria-label={text.focusSubtask+': '+child.name} disabled={busy||blocked} onClick={()=>{void startTask(task.id,child.id)}}>▷</button>}</li>)}</ul>}
   </li>;
@@ -192,8 +205,12 @@ function Workspace() {
         onPointerCancel={() => { resizeStart.current = null; setResizeWidth(null); }}
         onKeyDown={event => { if (['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); void run(() => services.settings.set('projectRegionWidth', preferences.projectRegionWidth + (event.key === 'ArrowLeft' ? -10 : 10))); } }} />
       <main id="workspace-content" className={'workspace-content'+(project?.type===7001?' calendar-content':'')} tabIndex={-1}>
-        <div className="workspace-view-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1>{project && !completedView && <label className="workspace-sort"><span className="workspace-sr">{text.sort}</span><select aria-label={text.sort} value={number(project.orderingRule)} disabled={busy || blocked} onChange={event => { void run(() => services.business.command({ type: 'updateProject', id: project.id, changes: { orderingRule: Number(event.target.value) }, expected: expected(project, ['orderingRule']) })); }}>
-          {[text.project, text.deadline, text.priority, text.manual].map((name, index) => <option value={index} key={index}>{name}</option>)}</select></label>}</div>
+        <div className="workspace-view-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1>{project && !completedView && <div className="workspace-sort">
+            <button type="button" className="workspace-sort-trigger" aria-label={text.sort} aria-haspopup="menu" aria-expanded={sortOpen} disabled={busy || blocked} onClick={()=>setSortOpen(!sortOpen)}><span className="workspace-sr">{text.sort}</span></button>
+            {sortOpen&&<><button type="button" className="workspace-sort-mask" aria-label={text.close} tabIndex={-1} onClick={()=>setSortOpen(false)} />
+              <div className="legacy-sort-menu" role="menu" aria-label={text.sort}>{sortOptions(project).map(option=><button key={option.value} type="button" role="menuitemradio" aria-checked={number(project.orderingRule)===option.value} onClick={()=>{setSortOpen(false);void run(()=>services.business.command({type:'updateProject',id:project.id,changes:{orderingRule:option.value},expected:expected(project,['orderingRule'])}))}}><span>{option.label}</span>{number(project.orderingRule)===option.value&&<i className="legacy-sort-check" />}</button>)}</div>
+            </>}
+          </div>}</div>
         {isTasks ? <>
           <div className="workspace-summary"><div><div className="workspace-summary-value">{duration(estimatedSeconds)}</div><span>{text.estimatedTime}</span></div><div><div className="workspace-summary-value"><strong>{active.filter(row => !row.isFinished).length}</strong></div><span>{services.language.locale.startsWith('zh')?'待完成任务':'Tasks to be Completed'}</span></div>{!summaryPresetOnly&&<><div><div className="workspace-summary-value">{duration(spentSeconds)}</div><span>{text.elapsedTime}</span></div><div><div className="workspace-summary-value"><strong data-testid="completed-total">{completedCount}</strong></div><span>{services.language.locale.startsWith('zh')?'已完成任务':'Completed Tasks'}</span></div></>}</div>
           {!completedView && view.kind !== 'search' && <form className="workspace-add-task" onSubmit={async event => {
@@ -207,8 +224,8 @@ function Workspace() {
             if (await run(() => services.business.command({ type: 'addTask', values: { name: name.trim(), projectId: quickProject?.id||fallback?.id||'',
               deadline, order, estimatePomoNum:quickEstimate, tags: type === 3000 ? project?.id : '', priority: [5001, 5002, 5003].includes(type) ? type - 5000 : 0 } }))) setName('');
           }}><span className="workspace-plus" aria-hidden="true"/><input ref={quickInput} aria-label={text.addTask} placeholder={services.language.locale.startsWith('zh')?'在"'+(quickProject?projectName(quickProject,text):text.tasks)+'"中添加一个任务，按「回车」键保存':'Add a task to "'+(quickProject?projectName(quickProject,text):text.tasks)+'", press「Enter」to save'} value={name} maxLength={1000} required disabled={busy || blocked} onChange={event => setName(event.target.value)} /><div className="workspace-quick-pomos" aria-label={text.estimate+' shortcuts'}>{quickEstimate<=5?Array.from({length:5},(_,i)=><button type="button" key={i} className="workspace-quick-pomo" aria-label={text.estimate+': '+(i+1)} aria-pressed={quickEstimate>=i+1} onMouseDown={event=>event.preventDefault()} onClick={()=>setQuickEstimate(quickEstimate===i+1?0:i+1)}/>):<span className="workspace-quick-pomo-many" aria-live="polite"><i aria-hidden="true"/><em>{quickEstimate}</em></span>}<QuickEstimate value={quickEstimate} change={setQuickEstimate} label={text.estimate} focusInput={()=>quickInput.current?.focus()}/></div><span className="workspace-quick-separator" aria-hidden="true"/><details className="workspace-quick-project-picker"><summary className="workspace-quick-project" aria-label={text.project+'…'}><ProjectIcon type={number(quickProject?.type)||7005} color={String(quickProject?.color||'')}/></summary><div className="legacy-detail-popover legacy-project-options">{projects.filter(row=>[1000,7005].includes(number(row.type))&&row.state===0).map(row=><button key={row.id} type="button" role="option" aria-selected={quickProject?.id===row.id} onClick={event=>{setQuickProjectId(row.id);const pop=event.currentTarget.closest('details');if(pop)pop.open=false}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span>{quickProject?.id===row.id&&<i>✓</i>}</button>)}</div></details></form>}
-          {!completedView&&taskGroups(active, project, projects, text).map(group => <section key={group.id} className="workspace-task-group">{group.title && group.rows.length>0 && <h2>{group.title}<span>  •  {Math.round(group.rows.reduce((n,t)=>n+remaining(t),0)/60)}{services.language.locale.startsWith('zh')?'分钟':'m'}</span></h2>}<ul className="workspace-tasks" aria-label={group.title || title}>{group.rows.map(task => taskRow(task, group.rows))}</ul></section>)}
-          {project && !completedView && <><button className="workspace-completed-toggle" onClick={() => setShowCompleted(value => !value)}>{showCompleted ? text.hideCompleted : text.showCompleted}</button>
+          {!completedView&&taskGroups(active, project, projects, text, services.language.locale).map(group => <section key={group.id} className="workspace-task-group">{group.title && group.rows.length>0 && <h2>{group.title}<span>  •  {formatMinutesDuration(group.rows.reduce((n,t)=>n+remaining(t),0)/60, services.language.locale)}</span></h2>}<ul className="workspace-tasks" aria-label={group.title || title}>{group.rows.map(task => taskRow(task, group.rows))}</ul></section>)}
+          {completedSection && <><button className="workspace-completed-toggle" onClick={() => setShowCompleted(value => !value)}>{showCompleted ? text.hideCompleted : text.showCompleted}</button>
             <ul className="workspace-tasks" aria-label={text.completed}>{finished.map(task => taskRow(task, finished))}</ul></>}
           {completedView&&<History openTask={openTask}/>}
         </> : view.kind === 'settings' ? <Settings/> : view.kind==='reports'?<Reports openTask={openTask}/>:view.kind==='forest'?<Forest/>:project?.type===7001?<Calendar startTask={(id,child)=>{void startTask(id,child)}} openTask={openTask}/>:null}
