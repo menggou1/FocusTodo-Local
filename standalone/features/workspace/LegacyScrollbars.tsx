@@ -6,7 +6,7 @@ import { useLayoutEffect } from 'react';
 export function LegacyScrollbars() {
   useLayoutEffect(() => {
     const bound = new Map<HTMLElement, { dispose(): void; refresh(): void }>();
-    const selectors = '.workspace-content:not(.calendar-content),.workspace-details,.workspace-projects,.legacy-settings-content,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll]';
+    const selectors = '.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll]';
     function bind(view: HTMLElement) {
       const track = document.createElement('div'), thumb = document.createElement('div');
       track.className = 'legacy-scroll-track'; thumb.className = 'legacy-scroll-thumb';
