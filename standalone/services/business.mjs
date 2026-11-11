@@ -192,7 +192,11 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 switch (view.type) {
                 case 1000: case 7005: return row.projectId === view.id;
                 case 7000: return true;
-                case 4000: return row.deadline >= 1 && row.deadline < end;
+                case 4000: {
+                    // Legacy folds overdue tasks into Today only while the Overdue preset is hidden.
+                    const overdueVisible = state.getSnapshot().projects.some(row => row.state === 0 && row.type === 4006);
+                    return row.deadline >= (overdueVisible ? start : 1) && row.deadline < end;
+                }
                 case 4001: return row.deadline >= tomorrow.start && row.deadline < tomorrow.end;
                 case 4002: return row.deadline > 0;
                 case 4003: return row.deadline === 0;

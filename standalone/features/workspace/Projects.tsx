@@ -26,7 +26,9 @@ export function ProjectManager({ projects, close,inline=false }: { projects: rea
   const t=(zh:string,en:string)=>services.language.locale.startsWith('zh')?zh:en;
   const drag = useRef<{ from: string; snapshot: { id: string; order: number }[] } | null>(null);
   const [active, setActive] = useState('');
-  const rows = ordered(projects.filter(row => row.state !== -1 && ![7002,7005,4000].includes(number(row.type))));
+  const presetRows = ordered(projects.filter(row => row.state !== -1 && number(row.type) >= 4000 && ![4000, 7002, 7005].includes(number(row.type))));
+  const customRows = ordered(projects.filter(row => row.state !== -1 && number(row.type) === 1000));
+  const rows = [...presetRows, ...customRows];
   const group = (row: Entity) => number(row.type) >= 4000 ? 'preset' : row.type === 3000 ? 'tags' : string(row.parentId) || 'root';
   const reorder = (from: string, to: string, snapshot: { id: string; order: number }[]) => run(() => services.business.command({ type: 'reorderProjects', from, to, snapshot }));
   function cancelDrag() { drag.current = null; setActive(''); }
