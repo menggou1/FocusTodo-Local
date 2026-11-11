@@ -47,3 +47,9 @@
 .legacy-detail-popover{--workspace-panel:#fff;color:#333}.legacy-pomodoro-picker,.legacy-date-picker,.legacy-repeat-picker,.legacy-tags-picker{color:#525252}
 :root[data-theme=dark] .legacy-detail-popover{--workspace-panel:#2d2d37;color:#333}
 :root[data-theme=dark] .legacy-pomodoro-picker,:root[data-theme=dark] .legacy-date-picker,:root[data-theme=dark] .legacy-repeat-picker,:root[data-theme=dark] .legacy-tags-picker{color:#e8e8eb}
+
+/* W6: legacy repetition weekday circles (legacy-pickers loads after legacy-details) */
+.legacy-repeat-days label{width:26px!important;height:26px!important;min-height:26px!important;max-height:26px!important;margin:0 0 5px 4px!important;padding:0!important;border:1px solid var(--workspace-muted)!important;border-radius:50%!important;display:grid!important;place-items:center;font-size:12px!important;line-height:26px!important;color:var(--workspace-muted)}
+.legacy-repeat-days label:first-child{margin-left:0!important}
+.legacy-repeat-days label[data-selected]{border-color:#fd5553!important;color:#fd5553!important}
+.legacy-repeat-days label p{line-height:26px!important}
