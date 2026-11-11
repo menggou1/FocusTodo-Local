@@ -6,9 +6,9 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .legacy-icon{width:24px;height:24px;object-fit:contain;flex:none;vertical-align:middle}
 .workspace-header{padding:0 13px 0 16px;gap:0;height:50px;border-bottom:0;box-shadow:0 0 3px 1px rgba(224,224,224,.5);position:relative;z-index:5}
 .workspace-header .workspace-profile{display:flex;align-items:center;gap:8px;padding:0;height:50px;line-height:50px}
-.workspace-header .workspace-profile>span{line-height:21px;height:21px;display:block}
-.workspace-header .workspace-profile:hover{background:transparent}.workspace-avatar{display:block;width:30px;height:30px;background:transparent;margin-top:4.4px}
-.workspace-profile .workspace-profile-arrow{width:14px;height:14px;margin-left:-6px;margin-top:5.4px}.workspace-header nav{gap:16px;align-items:center;height:50px}
+.workspace-header .workspace-profile>span{line-height:21px;height:21px;display:block;margin-bottom:1px}
+.workspace-header .workspace-profile:hover{background:transparent}.workspace-avatar{display:block;width:30px;height:30px;background:transparent;margin-top:3.4px}
+.workspace-profile .workspace-profile-arrow{width:14px;height:14px;margin-left:-6px;margin-top:4.4px}.workspace-header nav{gap:16px;align-items:center;height:50px}
 .workspace-header nav>button:not(.workspace-sr){padding:0;width:24px;height:24px;border-radius:0}.workspace-header nav>button:hover{background:transparent}
 .workspace-header .workspace-mobile-toggle{display:none}.workspace-profile-container{position:relative}
 .workspace-menu-dismiss{position:fixed;inset:0;width:100%;height:100%;z-index:9;background:transparent!important;border-radius:0!important}
@@ -92,3 +92,6 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-task[data-priority='1']>input:checked{background-image:url('../../public/img/task_done_low_priority.png')}.workspace-task[data-priority='2']>input:checked{background-image:url('../../public/img/task_done_medium_priority.png')}.workspace-task[data-priority='3']>input:checked{background-image:url('../../public/img/task_done_high_priority.png')}
 .workspace-projects>div[data-custom=true]:not([data-custom=true]~[data-custom=true])>.workspace-nested{margin-left:8px}.legacy-folder-arrow{color:var(--workspace-muted);width:16px;font-size:14px}.workspace-nav:has(.legacy-folder-arrow) .workspace-nav-estimate{width:33px}.workspace-nav:has(.legacy-folder-arrow) .workspace-nav-count{width:16px}.workspace-header nav>button[data-view=forest]{position:relative}.legacy-forest-header-count{position:absolute;top:-7px;left:12px;min-width:16px;padding:0 4px;background:#ff5155;border-radius:6px;color:white;font:10px/12px Arial}
 .workspace-nav-icon.legacy-folder-color{mask:url("../../public/img/folder.png") center/24px no-repeat}
+
+/* W5: opening the detail overlay must not change the sidebar's top padding. */
+.workspace-layout.has-details .workspace-sidebar{padding-top:0}

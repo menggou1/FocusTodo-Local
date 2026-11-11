@@ -51,3 +51,17 @@
 ## 临时目录
 
 本阶段临时目录 `.agent-temp/d-v-workspace-w5/` 已清理，检查确认不存在。
+
+## 二次验收补记（W5 收尾）
+
+在 W6 合入后重新按 W5 全量口径复验，发现并修复以下遗留：
+
+1. `has-details` 侧栏内边距从未真正覆盖：`.workspace-layout.has-details .workspace-sidebar{padding-top:16px}` 仍优先生效，打开详情侧栏下移 16px。已在 `legacy-workspace.css` 末尾显式置 0；实测 1024×600 下侧栏 `scrollTop=35` 在打开前后保持 35，首行 y 不变、padding 0。
+2. ≤1050 媒体查询把详情容器压成 324/310 并给 `.workspace-content` 重新加 padding。已在 `legacy-details.css` 补充 1050/760/540 覆盖：详情保持 340 覆盖层、任务区 margin-right 340、内容 padding 0。实测 1024×600 与旧版完全一致：root `[684,50,340,550]`、content `[684,66,324,518]`、bottom `[684,542,324,42]`。
+3. 去掉页头下边框后头像/用户名/箭头整体下移 0.5px。按旧版几何回调 margin（头像 `margin-top:3.4px`、用户名 `margin-bottom:1px`、箭头 `margin-top:4.4px`），1280×900 实测恢复 `[16,11.7,30,30] / [54,14,56,21] / [112,20.2,14,14]`。
+4. 长备注 textarea 吞掉滚轮：备注自身不可滚动时通过原生 passive:false 监听把 `deltaY` 转发给 `.workspace-details-info`。实测 1024×600 在备注区域滚轮 `scrollTop 0→60`，底栏保持 y=542。
+5. 滚动条：轨道需悬停右侧后 `pointer-events:auto`；实测悬停后轨道 `[1256,66,6,776]`、thumb 高 288.8，拖动后 `scrollTop≈296`，底栏 y=842 不变。
+6. 连续开关：U2/R1 交替打开-关闭 4 次，每次 `opened=true`、`closed=true`；空白矩阵：摘要/空白关闭，添加框/任务行/详情内/侧栏/页头不关闭。
+7. 动画中间帧：新版打开 0→113.3→245.5→340px、关闭 340→207.6→94.3→0px（50/100/150ms，150ms linear）；旧版计算样式 `margin-right .15s linear` 且此前采样到 0→87→200→313→340。完成任务后详情关闭，列表让位 150ms 过渡运行。
+
+补充验证：`typecheck`、`build`、59/59 单测、workspace-browser、task-interactions（8 组截图）全部通过。深色详情背景 `rgb(26,26,32)`、圆角 10 与旧版一致。

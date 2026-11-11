@@ -47,6 +47,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
   const note=useRef<HTMLTextAreaElement>(null);
   const resizeNote=()=>{const el=note.current;if(!el)return;el.style.height='auto';el.style.height=Math.max(165,el.scrollHeight)+'px'};
   useEffect(()=>{resizeNote()},[draft.remark]);
+  useEffect(()=>{const el=note.current;if(!el)return;const forward=(event:WheelEvent)=>{if(el.scrollHeight>el.clientHeight+1)return;const scroller=el.closest('.workspace-details-info') as HTMLElement|null;if(!scroller)return;event.preventDefault();scroller.scrollTop+=event.deltaY};el.addEventListener('wheel',forward,{passive:false});return()=>el.removeEventListener('wheel',forward)},[]);
   const save = async (only?:string) => {
     const entered={...draftRef.current};
     const recurrence=['rCycle','rUnit','rValue'];

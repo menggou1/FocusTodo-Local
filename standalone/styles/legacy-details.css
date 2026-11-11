@@ -68,3 +68,8 @@
 .workspace-details .legacy-detail-subtasks>form{height:44px;display:flex;align-items:center;gap:0;margin:0;padding:0 10px 0 12px}
 .workspace-details .legacy-detail-subtasks>form>.legacy-icon{width:24px;height:24px;margin-right:0}
 .workspace-details .legacy-detail-subtasks>form input{height:44px;line-height:20px;padding:0 0 0 8px;border:0;background:transparent}
+
+/* W5: legacy detail keeps its 340px overlay at narrower windows. */
+@media(max-width:1050px){.workspace-details{width:340px}.workspace-layout.has-details .workspace-task-scroll{margin-right:340px}.workspace-content{padding:0}.workspace-content.calendar-content{padding:30px 16px 16px}}
+@media(max-width:760px){.workspace-details{width:340px}.workspace-content{padding:0}}
+@media(max-width:540px){.workspace-content{padding:0}}
