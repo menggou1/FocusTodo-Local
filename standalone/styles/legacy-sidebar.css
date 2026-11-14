@@ -22,8 +22,8 @@
 .sidebar-nav-icon-slot .workspace-tag-color{mask:url("../../public/img/tag.png") center/24px 24px no-repeat}
 .workspace-sidebar .sidebar-nav-main[aria-current=page]{background-color:var(--workspace-selected);background-clip:padding-box}
 .workspace-sidebar .sidebar-item .sidebar-nav-main:hover:not([aria-current=page]){background:transparent}
-.sidebar-item .workspace-nav-estimate{width:33px;height:34px;line-height:33px;padding:1px 14px 0 0;font-size:12px;text-align:right;color:var(--workspace-muted);white-space:nowrap}
-.sidebar-item .workspace-nav-count{width:16.67px;height:34px;line-height:33px;margin:0;padding:1px 10px 0 0;text-align:right;color:var(--workspace-muted)}
+.sidebar-item .workspace-nav-estimate{flex:0 1 33px;height:34px;line-height:33px;padding:1px 14px 0 0;font-size:12px;text-align:right;color:var(--workspace-muted);white-space:nowrap}
+.sidebar-item .workspace-nav-count{flex:0 1 12px;height:34px;line-height:33px;margin:0;padding:1px 10px 0 0;text-align:right;color:var(--workspace-muted)}
 .sidebar-custom:hover .workspace-nav-estimate,.sidebar-custom:hover .workspace-nav-count{display:none}
 .sidebar-custom .sidebar-menu-button{display:none;flex:none;align-items:center;justify-content:flex-start;width:32px;height:38px;padding:0;border:0;background:transparent;cursor:default}
 .workspace-sidebar .sidebar-menu-button:hover,.workspace-sidebar .sidebar-folder-toggle:hover{background:transparent}

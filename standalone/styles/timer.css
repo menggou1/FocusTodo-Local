@@ -19,6 +19,5 @@
 .workspace-tags { display:flex; flex-wrap:wrap; gap:4px; }
 .workspace-tags legend { font-size:12px; }
 .workspace-tags .workspace-check { font-size:12px; min-height:28px; gap:4px; }
-.workspace-summary span { min-width:0; padding:8px; }
 @media(max-width:760px) { .workspace-timer-expanded { padding:16px; } .workspace-timer-expanded .workspace-clock { font-size:54px; } }
-@media(max-width:540px) { .workspace-resize { display:none; } .workspace-timer-expanded { width:auto; margin:0; } .workspace-timer-expanded .workspace-clock { font-size:64px; margin:36px 0 20px; } .workspace-summary { flex-wrap:wrap; } .workspace-summary span { width:50%; } }
+@media(max-width:540px) { .workspace-resize { display:none; } .workspace-timer-expanded { width:auto; margin:0; } .workspace-timer-expanded .workspace-clock { font-size:64px; margin:36px 0 20px; } }

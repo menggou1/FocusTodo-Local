@@ -19,8 +19,8 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-search .legacy-icon{width:24px;height:24px}.workspace-projects{overflow-y:auto;flex:1;padding-top:0}
 .workspace-shell .workspace-nav{width:calc(100% - 16px);height:38px;margin:0 8px;padding:0 1px 0 8px;gap:0;border-radius:6px;background:transparent}
 .workspace-nav[aria-current=page]{background:var(--workspace-selected)}.workspace-nav-icon{width:24px;height:24px;flex:none;margin-right:0}
-.workspace-nav-name{padding-left:8px;flex:1;min-width:0}.workspace-nav-estimate{font-size:12px;line-height:33px;width:33px;text-align:left;color:var(--workspace-muted);height:34px}
-.workspace-nav-count{width:16.67px;margin:0;text-align:left}.workspace-sidebar footer{margin:0;height:42px;flex:none;padding:0 8px;gap:8px}
+.workspace-nav-name{padding-left:8px;flex:1;min-width:0}.workspace-nav-estimate{font-size:12px;line-height:33px;text-align:left;color:var(--workspace-muted);height:34px}
+.workspace-nav-count{margin:0;text-align:left}.workspace-sidebar footer{margin:0;height:42px;flex:none;padding:0 8px;gap:8px}
 .workspace-sidebar footer button{padding:0;width:28px;height:28px}.workspace-sidebar footer button:first-child{display:flex;align-items:center;gap:4px;width:auto;padding-left:4px;flex:1}
 .workspace-plus{font-size:23px;font-weight:300;line-height:24px}.workspace-sidebar footer .legacy-icon{width:24px;height:24px}
 .workspace-resize{position:relative;z-index:3;flex:0 0 0;width:0;margin:0;align-self:stretch;overflow:visible;display:block}.workspace-resize:before{content:'';position:absolute;top:0;bottom:0;left:-3px;width:6px;cursor:col-resize}
@@ -32,10 +32,10 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-sort{position:relative;display:block;width:40px;height:40px;background:center/40px 30px no-repeat url('../../public/img/tsk-sort.png')}
 :root[data-theme=dark] .workspace-sort{background-image:url('../../public/img/tsk-sort-dark.png')}
 .workspace-sort-trigger{display:block;width:40px;height:40px;padding:0;border:0;background:transparent;cursor:default}.workspace-sort-trigger:focus-visible{outline:1px solid var(--workspace-accent);outline-offset:-2px}.workspace-sort-mask{position:fixed;inset:0;z-index:40;border:0;padding:0;background:transparent}.legacy-sort-menu{position:absolute;top:40px;right:0;z-index:41;width:190px;padding:8px 0;background:var(--workspace-panel);border-radius:8px;box-shadow:0 0 20px 1px rgba(197,197,197,.5)}[data-theme=dark] .legacy-sort-menu{background:#2d2d37;box-shadow:0 0 20px 1px #0e0d12}.legacy-sort-menu button{position:relative;display:block;width:100%;height:24px;padding:0 40px 0 16px;border:0;border-radius:0;background:transparent;color:var(--workspace-text);text-align:left;font:14px/24px var(--workspace-font);cursor:default}.legacy-sort-menu button:hover,.legacy-sort-menu button:focus-visible{background:var(--workspace-selected);outline:0}.legacy-sort-check{position:absolute;right:8px;top:0;width:24px;height:24px;background:center/24px 24px no-repeat url('../../public/img/new-task-project-selected.png')}
-.workspace-summary{height:78px;min-height:78px;display:flex;gap:4px;padding:9px 4px 11px;border-radius:8px;margin-bottom:16px}
-.workspace-summary>div{flex:1;text-align:center;min-width:0}.workspace-summary-value{height:36px;line-height:36px;display:block}
-.workspace-summary strong{font:30px/36px DINCond;color:var(--workspace-accent)}.workspace-summary small{font-size:12px;margin-left:1px;color:var(--workspace-muted)}
-.workspace-summary>div>span{display:block;line-height:20px;margin-top:2px;font-size:12px;white-space:nowrap;color:var(--workspace-muted)}
+.workspace-summary{height:78px;min-height:78px;display:flex;padding:9px 2px 4px;border-radius:8px;margin-bottom:16px;overflow:hidden}
+.workspace-summary-item{flex:1 1 50px;max-width:25%;padding:0 2px;text-align:center}.workspace-summary-value{height:36px;line-height:36px;text-align:center;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+.workspace-summary-number{font:30px/36px DINCond;color:var(--workspace-accent);margin-left:4px}.workspace-summary-number:first-child{margin-left:0}.workspace-summary-unit{display:inline-block;margin-left:1px;font-size:12px;color:var(--workspace-muted);transform:scale(.91);transform-origin:left}
+.workspace-summary-title{height:20px;line-height:20px;margin-top:2px;font-size:12px;text-align:center;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--workspace-muted)}
 .workspace-add-task{height:48px;min-height:48px;gap:0;padding:0 8px;border-radius:8px;margin:0 0 24px;border:1px solid transparent}
 .workspace-add-task:focus-within{border-color:#ff5155}.workspace-shell .workspace-add-task input{flex:1;width:0;padding:0;border:0;background:transparent;height:30px;font-size:14px;outline:0}
 .workspace-add-task input::placeholder{color:var(--workspace-muted)}.workspace-add-task>.workspace-plus{flex:none;width:32px;height:24px;font-size:0;background:left center/25px 24px no-repeat url('../../public/img/tsk-new.png')}
@@ -70,7 +70,7 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-shell .workspace-task-start{width:24px;height:30px;padding:0;margin-right:8px;background:transparent}.workspace-task-start .legacy-icon{width:20px;height:20px}
 .workspace-shell .workspace-task-name{line-height:20px;font-size:14px;padding:0;display:flex;align-items:center;gap:10px;text-align:left}.workspace-task-date{margin-left:12px;font-size:12px;line-height:15px;white-space:nowrap}.workspace-task-date[data-overdue]{color:#dd4b39}.workspace-task>.legacy-icon{width:18px;height:18px;margin-left:8px}
 .workspace-task-pomos{display:flex;gap:2px}.workspace-task-pomos .legacy-icon{width:12px;height:12px}.domain-inline-subtasks{width:100%;flex-basis:100%}
-.workspace-shell .workspace-task-name:hover{background:transparent}.workspace-summary span{padding:0}.workspace-summary{flex-wrap:nowrap}.workspace-summary span{width:auto}.workspace-task>.workspace-handle:focus{opacity:0}
+.workspace-shell .workspace-task-name:hover{background:transparent}.workspace-task>.workspace-handle:focus{opacity:0}
 .workspace-shell .workspace-completed-toggle{font-size:12px;line-height:20px;height:20px;padding:0 14px;margin:24px auto 0;border-radius:12px;background:var(--workspace-panel)}
 .workspace-completed-toggle:after{content:'';display:inline-block;width:8px;height:6px;background:center/8px no-repeat url('../../public/img/up-flag.png');margin-left:4px}
 .workspace-content.calendar-content{padding:0}.calendar-content>.workspace-view-heading{display:none}

@@ -38,9 +38,7 @@ body { font:14px/20px var(--workspace-font); background:var(--workspace-bg); col
 .workspace-sidebar footer button:first-child { margin-right:auto; text-align:left; }
 .workspace-content { flex:1; min-width:0; padding:36px 16px; }
 .workspace-content h1 { font-size:22px; font-weight:500; margin:0 4px 24px; line-height:28px; }
-.workspace-summary { display:flex; justify-content:space-around; align-items:center; min-height:78px; background:var(--workspace-panel); border-radius:9px; margin-bottom:16px; color:var(--workspace-muted); font-size:12px; }
-.workspace-summary span { display:grid; text-align:center; gap:4px; }
-.workspace-summary strong { font-size:26px; font-weight:400; line-height:32px; color:var(--workspace-accent); }
+.workspace-summary { display:flex; min-height:78px; background:var(--workspace-panel); border-radius:9px; margin-bottom:16px; color:var(--workspace-muted); font-size:12px; }
 .workspace-add-task { display:flex; gap:10px; align-items:center; min-height:48px; padding:8px 14px; background:var(--workspace-panel); border-radius:9px; margin-bottom:24px; color:var(--workspace-muted); }
 .workspace-shell .workspace-add-task input { width:100%; border:0; }
 .workspace-tasks { list-style:none; padding:0; margin:0; }
