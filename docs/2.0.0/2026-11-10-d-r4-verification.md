@@ -25,7 +25,7 @@ D-R4 只处理：
 - 旧版快速安排弹窗背景：`rgb(45,45,55)`
 - 新版：`rgb(26,26,32)`
 
-已在 [`legacy-calendar-reports.css`](standalone/styles/legacy-calendar-reports.css) 对 `.workspace-dialog.legacy-record-quick` 增加暗色局部背景：
+已在 [`legacy-calendar-reports.css`](../../standalone/styles/legacy-calendar-reports.css) 对 `.workspace-dialog.legacy-record-quick` 增加暗色局部背景：
 
 ```css
 :root[data-theme=dark] .workspace-dialog.legacy-record-quick{background:#2d2d37}
@@ -35,7 +35,7 @@ D-R4 只处理：
 
 ### 2.2 测试前提修正（不改变业务断言）
 
-[`domain-pages.cjs`](tests/standalone/domain-pages.cjs) 中发现并修正了与实际 UI 语义不一致的测试前提：
+[`domain-pages.cjs`](../../tests/standalone/domain-pages.cjs) 中发现并修正了与实际 UI 语义不一致的测试前提：
 
 1. 手动记录日期格现在使用完整 `aria-label`（如 `2026-11-07`），旧测试仍按数字 `7` 查找。
 2. 手动记录/报表场景未固定时钟，却硬编码 `2026-11-08`；现在固定 `2026-11-08 12:00 Asia/Shanghai`。
@@ -72,10 +72,10 @@ D-R4 只处理：
 
 证据：
 
-- [`calendar-reports-restore/metrics.json`](dist/acceptance/calendar-reports-restore/metrics.json)
-- [`d-iv-calendar/results.json`](dist/acceptance/d-iv-calendar/results.json)
-- [`standalone-domain-results.json`](dist/acceptance/standalone-domain-results.json)
-- [`standalone-workspace-results.json`](dist/acceptance/standalone-workspace-results.json)
+- [`calendar-reports-restore/metrics.json`](../../dist/acceptance/calendar-reports-restore/metrics.json)
+- [`d-iv-calendar/results.json`](../../dist/acceptance/d-iv-calendar/results.json)
+- [`standalone-domain-results.json`](../../dist/acceptance/standalone-domain-results.json)
+- [`standalone-workspace-results.json`](../../dist/acceptance/standalone-workspace-results.json)
 
 ## 4. 剩余差异（D-V 入口）
 
@@ -107,7 +107,7 @@ D-R4 日历/报表现有场景均已通过；D-V 仍需要逐组件核验的剩�
 
 ## 5. D-V 准备与阶段边界
 
-已核对 [2.0.0 计划](2.0.0.md#L114-L118)：
+已核对 [2.0.0 计划](../plan/2.0.0.md#L114-L118)：
 
 - D-V 是经授权的集中视觉还原；前置为 GPT-6 对 D-R4 的审核。
 - 旧版 1.9.3 是视觉与操作权威；保留 D 的独立架构、数据兼容和业务服务。

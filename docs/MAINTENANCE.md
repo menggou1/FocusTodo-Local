@@ -50,7 +50,7 @@ npm run test:browser
 
 开发预览固定为 `http://127.0.0.1:5511/`，`dev:standalone` 使用同一 Vite 配置。首次缺少依赖时先运行 `npm ci`；之后直接启动，无需清理或 production build。组件/CSS 支持 HMR，普通浏览器可直接打开 URL。PowerShell 脚本前台运行，Ctrl+C 停止本次服务；端口占用直接报错，不回退端口、不结束其他进程。
 
-`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 通过服务合同接入全部工作区、任务/清单、计时、日程/提醒、历史/报表、森林/成就、设置/主题/资料/备份和通知/更新页面；逐字段自动保存及批量排序使用冲突检查和原子命令，v1.1 仅兼容增补已有功能所需接口。D-R 是全部功能及全页面渲染通过后的强制人工门禁，用户明确授权前不得进入 D-V、E 或 F。工程结果见 [B 报告](plan/2.0.0-skeleton.md)、[C 报告与兼容矩阵](plan/2.0.0-services.md)、[冻结服务合同](plan/2.0.0-service-contracts.md)、[D 首批报告](plan/2.0.0-ui-batch-1.md)及 [D 第二批报告](plan/2.0.0-ui-batch-2.md)；本次运行、已知差异与人工核查入口见 [D-R 交接](plan/2.0.0-dr.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
+`standalone/` 包含 React + TypeScript + Vite 骨架与 Phase C 核心服务。D 通过服务合同接入全部工作区、任务/清单、计时、日程/提醒、历史/报表、森林/成就、设置/主题/资料/备份和通知/更新页面；逐字段自动保存及批量排序使用冲突检查和原子命令，v1.1 仅兼容增补已有功能所需接口。D-R 是全部功能及全页面渲染通过后的强制人工门禁，用户明确授权前不得进入 D-V、E 或 F。工程结果见 [B 报告](2.0.0/2.0.0-skeleton.md)、[C 报告与兼容矩阵](2.0.0/2.0.0-services.md)、[冻结服务合同](2.0.0/2.0.0-service-contracts.md)、[D 首批报告](2.0.0/2.0.0-ui-batch-1.md)及 [D 第二批报告](2.0.0/2.0.0-ui-batch-2.md)；本次运行、已知差异与人工核查入口见 [D-R 交接](2.0.0/2.0.0-dr.md)。工作只保留在 `refactor/standalone-app`，禁止合入其他分支。正式应用、Pages 和普通便携包继续使用原入口。
 
 ```powershell
 npm ci
@@ -238,7 +238,7 @@ python scripts/deploy-pages.py --output dist/pages-preview
 
 中文和英文教程分别位于 `docs/GUIDE.md`、`docs/en/GUIDE.md`，配图位于 `docs/guide-images/` 并包含在便携包中。中文版本报告位于 `docs/releases/`，英文报告位于 `docs/en/releases/`；不保留旧路径跳转页，链接直接指向归档目录。更新记录指向归档报告。移动文件时同步相对链接、`release.json`、生成器和打包清单，并检查文件及锚点。
 
-工程版本计划放在 [`docs/plan/`](plan/README.md)，英文版本位于 `docs/en/plan/`；记录范围、优先级、实施顺序和验收标准，任务状态只在 BACKLOG 维护。工程文档与娱乐性质的设计理论文献隔离，不互相链接，不从理论文献生成贡献指南或开发要求。娱乐理论不随便携运行包交付；所有文档均不上传 Pages 运行目录。
+2.0.0 技术合同、审计和过程记录放在 [`docs/2.0.0/`](2.0.0/README.md)。工程版本计划放在 [`docs/plan/`](plan/README.md)，英文版本位于 `docs/en/plan/`；记录范围、优先级、实施顺序和验收标准，任务状态只在 BACKLOG 维护。工程文档与娱乐性质的设计理论文献隔离，不互相链接，不从理论文献生成贡献指南或开发要求。娱乐理论不随便携运行包交付；所有文档均不上传 Pages 运行目录。
 
 ## 6. 统一待办入口
 

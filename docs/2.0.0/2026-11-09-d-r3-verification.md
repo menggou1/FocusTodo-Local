@@ -9,18 +9,18 @@
 
 | 旧版行为 | 依据 | 新版实现 |
 |---|---|---|
-| 浮动计时 147/232×58，底部居中；root 250ms ease-in | [`src/main.css:2483`](src/main.css#L2483)、[`src/main.css:2768`](src/main.css#L2768) | `.workspace-floating-timer`，D-III 几何 |
-| 浮动 zoom-up 悬停显示；圆环 40×40 | [`src/main.css:2501`](src/main.css#L2501)、[`src/main.css:2535`](src/main.css#L2535) | `.legacy-timer-float-expand`、`legacy-floating-progress` |
-| Timer root `.25s all`；浮→全屏过渡 | [`src/main.css:2751`](src/main.css#L2751) | `legacy-timer-expand` 关键帧 |
-| Fullscreen root 250ms ease-in；内容 margin 150ms | [`src/main.css:9696`](src/main.css#L9696)、[`src/main.css:9727`](src/main.css#L9727) | `legacy-timer-surface-in`、`legacy-timer-main` |
+| 浮动计时 147/232×58，底部居中；root 250ms ease-in | [`src/main.css:2483`](../../src/main.css#L2483)、[`src/main.css:2768`](../../src/main.css#L2768) | `.workspace-floating-timer`，D-III 几何 |
+| 浮动 zoom-up 悬停显示；圆环 40×40 | [`src/main.css:2501`](../../src/main.css#L2501)、[`src/main.css:2535`](../../src/main.css#L2535) | `.legacy-timer-float-expand`、`legacy-floating-progress` |
+| Timer root `.25s all`；浮→全屏过渡 | [`src/main.css:2751`](../../src/main.css#L2751) | `legacy-timer-expand` 关键帧 |
+| Fullscreen root 250ms ease-in；内容 margin 150ms | [`src/main.css:9696`](../../src/main.css#L9696)、[`src/main.css:9727`](../../src/main.css#L9727) | `legacy-timer-surface-in`、`legacy-timer-main` |
 | 关闭全屏恢复浮条，浮条 250ms 淡入 | FloatTimer root animation | 本轮补齐关闭态透明度 |
-| Widget 432/26px，150ms linear，内容延迟卸载 | [`src/main.css:11562`](src/main.css#L11562) | `.legacy-timer-widgets` 150ms + 150ms 卸载 |
-| FlipDigit 600ms linear，front 0→-180°，back 180→0° | [`src/main.css:10457`](src/main.css#L10457) | 现有 `.legacy-flip-*` 关键帧 |
-| 森林 380×447、树/成就/攻略 | [`src/main.css:4078`](src/main.css#L4078) | `Forest.tsx` / `.legacy-forest*` |
+| Widget 432/26px，150ms linear，内容延迟卸载 | [`src/main.css:11562`](../../src/main.css#L11562) | `.legacy-timer-widgets` 150ms + 150ms 卸载 |
+| FlipDigit 600ms linear，front 0→-180°，back 180→0° | [`src/main.css:10457`](../../src/main.css#L10457) | 现有 `.legacy-flip-*` 关键帧 |
+| 森林 380×447、树/成就/攻略 | [`src/main.css:4078`](../../src/main.css#L4078) | `Forest.tsx` / `.legacy-forest*` |
 
 ## 2. 本轮实际修复
 
-产品源码仅改 [`standalone/styles/legacy-timer.css`](standalone/styles/legacy-timer.css)：
+产品源码仅改 [`standalone/styles/legacy-timer.css`](../../standalone/styles/legacy-timer.css)：
 
 - 浮动计时 root 增加旧版 250ms ease-in 淡入。
 - 全屏关闭增加独立 250ms ease-in 透明度动画，与几何收起同时进行。
@@ -31,9 +31,9 @@
 
 测试侧同时修正/新增：
 
-- [`tests/standalone/ui-restore-helpers.cjs`](tests/standalone/ui-restore-helpers.cjs)：`paired()` 支持 `reducedMotion`。
-- [`tests/standalone/visual-timer-forest.cjs`](tests/standalone/visual-timer-forest.cjs)：攻略抽屉关闭等待、森林随机光球像素门禁隔离、reduced-motion 断言。
-- 新增 [`tests/standalone/timer-forest-motion.cjs`](tests/standalone/timer-forest-motion.cjs)：正常动画时间轴。
+- [`tests/standalone/ui-restore-helpers.cjs`](../../tests/standalone/ui-restore-helpers.cjs)：`paired()` 支持 `reducedMotion`。
+- [`tests/standalone/visual-timer-forest.cjs`](../../tests/standalone/visual-timer-forest.cjs)：攻略抽屉关闭等待、森林随机光球像素门禁隔离、reduced-motion 断言。
+- 新增 [`tests/standalone/timer-forest-motion.cjs`](../../tests/standalone/timer-forest-motion.cjs)：正常动画时间轴。
 
 ## 3. 动画与交互证据
 
@@ -89,8 +89,8 @@ D-R3 motion 测试使用旧 5513 / 新 5511、独立 context、合成数据、`r
 
 证据：
 
-- [`ui-restore-timer-forest/results.json`](dist/acceptance/ui-restore-timer-forest/results.json)
-- [`d-r3/motion-results.json`](dist/acceptance/d-r3/motion-results.json)
+- [`ui-restore-timer-forest/results.json`](../../dist/acceptance/ui-restore-timer-forest/results.json)
+- [`d-r3/motion-results.json`](../../dist/acceptance/d-r3/motion-results.json)
 
 ## 5. 未解决与验证边界
 
