@@ -72,6 +72,7 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
   const { services, text, run, report, busy, blocked } = useWorkspace();
   const session = useSyncExternalStore(services.timer.subscribe, services.timer.getSnapshot);
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
+  useSyncExternalStore(services.wallpaper.subscribe,()=>services.wallpaper.getSnapshot().version);
   // Legacy DialView is a PureComponent: toggling widgets never rebuilds its static ticks.
   const dialScales=useMemo(()=><div className="legacy-timer-scales" aria-hidden="true">{Array.from({length:120},(_,i)=><i key={i} style={{transform:`rotate(${i*3}deg) translateY(-210px)`,opacity:.3}}/>)}</div>,[]);
   const [widgetExpanded,setWidgetExpanded]=useState(preferences.widgetExpanded),widgetTarget=useRef(widgetExpanded),widgetWrite=useRef(false),widgetToggle=useRef<HTMLButtonElement>(null);

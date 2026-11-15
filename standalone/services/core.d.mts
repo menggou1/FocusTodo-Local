@@ -133,6 +133,7 @@ export interface CoreServices {
         permits(input: string): boolean; cancel(): void; dispose(): void;
     };
     readonly wallpaper: { read(): Record<string, CompatibleRecord>; fresh(value: CompatibleRecord): boolean; cancel(): void;
+        subscribe(listener: () => void): () => void; getSnapshot(): Readonly<{ loading: boolean; version: number }>;
         add(blob: Blob, name?: string): Promise<string>; select(id: string): Promise<void>; classic(id: string): Promise<void>;
         remove(id: string): Promise<void>; bing(): Promise<CompatibleRecord>; dispose(): void };
     readonly audio: AudioService | undefined;

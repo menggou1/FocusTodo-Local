@@ -126,3 +126,65 @@
 .legacy-backup-dialog .legacy-backup-formats legend{display:block;width:100%;margin:0 0 20px;border:0;border-bottom:1px solid var(--legacy-setting-border)}
 .legacy-account-row button.danger{border-color:var(--workspace-accent)!important}.legacy-backup-dialog>form>footer button.primary{border-color:#ff5155!important}
 .legacy-settings-notice{position:fixed;z-index:100000;bottom:88px;left:50%;transform:translateX(-50%);box-sizing:border-box;max-width:min(580px,calc(100vw - 32px));padding:12px 18px;background:var(--workspace-panel);color:var(--workspace-text);border:1px solid var(--legacy-setting-border);border-radius:12px;box-shadow:0 8px 28px #0003;font:14px/1.5 var(--workspace-font);overflow-wrap:anywhere}:root[data-theme=dark] .legacy-settings-notice{background:#2d2d37}
+
+/* D-V settings: the legacy switch animates its track and handle for 250ms. */
+.legacy-settings .legacy-switch{transition:background .25s,opacity .25s}
+.legacy-settings .legacy-switch:after{left:0;transform:translateX(2px);transition:background-color .25s,transform .25s,box-shadow .15s}
+.legacy-settings .legacy-switch:checked:after{left:0;transform:translateX(20px)}
+:root[data-theme=dark] .legacy-settings .legacy-switch:not(:checked){background:#717175}
+.legacy-platforms a{display:inline-flex;width:20px;height:24px;align-items:flex-start}
+.legacy-settings .legacy-upload>span{display:block;background:transparent;border:1px solid transparent;padding:4px}
+.legacy-upload-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;width:240px;height:160px;border:2px dashed var(--legacy-setting-border);border-radius:8px;background:var(--workspace-selected);font-size:14px}
+.legacy-upload-placeholder b{font-size:36px;line-height:1;margin-bottom:6px}
+.legacy-custom-theme{width:256px;height:182px}
+.legacy-custom-theme small{position:absolute;bottom:14px;left:4px;padding:2px 8px;background:#0009;border-radius:4px;color:#fff;font-size:12px;line-height:20px;pointer-events:none;z-index:5}
+.legacy-settings .legacy-theme-remove{top:2px;right:10px;width:22px;height:22px;line-height:20px;text-align:center;background:#0008;color:#fff;border-radius:50%;font-size:16px;font-weight:bold;z-index:10;padding:0}
+.legacy-settings[data-tab=projects] .legacy-settings-content{padding-bottom:32px;overflow:hidden}
+.legacy-settings-projects{position:relative;display:flex;flex-direction:column;height:100%;min-height:0}
+.legacy-settings .legacy-settings-project-toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:6px 12px;margin-bottom:12px;flex:none}
+.legacy-settings-project-toolbar p{flex:0 0 auto;margin:0;color:var(--legacy-setting-muted);font:12px/1.6 var(--workspace-font)}
+.legacy-settings .legacy-settings-project-toolbar button{flex:0 0 auto;padding:5px 9px;border:1px solid var(--legacy-setting-border);background:var(--workspace-panel);border-radius:5px;font:12px/1.5 var(--workspace-font)}
+.legacy-settings-project-scroll{position:relative;display:flex;flex:1;min-height:0}
+.legacy-settings-project-rows{flex:1;min-height:0;overflow:auto;border:1px solid var(--legacy-setting-border)}
+.legacy-settings-project-row{position:relative;display:flex;align-items:center;height:34px;line-height:34px;padding:0 12px 0 9px;background:var(--workspace-panel);cursor:grab;transition:opacity .15s,background-color .15s;flex:none}
+.legacy-settings-project-row:nth-child(even){background:var(--workspace-selected)}
+.legacy-settings-project-row[data-project-group=presetProjects]{user-select:none;touch-action:pan-y}
+.legacy-settings-project-row>.workspace-nav-icon{width:24px;height:24px;flex:none}
+.legacy-settings-project-name{flex:1;min-width:0;padding:0 12px 0 5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:14px}
+.legacy-settings-project-row[data-hidden]>.legacy-settings-project-name{color:var(--workspace-muted);text-decoration:line-through}
+.legacy-settings-handle-cell{display:flex;align-items:center;width:30px;padding-right:6px;flex:none}
+.legacy-settings .legacy-settings-project-handle{box-sizing:border-box;display:inline-flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;width:28px;height:28px;padding:5px;border:0;border-radius:5px;color:var(--workspace-muted);background:transparent;cursor:grab;touch-action:none}
+.legacy-settings-project-handle i{display:block;width:14px;height:2px;border-radius:1px;background:currentColor;pointer-events:none}
+.legacy-settings .legacy-settings-project-handle:hover{color:var(--workspace-text);background:var(--workspace-selected)}
+.legacy-settings-project-row:focus-visible,.legacy-settings-project-handle:focus-visible{outline:2px solid var(--workspace-accent);outline-offset:-2px}
+.legacy-settings-project-toggle{display:flex;align-items:center;width:36px;padding-top:4px;flex:none}
+.legacy-settings-project-toggle>.legacy-switch{transform:none}
+.legacy-project-drag-preview{position:fixed;z-index:100001;margin:0;pointer-events:none;background:var(--workspace-panel);box-shadow:0 4px 16px #0003;border-radius:5px;opacity:.95}
+.legacy-settings-project-row[data-reorder-active=true]{z-index:10}
+.legacy-settings-project-row[data-dragging=true]{opacity:.5;cursor:grabbing}
+.legacy-settings-project-row[data-dragging=true] .legacy-settings-project-handle{cursor:grabbing}
+.legacy-settings-projects[data-drag-group=presetProjects] [data-project-group=customProjects]{opacity:.35;filter:grayscale(1);cursor:not-allowed}
+.legacy-settings-project-row[data-drop-position]:after{content:'';position:absolute;z-index:1;left:5px;right:5px;height:3px;border-radius:2px;background:var(--workspace-accent);pointer-events:none}
+.legacy-settings-project-row[data-drop-position=before]:after{top:0}.legacy-settings-project-row[data-drop-position=after]:after{bottom:0}
+.legacy-settings-project-row[data-project-group=customProjects]{cursor:default;padding-left:16px;background:var(--workspace-selected)}
+.legacy-settings-project-row[data-project-group=customProjects]:nth-child(even){background:var(--workspace-panel)}
+.legacy-settings-project-row[data-project-group=customProjects]>.workspace-nav-icon{width:10px;height:10px}
+.legacy-settings-project-row[data-project-group=customProjects] .workspace-project-color i{width:10px;height:10px}
+.legacy-settings-project-row[data-project-group=customProjects] .legacy-settings-project-name{padding-left:12px}
+.legacy-settings .legacy-settings-project-visibility,.legacy-settings .legacy-settings-project-delete{border:0;padding:0;background:transparent center/20px 20px no-repeat;width:20px;height:34px;flex:none}
+.legacy-settings .legacy-settings-project-visibility{background-image:url('../../public/img/task-unfinished.png')}
+.legacy-settings .legacy-settings-project-visibility[data-hidden=true]{background-image:url('../../public/img/task-finished.png')}
+.legacy-settings .legacy-settings-project-delete{width:28px;background-position:right center;background-image:url('../../public/img/project-delete.png')}
+@media(prefers-reduced-motion:reduce){.legacy-settings .legacy-switch,.legacy-settings .legacy-switch:after{transition:none}}
+
+.legacy-platforms a{color:var(--workspace-text)}
+.legacy-settings .legacy-settings-project-handle{flex:none;transform:translateY(4.203125px)}
+.legacy-settings-project-toggle>.legacy-switch{transform:translateY(-1px)}
+.legacy-settings-project-name{transform:translateY(2px)}
+
+.legacy-settings-menu[data-selected-mark=true]>button[aria-selected=true]{background-image:url('../../public/img/new-task-project-selected.png');background-repeat:no-repeat;background-size:24px 24px;background-position:right center}
+.legacy-settings-project-delete-dialog::backdrop{background:rgba(0,0,0,.3)}
+:root[data-theme=dark] .domain-overlay:has(.legacy-settings)::backdrop,:root[data-theme=dark] .legacy-settings-project-delete-dialog::backdrop{background:rgba(0,0,0,.63)}
+.legacy-settings-project-delete-dialog .legacy-delete-content strong{display:block;margin-bottom:8px}
+.legacy-settings-project-delete-dialog .legacy-delete-content p{margin:0 0 10px}
+.legacy-settings-project-delete-dialog footer button:not(.primary){border-color:var(--legacy-setting-border)}

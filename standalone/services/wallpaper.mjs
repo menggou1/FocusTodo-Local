@@ -1,20 +1,23 @@
-import { invariant } from './errors.mjs';
+import { invariant, snapshotSource } from './errors.mjs';
 export function createWallpaperService({ themes, settings, network, image, parseImage, now, randomUUID }) {
     let revision = 0, pending = null, disposed = false;
+    const state = snapshotSource({ loading: false, version: 0 });
+    const publish = changes => state.publish({ ...state.getSnapshot(), ...changes });
     const read = () => { const raw = themes.read().themes; const value = raw === null ? {} : JSON.parse(raw); invariant(value && typeof value === 'object' && !Array.isArray(value), 'Invalid theme library'); return value; };
     const fresh = row => row && row.updatedAt <= now() && now() - row.updatedAt < 43200000 && new Date(row.updatedAt).toDateString() === new Date(now()).toDateString();
-    const cancel = () => { revision++; pending?.controller.abort(); pending = null; };
+    const cancel = () => { revision++; pending?.controller.abort(); pending = null; publish({ loading: false }); };
     const unsubscribe = settings.subscribe(() => { if (!settings.getSnapshot().externalNetwork) cancel(); });
     const save = async (update, token) => {
         invariant(!disposed && token === revision, 'Wallpaper operation cancelled', 'cancelled');
-        return themes.commit(update, () => !disposed && token === revision);
+        const result = await themes.commit(update, () => !disposed && token === revision);
+        publish({ version: state.getSnapshot().version + 1 }); return result;
     };
     const libraryJSON = value => {
         const raw = JSON.stringify(value);
         invariant(raw.length <= 2 * 1024 * 1024 || raw.length < (themes.read().themes || '').length, 'Custom themes exceed storage limit'); return raw;
     };
     return Object.freeze({
-        read, fresh, cancel,
+        read, fresh, cancel, subscribe: state.subscribe, getSnapshot: state.getSnapshot,
         async add(blob, name = '') {
             cancel(); const token = revision;
             invariant(blob.size <= 10 * 1024 * 1024 && /^image\//.test(blob.type), 'Invalid theme image');
@@ -37,6 +40,7 @@ export function createWallpaperService({ themes, settings, network, image, parse
             invariant(settings.getSnapshot().externalNetwork, 'External networking is disabled', 'network-blocked');
             if (pending) return pending.promise;
             const token = ++revision, cached = read().__bing_daily__;
+            publish({ loading: true });
             const controller = new AbortController();
             const promise = (async () => {
                 if (cached?.dataUrl) { await save({ active: '__bing_daily__', theme: '__bing_daily__' }, token); if (fresh(cached)) return cached; }
@@ -53,9 +57,9 @@ export function createWallpaperService({ themes, settings, network, image, parse
                 const rows = read(), value = { ...converted, name: 'Bing每日壁纸', type: 'bing', updatedAt: now(), copyright: metadata.copyright };
                 rows.__bing_daily__ = value;
                 await save({ themes: libraryJSON(rows), active: '__bing_daily__', theme: '__bing_daily__' }, token); return value;
-            })().finally(() => { if (pending?.controller === controller) pending = null; });
+            })().finally(() => { if (pending?.controller === controller) { pending = null; publish({ loading: false }); } });
             pending = { promise, controller }; return promise;
         },
-        dispose() { disposed = true; cancel(); unsubscribe(); },
+        dispose() { disposed = true; cancel(); unsubscribe(); state.dispose(); },
     });
 }

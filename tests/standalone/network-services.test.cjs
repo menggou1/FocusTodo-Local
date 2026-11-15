@@ -59,3 +59,22 @@ test('opt-out intent cancels a queued cached activation before either operation 
     const optOut=h.app.settings.set('externalNetwork',false);release();await owner;await cached;await optOut;
     assert.equal(h.app.themes.read().theme,'Leaf');assert.equal(h.app.settings.getSnapshot().externalNetwork,false);
 });
+
+test('wallpaper snapshots publish activation before stale-cache download completes and release loading after cancellation/failure',async t=>{
+    let release,entered,hold=false,offline=false;
+    const h=await app(t,async url=>{
+        if(offline)throw new Error('offline');
+        if(hold&&!url.includes('synthetic.jpg')){entered();await new Promise(resolve=>{release=resolve});}
+        return url.includes('synthetic.jpg')?picture():metadata();
+    });
+    const states=[],unsubscribe=h.app.wallpaper.subscribe(()=>states.push(h.app.wallpaper.getSnapshot()));t.after(unsubscribe);
+    await h.app.wallpaper.bing();await h.app.wallpaper.classic('Leaf');
+    const version=h.app.wallpaper.getSnapshot().version;h.clock.value+=86400000;hold=true;
+    const started=new Promise(resolve=>{entered=resolve}),pending=assert.rejects(h.app.wallpaper.bing());await started;
+    assert.equal(h.app.wallpaper.getSnapshot().loading,true);
+    assert(h.app.wallpaper.getSnapshot().version>version,'cached activation publishes before network completion');
+    assert.equal(h.app.themes.read().active,'__bing_daily__');
+    await h.app.wallpaper.classic('Ocean');assert.equal(h.app.wallpaper.getSnapshot().loading,false);release();await pending;
+    hold=false;offline=true;await assert.rejects(h.app.wallpaper.bing());assert.equal(h.app.wallpaper.getSnapshot().loading,false);
+    assert(states.some(state=>state.loading));assert(states.some(state=>!state.loading));
+});
