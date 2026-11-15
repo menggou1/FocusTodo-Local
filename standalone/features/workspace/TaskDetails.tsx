@@ -16,6 +16,7 @@ import repeatHigh from '../../../public/img/task_repeat_high_priority.png';
 import taskNo from '../../../public/img/task_no_priority.png';
 import taskDone from '../../../public/img/task_done_no_priority.png';
 import { formatTaskDate } from './TaskGroups';
+import { SubtaskName } from './SubtaskName';
 
 export function TaskDetails({ task, projects, subtasks, close, onStart }: { task: Entity; projects: readonly Entity[]; subtasks: readonly Entity[]; close(): void; onStart(): void }) {
   const { services, text, run, queue, busy, blocked } = useWorkspace();
@@ -29,6 +30,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
   const savedDraftRef = useRef(draft), draftRef = useRef(draft);
   const [pending,setPending]=useState(0),[saveFailed,setSaveFailed]=useState(false);
   const [subtaskName, setSubtaskName] = useState(''), [deleting, setDeleting] = useState(false), [preserve, setPreserve] = useState(true);
+  const [selectedSubtask,selectSubtask]=useState('');
   const [editing, setEditing] = useState<Entity | null>(null), [editName, setEditName] = useState(''), [validation, setValidation] = useState('');
   const [createTag, setCreateTag] = useState(false);
   const [createRecord,setCreateRecord]=useState(false),[pickerVersion,setPickerVersion]=useState(0);
@@ -36,11 +38,13 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
   const chinese=services.language.locale.startsWith('zh');
   const repeatIcon=[repeatNoPriority,repeatLow,repeatMedium,repeatHigh][number(task.priority)]||repeatNoPriority;
   const reminderValue=(value:string)=>{if(!value)return text.none;const date=new Date(value);const zh=services.language.locale.startsWith('zh');const hours=date.getHours()%12||12,minutes=String(date.getMinutes()).padStart(2,'0');
-    if(zh)return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${date.getHours()<12?'上午':'下午'}${hours}:${minutes}`;
+    const time=date.getHours()*100+date.getMinutes();
+    const period=time<600?'凌晨':time<900?'早上':time<1130?'上午':time<1230?'中午':time<1800?'下午':'晚上';
+    if(zh)return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${period}${hours}:${minutes}`;
     const month=date.toLocaleDateString('en-US',{month:'short'});return `${date.getDate()} ${month} ${date.getFullYear()} ${hours}:${minutes} ${date.getHours()<12?'am':'pm'}`};
   useEffect(()=>{const close=(event:Event)=>{for(const element of document.querySelectorAll<HTMLDetailsElement>('.workspace-details details[open]'))if(event instanceof KeyboardEvent?event.key==='Escape':!element.contains(event.target as Node))element.open=false};const reset=(event:Event)=>{const element=event.target as HTMLDetailsElement;if(element.open&&element.closest('.workspace-details'))setPickerVersion(value=>value+1)};document.addEventListener('toggle',reset,true);document.addEventListener('click',close);document.addEventListener('keydown',close);return()=>{document.removeEventListener('toggle',reset,true);document.removeEventListener('click',close);document.removeEventListener('keydown',close)}},[]);
   const closeFields=()=>{document.querySelectorAll<HTMLDetailsElement>('.workspace-details details[open]').forEach(element=>element.open=false)};
-  const dueLabel=!draft.deadline?text.none:formatTaskDate(new Date(draft.deadline.length===10?draft.deadline+'T12:00':draft.deadline).getTime(),services.language.locale);
+  const dueLabel=!draft.deadline?text.someday:formatTaskDate(new Date(draft.deadline.length===10?draft.deadline+'T12:00':draft.deadline).getTime(),services.language.locale);
   const set = <K extends keyof typeof draft>(key: K, value: typeof draft[K]) => { setValidation(''); draftRef.current={...draftRef.current,[key]:value};setDraft(draftRef.current); };
   useEffect(()=>{const remote={name:string(task.name),remark:string(task.remark),projectId:string(task.projectId),deadline:dateInput(task.deadline),reminder:dateInput(task.reminderDate,true),priority:number(task.priority),estimatePomoNum:number(task.estimatePomoNum),interval:number(task.pomodoroInterval)/60,rCycle:number(task.rCycle)||1,rUnit:number(task.rCycle)?string(task.rUnit):'',rValue:string(task.rValue),tags:string(task.tags)};const current=draftRef.current,saved=savedDraftRef.current,next={...current},nextSaved={...saved};const preserve:Record<string,unknown>={};const fields:Record<string,string>={interval:'pomodoroInterval',reminder:'reminderDate'};for(const key of Object.keys(remote) as (keyof typeof remote)[]){if(current[key]===saved[key]){Object.assign(next,{[key]:remote[key]});Object.assign(nextSaved,{[key]:remote[key]})}else preserve[fields[key]||key]=savedBaseRef.current[fields[key]||key]}savedBaseRef.current={...task,...preserve};draftRef.current=next;savedDraftRef.current=nextSaved;setDraft(next)},[task]);
   const children = ordered(subtasks.filter(row => row.taskId === task.id && row.state === 0));
@@ -100,7 +104,8 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
       {validation && <p className={saveFailed?'danger':'workspace-sr'} role="status">{validation}</p>}
     </form>
     <section className="legacy-detail-subtasks" aria-label={text.subtasks}>
-      {children.map((row, index) => <div className="workspace-subtask" key={row.id} onDragOver={event => { if (drag.current) event.preventDefault(); }} onDrop={event => {
+      <div className="legacy-subtask-separator"/>
+      {children.map((row, index) => <div className="workspace-subtask" key={row.id} data-selected={selectedSubtask===row.id||undefined} onClick={event=>{if(!(event.target as Element).closest('button,input'))selectSubtask(row.id)}} onFocus={event=>{if((event.target as Element).closest('.legacy-subtask-name'))selectSubtask(row.id)}} draggable={!busy&&!blocked} onDragStart={event=>{drag.current=row;event.dataTransfer.setData('text/plain',row.id)}} onDragEnd={()=>{drag.current=null}} onDragOver={event => { if (drag.current) event.preventDefault(); }} onDrop={event => {
         event.preventDefault(); const from = drag.current; drag.current = null; if (!from || from.id === row.id) return;
         const peers = children.filter(child => child.id !== from.id), slot = peers.findIndex(child => child.id === row.id) + (children.findIndex(child => child.id === from.id) < index ? 1 : 0);
         peers.splice(slot,0,from);void run(()=>services.business.batch(peers.map((child,index)=>({type:'updateSubtask',id:child.id,changes:{order:(index+1)*10000},expected:child}))));
@@ -112,14 +117,15 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
           }}>⠿</button>
         <input type="checkbox" aria-label={text.toggleSubtask + ': ' + row.name} checked={!!row.isFinished} disabled={busy || blocked}
           onChange={() => { void run(() => services.business.command({ type: 'toggleSubtask', id: row.id, expected: row })); }} />
-        <button type="button" className="workspace-task-name" data-finished={row.isFinished||undefined} aria-label={text.editSubtask + ': ' + row.name} onClick={event => { event.currentTarget.focus(); setEditing(row); setEditName(string(row.name)); }}>{row.name}</button>
-        {!row.isFinished && !task.isFinished && <button type="button" aria-label={text.focusSubtask + ': ' + row.name} disabled={busy || blocked} onClick={async () => { if (await run(() => services.startForTask(task.id, row.id))) onStart(); }}><LegacyIcon name="task-start"/></button>}
-        <button type="button" aria-label={text.deleteSubtask + ': ' + row.name} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setEditing(row); setEditName(string(row.name)); setDeleting(true); }}><LegacyIcon name="detail-subtask-delete"/></button>
+        <button type="button" className="legacy-subtask-start" aria-label={text.focusSubtask + ': ' + row.name} disabled={busy || blocked || !!row.isFinished || !!task.isFinished} onClick={async () => { if (await run(() => services.startForTask(task.id, row.id))) onStart(); }}><LegacyIcon name={row.isFinished||task.isFinished?'task-start-disabled':'task-start'}/></button>
+        <SubtaskName subtask={row} selected={selectedSubtask===row.id}/>
+        <button type="button" className="legacy-subtask-delete" aria-label={text.deleteSubtask + ': ' + row.name} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setEditing(row); setEditName(string(row.name)); setDeleting(true); }}><LegacyIcon name="detail-subtask-delete"/></button>
       </div>)}
       <form onSubmit={async event => { event.preventDefault(); if (await run(() => services.business.batch([{ type: 'addSubtask', values: { name: subtaskName.trim(), taskId: task.id,
         order: Math.max(0, ...children.map(row => number(row.order))) + 10000 } },{type:'updateTask',id:task.id,changes:{hasSubtask:true},expected:{hasSubtask:task.hasSubtask}}]))) setSubtaskName(''); }}>
         <LegacyIcon name="detail-subtask-add"/><label className="workspace-sr" htmlFor="new-subtask">{text.addSubtask}</label><input id="new-subtask" name="new-subtask" autoComplete="off" spellCheck={false} tabIndex={-10} placeholder={text.addSubtask+'...'} value={subtaskName} maxLength={1000} required disabled={busy || blocked} onChange={event => setSubtaskName(event.target.value)} />
       </form>
+      <div className="legacy-subtask-separator bottom"/>
     </section>
     <textarea ref={note} className="legacy-detail-note" aria-label={text.remark} placeholder={chinese?'添加备注...':'Add note...'} value={draft.remark} onChange={event=>{set('remark',event.target.value);resizeNote()}} onFocus={()=>resizeNote()} onBlur={()=>{void save('remark')}}/>
     </div>

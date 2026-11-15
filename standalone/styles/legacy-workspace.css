@@ -7,7 +7,7 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-header{padding:0 13px 0 16px;gap:0;height:50px;border-bottom:0;box-shadow:0 0 3px 1px rgba(224,224,224,.5);position:relative;z-index:5}
 .workspace-header .workspace-profile{display:flex;align-items:center;gap:8px;padding:0;height:50px;line-height:50px}
 .workspace-header .workspace-profile>span{line-height:21px;height:21px;display:block;margin-bottom:1px}
-.workspace-header .workspace-profile:hover{background:transparent}.workspace-avatar{display:block;width:30px;height:30px;background:transparent;margin-top:3.4px}
+.workspace-header .workspace-profile:hover{background:transparent}.workspace-header .workspace-avatar{display:block;flex:none;width:30px;height:30px;max-width:none;aspect-ratio:1;border-radius:50%;object-fit:fill;background:transparent;margin-top:3.4px}
 .workspace-profile .workspace-profile-arrow{width:14px;height:14px;margin-left:-6px;margin-top:4.4px}.workspace-header nav{gap:16px;align-items:center;height:50px}
 .workspace-header nav>button:not(.workspace-sr){padding:0;width:24px;height:24px;border-radius:0}.workspace-header nav>button:hover{background:transparent}
 .workspace-header .workspace-mobile-toggle{display:none}.workspace-profile-container{position:relative}
@@ -95,3 +95,17 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 
 /* W5: opening the detail overlay must not change the sidebar's top padding. */
 .workspace-layout.has-details .workspace-sidebar{padding-top:0}
+
+/* R1: the two-statistic presets keep equal halves, as in StatisticsRegion. */
+.workspace-summary:has(>.workspace-summary-item:last-child:nth-child(2))>.workspace-summary-item{max-width:50%}
+.workspace-task>input[data-repeat]{background-image:url('../../public/img/task_repeat_no_priority.png')}
+.workspace-task[data-priority='1']>input[data-repeat]{background-image:url('../../public/img/task_repeat_low_priority.png')}
+.workspace-task[data-priority='2']>input[data-repeat]{background-image:url('../../public/img/task_repeat_medium_priority.png')}
+.workspace-task[data-priority='3']>input[data-repeat]{background-image:url('../../public/img/task_repeat_high_priority.png')}
+.workspace-task-subtask{flex:none;align-self:stretch;width:19px;min-height:31px;background:right center/15px 15px no-repeat url('../../public/img/task-subtask.png')}
+.workspace-task-subtask-remark{flex:none;align-self:stretch;width:19px;min-height:31px;background:right center/15px 15px no-repeat url('../../public/img/task-remark.png')}
+.workspace-task-subtask~.workspace-task-date{margin-left:4px}
+.workspace-completed-section{margin-top:24px}.workspace-shell .workspace-completed-section>.workspace-completed-toggle{margin:0 auto;color:var(--workspace-text)}
+.workspace-completed-toggle:after{height:20px;vertical-align:bottom;transform-origin:4px 10.5px}.workspace-completed-toggle[aria-expanded=false]:after{transform:none}
+.workspace-completed-section>.workspace-task-group{margin-top:24px}
+.workspace-shell .workspace-task-start:disabled{opacity:1}

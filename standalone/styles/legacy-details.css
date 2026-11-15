@@ -52,22 +52,28 @@
 .legacy-repeat-days input{display:none!important}
 .workspace-details .legacy-detail-note{height:auto;min-height:165px;overflow:hidden;outline:0!important;padding:8px 0;margin:6px 14px 0 16px;width:calc(100% - 30px);line-height:21px}
 .workspace-shell textarea.legacy-detail-note:focus,.workspace-shell textarea.legacy-detail-note:focus-visible{outline:0!important;box-shadow:none!important;border:0!important}
-.legacy-detail-subtasks{margin:0!important;padding:0!important;border-top:1px solid var(--workspace-line);border-bottom:1px solid var(--workspace-line)}
-.legacy-detail-subtasks .workspace-subtask{display:flex;align-items:center;height:44px;min-height:44px;padding:0 14px;gap:0;border-bottom:0}
-.legacy-detail-subtasks .workspace-subtask>.workspace-handle{position:static;width:14px;min-width:14px;height:20px;padding:0;border:0;background:transparent;color:var(--workspace-muted);font-size:14px;opacity:0}
-.legacy-detail-subtasks .workspace-subtask:hover>.workspace-handle,.legacy-detail-subtasks .workspace-subtask>.workspace-handle:focus-visible{opacity:1}
-.legacy-detail-subtasks .workspace-subtask>input[type=checkbox]{width:20px;height:20px;min-width:20px;margin:0;padding:0;border:0;appearance:none;background:center/20px 20px no-repeat url('../../public/img/task_no_priority.png')}
+.legacy-detail-subtasks{margin:0!important;padding:0!important;border:0;overflow:hidden}
+.legacy-subtask-separator{height:1px;background:#f4f4f4;margin:8px 16px 2px}.legacy-subtask-separator.bottom{margin:2px 16px 8px}
+:root[data-theme=dark] .legacy-subtask-separator{background:rgba(255,255,255,.08)}
+.legacy-detail-subtasks .workspace-subtask{display:flex;align-items:center;min-height:44px;padding:0 14px;gap:0;border:0}
+.legacy-detail-subtasks .workspace-subtask[data-selected]{background:var(--workspace-selected)}
+.legacy-detail-subtasks .workspace-subtask>.workspace-handle{position:absolute;left:0;width:14px;height:20px;padding:0;border:0;background:transparent;opacity:0}
+.legacy-detail-subtasks .workspace-subtask>.workspace-handle:focus-visible{opacity:1}
+.legacy-detail-subtasks .workspace-subtask>input[type=checkbox]{flex:none;width:20px;height:20px;min-width:20px;margin:0;padding:0;border:0;border-radius:0;appearance:none;background:center/20px 20px no-repeat url('../../public/img/task_no_priority.png')}
 .legacy-detail-subtasks .workspace-subtask>input[type=checkbox]:checked{background-image:url('../../public/img/task_done_no_priority.png');box-shadow:none}
-.legacy-detail-subtasks .workspace-subtask>.workspace-task-name{flex:1;min-width:0;padding:8px 0 8px 12px;border:0;background:transparent;color:var(--workspace-text);text-align:left;font:14px/20px var(--workspace-font);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.legacy-detail-subtasks .workspace-subtask>.workspace-task-name[data-finished]{color:var(--workspace-muted);text-decoration:line-through}
-.legacy-detail-subtasks .workspace-subtask>button[aria-label^='开始子任务'],.legacy-detail-subtasks .workspace-subtask>button[aria-label^='Start subtask']{width:20px;height:20px;padding:0;margin-left:8px;border:0;background:transparent}
-.legacy-detail-subtasks .workspace-subtask>button .legacy-icon{width:20px;height:20px}
-.legacy-detail-subtasks .workspace-subtask>button[aria-label^='删除子任务'],.legacy-detail-subtasks .workspace-subtask>button[aria-label^='Delete subtask']{width:20px;height:20px;padding:0;margin-left:8px;border:0;background:transparent}
-.legacy-detail-subtasks .workspace-subtask>button[aria-label^='删除子任务'] .legacy-icon,.legacy-detail-subtasks .workspace-subtask>button[aria-label^='Delete subtask'] .legacy-icon{width:10px;height:10px;opacity:0}
-.legacy-detail-subtasks .workspace-subtask:hover>button[aria-label^='删除子任务'] .legacy-icon,.legacy-detail-subtasks .workspace-subtask:hover>button[aria-label^='Delete subtask'] .legacy-icon{opacity:1}
+.workspace-shell .legacy-subtask-start{display:flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;padding:0;margin:0 0 0 2px;border:0;border-radius:0;background:transparent}
+.workspace-shell .legacy-subtask-start:disabled{opacity:1}.legacy-subtask-start>.legacy-icon{width:20px;height:20px}
+.legacy-subtask-name-pomodoros{flex:1;min-width:0;padding:8px 0 8px 12px}
+.legacy-subtask-name{font:14px/20px var(--workspace-font);color:var(--workspace-text);outline:none;word-break:break-word;white-space:normal}
+.legacy-subtask-name[data-finished=true]{color:var(--workspace-muted);text-decoration:line-through}
+.legacy-subtask-pomos{display:flex;align-items:flex-start;gap:2px;margin-top:3px;height:14px;font-size:0;line-height:14px}
+.legacy-subtask-pomos>.legacy-icon{width:12px;height:12px}.legacy-subtask-pomos>span{font-size:12px;line-height:14px;color:#fd5553;margin-left:-1px}
+.workspace-shell .legacy-subtask-delete{flex:none;box-sizing:content-box;width:8px;height:20px;padding:0 0 0 12px;border:0;background:transparent;border-radius:0;font-size:0}
+.legacy-subtask-delete>.legacy-icon{display:none;width:10px;height:10px}.workspace-subtask:hover>.legacy-subtask-delete>.legacy-icon,.legacy-subtask-delete:focus-visible>.legacy-icon{display:inline}
+.workspace-subtask:hover>.legacy-subtask-delete,.legacy-subtask-delete:focus-visible{width:10px}
 .workspace-details .legacy-detail-subtasks>form{height:44px;display:flex;align-items:center;gap:0;margin:0;padding:0 10px 0 12px}
 .workspace-details .legacy-detail-subtasks>form>.legacy-icon{width:24px;height:24px;margin-right:0}
-.workspace-details .legacy-detail-subtasks>form input{height:44px;line-height:20px;padding:0 0 0 8px;border:0;background:transparent}
+.workspace-details .legacy-detail-subtasks>form input{height:44px;line-height:44px;padding:0 0 0 8px;border:0;border-radius:0;background:var(--workspace-panel)}
 
 /* W5: legacy detail keeps its 340px overlay at narrower windows. */
 @media(max-width:1050px){.workspace-details{width:340px}.workspace-layout.has-details .workspace-task-scroll{margin-right:340px}.workspace-content{padding:0}.workspace-content.calendar-content{padding:30px 16px 16px}}

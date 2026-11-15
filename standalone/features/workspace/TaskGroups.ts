@@ -4,6 +4,17 @@ import { dateInput, number, ordered, projectName, string } from './model';
 
 const weekdayZh = ['日', '一', '二', '三', '四', '五', '六'];
 
+/** Finished lists use the completion day, independent of the task's due date. */
+export function completedTaskGroups(rows: readonly Entity[], locale: string) {
+  const groups = new Map<string, { id: string; title: string; rows: Entity[] }>();
+  for (const row of [...rows].sort((a,b)=>number(b.finishedDate)-number(a.finishedDate))) {
+    const value=number(row.finishedDate), id=dateInput(value);
+    if (!groups.has(id)) groups.set(id,{id,title:formatTaskDate(value,locale),rows:[]});
+    groups.get(id)!.rows.push(row);
+  }
+  return [...groups.values()];
+}
+
 export function formatMinutesDuration(minutes: number, locale: string) {
   const zh = locale.startsWith('zh'), total = Math.max(0, Math.round(minutes));
   const hours = Math.floor(total / 60), rest = Math.round(total % 60);
