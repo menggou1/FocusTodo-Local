@@ -211,13 +211,13 @@ function Workspace() {
         onPointerCancel={() => { resizeStart.current = null; setResizeWidth(null); }}
         onKeyDown={event => { if (['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); void run(() => services.settings.set('projectRegionWidth', preferences.projectRegionWidth + (event.key === 'ArrowLeft' ? -10 : 10))); } }} />
       <main id="workspace-content" className={'workspace-content'+(project?.type===7001?' calendar-content':'')} tabIndex={-1} onClick={blankClick}>
+        {isTasks ? <div className="workspace-task-scroll">
         <div className="workspace-view-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1>{project && !completedView && <div className="workspace-sort">
             <button type="button" className="workspace-sort-trigger" aria-label={text.sort} aria-haspopup="menu" aria-expanded={sortOpen} disabled={busy || blocked} onClick={()=>setSortOpen(!sortOpen)}><span className="workspace-sr">{text.sort}</span></button>
             {sortOpen&&<><button type="button" className="workspace-sort-mask" aria-label={text.close} tabIndex={-1} onClick={()=>setSortOpen(false)} />
               <div className="legacy-sort-menu" role="menu" aria-label={text.sort}>{sortOptions(project).map(option=><button key={option.value} type="button" role="menuitemradio" aria-checked={number(project.orderingRule)===option.value} onClick={()=>{setSortOpen(false);void run(()=>services.business.command({type:'updateProject',id:project.id,changes:{orderingRule:option.value},expected:expected(project,['orderingRule'])}))}}><span>{option.label}</span>{number(project.orderingRule)===option.value&&<i className="legacy-sort-check" />}</button>)}</div>
             </>}
           </div>}</div>
-        {isTasks ? <div className="workspace-task-scroll">
           <div className="workspace-summary"><div className="workspace-summary-item"><div className="workspace-summary-value">{duration(estimatedSeconds)}</div><div className="workspace-summary-title">{text.estimatedTime}</div></div><div className="workspace-summary-item"><div className="workspace-summary-value"><span className="workspace-summary-number">{active.filter(row => !row.isFinished).length}</span></div><div className="workspace-summary-title">{services.language.locale.startsWith('zh')?'待完成任务':'Tasks to be Completed'}</div></div>{!summaryPresetOnly&&<><div className="workspace-summary-item"><div className="workspace-summary-value">{duration(spentSeconds)}</div><div className="workspace-summary-title">{text.elapsedTime}</div></div><div className="workspace-summary-item"><div className="workspace-summary-value"><span className="workspace-summary-number" data-testid="completed-total">{completedCount}</span></div><div className="workspace-summary-title">{services.language.locale.startsWith('zh')?'已完成任务':'Completed Tasks'}</div></div></>}</div>
           {!completedView && view.kind !== 'search' && <form className="workspace-add-task" onSubmit={async event => {
             event.preventDefault();
@@ -235,11 +235,11 @@ function Workspace() {
             <ul className="workspace-tasks" aria-label={text.completed}>{finished.map(task => taskRow(task, finished))}</ul></>}
           {completedView&&<History openTask={openTask}/>}
         </div> : view.kind === 'settings' ? <Settings/> : view.kind==='reports'?<Reports openTask={openTask}/>:view.kind==='forest'?<Forest/>:project?.type===7001?<Calendar startTask={(id,child)=>{void startTask(id,child)}} openTask={openTask}/>:null}
-        <Timer expanded={timerOpen} openExpanded={() => navigate({ kind: 'timer' })} closeExpanded={()=>{setTimerOpen(false);focusHeading.current=true;setView({...timerReturn.current.view});select(timerReturn.current.selected)}} />
               {selectedTask && isTasks && <TaskDetails key={selectedTask.id} task={selectedTask} projects={projects} subtasks={snapshot.subtasks} close={() => select('')} onStart={() => navigate({ kind: 'timer' })} />}
       </main>
       
     </div>
+        <Timer expanded={timerOpen} openExpanded={() => navigate({ kind: 'timer' })} closeExpanded={()=>{setTimerOpen(false);focusHeading.current=true;setView({...timerReturn.current.view});select(timerReturn.current.selected)}} />
     {taskMenu && <TaskContextMenu remove={setDeletingTask} key={taskMenu.task.id} task={taskMenu.task} x={taskMenu.x} y={taskMenu.y} close={closeTaskMenu} />}
   {deletingTask&&<TaskDeleteDialog task={deletingTask} close={()=>{setDeletingTask(null)}}/>}
   {overlay&&<PageOverlay title={overlay==='forest'?(services.language.locale.startsWith('zh')?'专注森林':'Focus forest'):text[overlay]} full={overlay==='reports'} close={()=>setOverlay(null)}>{overlay==='settings'?<Settings initialTab={settingsTab}/>:overlay==='reports'?<Reports openTask={openTask}/>:<Forest/>}</PageOverlay>}
