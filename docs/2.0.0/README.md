@@ -1,9 +1,9 @@
 # 2.0.0 开发资料
 
-[版本计划](../plan/2.0.0.md) · [统一待办](../BACKLOG.md) · [维护指南](../MAINTENANCE.md)
+- [版本计划](../plan/2.0.0.md)：范围、阶段与验收标准。
+- [统一待办](../BACKLOG.md)：当前未完成工作和验收状态。
+- [开发与验证依据](evidence.md)：独立工程、服务和界面验证摘要。
+- [基线审计](2.0.0-audit.md)：旧版行为、数据与许可取证。
+- [服务合同](2.0.0-service-contracts.md)：接口与兼容边界。
 
-本目录保留开发过程的技术合同、审计、阶段验证和交接记录；历史记录反映当时的情况，当前未完成事项以待办为准。
-
-- 基线与合同：[审计](2.0.0-audit.md)、[依赖](2.0.0-dependencies.md)、[服务合同](2.0.0-service-contracts.md)。
-- 阶段结果：[骨架](2.0.0-skeleton.md)、[服务](2.0.0-services.md)、[界面第一批](2.0.0-ui-batch-1.md)、[第二批](2.0.0-ui-batch-2.md)、[D-R](2.0.0-dr.md)。
-- 界面还原：[交互等价](2.0.0-interaction-equivalence.md)、[核查清单](2.0.0-ui-review-checklist.md)；按日期命名的文件记录各轮对照和交接。
+历史逐轮报告保留在 Git 历史中。运行命令见[维护指南](../MAINTENANCE.md)。
