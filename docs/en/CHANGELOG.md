@@ -12,6 +12,13 @@ Current application: **2.0.0**, author Lexible.
 
 [English report](releases/UPDATE-2.0.0.md).
 
+## 7.1.1-local.1.9.4 · 2026-11-09
+
+- Correct documentation errors in the previous version concerning the long-lived development branch and archived version.
+- Publish a verified version tag directly as a stable Release and mark it Latest.
+
+[English report](releases/UPDATE-7.1.1-local.1.9.4.md).
+
 ## 7.1.1-local.1.9.3 · 2026-11-07
 
 - Preserve the expanded timer collapse control and keep the mini-window entry on the floating bar.

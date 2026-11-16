@@ -7,7 +7,7 @@ Date: 2026-11-07. Author: Lexible.
 ## Delivered behavior
 
 - Preserve the expanded timer collapse control and keep the mini-window entry on the floating bar.
-- Use feature/2.0.0-versioning for ongoing development; both maintenance guides forbid reusing any pushed version tag.
+- The development branch was named `feature/2.0.0-versioning` at release and was later renamed to `dev`; see Maintenance for current policy. Both guides forbid reusing any pushed version tag.
 
 ## Technical and verification account
 
