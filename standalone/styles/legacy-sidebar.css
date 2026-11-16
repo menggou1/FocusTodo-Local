@@ -41,10 +41,10 @@
 .sidebar-item[data-over=true] .sidebar-nav-main{outline:1px solid var(--workspace-accent);outline-offset:-1px}
 .sidebar-item.sidebar-menu-open .sidebar-nav-main{outline:1px solid var(--workspace-accent);outline-offset:-1px}
 .sidebar-custom .sidebar-nav-main{cursor:default}
-.workspace-sidebar footer{margin-top:0;padding:8px 12px 10px;background:var(--workspace-panel);border-top-color:#f4f4f4}
-[data-theme=dark] .workspace-sidebar footer{border-top-color:rgba(255,255,255,.08)}
-.workspace-sidebar footer button:first-child{padding-left:0}
-.workspace-sidebar footer button:hover{background:transparent}
+.workspace-sidebar>footer{margin-top:0;padding:8px 12px 10px;background:var(--workspace-panel);border-top-color:#f4f4f4}
+[data-theme=dark] .workspace-sidebar>footer{border-top-color:rgba(255,255,255,.08)}
+.workspace-sidebar>footer button:first-child{padding-left:0}
+.workspace-sidebar>footer button:hover{background:transparent}
 .workspace-sidebar .workspace-search-clear:hover{background:transparent}
 .sidebar-new-list-icon{width:24px;height:24px;flex:none;background:center/24px 24px no-repeat url("../../public/img/project-new.png")}
 .sidebar-menu-mask{position:fixed;inset:0;z-index:9999;border:0;padding:0;background:transparent}

@@ -5,7 +5,7 @@ import { useWorkspace } from './Context';
 import { ProjectIcon } from './ProjectIcon';
 import { LegacyIcon } from './LegacyIcon';
 import { ProjectEditor } from './Projects';
-import { Dialog } from './Dialog';
+import { ConfirmDialog } from './ConfirmDialog';
 import { sidebarItems, sidebarMinutes, sidebarMove } from './SidebarModel.mjs';
 import { expected, number, ordered, projectName } from './model';
 
@@ -237,10 +237,9 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     </footer>
     {menuRow && <SidebarMenu row={menuRow} x={menu!.x} y={menu!.y} close={() => closeMenu()} edit={() => edit(menuRow)} hide={() => requestHide(menuRow)} remove={() => requestDelete(menuRow)} />}
     {editor && <ProjectEditor row={editor.row} type={editor.type} projects={projects} close={() => setEditor(null)} />}
-    {confirm && <Dialog title={confirm.kind === 'hide' ? services.language.legacyText('prj_hide') : services.language.legacyText('prj_del_title', confirm.row.name)} close={() => setConfirm(null)}>
-      <p>{confirm.kind === 'hide' ? services.language.legacyText('prj_hide_prompt') : services.language.legacyText('prj_del_prompt')}</p>
-      <footer><button type="button" onClick={() => setConfirm(null)}>{services.language.legacyText('cmm_cancel')}</button><button type="button" className={confirm.kind === 'delete' ? 'danger' : 'primary'} disabled={busy || blocked} onClick={() => { if (confirm.kind === 'hide') void hideProject(confirm.row); else void removeProject(confirm.row); }}>{services.language.legacyText('cmm_ok')}</button></footer>
-    </Dialog>}
+    {confirm && <ConfirmDialog canClose={!busy} title={confirm.kind === 'hide' ? services.language.legacyText('prj_hide') : services.language.legacyText('prj_del_title', confirm.row.name)} message={confirm.kind === 'hide' ? services.language.legacyText('prj_hide_prompt') : services.language.legacyText('prj_del_prompt')} close={() => setConfirm(null)}>{dismiss=><>
+      <button type="button" onClick={dismiss}>{services.language.legacyText('cmm_cancel')}</button><button type="button" className="primary" disabled={busy || blocked} onClick={() => { if (confirm.kind === 'hide') void hideProject(confirm.row); else void removeProject(confirm.row); }}>{services.language.legacyText('cmm_ok')}</button>
+    </>}</ConfirmDialog>}
   </nav>;
 }
 

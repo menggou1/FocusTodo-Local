@@ -34,8 +34,8 @@ body { font:14px/20px var(--workspace-font); background:var(--workspace-bg); col
 .workspace-nav-icon { width:20px; height:20px; object-fit:contain; flex:none; }
 .workspace-nav[aria-current] { background:var(--workspace-selected); }
 .workspace-nested { margin-left:18px; }
-.workspace-sidebar footer { display:flex; align-items:center; gap:4px; padding:8px; margin-top:24px; border-top:1px solid var(--workspace-line); color:var(--workspace-accent); }
-.workspace-sidebar footer button:first-child { margin-right:auto; text-align:left; }
+.workspace-sidebar>footer { display:flex; align-items:center; gap:4px; padding:8px; margin-top:24px; border-top:1px solid var(--workspace-line); color:var(--workspace-accent); }
+.workspace-sidebar>footer button:first-child { margin-right:auto; text-align:left; }
 .workspace-content { flex:1; min-width:0; padding:36px 16px; }
 .workspace-content h1 { font-size:22px; font-weight:500; margin:0 4px 24px; line-height:28px; }
 .workspace-summary { display:flex; min-height:78px; background:var(--workspace-panel); border-radius:9px; margin-bottom:16px; color:var(--workspace-muted); font-size:12px; }

@@ -56,7 +56,7 @@ await copyFile('public/font/OFL-NotoSans.txt', path.join(site, 'licenses', 'Noto
 await copyFile('LICENSE', path.join(site, 'LICENSE'));
 await writeFile(path.join(site, 'THIRD-PARTY-NOTICES.txt'),
   'FocusTodo isolated engineering candidate\nReact, ReactDOM and scheduler: MIT. Full copyright and license texts are in licenses/.\nNoto Sans and Noto Sans SC: SIL Open Font License 1.1; see licenses/NotoSans-OFL.txt.\nAudio assets, UI icons/backgrounds/forest illustrations and translation catalogs originate from FocusTodo 7.1.1; redistribution authorization was confirmed by the maintainer. Per-asset release notices remain a release-preparation requirement.\nNo legacy bundle is distributed in this candidate.\n');
-const release = JSON.parse(await readFile('release.json', 'utf8'));
+const release = JSON.parse(await readFile('standalone/app-version.json', 'utf8'));
 await writeFile(path.join(site, 'prototype-build.json'), JSON.stringify({
   kind: 'isolated-prototype', localVersion: release.localVersion, sourceVersion: release.officialVersion,
   schemaVersion: 3, backupExportVersion: 2, persistence: 'isolated-namespaced-v3', serviceProtocol: 1, base: './',

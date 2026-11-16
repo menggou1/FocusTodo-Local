@@ -41,6 +41,11 @@ export function TaskContextMenu({ task, x, y, close, remove }: { task: Entity; x
   const [ready, setReady] = useState(false), [open, setOpen] = useState(false), [closing, setClosing] = useState(false);
   const closingRef = useRef(false), closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [submenu,setSubmenu]=useState<{id:'date'|'projects'|'tags';anchor:HTMLElement}|null>(null);
+  const [submenuClosing,setSubmenuClosing]=useState(false);
+  const submenuTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const enterSubmenu=()=>{setSubmenuClosing(false);if(submenuTimer.current){clearTimeout(submenuTimer.current);submenuTimer.current=null}};
+  const leaveSubmenu=()=>{enterSubmenu();submenuTimer.current=setTimeout(()=>{setSubmenuClosing(true);submenuTimer.current=setTimeout(()=>setSubmenu(null),120)},200)};
+  useEffect(()=>()=>{if(submenuTimer.current)clearTimeout(submenuTimer.current)},[]);
   const [tagDraft,setTagDraft]=useState(()=>String(task.tags||'').split(',').filter(Boolean));
   const tagRef=useRef(tagDraft),tagChanged=useRef(false);
   const projects=ordered(services.business.getSnapshot().projects.filter(row=>row.state===0));
@@ -139,7 +144,7 @@ export function TaskContextMenu({ task, x, y, close, remove }: { task: Entity; x
     closingRef.current = true;
     commitEstimate();
     commitTags();
-    setOpen(false); setClosing(true);
+    setOpen(false); setClosing(true); setSubmenuClosing(true);
     // Legacy ContextMenu unmounts 120ms after hiding even though its exit
     // stylesheet declares 250ms. Keep the actual 1.9.3 visible exit timing.
     closeTimer.current = setTimeout(close, 120);
@@ -170,7 +175,7 @@ export function TaskContextMenu({ task, x, y, close, remove }: { task: Entity; x
   }
 
   function commitTags(){if(!tagChanged.current)return;tagChanged.current=false;const value=tagRef.current.join(',');void updateTask({tags:value});}
-  function parent(id:'date'|'projects'|'tags',label:string,disabled=false){return <div className="legacy-context-parent" onMouseEnter={event=>{if(!disabled)setSubmenu({id,anchor:event.currentTarget})}} onMouseLeave={()=>{if(id==='tags'&&tagChanged.current){commitTags();requestClose()}setSubmenu(null)}}><button type="button" role="menuitem" aria-haspopup="true" aria-expanded={submenu?.id===id} disabled={disabled} onClick={event=>setSubmenu({id,anchor:event.currentTarget.parentElement!})} onKeyDown={event=>{if(event.key==='ArrowRight'){event.preventDefault();event.stopPropagation();setSubmenu({id,anchor:event.currentTarget.parentElement!})}}}>{label}<i/></button>{submenu?.id===id&&<MenuSubmenu anchor={submenu.anchor}>{id==='date'?<DatePicker value={dateInput(task.deadline)} shortcutHidden actionsHidden cancel={()=>setSubmenu(null)} confirm={value=>chooseDeadline(timestamp(value,true))}/>:id==='projects'?<div className="legacy-menu-projects">{destinations.map(row=><button key={row.id} type="button" role="menuitem" onClick={()=>{requestClose();void updateTask({projectId:row.id})}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span></button>)}</div>:<div className="legacy-menu-tags">{tags.map(tag=><label key={tag.id}><ProjectIcon type={3000} color={String(tag.color||'')}/><span>{tag.name}</span><input type="checkbox" aria-label={String(tag.name)} checked={tagDraft.includes(tag.id)} onChange={event=>{const next=event.target.checked?[...tagRef.current,tag.id]:tagRef.current.filter(id=>id!==tag.id);tagRef.current=next;tagChanged.current=true;setTagDraft(next)}}/></label>)}</div>}</MenuSubmenu>}</div>}
+  function parent(id:'date'|'projects'|'tags',label:string,disabled=false){return <div className="legacy-context-parent" onMouseEnter={event=>{enterSubmenu();if(!disabled)setSubmenu({id,anchor:event.currentTarget})}} onMouseLeave={()=>{if(id==='tags'&&tagChanged.current){commitTags();requestClose()}leaveSubmenu()}}><button type="button" role="menuitem" aria-haspopup="true" aria-expanded={submenu?.id===id} disabled={disabled} onClick={event=>setSubmenu({id,anchor:event.currentTarget.parentElement!})} onKeyDown={event=>{if(event.key==='ArrowRight'){event.preventDefault();event.stopPropagation();setSubmenu({id,anchor:event.currentTarget.parentElement!})}}}>{label}<i/></button>{submenu?.id===id&&<MenuSubmenu anchor={submenu.anchor} closing={submenuClosing}><div onMouseEnter={enterSubmenu} onMouseLeave={leaveSubmenu}>{id==='date'?<DatePicker value={dateInput(task.deadline)} shortcutHidden actionsHidden cancel={()=>setSubmenu(null)} confirm={value=>chooseDeadline(timestamp(value,true))}/>:id==='projects'?<div className="legacy-menu-projects">{destinations.map(row=><button key={row.id} type="button" role="menuitem" onClick={()=>{requestClose();void updateTask({projectId:row.id})}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span></button>)}</div>:<div className="legacy-menu-tags">{tags.map(tag=><label key={tag.id}><ProjectIcon type={3000} color={String(tag.color||'')}/><span>{tag.name}</span><input type="checkbox" aria-label={String(tag.name)} checked={tagDraft.includes(tag.id)} onChange={event=>{const next=event.target.checked?[...tagRef.current,tag.id]:tagRef.current.filter(id=>id!==tag.id);tagRef.current=next;tagChanged.current=true;setTagDraft(next)}}/></label>)}</div>}</div></MenuSubmenu>}</div>}
   function navigate(event: KeyboardEvent<HTMLDivElement>) {
     // The estimate input keeps native number editing, including arrow keys.
     if ((event.target as HTMLElement).closest('input')) return;

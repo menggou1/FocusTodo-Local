@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
-const release = JSON.parse(readFileSync(new URL('./release.json', import.meta.url), 'utf8'));
+const release = JSON.parse(readFileSync(new URL('./standalone/app-version.json', import.meta.url), 'utf8'));
 export default defineConfig({
   root: 'standalone',
   base: './',

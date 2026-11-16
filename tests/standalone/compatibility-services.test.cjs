@@ -68,6 +68,19 @@ test('version naming migration preserves schema, data, unknown keys and old rele
     assert.deepEqual((await rollback.app.backup.export({format:'json'})).data.indexedDB,before.data.indexedDB);
     assert.equal(rollback.app.release.hasUnread(),true);
 });
+test('development candidate version labels exports without rewriting published history or read state',async t=>{
+    const history=clone(require('../../release.json')),candidate=require('../../standalone/app-version.json');
+    const h=await createApplication({application:{appVersion:candidate.localVersion,releaseConfig:{...history,...candidate}}});t.after(h.dispose);
+    await h.app.business.command({type:'addTask',values:{id:'keep',name:'Synthetic'}});
+    const before=await h.app.backup.export({format:'json'});
+    assert.equal(h.app.release.metadata.version,'2.0.0');assert.equal(before.data.meta.patch,'2.0.0');assert.equal(before.data.meta.dbVersion,3);
+    assert.deepEqual(h.app.release.entries().map(entry=>entry.version),history.updates.map(entry=>entry.version));
+    assert.equal(h.app.release.hasUnread(),false);
+    await h.app.release.markRead(history.updates[0].version);
+    assert.equal((await h.app.backup.export({format:'json'})).data.localStorage['FocusTodo.releaseRead'],before.data.localStorage['FocusTodo.releaseRead']);
+    assert.equal((await rows(h.app.repository,'Task'))[0].id,'keep');
+});
+
 test('v1/v2 imports preserve historical compatibility records and unsupported formats never start maintenance',async t=>{
     const h=await createApplication();t.after(h.dispose);
     const exported=await h.app.backup.export({format:'json'});

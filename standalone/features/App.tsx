@@ -1,3 +1,4 @@
+import { ProfileMenu } from './workspace/ProfileMenu';
 import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import type { ApplicationServices } from '../app/contracts';
 import type { Entity } from '../services/core.mjs';
@@ -30,7 +31,7 @@ export function App({ services }: { services: ApplicationServices }) {
   const text = workspaceText(services.language.locale);
   useEffect(() => {
     document.documentElement.lang = services.language.locale;
-    document.title = 'FocusTodo';
+    document.title = 'FocusTodo '+services.release.metadata.version;
   }, [services, preferences.language, text.preview]);
   useEffect(() => {
     const media = matchMedia('(prefers-color-scheme: dark)');
@@ -149,7 +150,7 @@ function Workspace() {
   function blankClick(event: ReactMouseEvent<HTMLElement>) {
     if (!selectedTask || !isTasks) return;
     const target = event.target as Element;
-    if (target.closest('.workspace-task, .workspace-add-task, .workspace-details, .workspace-sort, button, input, select, textarea, a, label, summary, details')) return;
+    if (target.closest('[data-app-interaction-root], .workspace-task, .workspace-add-task, .workspace-details, .workspace-sort, button, input, select, textarea, a, label, summary, details')) return;
     select('');
   }
   const taskRow = (task: Entity, rows: Entity[]) => <li key={task.id} className="workspace-task" data-testid="task-row" data-task-id={task.id} data-priority={number(task.priority)} data-selected={selected === task.id || undefined} data-dragging={dragId === task.id || undefined}
@@ -188,8 +189,9 @@ function Workspace() {
       }); }} />
     <button type="button" className="workspace-task-start" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked || !!task.isFinished} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}><LegacyIcon name={task.isFinished?'task-start-disabled':'task-start'}/></button>
     <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
-    {snapshot.subtasks.some(child=>child.taskId===task.id&&child.state===0)&&<span className="workspace-task-subtask" role="img" aria-label={text.subtasks}/>}
-    {!!task.remark&&(snapshot.subtasks.some(child=>child.taskId===task.id&&child.state===0)?<span className="workspace-task-subtask-remark" aria-hidden="true"/>:<LegacyIcon name="task-remark"/>)}
+    {!!number(task.reminderDate)&&<span className="workspace-task-status workspace-task-reminder" data-expired={number(task.reminderDate)<Date.now()||undefined} role="img" aria-label={text.reminder}/>}
+    {snapshot.subtasks.some(child=>child.taskId===task.id&&child.state===0)&&<span className="workspace-task-status workspace-task-subtask" role="img" aria-label={text.subtasks}/>}
+    {!!task.remark&&<span className="workspace-task-status workspace-task-subtask-remark" role="img" aria-label={text.remark}/>}
     {number(task.deadline)>0&&<span className="workspace-task-date" data-overdue={number(task.deadline)<new Date().setHours(0,0,0,0)||undefined}>{formatTaskDate(number(task.deadline), services.language.locale)}</span>}
   </li>;
   return <div className="workspace-shell" data-testid="app-shell">
@@ -197,7 +199,7 @@ function Workspace() {
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
     <header className="workspace-header">
       <button className="workspace-mobile-toggle" aria-label={text.navigation} aria-expanded={mobileNav} onClick={() => setMobileNav(value => !value)}>☰</button>
-      <div className="workspace-profile-container"><button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} aria-expanded={profileMenu} onClick={()=>setProfileMenu(!profileMenu)}>{services.settings.profile().avatar?<img className="workspace-avatar" src={services.settings.profile().avatar} alt=""/>:<LegacyIcon className="workspace-avatar" name="header-portrait"/>}<span>{services.settings.profile().name}</span><LegacyIcon className="workspace-profile-arrow" name="user-dropdown"/></button>{profileMenu&&<><button className="workspace-menu-dismiss" aria-label={text.close} onClick={()=>setProfileMenu(false)}/><div className="workspace-profile-menu" role="menu">{(['account','pomodoro'] as const).map((tab)=><button key={tab} role="menuitem" onClick={()=>{setProfileMenu(false);setSettingsTab(tab);setOverlay('settings')}}>{tab==='account'?(services.language.locale.startsWith('zh')?'账号':'Account'):text.settings}</button>)}</div></>}</div>
+      <div className="workspace-profile-container"><button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} aria-expanded={profileMenu} onContextMenu={event=>{event.preventDefault();setProfileMenu(!profileMenu)}} onClick={()=>setProfileMenu(!profileMenu)}>{services.settings.profile().avatar?<img className="workspace-avatar" src={services.settings.profile().avatar} alt=""/>:<LegacyIcon className="workspace-avatar" name="header-portrait"/>}<span>{services.settings.profile().name}</span><LegacyIcon className="workspace-profile-arrow" name="user-dropdown"/></button>{profileMenu&&<ProfileMenu close={()=>setProfileMenu(false)} account={()=>{setProfileMenu(false);setSettingsTab('account');setOverlay('settings')}}/>}</div>
       <nav aria-label={text.navigation}>{(['forest','reports'] as const).map(item=><button key={item} title={text[item]} aria-label={text[item]} data-view={item} aria-current={overlay===item?'page':undefined} onClick={()=>navigate({kind:item})}><LegacyIcon name={item==='forest'?'header-forest':'header-report'}/>{item==='forest'&&forestReward>0&&<small className="legacy-forest-header-count">{forestReward}</small>}</button>)}<Updates openTask={openTask}/><button title={text.settings} aria-label={text.settings} data-view="settings" aria-current={overlay==='settings'?'page':undefined} onClick={()=>navigate({kind:'settings'})}><LegacyIcon name="header-setting"/></button></nav>
     </header>
     <div className={'workspace-layout' + (selectedTask && isTasks ? ' has-details' : '')}>

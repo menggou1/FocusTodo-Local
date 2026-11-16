@@ -1,12 +1,14 @@
 import { createCoreServices } from './core.mjs';
 import { createImageConverter } from './images.mjs';
+import publishedHistory from '../../release.json';
+import candidateVersion from '../app-version.json';
 import notificationIcon from '../../public/favicon.ico?url';
 
 const sounds = import.meta.glob<string>('../../public/audio/*', { query: '?url', import: 'default', eager: true });
 export function createBrowserServices(appVersion: string) {
     return createCoreServices({
         storage: localStorage, indexedDB, now: () => Date.now(), randomUUID: () => crypto.randomUUID(), random: () => Math.random(),
-        appVersion, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
+        appVersion, releaseConfig: { ...publishedHistory, ...candidateVersion }, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
         decodeBase64: value => decodeURIComponent(escape(atob(value))), compression: window,
         locks: navigator.locks, channel: typeof BroadcastChannel === 'function' ? new BroadcastChannel('FocusTodoStandalone.PomodoroDB6:services') : null,
         languages: navigator.languages, origin: location.origin, fetch: (...args) => fetch(...args),

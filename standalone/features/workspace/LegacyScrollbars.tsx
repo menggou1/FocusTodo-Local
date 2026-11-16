@@ -6,7 +6,7 @@ import { useLayoutEffect } from 'react';
 export function LegacyScrollbars() {
   useLayoutEffect(() => {
     const bound = new Map<HTMLElement, { dispose(): void; refresh(): void }>();
-    const selectors = '.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-settings-project-rows,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll]';
+    const selectors = '.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-settings-project-rows,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll],.legacy-record-duration-picker,.legacy-record-task-scroll,.legacy-record-project-scroll,.legacy-tags-options';
     function bind(view: HTMLElement) {
       const track = document.createElement('div'), thumb = document.createElement('div');
       track.className = 'legacy-scroll-track'; thumb.className = 'legacy-scroll-thumb';
@@ -54,7 +54,7 @@ export function LegacyScrollbars() {
       for (const [view, binding] of bound) if (!view.isConnected || !view.matches(selectors)) { binding.dispose(); bound.delete(view); }
       document.querySelectorAll<HTMLElement>(selectors).forEach(view => { if (!bound.has(view)) bound.set(view, bind(view)); else if(!timerOnly||view.closest('.legacy-timer-widget-rail'))bound.get(view)!.refresh(); });
     }
-    const observer = new MutationObserver(sync); observer.observe(document.getElementById('prototype-root')!, { childList: true, subtree: true }); sync();
+    const observer = new MutationObserver(sync); observer.observe(document.body, { childList: true, subtree: true }); sync();
     return () => { observer.disconnect(); for (const binding of bound.values()) binding.dispose(); };
   }, []);
   return null;

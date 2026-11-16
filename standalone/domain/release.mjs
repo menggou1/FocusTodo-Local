@@ -12,14 +12,15 @@ export function releaseMetadata(config) {
     invariant(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.test(config.localVersion), 'Invalid release version');
     const version = Number(config.localVersion.split('.')[0]) >= 2 ? config.localVersion : config.officialVersion + '-local.' + config.localVersion;
     invariant(identifyVersion(version), 'Unsupported release metadata');
-    invariant(config.updates[0]?.version === version && config.updates[0]?.date === config.date, 'Latest release entry mismatch');
+    // A development candidate keeps published history intact until release preparation.
+    invariant(config.development === true || config.updates[0]?.version === version && config.updates[0]?.date === config.date, 'Latest release entry mismatch');
     return immutable({ ...config, version, sourceVersion: config.officialVersion, schemaVersion: 3 });
 }
 export function createReleaseService({ metadata, storage, data, language }) {
     const key = 'FocusTodo.releaseRead';
     return Object.freeze({
         metadata,
-        hasUnread: () => storage.getItem(key) !== metadata.version,
+        hasUnread: () => metadata.development !== true && storage.getItem(key) !== metadata.version,
         entries: () => metadata.updates.map(language.update),
         async markRead(version) {
             invariant(metadata.updates.some(entry => entry.version === version), 'Unknown release entry');

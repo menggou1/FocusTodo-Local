@@ -20,9 +20,9 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-shell .workspace-nav{width:calc(100% - 16px);height:38px;margin:0 8px;padding:0 1px 0 8px;gap:0;border-radius:6px;background:transparent}
 .workspace-nav[aria-current=page]{background:var(--workspace-selected)}.workspace-nav-icon{width:24px;height:24px;flex:none;margin-right:0}
 .workspace-nav-name{padding-left:8px;flex:1;min-width:0}.workspace-nav-estimate{font-size:12px;line-height:33px;text-align:left;color:var(--workspace-muted);height:34px}
-.workspace-nav-count{margin:0;text-align:left}.workspace-sidebar footer{margin:0;height:42px;flex:none;padding:0 8px;gap:8px}
-.workspace-sidebar footer button{padding:0;width:28px;height:28px}.workspace-sidebar footer button:first-child{display:flex;align-items:center;gap:4px;width:auto;padding-left:4px;flex:1}
-.workspace-plus{font-size:23px;font-weight:300;line-height:24px}.workspace-sidebar footer .legacy-icon{width:24px;height:24px}
+.workspace-nav-count{margin:0;text-align:left}.workspace-sidebar>footer{margin:0;height:42px;flex:none;padding:0 8px;gap:8px}
+.workspace-sidebar>footer button{padding:0;width:28px;height:28px}.workspace-sidebar>footer button:first-child{display:flex;align-items:center;gap:4px;width:auto;padding-left:4px;flex:1}
+.workspace-plus{font-size:23px;font-weight:300;line-height:24px}.workspace-sidebar>footer .legacy-icon{width:24px;height:24px}
 .workspace-resize{position:relative;z-index:3;flex:0 0 0;width:0;margin:0;align-self:stretch;overflow:visible;display:block}.workspace-resize:before{content:'';position:absolute;top:0;bottom:0;left:-3px;width:6px;cursor:col-resize}
 .workspace-content{position:relative;display:block;flex:1;min-width:0;padding:0;overflow:hidden;outline:0}
 .workspace-content.calendar-content{overflow:auto;padding:30px 16px 16px}

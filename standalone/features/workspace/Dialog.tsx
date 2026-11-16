@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { useEffect, useId, useRef, useState, useCallback, type ReactNode } from 'react';
 import { useWorkspace } from './Context';
 
@@ -25,11 +26,11 @@ export function Dialog({ title, close, children, className='',inline=false, moti
     return () => { dialog.close(); if (previous?.isConnected) previous.focus(); };
   }, [inline]);
   if(inline)return <section className={'legacy-inline-dialog '+className} aria-label={title}>{children}</section>;
-  return <dialog ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { event.preventDefault(); if (!busy) requestClose(); }}>
+  return createPortal(<dialog data-app-interaction-root ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { event.preventDefault(); if (!busy) requestClose(); }}>
     <header><h2 id={heading}>{title}</h2><button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button></header>
     {error && <p className="danger" role="alert" data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</p>}
     {children}
-  </dialog>;
+  </dialog>, document.body);
 }
 
 /** Legacy secondary pages return to the same workspace selection. */
