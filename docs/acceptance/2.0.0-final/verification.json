@@ -20,6 +20,7 @@
     "isolated_archives": 2,
     "legacy_core_browser": 66,
     "final_ui_matrix": 8,
+    "inspector_dialog_matrix": 4,
     "reports_matrix": 4,
     "settings_drag_matrix": 4,
     "timer_forest": 8,

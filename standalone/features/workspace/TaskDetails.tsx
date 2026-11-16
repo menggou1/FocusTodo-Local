@@ -2,7 +2,8 @@ import { formatDateTime } from '../../domain/display.mjs';
 import { PickerField } from './PickerField';
 import { useEffect, useRef, useState } from 'react';
 import type { Entity, CompatibleRecord } from '../../services/core.mjs';
-import { Dialog } from './Dialog';
+import { ConfirmDialog } from './ConfirmDialog';
+import { TaskDeleteDialog } from './TaskDeleteDialog';
 import { useWorkspace } from './Context';
 import { ProjectEditor } from './Projects';
 import { LegacyIcon } from './LegacyIcon';
@@ -33,7 +34,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
   const [pending,setPending]=useState(0),[saveFailed,setSaveFailed]=useState(false);
   const [subtaskName, setSubtaskName] = useState(''), [deleting, setDeleting] = useState(false), [preserve, setPreserve] = useState(true);
   const [selectedSubtask,selectSubtask]=useState('');
-  const [editing, setEditing] = useState<Entity | null>(null), [editName, setEditName] = useState(''), [validation, setValidation] = useState('');
+  const [editing, setEditing] = useState<Entity | null>(null), [validation, setValidation] = useState('');
   const [createTag, setCreateTag] = useState(false);
   const [createRecord,setCreateRecord]=useState(false),[pickerVersion,setPickerVersion]=useState(0);
   const drag = useState(() => ({ current: null as Entity | null }))[0];
@@ -117,7 +118,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
           onChange={() => { void run(() => services.business.command({ type: 'toggleSubtask', id: row.id, expected: row })); }} />
         <button type="button" className="legacy-subtask-start" aria-label={text.focusSubtask + ': ' + row.name} disabled={busy || blocked || !!row.isFinished || !!task.isFinished} onClick={async () => { if (await run(() => services.startForTask(task.id, row.id))) onStart(); }}><LegacyIcon name={row.isFinished||task.isFinished?'task-start-disabled':'task-start'}/></button>
         <SubtaskName subtask={row} selected={selectedSubtask===row.id}/>
-        <button type="button" className="legacy-subtask-delete" aria-label={text.deleteSubtask + ': ' + row.name} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setEditing(row); setEditName(string(row.name)); setDeleting(true); }}><LegacyIcon name="detail-subtask-delete"/></button>
+        <button type="button" className="legacy-subtask-delete" aria-label={text.deleteSubtask + ': ' + row.name} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setEditing(row);setDeleting(true); }}><LegacyIcon name="detail-subtask-delete"/></button>
       </div>)}
       <form onSubmit={async event => { event.preventDefault(); if (await run(() => services.business.batch([{ type: 'addSubtask', values: { name: subtaskName.trim(), taskId: task.id,
         order: Math.max(0, ...children.map(row => number(row.order))) + 10000 } },{type:'updateTask',id:task.id,changes:{hasSubtask:true},expected:{hasSubtask:task.hasSubtask}}]))) setSubtaskName(''); }}>
@@ -129,20 +130,13 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
     </div>
     <footer className="legacy-detail-bottom"><button type="button" aria-label={text.close} onClick={close}><LegacyIcon name="detail-close"/></button><span>{chinese?'创建于':'Created '}{formatTaskDate(number(task.creationDate||task.createDate||task.createdDate),services.language.locale)}</span><button type="button" aria-label={chinese?'手动补记':'Add focus record'} onClick={()=>{setCreateRecord(true)}}><LegacyIcon name="add-pomodoro"/></button><button type="button" aria-label={text.remove} disabled={busy||blocked} onClick={event=>{event.currentTarget.focus();setEditing(null);setDeleting(true)}}><LegacyIcon name="detail-delete"/></button></footer>
     </div>
-    {(deleting || editing) && <Dialog title={deleting ? text.confirmDelete : text.editSubtask} close={() => { setDeleting(false); setEditing(null); }}>
-      <form onSubmit={async event => {
-        event.preventDefault();
-        const command = editing ? deleting ? { type: 'removeSubtask' as const, id: editing.id, expected: editing }
-          : { type: 'updateSubtask' as const, id: editing.id, changes: { name: editName.trim() }, expected: editing }
-          : { type: 'removeTask' as const, id: task.id, preserveHistory: preserve, expected: task };
-        if (await run(() => editing&&deleting&&children.length===1?services.business.batch([command,{type:'updateTask',id:task.id,changes:{hasSubtask:false,isExpanded:false},expected:{hasSubtask:task.hasSubtask}}]):services.business.command(command))) { setDeleting(false); setEditing(null); if (!editing) close(); }
-      }}>
-        {deleting ? <><p>{editing ? text.deleteSubtask : text.deleteTaskHelp}</p><p>{editing?.name || task.name}</p>
-          {!editing && <label className="workspace-check"><input type="checkbox" checked={preserve} onChange={event => setPreserve(event.target.checked)} />{text.preserveHistory}</label>}</>
-          : <label>{text.name}<input autoFocus required maxLength={1000} value={editName} onChange={event => setEditName(event.target.value)} /></label>}
-        <footer><button type="button" disabled={busy} onClick={() => { setDeleting(false); setEditing(null); }}>{text.cancel}</button><button disabled={busy || blocked} className={deleting ? 'danger' : 'primary'}>{deleting ? text.remove : text.save}</button></footer>
-      </form>
-    </Dialog>}
+    {deleting&&!editing&&<TaskDeleteDialog task={task} close={()=>setDeleting(false)} afterDelete={close} preserveHistory={preserve} extra={<label className="legacy-confirm-option"><input type="checkbox" checked={preserve} disabled={busy||blocked} onChange={event=>setPreserve(event.target.checked)}/>{text.preserveHistory}</label>}/>}
+    {deleting&&editing&&<ConfirmDialog canClose={!busy} title={services.language.legacyText('tsk_del_title',String(editing.name))} message={services.language.legacyText('sbt_del_msg')} close={()=>{setDeleting(false);setEditing(null)}}>{dismiss=><>
+      <button disabled={busy} onClick={dismiss}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{
+        const command={type:'removeSubtask' as const,id:editing.id,expected:editing};
+        if(await run(()=>children.length===1?services.business.batch([command,{type:'updateTask',id:task.id,changes:{hasSubtask:false,isExpanded:false},expected:{hasSubtask:task.hasSubtask}}]):services.business.command(command)))dismiss();
+      }}>{services.language.legacyText('cmm_ok')}</button>
+    </>}</ConfirmDialog>}
     {createTag && <ProjectEditor type={3000} projects={projects} close={() => setCreateTag(false)} />}
     {createRecord&&<RecordEditor kind="record" taskId={task.id} close={()=>setCreateRecord(false)}/>}
   </aside>;

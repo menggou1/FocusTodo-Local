@@ -175,6 +175,7 @@ jobs:
           node tests/standalone/package-smoke.cjs
           npm run test:release-app
           node tests/standalone/final-ui-parity.cjs
+          node tests/standalone/inspector-dialog-parity.cjs
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_STANDALONE_ENGINES: chromium

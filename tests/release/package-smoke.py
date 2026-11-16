@@ -40,7 +40,9 @@ for suffix in ('.zip', '.tar.gz'):
         for name in names:
             parts = Path(name).parts
             assert parts[0] == stem and '..' not in parts
-            assert not any(p.startswith('.') or p in ('node_modules', 'tests', 'acceptance') for p in parts)
+            assert not any(p.startswith('.') or p in ('node_modules', 'tests') for p in parts)
+            if 'acceptance' in parts:
+                assert name == stem + '/docs/acceptance/2.0.0-final/verification.json', 'Unexpected debug evidence in package'
         site = target / stem
         assert not (site / '.git').exists() and not (site / 'node_modules').exists()
         assert not (site / 'src').exists() and not (site / 'public').exists()
