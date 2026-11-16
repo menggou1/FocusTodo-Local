@@ -53,3 +53,32 @@
 .legacy-repeat-days label:first-child{margin-left:0!important}
 .legacy-repeat-days label[data-selected]{border-color:#fd5553!important;color:#fd5553!important}
 .legacy-repeat-days label p{line-height:26px!important}
+/* The same legacy ProjectSelection is used by quick creation and task details. */
+.legacy-project-options{min-height:120px;max-height:240px;overflow:auto;width:200px;padding:0}
+.legacy-project-options>button{gap:12px;height:34px;font-size:14px}
+.legacy-project-options>button:hover{background:var(--workspace-selected)}
+.legacy-project-options .workspace-nav-icon{flex:none;width:16px;height:24px}
+.legacy-project-options .workspace-project-color{width:16px;height:34px}
+.legacy-project-options .workspace-project-color>i{width:11px;height:11px}
+.legacy-project-options>button>i{width:24px;height:24px;flex:none;margin-left:auto;background:center/24px no-repeat url('../../public/img/new-task-project-selected.png')}
+.workspace-dialog.legacy-project-editor{padding:16px 20px;border-radius:10px;width:312px}
+.legacy-project-editor>header{height:auto;min-height:0;padding:0;display:block}
+.legacy-project-editor>header>h2{text-align:center;font-size:16px;font-weight:500;line-height:22.8571px;margin:0}
+.legacy-project-editor>form{padding:0}
+.legacy-project-editor .legacy-project-name{margin:16px 0;border-radius:6px;font:14px/20px var(--workspace-font);border-color:var(--workspace-input-border,#e5e5e5);background:var(--workspace-panel)}
+.legacy-project-editor .legacy-project-name:focus-visible{outline:none;box-shadow:none}
+.legacy-project-editor .legacy-project-palette{margin:0;height:48px}
+.legacy-project-palette>button{opacity:1;position:relative}
+.legacy-project-palette>button>img{position:absolute;inset:0;width:20px;height:20px}
+.legacy-project-editor>form>footer{margin-top:20px;height:30px;justify-content:flex-end;gap:8px}
+.legacy-project-editor>form>footer>button{border-radius:6px;min-height:0}
+.legacy-project-editor .legacy-folder-lists{margin-top:16px;max-height:190px;border-radius:6px}
+.legacy-folder-lists>label{margin:0;min-height:34px;height:34px;padding:0 8px 0 12px;gap:12px;background:var(--workspace-panel);border-bottom:1px solid var(--workspace-line)}
+.legacy-folder-lists>label:nth-child(even){background:var(--workspace-selected)}
+.legacy-folder-lists>label>span:nth-child(2){flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legacy-folder-lists .workspace-project-color{width:10px;height:34px;flex:none}
+.legacy-folder-lists .workspace-project-color>i{width:10px;height:10px}
+.legacy-folder-lists input[type=checkbox]{appearance:none;width:24px;height:24px;border:0;padding:0;border-radius:0;background:center/24px url('../../public/img/tag-unchecked.png')}
+.legacy-folder-lists input[type=checkbox]:checked{background-image:url('../../public/img/folder_project_checked.png')}
+.legacy-folder-lists>button{height:34px;width:100%;display:flex;align-items:center;gap:12px;background:var(--workspace-selected);color:#a6a6a6;padding:0 12px;font-size:14px}
+.legacy-folder-lists>button>i{width:10px;height:20px;background:center/16px no-repeat url('../../public/img/project-new.png')}

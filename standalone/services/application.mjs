@@ -109,7 +109,7 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
                 const value = business.getSnapshot();
                 return [...value.schedules.map(row=>({type:'schedule',...row})),...value.records.map(row=>({type:'focus',...row}))]
                     .filter(row=>row.state!==-1&&Number.isFinite(row.endDate)&&row.interval>0&&row.endDate>start&&row.endDate-row.interval*1000<end)
-                    .map(row=>({id:row.id,type:row.type,start:row.endDate-row.interval*1000,end:row.endDate,record:row}));
+                    .map(({type,...record})=>({id:record.id,type,start:record.endDate-record.interval*1000,end:record.endDate,record}));
             },
             createTask: input => data.createCalendarTask(input).then(async result=>{await business.refresh();return result}),
             put: (record, expected) => data.putSchedule(record, expected).then(async result=>{await business.refresh();return result}),
