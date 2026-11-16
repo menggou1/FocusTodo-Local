@@ -133,7 +133,7 @@
 .legacy-settings .legacy-switch:checked:after{left:0;transform:translateX(20px)}
 :root[data-theme=dark] .legacy-settings .legacy-switch:not(:checked){background:#717175}
 .legacy-platforms a{display:inline-flex;width:20px;height:24px;align-items:flex-start}
-.legacy-settings .legacy-upload>span{display:block;background:transparent;border:1px solid transparent;padding:4px}
+.legacy-settings .legacy-upload>span{display:block;width:250px;height:170px;margin:0;background:transparent;border:1px solid transparent;border-radius:10px;padding:4px}
 .legacy-upload-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;width:240px;height:160px;border:2px dashed var(--legacy-setting-border);border-radius:8px;background:var(--workspace-selected);font-size:14px}
 .legacy-upload-placeholder b{font-size:36px;line-height:1;margin-bottom:6px}
 .legacy-custom-theme{width:256px;height:182px}

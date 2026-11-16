@@ -15,3 +15,9 @@
 :is(#prototype-root,[data-app-interaction-root]) img:not([draggable="true"]) {
   -webkit-user-drag:none;
 }
+
+.workspace-row-dragging,.workspace-row-dragging *{user-select:none!important;cursor:grabbing!important}
+.workspace-drag-preview{position:fixed!important;z-index:100000!important;pointer-events:none!important;min-height:0!important;margin:0!important;padding:0!important;display:block!important;overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.workspace-drag-preview [data-dragging]{opacity:1}
+.workspace-task[data-dragging=true],.sidebar-item[data-dragging=true]{opacity:0}
+.sidebar-custom,.workspace-task{touch-action:pan-y}

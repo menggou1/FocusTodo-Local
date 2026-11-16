@@ -6,6 +6,7 @@ import { ProjectIcon } from './ProjectIcon';
 import { LegacyIcon } from './LegacyIcon';
 import { ProjectEditor } from './Projects';
 import { ConfirmDialog } from './ConfirmDialog';
+import { useRowDrag } from './useRowDrag';
 import { sidebarItems, sidebarMinutes, sidebarMove } from './SidebarModel.mjs';
 import { expected, number, ordered, projectName } from './model';
 
@@ -35,6 +36,7 @@ const menuLabel = (services: ReturnType<typeof useWorkspace>['services']) => ser
 
 export function Sidebar({ projects, view, navigate, query, setQuery, summary, width, mobileNav, canDropTask, dropTask }: Props) {
   const { services, text, run, busy, blocked } = useWorkspace();
+  const root=useRef<HTMLElement>(null),projection=useRef<DropPreview|null>(null);
   const input = useRef<HTMLInputElement>(null), searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousView = useRef<SidebarView | null>(null), lastViewKind = useRef(view.kind);
   const [menu, setMenu] = useState<MenuState | null>(null), [editor, setEditor] = useState<EditorState | null>(null);
@@ -169,7 +171,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     const move = sidebarMove(baseItems, dragging, target.id);
     setPreview(move);
   }
-  function finishProjectDrag() { clearFolderExpand(); setDragging(''); setOverId(''); setPreview(null); }
+  function finishProjectDrag() { projection.current=null;clearFolderExpand(); setDragging(''); setOverId(''); setPreview(null); }
   function dropProject(event: ReactDragEvent<HTMLElement>) {
     if (!dragging || !preview) return;
     event.preventDefault();
@@ -178,6 +180,26 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     if (!row) return;
     void run(() => services.business.command({ type: 'updateProject', id: row.id, changes: { order: preview.order, parentId: preview.parentId }, expected: expected(row, ['order', 'parentId']) }));
   }
+  const pointerDrag=useRowDrag<Entity>({
+    start(row){setDragging(row.id);setOverId('');projection.current=null;setPreview(null)},
+    move(row,x,y){
+      const hit=document.elementFromPoint(x,y)?.closest<HTMLElement>('.sidebar-custom,.sidebar-empty-folder');
+      if(!hit||!root.current?.contains(hit))return;
+      const target=hit.dataset.projectId||hit.dataset.emptyId;if(!target||target===row.id)return;
+      const from=items.findIndex(item=>item.id===row.id),to=items.findIndex(item=>item.id===target),rect=hit.getBoundingClientRect();
+      if(from<to&&y<rect.top+rect.height/2||from>to&&y>rect.top+rect.height/2)return;
+      const next=sidebarMove(items,row.id,target);
+      if(next){projection.current=next;setPreview(next);setOverId(target)}
+      const folder=projects.find(item=>item.id===target);
+      if(folder?.type===2000&&folder.expanded===false){
+        if(folderExpand.current?.id!==folder.id){clearFolderExpand();folderExpand.current={id:folder.id,timer:setTimeout(()=>{clearFolderExpand();void run(()=>services.business.command({type:'updateProject',id:folder.id,changes:{expanded:true},expected:expected(folder,['expanded','state'])}))},1000)}}
+      }else clearFolderExpand();
+    },
+    end(row,x,y){
+      const next=projection.current,inside=!!document.elementFromPoint(x,y)?.closest('.workspace-projects');finishProjectDrag();
+      if(next&&inside)void run(()=>services.business.command({type:'updateProject',id:row.id,changes:{order:next.order,parentId:next.parentId},expected:expected(row,['order','parentId'])}));
+    },cancel:finishProjectDrag,
+  });
   function taskDrop(event: ReactDragEvent<HTMLElement>, row: Entity) {
     if (!canDropTask(row)) return;
     event.preventDefault(); dropTask(row);
@@ -185,7 +207,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
 
   function row(item: { id: string; project: Entity | null; parent: Entity | null }) {
     if (!item.project) {
-      return <div className="sidebar-empty-folder" key={item.id} style={{ '--sidebar-parent': '#' + String(item.parent?.color || 'aeaeae').replace('#', '') } as CSSProperties}>
+      return <div className="sidebar-empty-folder" key={item.id} data-empty-id={item.id} style={{ '--sidebar-parent': '#' + String(item.parent?.color || 'aeaeae').replace('#', '') } as CSSProperties}>
         <span className="sidebar-child-line" />
         <button type="button" onClick={() => setEditor({ row: item.parent || undefined, type: 2000 })}>{services.language.legacyText('fld_click_add')}</button>
       </div>;
@@ -194,6 +216,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     const selected = view.kind === 'project' && view.id === project.id;
     const counts = summaryFor(project), hideStats = [7001, 7003].includes(number(project.type));
     return <div key={item.id} className={'sidebar-item' + (custom ? ' sidebar-custom' : '') + (item.parent ? ' sidebar-child' : '') + (menu?.row.id === project.id ? ' sidebar-menu-open' : '')}
+      onPointerDown={custom&&!busy&&!blocked?event=>pointerDrag(event,project,'project'):undefined}
       data-project-id={project.id} data-dragging={dragging === project.id || undefined} data-over={overId === project.id || undefined}
       onDragOver={event => projectDragOver(event, item)} onDrop={dropProject} onDragEnd={finishProjectDrag}
       onContextMenu={event => openMenu(event, project)}>
@@ -217,7 +240,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   }
 
   const menuRow = menu?.row;
-  return <nav className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': width + 'px' } as CSSProperties}>
+  return <nav ref={root} className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': width + 'px' } as CSSProperties}>
     <div className="workspace-projects">
       <div className="workspace-search">
         <div className="workspace-search-box">

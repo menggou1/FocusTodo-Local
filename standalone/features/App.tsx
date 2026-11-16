@@ -1,5 +1,6 @@
+import { useRowDrag } from './workspace/useRowDrag';
 import { ProfileMenu } from './workspace/ProfileMenu';
-import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import type { ApplicationServices } from '../app/contracts';
 import type { Entity } from '../services/core.mjs';
 import { workspaceText } from '../shared/workspace';
@@ -33,7 +34,7 @@ export function App({ services }: { services: ApplicationServices }) {
     document.documentElement.lang = services.language.locale;
     document.title = 'FocusTodo '+services.release.metadata.version;
   }, [services, preferences.language, text.preview]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const media = matchMedia('(prefers-color-scheme: dark)');
     const apply = () => { document.documentElement.dataset.theme = (preferences.isDarkMode ?? media.matches) ? 'dark' : 'light'; };
     apply(); media.addEventListener('change', apply); return () => media.removeEventListener('change', apply);
@@ -58,6 +59,7 @@ function Workspace() {
   const [resizeWidth, setResizeWidth] = useState<number | null>(null);
   const resizeStart = useRef<{x: number; width: number} | null>(null);
   const [mobileNav, setMobileNav] = useState(false), [dragId, setDragId] = useState(''), [sortOpen, setSortOpen] = useState(false);
+  const [dragOrder,setDragOrder]=useState<Entity[]|null>(null),dragOrderRef=useRef<Entity[]|null>(null);
   const taskDrag = useRef<{ row: Entity; rows: Entity[] } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusHeading = useRef(false);
@@ -103,16 +105,31 @@ function Workspace() {
   function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; setView(next);setQuickProjectId(''); select(''); setMobileNav(false); }
   function openTask(id:string) { navigate({kind:'project',id:'id-task-tasks'});select(id); }
   async function startTask(id:string,child?:string) { if(await run(()=>id?services.startForTask(id,child):services.timer.command({type:'switchTask',taskId:'',subtaskId:'',mode:preferences.isCountdown?'countdown':'countup',config:services.settings.timerConfig(),expectedSession:services.timer.getSnapshot()?.sessionId})))navigate({kind:'timer'}); }
-  function cancelDrag() { taskDrag.current = null; setDragId(''); }
+  function cancelDrag() { taskDrag.current = null;dragOrderRef.current=null;setDragOrder(null);setDragId(''); }
   async function reorder(to: Entity, source = taskDrag.current) {
     cancelDrag(); if (!source || source.row.id === to.id) return;
-    const rows = source.rows.filter(row => row.id !== source.row.id), index = rows.findIndex(row => row.id === to.id);
-    if (index < 0) return;
-    const from = source.rows.findIndex(row => row.id === source.row.id), originalTo = source.rows.findIndex(row => row.id === to.id);
-    const insert = index + (from < originalTo ? 1 : 0);
-    rows.splice(insert,0,source.row);
-    await run(()=>services.business.batch(rows.map((row,index)=>({type:'updateTask',id:row.id,changes:{order:(index+1)*10000},expected:row}))));
+    const rows=source.rows,from=rows.findIndex(row=>row.id===source.row.id),target=rows.findIndex(row=>row.id===to.id);
+    if(from<0||target<0)return;
+    const order=target>from?(target===rows.length-1?number(to.order)+10000:(number(to.order)+number(rows[target+1].order))/2):(target===0?number(to.order)-10000:(number(to.order)+number(rows[target-1].order))/2);
+    await run(()=>services.business.command({type:'updateTask',id:source.row.id,changes:{order},expected:expected(source.row,['order'])}));
   }
+  const pointerTaskDrag=useRowDrag<{row:Entity;rows:Entity[]}>({
+    start(source){taskDrag.current=source;dragOrderRef.current=source.rows;setDragId(source.row.id)},
+    move(source,x,y){
+      if(!customOrder||source.row.isFinished)return;
+      const hit=document.elementFromPoint(x,y)?.closest<HTMLElement>('.workspace-task'),current=dragOrderRef.current;
+      if(!hit||!current)return;const from=current.findIndex(row=>row.id===source.row.id),to=current.findIndex(row=>row.id===hit.dataset.taskId);
+      if(from<0||to<0||from===to)return;
+      const rect=hit.getBoundingClientRect();if(from<to&&y<rect.top+rect.height/2||from>to&&y>rect.top+rect.height/2)return;
+      const next=[...current],moving=next.splice(from,1)[0];const order=to>from?(to>=current.length-1?number(current[to].order)+10000:(number(current[to].order)+number(current[to+1].order))/2):(to<=0?number(current[to].order)-10000:(number(current[to].order)+number(current[to-1].order))/2);next.splice(to,0,{...moving,order});dragOrderRef.current=next;setDragOrder(next);
+    },
+    end(source,x,y){
+      const hit=document.elementFromPoint(x,y),list=hit?.closest<HTMLElement>('.sidebar-item'),destination=projects.find(row=>row.id===list?.dataset.projectId);
+      if(destination&&canDropTask(destination)){dropTask(destination);return}
+      const next=dragOrderRef.current;cancelDrag();
+      if(customOrder&&!source.row.isFinished&&next&&hit?.closest('.workspace-tasks')&&next.some((row,index)=>row.id!==source.rows[index]?.id))void run(()=>services.business.command({type:'updateTask',id:source.row.id,changes:{order:next.find(row=>row.id===source.row.id)!.order},expected:expected(source.row,['order'])}));
+    },cancel:cancelDrag,
+  });
   function closeTaskMenu() {
     setTaskMenu(null);
     const target = taskMenuReturn.current;
@@ -154,6 +171,8 @@ function Workspace() {
     select('');
   }
   const taskRow = (task: Entity, rows: Entity[]) => <li key={task.id} className="workspace-task" data-testid="task-row" data-task-id={task.id} data-priority={number(task.priority)} data-selected={selected === task.id || undefined} data-dragging={dragId === task.id || undefined}
+    onPointerDown={!busy&&!blocked?event=>pointerTaskDrag(event,{row:task,rows},'task'):undefined}
+    draggable={!busy&&!blocked} onDragStart={event=>{taskDrag.current={row:task,rows};setDragId(task.id);event.dataTransfer.setData('text/plain',task.id)}} onDragEnd={cancelDrag}
     onContextMenu={event => openTaskMenu(task, event)}
     onKeyDown={event => openTaskMenuFromKeyboard(task, event)}
     onClick={event => {
@@ -188,7 +207,7 @@ function Workspace() {
         if (!task.isFinished && preferences.completeSoundEnabled) { try { services.audio?.effect('Complete.m4a', preferences.ringtoneVolume / 100); } catch { /* Media failure cannot undo a committed task. */ } }
       }); }} />
     <button type="button" className="workspace-task-start" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked || !!task.isFinished} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}><LegacyIcon name={task.isFinished?'task-start-disabled':'task-start'}/></button>
-    <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
+    <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} selected={selected===task.id} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
     {!!number(task.reminderDate)&&<span className="workspace-task-status workspace-task-reminder" data-expired={number(task.reminderDate)<Date.now()||undefined} role="img" aria-label={text.reminder}/>}
     {snapshot.subtasks.some(child=>child.taskId===task.id&&child.state===0)&&<span className="workspace-task-status workspace-task-subtask" role="img" aria-label={text.subtasks}/>}
     {!!task.remark&&<span className="workspace-task-status workspace-task-subtask-remark" role="img" aria-label={text.remark}/>}
@@ -231,7 +250,7 @@ function Workspace() {
             if (await run(() => services.business.command({ type: 'addTask', values: { name: name.trim(), projectId: quickProject?.id||fallback?.id||'',
               deadline, order, estimatePomoNum:quickEstimate, tags: type === 3000 ? project?.id : '', priority: [5001, 5002, 5003].includes(type) ? type - 5000 : 0 } }))) setName('');
           }}><span className="workspace-plus" aria-hidden="true"/><input ref={quickInput} aria-label={text.addTask} placeholder={services.language.locale.startsWith('zh')?'在"'+(quickProject?projectName(quickProject,text):text.tasks)+'"中添加一个任务，按「回车」键保存':'Add a task to "'+(quickProject?projectName(quickProject,text):text.tasks)+'", press「Enter」to save'} value={name} maxLength={1000} required disabled={busy || blocked} onChange={event => setName(event.target.value)} /><div className="workspace-quick-pomos" aria-label={text.estimate+' shortcuts'}>{quickEstimate<=5?Array.from({length:5},(_,i)=><button type="button" key={i} className="workspace-quick-pomo" aria-label={text.estimate+': '+(i+1)} aria-pressed={quickEstimate>=i+1} onMouseDown={event=>event.preventDefault()} onClick={()=>setQuickEstimate(quickEstimate===i+1?0:i+1)}/>):<span className="workspace-quick-pomo-many" aria-live="polite"><i aria-hidden="true"/><em>{quickEstimate}</em></span>}<QuickEstimate value={quickEstimate} change={setQuickEstimate} label={text.estimate} focusInput={()=>quickInput.current?.focus()}/></div><span className="workspace-quick-separator" aria-hidden="true"/><details className="workspace-quick-project-picker"><summary className="workspace-quick-project" aria-label={text.project+'…'}><ProjectIcon type={number(quickProject?.type)||7005} color={String(quickProject?.color||'')}/></summary><div className="legacy-detail-popover legacy-project-options">{projects.filter(row=>[1000,7005].includes(number(row.type))&&row.state===0).map(row=><button key={row.id} type="button" role="option" aria-selected={quickProject?.id===row.id} onClick={event=>{setQuickProjectId(row.id);const pop=event.currentTarget.closest('details');if(pop)pop.open=false}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span>{quickProject?.id===row.id&&<i>✓</i>}</button>)}</div></details></form>}
-          {!completedView&&taskGroups(active, project, projects, text, services.language.locale).map(group => <section key={group.id} className="workspace-task-group">{group.title && group.rows.length>0 && <h2>{group.title}<span>  •  {formatMinutesDuration(group.rows.reduce((n,t)=>n+remaining(t),0)/60, services.language.locale)}</span></h2>}<ul className="workspace-tasks" aria-label={group.title || title}>{group.rows.map(task => taskRow(task, group.rows))}</ul></section>)}
+          {!completedView&&taskGroups(active, project, projects, text, services.language.locale).map(group => <section key={group.id} className="workspace-task-group">{group.title && group.rows.length>0 && <h2>{group.title}<span>  •  {formatMinutesDuration(group.rows.reduce((n,t)=>n+remaining(t),0)/60, services.language.locale)}</span></h2>}<ul className="workspace-tasks" aria-label={group.title || title}>{(customOrder&&dragOrder&&group.rows.some(row=>row.id===dragId)?dragOrder:group.rows).map(task => taskRow(task, group.rows))}</ul></section>)}
           {completedSection && <div className="workspace-completed-section"><button className="workspace-completed-toggle" aria-expanded={showCompleted} onClick={() => setShowCompleted(value => !value)}>{showCompleted ? text.hideCompleted : text.showCompleted}</button>
             {completedTaskGroups(finished,services.language.locale).map(group=><section className="workspace-task-group" key={group.id}><h2>{group.title}</h2><ul className="workspace-tasks" aria-label={text.completed+': '+group.title}>{group.rows.map(task=>taskRow(task,group.rows))}</ul></section>)}</div>}
           {completedView&&<History openTask={openTask}/>}

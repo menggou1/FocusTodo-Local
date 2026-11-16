@@ -16,7 +16,7 @@ export function PickerField({children, ...props}: ComponentProps<'details'>) {
     const element = field.current!, popup = surface.current!;
     const place = () => {
       const summary = element.querySelector('summary')!;
-      const anchor = summary.querySelector('.legacy-tag-add-content,.legacy-detail-pomo-value,.legacy-detail-value,.legacy-record-value')
+      const anchor = summary.querySelector('.legacy-record-duration-text') || summary.querySelector('.legacy-tag-add-content,.legacy-detail-pomo-value,.legacy-detail-value,.legacy-record-value')
         || (element.matches('.legacy-priority-picker') ? summary.querySelector('.legacy-icon') : null) || summary;
       const rect = anchor.getBoundingClientRect(), width = popup.offsetWidth, height = popup.offsetHeight;
       const left = Math.max(4, Math.min(rect.x + rect.width / 2 - width / 2, innerWidth - width - 4));

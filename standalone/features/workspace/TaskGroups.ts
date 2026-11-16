@@ -62,7 +62,9 @@ export function taskGroups(rows: readonly Entity[], project: Entity | undefined,
     const date = dateInput(row.deadline);
     const id = rule === 0 ? string(row.projectId) : rule === 1 ? date : String(number(row.priority));
     const title = rule === 0 ? parent ? projectName(parent, text) : text.none : rule === 1 ? formatTaskDateGroup(number(row.deadline), locale, text, now) : priorityLabel(number(row.priority), locale);
-    const order = rule === 0 ? number(parent?.order) : rule === 1 ? number(row.deadline) || Number.MAX_SAFE_INTEGER : -number(row.priority);
+    // Legacy module 917 places the default Tasks group before every custom
+    // project, then uses each project's own order (including folder children).
+    const order = rule === 0 ? parent?.type===7005 ? -Infinity : number(parent?.order) : rule === 1 ? number(row.deadline) || Number.MAX_SAFE_INTEGER : -number(row.priority);
     if (!groups.has(id)) groups.set(id, { id, title, order, rows: [] });
     groups.get(id)!.rows.push(row);
   }

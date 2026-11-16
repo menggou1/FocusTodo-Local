@@ -29,7 +29,7 @@
 .legacy-priority-menu{height:51px;padding:0 24px 0 16px}
 .legacy-priority-title{height:17px;line-height:17px;margin-bottom:4px;color:var(--workspace-muted);font-size:12px}
 .legacy-priority-options{display:flex;height:30px}
-.legacy-priority-options button{width:30px;height:30px;padding:0;border:0;border-radius:4px;background:transparent;display:grid;place-items:center}
+.legacy-context-menu .legacy-priority-options>button{flex:0 0 30px;width:30px;height:30px;padding:0;border:0;border-radius:4px;background:transparent;display:grid;place-items:center;line-height:30px}
 .legacy-priority-options button[aria-checked=true]{background:var(--workspace-selected)}
 .legacy-priority-options button:focus-visible{outline:2px solid var(--workspace-accent);outline-offset:1px}
 .legacy-priority-options .legacy-icon{width:20px;height:20px}

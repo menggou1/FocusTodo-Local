@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ApplicationServices } from '../../app/contracts';
 import type { WorkspaceText } from '../../shared/workspace';
 
@@ -30,11 +30,11 @@ export function WorkspaceProvider({ services, text, children }: { services: Appl
     } finally { guard.current = false; setBusy(false); finish(); }
   };
   const queue: Command=async action=>{while(guard.current)await inFlight.current;return run(action)};
-  const report=(failure:unknown)=>{
+  const report=useCallback((failure:unknown)=>{
     const code=failure as {code?:string;name?:string;recoveryRequired?:boolean}|null;
     if(code && (['incompatible-client','disposed'].includes(code.code||'')||code.recoveryRequired||['VersionError','InvalidStateError'].includes(code.name||''))){stopped.current=true;setBlocked(true);setError('blocked')}
     else setError(previous=>previous||'failed');
-  };
+  },[]);
   return <Context value={{ services, text, run, queue, report, busy, blocked, error }}>
     {error && <div className="workspace-error" role="alert"><span data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</span>
       {blocked ? <button onClick={() => location.reload()}>{text.reload}</button> : <button onClick={() => setError('')}>{text.dismiss}</button>}</div>}
