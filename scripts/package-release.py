@@ -28,7 +28,7 @@ def build(output, tag=None):
         '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs', 'scripts/serve-static.py',
         'scripts/runtime-layout.json', 'scripts/runtime-paths.cjs', 'scripts/runtime_layout.py',
     )]
-    for directory in ('docs', 'docs/en', 'docs/plan', 'docs/en/plan', 'docs/releases', 'docs/en/releases'):
+    for directory in ('docs', 'docs/en', 'docs/plan', 'docs/en/plan', 'docs/2.0.0', 'docs/en/2.0.0', 'docs/releases', 'docs/en/releases'):
         extras.extend(p for p in (ROOT / directory).glob('*.md') if p.name != 'CONTRIBUTING.md')
     extras.extend((ROOT / 'docs/guide-images').glob('*.png'))
     for file in extras:
