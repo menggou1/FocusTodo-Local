@@ -13,5 +13,6 @@
 @import './legacy-sidebar.css';
 @import './legacy-window-motion.css';
 @import './legacy-overlays.css';
+@import './legacy-dialogs.css';
 @import './timer-widgets.css';
 @import './interactions.css';

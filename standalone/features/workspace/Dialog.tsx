@@ -15,7 +15,7 @@ export function useWindowClose(close: () => void, immediate = false) {
   return { close: requestClose, motion: closing ? 'legacy-window-exit' : 'legacy-window-enter' };
 }
 
-export function Dialog({ title, close, children, className='',inline=false, motion }: { title: string; close(): void; children: ReactNode;className?:string;inline?:boolean; motion?:string }) {
+export function Dialog({ title, close, children, className='',inline=false, motion }: { title: string; close(): void; children: ReactNode|((dismiss:()=>void)=>ReactNode);className?:string;inline?:boolean; motion?:string }) {
   const ownMotion = useWindowClose(close), requestClose = motion ? close : ownMotion.close;
   const ref = useRef<HTMLDialogElement>(null), heading = useId();
   const { busy, text, error } = useWorkspace();
@@ -25,11 +25,12 @@ export function Dialog({ title, close, children, className='',inline=false, moti
     const dialog = ref.current!; dialog.showModal();
     return () => { dialog.close(); if (previous?.isConnected) previous.focus(); };
   }, [inline]);
-  if(inline)return <section className={'legacy-inline-dialog '+className} aria-label={title}>{children}</section>;
+  const content = typeof children==='function'?children(requestClose):children;
+  if(inline)return <section className={'legacy-inline-dialog '+className} aria-label={title}>{content}</section>;
   return createPortal(<dialog data-app-interaction-root ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { event.preventDefault(); if (!busy) requestClose(); }}>
     <header><h2 id={heading}>{title}</h2><button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button></header>
     {error && <p className="danger" role="alert" data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</p>}
-    {children}
+    {content}
   </dialog>, document.body);
 }
 

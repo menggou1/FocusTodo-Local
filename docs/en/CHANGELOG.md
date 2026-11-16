@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **7.1.1-local.1.9.3**, author Lexible.
+Current application: **2.0.0**, author Lexible.
+
+## 2.0.0 · 2026-11-16
+
+- Build from complete React/TypeScript sources with local tasks, timer, calendar, forest and backups.
+- Correct initial report layout, completed cards, active-task icons and the forest feature switch.
+- Unify confirmation dialogs and version metadata, with updated bilingual documentation.
+
+[English report](releases/UPDATE-2.0.0.md).
 
 ## 7.1.1-local.1.9.3 · 2026-11-07
 

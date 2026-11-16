@@ -1,9 +1,10 @@
 /* Candidate-only server; never serves the checkout or the legacy runtime. */
 const http = require('node:http'), fs = require('node:fs'), path = require('node:path');
 const { pipeline } = require('node:stream');
-const layout = require('./standalone-layout.json');
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.ttf': 'font/ttf', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.wav': 'audio/wav', '.ogg': 'audio/ogg' };
+const defaultLayout = require('./standalone-layout.json');
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.ttf': 'font/ttf', '.otf': 'font/otf', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4', '.wav': 'audio/wav', '.ogg': 'audio/ogg' };
 function createStandaloneServer(options = {}) {
+  const layout = options.runtimeLayout || defaultLayout;
   const site = fs.realpathSync(options.root || path.resolve(__dirname, '..', layout.siteDirectory));
   const base = options.basePath || '/';
   if (!/^\/(?:[a-zA-Z0-9_-]+\/)*$/.test(base)) throw new Error('Invalid prototype base path');
@@ -25,7 +26,7 @@ function createStandaloneServer(options = {}) {
     try { pathname = decodeURIComponent(new URL(req.url, 'http://' + req.headers.host).pathname); }
     catch { res.writeHead(400); res.end(); return; }
     if (/[\\\0]/.test(pathname) || pathname.split('/').some(part => part.startsWith('.'))) { res.writeHead(403); res.end(); return; }
-    if (pathname === base + '__prototype/session.json') {
+    if (options.isolated !== false && pathname === base + '__prototype/session.json') {
       res.writeHead(200, { ...headers, 'Content-Type': 'application/json' });
       res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ kind: 'isolated-prototype', origin: 'http://' + req.headers.host })); return;
     }

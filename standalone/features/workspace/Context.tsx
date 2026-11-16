@@ -1,3 +1,4 @@
+import { ConfirmationHost } from './ConfirmationHost';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { ApplicationServices } from '../../app/contracts';
 import type { WorkspaceText } from '../../shared/workspace';
@@ -40,5 +41,6 @@ export function WorkspaceProvider({ services, text, children }: { services: Appl
       {blocked ? <button onClick={() => location.reload()}>{text.reload}</button> : <button onClick={() => setError('')}>{text.dismiss}</button>}</div>}
     <span className="workspace-sr" role="status">{busy ? text.busy : ''}</span>
     {children}
+    <ConfirmationHost/>
   </Context>;
 }

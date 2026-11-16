@@ -103,11 +103,6 @@ details.legacy-detail-tags>summary{display:block;height:20px;line-height:18px;pa
 .legacy-context-submenu .legacy-date-picker .legacy-date-month{height:24px}
 .legacy-context-submenu .legacy-date-days>button:hover:not([data-selected]){background:var(--workspace-selected)}
 :root[data-theme=dark] .legacy-context-submenu{box-shadow:0 0 20px 1px #0e0d12}
-.legacy-task-delete{width:360px;box-sizing:border-box}
-.legacy-delete-content strong{display:block;font-weight:700;margin:0 0 8px}
-.legacy-delete-content p{margin:0 0 10px;font:12px/17.1429px var(--workspace-font)}
-.legacy-task-delete footer button{flex:none;box-sizing:border-box}
-.legacy-task-delete footer button.primary{padding:0 8px;line-height:30px}
 .workspace-task-status{flex:none;align-self:stretch;width:19px;min-height:31px;margin:0;background-position:right center;background-size:15px 15px;background-repeat:no-repeat}
 .workspace-task-reminder{background-image:url('../../public/img/task-reminder.png')}
 .workspace-task-reminder[data-expired]{background-image:url('../../public/img/task-reminder-expired.png')}

@@ -1,100 +1,59 @@
 # FocusTodo
 
-FocusTodo 专注清单 - 浏览器本地版
+浏览器本地专注清单 · **2.0.0** · 作者 **Lexible** · [English](README_en.md)
 
-官方基础版本 **7.1.1** · 本地版本 **7.1.1-local.1.9.3** · 作者 **Lexible** · [English](README_en.md)
+FocusTodo 使用 React、TypeScript 和 Vite 从完整应用源码构建。任务、专注记录和设置保存在浏览器中，无需账号服务器。项目源自 [Lâm Ngọc Khương 的 FocusTodo 7.1.1](https://github.com/lamngockhuong/focustodo)，原版及完整历史保留在 `upstream/7.1.1`。
 
-## 项目说明
+## 安装与运行
 
-本项目基于 [lamngockhuong/FocusTodo](https://github.com/lamngockhuong/focustodo) 的 7.1.1 版本持续维护，现为独立仓库。上游原版单独保存在 `upstream/7.1.1` 分支，来源、校验和分支用途见[维护指南](docs/MAINTENANCE.md#7-源码来源与原版归档)。
+从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 选择已发布版本。本文描述正在准备的 2.0.0；创建发布 PR 不代表 Release 或线上站点已经更新。
 
-任务、专注记录和设置保存在浏览器中，运行时无需账号服务器。外部联网默认关闭；在设置 → 通用 → 功能开关启用后，Bing 壁纸才访问允许的外部来源。关于页的 GitHub 图标在点击后打开[本地版仓库](https://github.com/menggou1/FocusTodo-Local)。本仓库保留原压缩 React 主包，并使用独立本地模块接入，不是已经恢复完整源码的 React 工程。
+便携 ZIP / tar.gz 解压后安装 Node.js 22.12+，运行 `node scripts/start.cjs` 或 `npm start`；无需安装 npm 依赖。Windows 可双击 `启动.bat`，macOS / Linux 可运行 `sh start.sh`。启动器默认打开 `http://127.0.0.1:5500/index.html`；无桌面环境使用 `--no-browser`，其他端口使用 `--port 5511`。Python 3.7+ 可用 `python scripts/serve-static.py` 作为备用服务。压缩包附有 `SHA256SUMS.txt`，不包含 Node/Python 运行时。
 
-> **免责声明**：本项目仅供个人学习研究使用。请支持 [FocusTodo 官方](https://focustodo.cn)。
+从源码运行需要先构建：
 
-## 必要环境
-
-### 方式一：Node.js（推荐）
-- Node.js 22+；CI 覆盖 Windows、macOS、Linux 的 Node.js 22/24
-- 无需安装应用依赖；运行 `node scripts/start.cjs` 或 `npm start`
-- 默认仅监听 `127.0.0.1:5500`，禁用缓存，支持音频范围请求
-
-### 方式二：Python
-- Python 3.7+（手动启动备用方式）
-- 无需安装任何依赖
-
-请通过本地 HTTP 服务器访问，保持原有主机名和端口。不同地址对应不同的浏览器存储；直接打开文件不属于本次验收范围。
-
-## 快速开始
-
-在线使用：[GitHub Pages](https://menggou1.github.io/FocusTodo-Local/)。线上站点与本地 `127.0.0.1` 地址使用不同的浏览器存储，迁移数据请先导出备份再导入。
-
-Pages 在 `main` 推送通过完整检查后由官方 Actions 自动部署，沿用运行文件白名单；`main` 保留完整项目，无需维护 `gh-pages`。部署与本地预览见[维护指南](docs/MAINTENANCE.md)。
-
-从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载 ZIP 或 tar.gz 并解压，安装 Node.js 22+。三个系统使用同一份便携包，无需运行 `npm install`。发布附带 `SHA256SUMS.txt`，运行时需自行安装，不包含在压缩包中。
-
-三个系统通用：`node scripts/start.cjs` 或 `npm start`。成功启动后自动打开浏览器；无桌面环境可用 `node scripts/start.cjs --no-browser`，指定端口用 `--port 5511`（npm 方式为 `npm start -- --no-browser --port 5511`）。
-
-### Windows
-双击 `启动.bat` 或运行 PowerShell `.\start.ps1`
-
-默认访问 `http://127.0.0.1:5500/index.html`。需要手动打开浏览器时，可用 `.\start.ps1 -NoBrowser`；临时指定端口可加 `-Port 5511`，更换端口后不会直接显示旧端口的数据。
-
-### macOS / Linux
-```bash
-sh start.sh
-# 无桌面环境或自定义端口：sh start.sh --no-browser --port 5511
-# 或使用 Python，保持相同端口和访问地址
-python3 scripts/serve-static.py
+```powershell
+npm ci
+npm run build:release
+npm run build
+npm start
 ```
 
-然后访问 `http://127.0.0.1:5500/index.html`。
+开发预览使用 `npm run dev`（5511）。它使用独立数据库和设置，拒绝读取日常数据。旧版对照可运行 `node -e "require('./scripts/server.cjs').createServer().listen(5513,'127.0.0.1')"`。测试不得使用 5500 稳定服务。
 
-## 主要功能
+[GitHub Pages](https://menggou1.github.io/FocusTodo-Local/) 仅由 `main` 的成功流水线部署。网页与本地地址的浏览器存储不同，通过备份迁移数据；不能直接双击 HTML 运行。
 
-- 🍅 番茄钟计时器（25/5/15 分钟可调）
-- ✅ 任务管理（清单、子任务、截止日期、提醒）
-- 📅 日程视图、快速建任务、重叠布局和从安排开始专注
-- 📊 专注时间报表
-- 🎨 自定义主题（Bing 每日壁纸 + 本地上传）
-- 💾 完整 Gzip / JSON 备份、旧版导入、体积分析与壁纸范围选择
-- 🌐 通用设置可选择跟随系统、简体中文或 English；其他既有翻译只通过跟随系统启用，缺失内容回退英文
-- 🔔 通用设置可主动允许和测试桌面通知
+## 功能
 
-专注森林沿用原版入口、树木和阳光收取，设置 → 通用可开关；阳光无需联网且没有每日收取上限；收取沿原版路径飞向树木，支持减少动态效果。成就按照累计专注、已完成任务和专注记录结束的自然日统计，铜、银、金奖杯解锁后一次性发放阳光。小组和在线排名仍不属于本地版。
+- 清单、清单夹、标签、任务、子任务、优先级、重复、到期日和提醒。
+- 倒计时/正计时、暂停与继续、休息、白噪音、计时组件及支持浏览器中的独立小窗。
+- 日/周/月日程、快速创建、拖动安排、手动补记、已完成历史与报表。
+- 本地专注森林、阳光收取和成就；功能开关控制顶部入口。
+- 明暗主题、内置/上传壁纸；Bing 每日壁纸仅在主动开启外部联网后请求允许的来源。
+- 完整 JSON / Gzip 备份、旧版备份导入、体积分析、可选壁纸范围及覆盖前安全备份确认。
+- 跟随系统、简体中文和 English；其他既有系统语言词库缺项回退英文。
 
-设置 → 通用 → 语言可选择“跟随系统、简体中文、English”；切换后刷新同一地址，任务与记录保留。其他已有部分翻译只由跟随系统启用，缺项使用可读回退内容。[英文文档入口](docs/en/README.md)提供使用、维护、架构、待办与版本技术报告。
+小组、云同步和在线排名不属于本地版。系统通知、声音、下载和 Document PiP 取决于浏览器及系统能力；减少动态效果设置会关闭相应动画。
 
-## 数据存储
+## 数据与升级
 
-- **IndexedDB**: 任务、番茄记录、日程等
-- **localStorage**: 设置、用户凭证、主题等
+正式构建继续使用 `PomodoroDB6` v3 和既有设置键。版本标识变为独立三段式 `2.0.0`，来源版本 7.1.1 仅用于来源信息；数据库版本、备份格式和偏好 `Version='6.5'` 不随应用版本改写。同一浏览器、主机名、端口和站点路径下可继续使用原数据；更换 origin 需要导出/导入备份。开发预览使用 `FocusTodoStandalone.PomodoroDB6` 和 `FocusTodoStandalone.data.*`。
 
-计时会话保存在 `PomodoroDB6` v3 的 `TimerSession` 表中。超过 5 分钟的执行中断会要求确认是否计入；停止会保存达到 25 秒门槛的有效片段并归零，取消计时任务只解除关联，任务仍保留在列表中。
+升级前导出完整备份。导入支持旧 JSON 和内容识别的 Gzip，文件与解压数据上限均为 128 MB。缺少压缩能力时导出 JSON；旧版需先解压 Gzip。图片目前仍存于 localStorage，受浏览器配额限制。覆盖或清空前下载完整安全备份，并要求确认已保存且可读；取消会保留现有数据。清除站点存储会丢失本地内容。
 
-设置 → 账号可查看各类数据体积和记录数，默认下载完整 `.json.gz` 无损压缩备份，也可选择普通 JSON 或不含壁纸。导入按内容识别旧 v1/v2 JSON 和 Gzip，先显示范围再确认覆盖；不含壁纸时回退到内置主题。缺少压缩能力时导出回退到 JSON，导入 Gzip 需要解压能力；文件和解压数据上限均为 128 MB。旧版应用不直接支持 Gzip。
+计时会话持久化在 TimerSession；超过 5 分钟的执行中断需要确认，停止保存满足 25 秒门槛的有效专注片段。回退应先退出所有窗口并保留完整备份，不删除数据库来绕过兼容检查。
 
-删除数据无需密码，等待 5 秒后确认；导入前和删除前均发起完整 JSON 安全备份，完成后刷新，失败时显示错误并恢复。图片仍存于 localStorage，大图片恢复受浏览器配额约束。程序无法确认下载已永久保存到磁盘，请检查浏览器下载文件。清除浏览器站点数据会丢失本地内容，Git 仓库不保存日常使用的浏览器数据库。
+## 文档
 
-右上角铃铛展示面向用户的日期、版本和简短更新详情，并保留原任务提醒。维护报告仅在仓库文档中提供，不在更新窗口展示 Markdown 入口。
-
-## 工程目录
-
-`src/` 保存页面、样式、压缩主包和本地模块；`public/` 保存图标、图片、字体、音频和语言资源；`scripts/` 保存启动、生成及发布工具；`tests/` 保存单元、浏览器及发布测试；`docs/` 保存文档和历史验收。开发时运行 `npm ci`、`npm test`、`npm run check` 和 `npm run test:browser`；更多命令见维护指南。
-
-## 文档导航
-
-| 你想做什么 | 从这里开始 |
+| 内容 | 入口 |
 |---|---|
-| 查阅 2.0.0 范围、实施顺序与验收要求 | [2.0.0 版本计划](docs/plan/2.0.0.md) |
-| 学习任务、计时、日程和备份 | [使用教程](docs/GUIDE.md) |
-| 看版本变化、发布验收或历史报告 | [更新记录](docs/CHANGELOG.md) |
-| 开发、测试或发布新版本 | [开发维护指南](docs/MAINTENANCE.md) |
-| 未完成工程、验收与未来计划 | [统一待办与验收](docs/BACKLOG.md) |
-| 理解模块、数据库、计时与旧主包之间的关系 | [架构说明](docs/ARCHITECTURE.md) |
-
-更新记录按版本链接详细报告；维护指南已包含版本规范和发布步骤。日常使用只需按本页启动，无需逐篇阅读历史报告。开发先运行 `npm ci`，其余准备和检查命令集中在维护指南。
+| 安装、任务与专注使用 | [使用教程](docs/GUIDE.md) |
+| 开发、打包、部署与版本规则 | [维护指南](docs/MAINTENANCE.md) |
+| React 架构、服务与数据兼容 | [架构说明](docs/ARCHITECTURE.md) |
+| 自动化、UI 对照与验证边界 | [测试说明](docs/TESTING.md) |
+| 更新与历史证据 | [更新记录](docs/CHANGELOG.md) |
+| 未完成工作及人工验收 | [统一待办](docs/BACKLOG.md) |
 
 ## 许可证
 
-请勿用于商业用途，仅供个人学习研究使用。请支持正版软件。
+[MIT License](LICENSE)。保留 Lâm Ngọc Khương 与 Lexible 的版权声明。[第三方声明](THIRD-PARTY-NOTICES.txt)及构建包中的 `licenses/` 保留第三方许可文本。

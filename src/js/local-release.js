@@ -3,11 +3,28 @@
     "use strict";
     root.FocusRelease = Object.freeze({
     "officialVersion": "7.1.1",
-    "localVersion": "1.9.3",
+    "localVersion": "2.0.0",
     "author": "Lexible",
-    "date": "2026-11-07",
+    "date": "2026-11-16",
     "repositoryRemote": "Focustodo-local",
     "updates": [
+        {
+            "version": "2.0.0",
+            "date": "2026-11-16",
+            "title": "独立 React 应用与界面还原",
+            "titleEn": "Independent React app and interface restoration",
+            "items": [
+                "从完整 React / TypeScript 源码构建，保留本地任务、计时、日程、森林与备份。",
+                "修复报表首次布局、已完成记录卡片、运行图标和专注森林开关。",
+                "统一确认弹窗与版本信息，整理中英文使用、架构和维护文档。"
+            ],
+            "itemsEn": [
+                "Build from complete React/TypeScript sources with local tasks, timer, calendar, forest and backups.",
+                "Correct initial report layout, completed cards, active-task icons and the forest feature switch.",
+                "Unify confirmation dialogs and version metadata, with updated bilingual documentation."
+            ],
+            "report": "docs/releases/UPDATE-2.0.0.md"
+        },
         {
             "version": "7.1.1-local.1.9.3",
             "date": "2026-11-07",
@@ -504,7 +521,7 @@
             ]
         }
     ],
-    "version": "7.1.1-local.1.9.3",
+    "version": "2.0.0",
     "repository": "https://github.com/menggou1/FocusTodo-Local"
 });
 })(window);

@@ -1,122 +1,52 @@
 # FocusTodo
 
-FocusTodo — browser-local edition · [中文版](README.md)
+Local browser focus and task app · **2.0.0** · **Lexible** · [中文](README.md)
 
-## About
+The application builds from complete React, TypeScript and Vite sources. Tasks, focus history and preferences stay in the browser; no account server is required. It derives from [Lâm Ngọc Khương's FocusTodo 7.1.1](https://github.com/lamngockhuong/focustodo). Original source and history remain on `upstream/7.1.1`.
 
-This local version of [FocusTodo](https://focustodo.cn) is maintained from [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) version 7.1.1 as a standalone repository. The untouched upstream version is preserved on `upstream/7.1.1`; see the [English maintenance guide](docs/en/MAINTENANCE.md#provenance) for provenance and branch roles.
+## Install and run
 
-> **Disclaimer**: This project is for personal learning and research purposes only. Please support the official [FocusTodo](https://focustodo.cn) software.
+Choose an available version from [Releases](https://github.com/menggou1/FocusTodo-Local/releases). This document describes 2.0.0 release preparation; a release PR does not update the published release or live site.
 
-## Requirements
+Extract ZIP or tar.gz, install Node.js 22.12+, and run `node scripts/start.cjs` or `npm start`. Portable packages need no npm dependencies. Windows: `启动.bat`; macOS/Linux: `sh start.sh`. The launcher opens `http://127.0.0.1:5500/index.html`. Use `--no-browser` for headless environments or `--port 5511` for another origin. Python 3.7+ can run `python scripts/serve-static.py`. Packages contain checksums, but no language runtime.
 
-### Option 1: Node.js (Recommended)
-- Node.js 22+; CI covers Node.js 22/24 on Windows, macOS and Linux
-- Run `node scripts/start.cjs` or `npm start`; no npm dependency installation required
-- Binds to `127.0.0.1:5500`, disables caching, and supports audio byte ranges
+Source checkouts must build first:
 
-### Option 2: Python
-- Python 3.7+ (manual fallback)
-- No dependencies required
-
-Use a local HTTP server and keep your existing hostname and port. Browser data is scoped to the origin; direct file access is outside the validated workflow.
-
-## Quick Start
-
-Use the [online GitHub Pages app](https://menggou1.github.io/FocusTodo-Local/). The online site and local loopback address have separate browser storage; use backup export/import to move your data.
-
-Pages deploys after the complete checks on `main` through the official Actions workflow using the existing runtime whitelist. Main keeps the full project; no `gh-pages` branch is required. See [Maintenance](docs/en/MAINTENANCE.md).
-
-Download and extract either portable archive from [Releases](https://github.com/menggou1/FocusTodo-Local/releases), then install Node.js 22+. The ZIP and tar.gz contain the same application and work on all three systems. Runtimes are not bundled. SHA256 checksums accompany each release.
-
-All systems: `node scripts/start.cjs` or `npm start`. The default browser opens after the server starts. Use `node scripts/start.cjs --no-browser --port 5511` for headless use or a different port; with npm, use `npm start -- --no-browser --port 5511`.
-
-### Windows
-Double-click `启动.bat` or run PowerShell `.\start.ps1`
-
-Open `http://127.0.0.1:5500/index.html`. Use `-NoBrowser` to suppress automatic browser opening and `-Port 5511` to select another port. Changing the port creates a different storage origin.
-
-### macOS / Linux
-```bash
-sh start.sh
-# Optional: sh start.sh --no-browser --port 5511
-# or
-python3 scripts/serve-static.py
+```sh
+npm ci
+npm run build:release
+npm run build
+npm start
 ```
 
-### Access
-```
-http://127.0.0.1:5500/index.html
-```
+`npm run dev` starts an isolated preview on 5511. It rejects ordinary profile data. The legacy oracle can run on 5513 using `node -e "require('./scripts/server.cjs').createServer().listen(5513,'127.0.0.1')"`. Never use the stable 5500 service for tests.
 
-## Project layout
-
-`src/` holds the pages, styles, preserved bundle and local modules. `public/` holds the static assets. `scripts/` contains launch, generation and release tools; `tests/` contains test suites and fixtures; `docs/` contains documentation and historical evidence. For development, run `npm ci`, `npm test`, `npm run check` and `npm run test:browser`. See Maintenance for build and release commands.
+[GitHub Pages](https://menggou1.github.io/FocusTodo-Local/) deploys only from successful `main` workflows. Its storage is separate from loopback; transfer data with backups. Opening HTML directly is unsupported.
 
 ## Features
 
-- 🍅 Pomodoro timer (25/5/15 min adjustable)
-- ✅ Task management (projects, subtasks, deadlines, reminders)
-- 📅 Calendar view, quick task creation, overlap layout and focus from a plan
-- 📊 Focus time reports
-- 🎨 Custom themes (Bing daily wallpaper requires Settings → General → External networking, off by default; local upload works offline)
-- 💾 Lossless Gzip / JSON backups, legacy imports, size analysis and optional wallpapers
-- 🌐 Complete Simplified Chinese and English local UI, with system-selected existing partial translations and readable English fallbacks
-- 🔔 Explicit desktop notification permission and test controls
+- Projects, folders, tags, subtasks, priorities, recurrence, deadlines and reminders.
+- Countdown/countup, pause/resume, breaks, white noise, widgets and browser-dependent mini windows.
+- Day/week/month schedules, quick creation, drag edits, manual records, completed history and reports.
+- Local forest sunlight and achievements; the feature switch controls its header entry.
+- Light/dark appearance, bundled/uploaded wallpapers and opt-in Bing sources.
+- JSON/Gzip backups, legacy import, size inspection, wallpaper scope and explicit safety-backup confirmation.
+- System language, Simplified Chinese and English; existing system-language catalogs fall back to English.
 
-Focus forest restores the original interface and sunlight collection locally, without a daily collection limit. Collection follows the original flight animation and respects reduced motion. Enable it under Settings → General. Bronze, silver and gold achievements award sunlight once, based on saved focus time, completed tasks and local dates on which focus records end. Groups and online rankings remain excluded.
+Groups, cloud sync and server rankings are excluded. System notifications, sound, downloads and Document PiP depend on browser/system support. Reduced motion disables relevant transitions.
 
-## Language and notifications
+## Data and upgrades
 
-Open **Settings → General → Language** and choose **Follow system**, **简体中文** or **English**. Only fully adapted languages are explicit choices. Other existing translations are used by Follow system, resolving an available base language and then English. Missing messages show readable fallback text, never internal translation keys. Changing language reloads the page without moving or deleting browser data; your own task text, notes and image filenames are preserved.
+Production retains `PomodoroDB6` v3 and legacy setting keys. The application uses independent version `2.0.0`; source version 7.1.1, schema, backup format and legacy `Version='6.5'` remain separate. Keep the browser, hostname and port to retain the same origin. Another origin needs backup import. Development previews use `FocusTodoStandalone.PomodoroDB6` and `FocusTodoStandalone.data.*`.
 
-The same General section can request desktop notification permission or send a test notification. Permission is never requested at startup. If denied, change the browser's site permission; operating-system notification rules still apply.
+Export a complete backup before upgrading. Import accepts legacy JSON and content-detected Gzip, with 128 MB file/decoded limits. Export falls back to JSON without compression support; older apps need decompressed JSON. Wallpaper data remains in localStorage and is quota-limited. Replacement/reset downloads a complete safety backup and requires confirmation that it is saved/readable. Cancel preserves data. Clearing site storage deletes local content.
 
-## Tech Stack
-
-- React 16.14.0 + Redux
-- jQuery + Moment.js + Bootstrap Datepicker
-- IndexedDB (PomodoroDB6) + localStorage
-- Pure static files, no backend required
-
-## File Structure
-
-```
-FocusTodo/
-├── index.html          # Entry point
-├── patch.js            # Local patch
-├── main.css            # Styles
-├── js/main.js          # Main application
-├── i18n/               # Internationalization
-├── img/                # Images
-├── audio/              # Audio files
-└── font/               # Fonts
-```
-
-## Data Storage
-
-- **IndexedDB**: Tasks, pomodoro records, schedules, etc.
-- **localStorage**: Settings, user credentials, themes, etc.
-
-Timer sessions use the `TimerSession` store in `PomodoroDB6` v3. Long interruptions require confirmation. Stopping saves valid work and resets elapsed time; removing a timing task preserves the task in the list.
-
-Settings → Account exports a complete `.json.gz` backup by default, with plain JSON and wallpaper omission available. Imports identify JSON/Gzip by content, retain v1/v2 compatibility, and show the backup scope before replacement. Omitting wallpapers restores the built-in Leaf theme. Automatic pre-import/reset JSON backups always include all data. Without compression support, exports fall back to JSON; Gzip imports require decompression support. Encoded and decoded backups are limited to 128 MB. Older app versions cannot directly import Gzip. Images still use localStorage and remain subject to browser quota. Starting a download does not prove the file was permanently saved.
+TimerSession persists the timer. Execution gaps over five minutes require review; stopping saves eligible focus segments of at least 25 seconds. Close all app windows before rollback and keep a complete backup. Never delete databases to bypass compatibility checks.
 
 ## Documentation
 
-The application guide, maintenance, architecture, backlog and release documentation are available in English. [English documentation index](docs/en/README.md).
-
-| Goal | Start here |
-|---|---|
-| Tasks, focus, calendar and backups | [User guide](docs/en/GUIDE.md) |
-| 2.0.0 scope, implementation order and acceptance | [2.0.0 plan](docs/en/plan/2.0.0.md) |
-| Changes, release evidence and historical reports | [Changelog](docs/en/CHANGELOG.md) |
-| Development, tests and version/release procedure | [Maintenance guide](docs/en/MAINTENANCE.md) |
-| Open engineering, verification and future plans | [Backlog](docs/en/BACKLOG.md) |
-| Module, database and legacy bundle boundaries | [Architecture](docs/en/ARCHITECTURE.md) |
-
-Current application: `7.1.1-local.1.9.3`, author Lexible. Development starts with `npm ci`; setup and checks are documented in the maintenance guide. The legacy React bundle is patched and cannot be fully rebuilt by the historical upgrade scripts.
+[Guide](docs/en/GUIDE.md) · [Maintenance](docs/en/MAINTENANCE.md) · [Architecture](docs/en/ARCHITECTURE.md) · [Testing](docs/en/TESTING.md) · [Changelog](docs/en/CHANGELOG.md) · [Backlog](docs/BACKLOG.md)
 
 ## License
 
-For personal use only. Please support the official software.
+[MIT](LICENSE), retaining the Lâm Ngọc Khương and Lexible copyright notices. See [third-party notices](THIRD-PARTY-NOTICES.txt) and the complete licenses shipped in `licenses/`.

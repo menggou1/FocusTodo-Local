@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def verify(tag, directory, reference=None):
     config = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))
     version = config['localVersion']
-    full = config['officialVersion'] + '-local.' + version
+    full = version if int(version.split('.')[0]) >= 2 else config['officialVersion'] + '-local.' + version
     package = json.loads((ROOT / 'package.json').read_text(encoding='utf-8'))
     if tag != version or package['version'] != full or config['updates'][0]['version'] != full:
         raise ValueError('Tag and release versions do not match')

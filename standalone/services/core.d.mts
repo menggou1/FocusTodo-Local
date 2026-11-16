@@ -167,6 +167,7 @@ export interface CoreServices {
 }
 export interface CoreCapabilities {
     storage: Storage; indexedDB: IDBFactory; now(): number; randomUUID(): string; random(): number;
+    databaseName?: string; storagePrefix?: string;
     appVersion: string; encodeBase64(value: string): string;
     releaseConfig?: {localVersion: string; officialVersion: string; date: string; updates: CompatibleRecord[]; [key: string]: unknown};
     decodeBase64?(value: string): string; languages?: readonly string[];

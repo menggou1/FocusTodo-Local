@@ -1,3 +1,4 @@
+import { ConfirmDialog } from './ConfirmDialog';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import interactionCSS from '../../styles/interactions.css?inline';
@@ -187,13 +188,11 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
     {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`,'--float-size':task?'232px':'147px','--float-offset':task?'-108px':'-60px'} as React.CSSProperties}>{surface}</dialog>:surface}
     {mini && !mini.closed && createPortal(<section data-app-interaction-root className={'workspace-mini-native workspace-floating-timer'+(task?' has-task':'')} aria-label={text.mini} data-state={state} style={{backgroundImage:`url("${backdrop}")`}}>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={timerImage('float-timer-close')} alt=""/></button></section>, mini.document.body)}
     {miniError&&<div className="legacy-timer-notice" role="status">{miniError}</div>}
-    {confirmation && <Dialog title={text.stop} close={() => setConfirmation(false)}>
-      <p>{text.stopHelp}</p><footer><button onClick={() => setConfirmation(false)}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {
+    {confirmation && <ConfirmDialog title={services.language.legacyText('tmr_stop_title')} message={services.language.legacyText('tmr_stop_prompt')} canClose={!busy} close={() => setConfirmation(false)}>{dismiss=><><button disabled={busy} onClick={dismiss}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {
         if (await run(async () => {
           await services.timer.command({ type: 'stop', expectedSession: session?.sessionId });
-        })) setConfirmation(false);
-      }}>{text.confirm}</button></footer>
-    </Dialog>}
+        })) dismiss();
+      }}>{services.language.legacyText('tmr_stop')}</button></>}</ConfirmDialog>}
     {modePicker&&<TimerModeSelector mode={mode} interval={interval} close={()=>setModePicker(false)} confirm={async value=>{return run(async()=>{await services.timer.command({type:'mode',mode:value,expectedSession:session?.sessionId});await services.settings.set('isCountdown',value==='countdown')})}}/>}
     {widgetEditor&&<WidgetEditor close={()=>setWidgetEditor(false)}/>}
     {sound && <WhiteNoiseSelector close={() => setSound(false)} />}

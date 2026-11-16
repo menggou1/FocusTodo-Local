@@ -55,7 +55,13 @@ body { font:14px/20px var(--workspace-font); background:var(--workspace-bg); col
 .workspace-priority { color:var(--workspace-accent); }
 .workspace-shell .workspace-handle,.workspace-dialog .workspace-handle { cursor:grab; touch-action:none; width:22px; padding:4px 2px; color:var(--workspace-muted); flex:none; }
 [data-dragging=true] { opacity:.5; }
-.workspace-empty { padding:32px 0; text-align:center; color:var(--workspace-muted); }
+.workspace-empty { padding:0; margin:0; text-align:center; color:var(--workspace-text); }
+.workspace-empty-art{height:220px;background:center/220px 220px url('../../public/img/tsk_empty.png') no-repeat}
+.workspace-empty-title{font:14px/20px var(--workspace-font)}
+.workspace-empty-desc{padding-top:2px;font:12px/17.1429px var(--workspace-font);color:var(--workspace-muted)}
+.workspace-empty[data-search] .workspace-empty-art{background-image:url('../../public/img/search-empty-image.png')}
+:root[data-theme=dark] .workspace-empty-art{background-image:url('../../public/img/tsk_empty_dark.png')}
+:root[data-theme=dark] .workspace-empty[data-search] .workspace-empty-art{background-image:url('../../public/img/search-empty-image-dark.png')}
 .workspace-shell .workspace-completed-toggle { display:block; margin:20px auto; border-radius:16px; background:var(--workspace-panel); font-size:12px; }
 .workspace-details { flex:0 0 340px; width:340px; padding:16px; background:var(--workspace-panel); border:16px solid var(--workspace-bg); border-left:0; border-radius:12px; overflow-wrap:anywhere; }
 .workspace-details header { display:flex; justify-content:space-between; align-items:center; gap:8px; }

@@ -4,9 +4,9 @@ import { ServiceError } from './errors.mjs';
  * Candidate storage stays namespaced. Backup metadata retains the legacy format.
  */
 export function createDataService({ indexedDB, storage: localStorage, timerCore, backupCodec,
-    databaseName, now: clockNow, randomUUID, appVersion, encodeBase64, translate = value => value, locks = null, channel = null,
+    databaseName, allowLegacyData = false, now: clockNow, randomUUID, appVersion, encodeBase64, translate = value => value, locks = null, channel = null,
     emit: onEvent = () => {}, saveBackup, recoverTheme, fault = () => {} }) {
-    if (!databaseName?.startsWith('FocusTodoStandalone.') || !indexedDB || !localStorage ||
+    if (!(databaseName?.startsWith('FocusTodoStandalone.') || allowLegacyData === true && databaseName === 'PomodoroDB6') || !indexedDB || !localStorage ||
         !timerCore || !backupCodec || ![clockNow, randomUUID, encodeBase64].every(value => typeof value === 'function')) {
         throw new Error('Explicit isolated data-service capabilities are required.');
     }

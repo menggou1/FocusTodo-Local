@@ -3,13 +3,16 @@ import { readFile, writeFile, mkdir, readdir, rename, copyFile, rm, lstat, realp
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import { createHash } from 'node:crypto';
 const root = await realpath(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'));
 process.chdir(root);
-const layout = JSON.parse(await readFile('scripts/standalone-layout.json', 'utf8'));
+const production = process.argv.includes('--production');
+const layout = JSON.parse(await readFile(production ? 'scripts/app-layout.json' : 'scripts/standalone-layout.json', 'utf8'));
+const outputRoot = production ? 'app' : 'standalone';
 const site = path.join(root, layout.siteDirectory), debug = path.join(root, layout.debugDirectory);
 // Both fixed output paths are inside ignored dist; never accept an arbitrary delete target.
 for (const target of [site, debug]) {
-  if (!target.startsWith(path.join(root, 'dist', 'standalone') + path.sep)) throw new Error('Invalid output directory');
+  if (!target.startsWith(path.join(root, 'dist', outputRoot) + path.sep)) throw new Error('Invalid output directory');
   let current = root;
   for (const part of path.relative(root, target).split(path.sep)) {
     current = path.join(current, part);
@@ -21,7 +24,7 @@ for (const target of [site, debug]) {
   }
 }
 await rm(debug, { recursive: true, force: true });
-await build({ configFile: path.join(root, 'vite.standalone.config.mjs') });
+await build({ mode: production ? 'release' : 'isolated', configFile: path.join(root, 'vite.standalone.config.mjs') });
 // Direct handlers also capture early stylesheet completion on engines whose
 // non-bubbling link events do not reach a window/document capture listener.
 const htmlPath = path.join(site, 'index.html');
@@ -54,14 +57,13 @@ for (const name of ['react', 'react-dom', 'scheduler']) {
 }
 await copyFile('public/font/OFL-NotoSans.txt', path.join(site, 'licenses', 'NotoSans-OFL.txt'));
 await copyFile('LICENSE', path.join(site, 'LICENSE'));
-await writeFile(path.join(site, 'THIRD-PARTY-NOTICES.txt'),
-  'FocusTodo isolated engineering candidate\nReact, ReactDOM and scheduler: MIT. Full copyright and license texts are in licenses/.\nNoto Sans and Noto Sans SC: SIL Open Font License 1.1; see licenses/NotoSans-OFL.txt.\nAudio assets, UI icons/backgrounds/forest illustrations and translation catalogs originate from FocusTodo 7.1.1; redistribution authorization was confirmed by the maintainer. Per-asset release notices remain a release-preparation requirement.\nNo legacy bundle is distributed in this candidate.\n');
+await copyFile('THIRD-PARTY-NOTICES.txt', path.join(site, 'THIRD-PARTY-NOTICES.txt'));
 const release = JSON.parse(await readFile('standalone/app-version.json', 'utf8'));
-await writeFile(path.join(site, 'prototype-build.json'), JSON.stringify({
-  kind: 'isolated-prototype', localVersion: release.localVersion, sourceVersion: release.officialVersion,
-  schemaVersion: 3, backupExportVersion: 2, persistence: 'isolated-namespaced-v3', serviceProtocol: 1, base: './',
+await writeFile(path.join(site, production ? 'build-info.json' : 'prototype-build.json'), JSON.stringify({
+  kind: production ? 'standalone-app' : 'isolated-prototype', ...(production ? { sourceDigest: (await import('./app-inputs.cjs')).default.inputDigest() } : {}), localVersion: release.localVersion, sourceVersion: release.officialVersion,
+  schemaVersion: 3, backupExportVersion: 2, persistence: production ? 'legacy-compatible-v3' : 'isolated-namespaced-v3', serviceProtocol: 1, base: './',
   syntaxTargets: ['Chrome 111', 'Edge 111', 'Firefox 114', 'Safari 16.4'],
-  isolationCapabilities: ['localStorage key enumeration', 'indexedDB.databases (Firefox 126+)', 'loopback server attestation'],
+  ...(production ? {} : {isolationCapabilities: ['localStorage key enumeration', 'indexedDB.databases (Firefox 126+)', 'loopback server attestation']}),
 }, null, 2) + '\n');
 const names = (await files(site)).map(file => path.relative(site, file).split(path.sep).join('/')).sort();
 for (const name of names) {
@@ -69,13 +71,13 @@ for (const name of names) {
     throw new Error('Unexpected runtime asset: ' + name);
   }
 }
-await writeFile(path.join(site, 'runtime-manifest.json'), JSON.stringify({ files: [...names, 'runtime-manifest.json'].sort() }, null, 2) + '\n');
+await writeFile(path.join(site, 'runtime-manifest.json'), JSON.stringify({ files: [...names, 'runtime-manifest.json'].sort(), sha256: Object.fromEntries(await Promise.all(names.map(async name => [name, createHash('sha256').update(await readFile(path.join(site, name))).digest('hex')]))) }, null, 2) + '\n');
 const metrics = [];
 for (const file of await files(site)) {
   const bytes = await readFile(file);
   metrics.push({ file: path.relative(site, file).split(path.sep).join('/'), bytes: bytes.length, gzipBytes: gzipSync(bytes).length });
 }
-await writeFile(path.join(root, 'dist/standalone/build-metrics.json'), JSON.stringify({
+await writeFile(path.join(root, 'dist', outputRoot, 'build-metrics.json'), JSON.stringify({
   node: process.version, files: metrics, totalBytes: metrics.reduce((n, item) => n + item.bytes, 0),
 }, null, 2) + '\n');
-console.log('Isolated prototype built in ' + layout.siteDirectory + '; private sourcemaps in ' + layout.debugDirectory);
+console.log((production ? 'Standalone app built in ' : 'Isolated preview built in ') + layout.siteDirectory + '; private sourcemaps in ' + layout.debugDirectory);

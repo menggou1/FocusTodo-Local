@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
 const release = JSON.parse(readFileSync(new URL('./standalone/app-version.json', import.meta.url), 'utf8'));
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: 'standalone',
   base: './',
   publicDir: false,
@@ -19,20 +19,22 @@ export default defineConfig({
       });
     },
     transformIndexHtml(html, context) {
+      if (mode === 'release') html = html.replace(' — Preview', '');
       return context.server ? html.replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*") : html;
     },
   }],
   server: { host: '127.0.0.1', port: 5511, strictPort: true },
   define: {
+    __APP_ISOLATED__: JSON.stringify(mode !== 'release'),
     __LOCAL_VERSION__: JSON.stringify(release.localVersion),
     __SOURCE_VERSION__: JSON.stringify(release.officialVersion),
   },
   build: {
-    outDir: '../dist/standalone/site',
+    outDir: mode === 'release' ? '../dist/app/site' : '../dist/standalone/site',
     emptyOutDir: true,
     target: ['chrome111', 'edge111', 'firefox114', 'safari16.4'],
     sourcemap: 'hidden',
     assetsInlineLimit: 0,
     manifest: true,
   },
-});
+}));

@@ -1,222 +1,59 @@
-# Maintenance and release guide
+# Development and release maintenance
 
-[English documentation](README.md) · [Architecture](ARCHITECTURE.md) · [Backlog](BACKLOG.md)
+[Home](../../README_en.md) · [Architecture](ARCHITECTURE.md) · [Testing](TESTING.md) · [中文](../MAINTENANCE.md)
 
-Current worktree: `7.1.1-local.1.9.3`, author Lexible. Version 1.6.0 has a tag but no Release. This guide describes the current workflow. Release reports retain historical evidence; open engineering, verification and proposal status live only in the backlog. [Milestone plans](plan/README.md) record goals and dependencies without a second progress list.
+## Environment and commands
 
+Development requires Node.js 22.12+ and locked `npm ci`; packaging requires Python 3.12+. Portable runtime needs no npm dependencies. The standard-library Python fallback supports Python 3.7+.
 
-The 1.9 browser suite covers opt-in networking, the shared bottom toast, release badges, wallpaper redirects/timeouts/day changes/cancellation, theme ownership and native mini windows. After `npx playwright install firefox webkit`, run `npm run test:compat` for Firefox/WebKit startup, tasks, timer recovery, themes and backup imports without BroadcastChannel, Web Locks or compression APIs. Linux Node 24 CI also runs this suite. Automated WebKit checks do not establish full real Safari acceptance.
-
-Design-theory documents are for entertainment only and are not development rules. Unless the user explicitly requests it, models must not read, consult or modify those documents. Development follows user requirements, code evidence and this maintenance guide.
-
-## Start development
-
-Check `git status --short`, the current branch and `git remote -v`. Preserve unrelated work. Test imports and resets with generated data in an isolated browser context and an ephemeral port, not the daily database.
-
-Run `npm ci` to install locked development dependencies. Development requires Node.js 22.12+; CI covers 22 and 24, and this candidate was checked on Node.js 24.16.0. Running the packaged app does not require npm dependencies. The production app retains its legacy entry: start with `node scripts/start.cjs`, `npm start`, `sh start.sh`, or the Windows launcher. The default origin is `http://127.0.0.1:5500/index.html`. Browser data is scoped to the browser, hostname and port. That entry has no React source build or hot reload; refresh after editing static files. The independent candidate has its own workflow below.
-
-### Isolated 2.0.0 candidate (B/C/D)
-
-`standalone/` combines the React + TypeScript + Vite skeleton with C core services. D connects all workspace, task/list, timer, calendar/reminder, history/report, forest/achievement, settings/theme/profile/backup and notification/update views. Field autosave and batch ordering use conflict checks and atomic commands. Compatible v1.1 additions supply existing feature needs without changing schema/protocol. The user authorized D-V visual restoration; current acceptance and later-stage gates are in the [Backlog](BACKLOG.md). See the [development evidence](../2.0.0/evidence.md) and [service contracts](2.0.0/2.0.0-service-contracts.md). Keep work on `refactor/standalone-app`; merging into other branches is prohibited. Production, Pages and normal portable packages retain the existing entry.
-
-```bash
-npm ci
-npm run build:standalone
-npm run start:standalone
-# Source debugging and HMR on the fixed isolated port
-npm run dev -- --host 127.0.0.1 --port 5511 --strictPort
-# Windows PowerShell shortcut (the same development server)
-.\scripts\preview-standalone.ps1
-npm run package:standalone
-npx playwright install chromium firefox webkit
-npm run test:standalone
-# C services only; no site build required
-npm run test:services
-# D workspace/timer; build the candidate first
-npm run test:workspace
-```
-
-The development preview uses `http://127.0.0.1:5511/`; `dev:standalone` uses the same Vite configuration. Run `npm ci` once if dependencies are missing. Later starts require no cleaning or production build. Components and CSS update through HMR; open the URL in a normal browser. The PowerShell script runs in the foreground; Ctrl+C stops this server. Port conflicts fail without selecting another port or terminating other processes.
-
-start:standalone prints a random loopback URL; preview:review uses http://127.0.0.1:5512/, excluding production 5500. Different ports have separate data. Use a separate browser context. Startup checks server attestation, storage and database inventory. Only `FocusTodoStandalone.PomodoroDB6` v3 and its `-maintenance-lock` v1 are allowed. Foreign/legacy databases or storage, opaque database enumeration, incompatible schemas and client protocols reject startup without deletion. Firefox needs 126+ for enumeration. Physical settings use `FocusTodoStandalone.data.`; backups retain logical legacy keys and `PomodoroDB6` v3 metadata. Never share the production database or bypass isolation by renaming databases.
-
-Recovery order is database import journal, theme journal, identity/preferences, timer, then business snapshots/schedulers. Imports await the caller's backup sink and cancel if missing or failed. Durable logs support recreation. Services own ticks, audio locks, reminders and cleanup. Components consume `ApplicationServices` without repository transactions. `standalone/shared/catalog.json` is generated from `public/i18n/` by `node scripts/build-i18n.cjs` (also called by `build:release`); do not hand-edit it.
-
-`dist/standalone/site/` is the allowlisted runtime; hidden maps and Vite metadata stay in `dist/standalone/debug/`. ZIP/tar.gz run with `node start.cjs`, or `node start.cjs --base /FocusTodo-Local/`, without npm/CDN. Audio, catalogs, list icons, forest/theme images and Noto fonts are local. Noto OFL text is included in `licenses/`; failed fonts do not block usability. External networking defaults off; Bing requires explicit opt-in and service restrictions. E17 still governs final distribution notices.
-
-`FOCUS_STANDALONE_ENGINES` selects engines for focused work, never replacing full acceptance. Evidence uses `dist/acceptance/` or `FOCUS_ACCEPTANCE_DIR`, leaving historical archives untouched. There is no service worker: offline means external networking blocked with the local HTTP server running. Test globals are built in memory and excluded from product packages.
-
-Historical verification requires an explicit authorized directory: `node tests/standalone/private-backups.cjs "<authorized-directory>"`. It compares old/new decoding, validation and in-memory database imports, never accesses the daily browser profile, and retains no filenames, task text, images or setting values. CI never scans private directories. Actual database upgrades and system environments remain under V02–V07/F.
-
-## Source boundaries
-
-The Node and Python servers accept only `127.0.0.1` or `localhost` Host values with valid optional ports. Custom domains are unsupported. Both disable caching and send `nosniff`. Node real-path checks reject links outside the runtime root or into hidden/private tooling paths. The Python fallback rejects symlinks and uses the same runtime allowlist, but does not support Node's audio range requests.
-
-Acorn, Playwright, fake-indexeddb and the React/TypeScript/Vite build dependencies are locked development dependencies. The data-service regression tests use isolated in-memory IndexedDB transactions to verify imports and conflict rejection. They do not replace real-browser acceptance.
-
-Paused breaks use the optional session field `pausedFrom: 'rest'`, retained by backups without changing database v3. End that break and export a backup before downgrading to 1.7.11 or earlier, which does not understand this field. Work spans retain occurrence order after a clock rollback even when wall-clock ranges overlap. Imports dated before the saved cursor require confirmation without counting a negative interval.
-
-| File | Responsibility |
+| Command | Purpose |
 |---|---|
-| `src/startup.css` / `src/js/local-startup.js` | First-screen sources inlined into HTML by `build:release`; independent of external styles/fonts. Progress follows real resource completion and app mounting. Reveal after required styles/data recovery, without waiting for optional images/fonts |
-| `js/local-timer-core.js` | Pure timer transitions, historical spans and completion events; no DOM or database access |
-| `js/local-data.js` | `PomodoroDB6` v3, transaction persistence, import/reset journals and complete snapshots |
-| `js/local-timer-ui.js` | Legacy timer adapter, recovery confirmation, subscriptions, audio and completion notifications |
-| `js/local-app-ui.js` | Task reminders, independent task/release reads, About and five-second reset confirmation |
-| `js/local-achievements.js` | Original forest collection animations, reduced motion, local achievements, original ranking drawer and refresh scheduling |
-| `js/local-backup.js` | Compact JSON/Gzip, content sniffing, scope, size analysis and bounded decoding |
-| `js/local-theme-storage.js` | Recoverable theme JSON/active/theme writes without copying image data into the journal |
-| `js/local-i18n.js` | Language preference, system resolution, local text and legacy fallback |
-| `public/i18n/local-en.json` | English translations for local UI and errors |
-| `src/js/local-i18n-catalog.js` | Generated complete fallback catalog; do not edit directly |
-| `js/local-settings-ui.js` | General language controls and explicit notification permission/test controls |
-| `src/local-controls.css` | Shared control atoms across the application: existing button, switch, tomato icon, date-picker and menu visuals; feature layout remains in its owning module |
-| `release.json` | Human-edited version, author, dates and Chinese/English release notes |
-| `src/patch.js` | Ordered, idempotent installation of identity, network, backup UI, settings and themes through their owning feature services |
-| `src/js/local-network.js` | Same-origin/Bing policy and reachable legacy account XHR behavior; preserve real profile edits |
-| `js/local-calendar.js` | Local calendar selection/layout/lifecycle; data and timer commands use the existing services |
-| `src/js/main.js` | Modified legacy bundle; it cannot be discarded and fully rebuilt from an upstream bundle |
+| `npm run dev` | Isolated Vite/HMR preview on 5511; fresh browser context only |
+| `npm run build:release` | Generate package/lock/app versions, compatibility metadata and bilingual history from release.json |
+| `npm run build` | Typecheck and build production React into dist/app/site; private maps in dist/app/debug |
+| `npm start -- --no-browser --port 5512` | Run the built production app; default port is 5500 |
+| `npm run build:standalone` | Build isolated test app into dist/standalone/site |
+| `npm run start:standalone -- --port 5512` | Serve isolated build; 5500 is excluded |
+| `npm run package:standalone` | Isolated CI archives |
+| `python scripts/package-release.py` | Package fresh production output and distribution docs |
+| `python scripts/deploy-pages.py --output dist/pages-preview` | Verify committed inputs against the production build; output must not exist |
 
-Change legacy integration through the checked AST scripts, then retain both script and bundle changes:
+`standalone/app/main.tsx` mounts App. Features, domain rules and explicit services live under standalone/. Legacy src/ is retained for compatibility tests and the 1.9.x UI oracle; it is excluded from production archives and Pages. revise-*.cjs are legacy tools; upgrade-*.cjs are historical one-time scripts, not 2.0 build steps.
 
-```bash
-node scripts/revise-timer-integration.cjs
-node scripts/revise-app-integration.cjs
-node scripts/revise-controls-integration.cjs
-node scripts/revise-pomodoro-rendering.cjs
-node scripts/revise-project-management.cjs
-node scripts/revise-local-profile.cjs
-node scripts/revise-calendar-integration.cjs
-```
+Close all old app windows before upgrading to avoid mixed-client writes. Production uses PomodoroDB6 v3 and legacy keys. Preview uses namespaced data and loopback attestation. Do not disable preview guards, use the stable 5500 service for tests, or access real profiles/private backups. Use fresh contexts and generated data. Keep temporary files in identifiable task directories, remove only this task's files, and never change system permissions for cleanup.
 
-The shared bundle editor checks the known 1,484-module structure, unique boundaries, overlapping edits and final syntax. Inspect a failed boundary instead of bypassing it. Historical `upgrade-*.cjs` scripts are not a complete rebuild pipeline.
+## Development rules
 
-`scripts/localize-local-modules.cjs` migrated static local messages to the translation service; it does not translate task names, notes or uploaded filenames. Add new local English messages to `public/i18n/local-en.json`. Release titles and items also require `titleEn` and `itemsEn`. `npm run build:release` regenerates the catalog, release module, package versions, title and cache tags. Keep Chinese and English current documents aligned; the English historical reports may summarize the original technical history.
+Reuse the regular checkout and long-lived dev branch; current preparation explicitly uses refactor/standalone-app. Check Git status first, preserve existing work and do not force push. Use Conventional Commits: fix, feat, docs, refactor, test or chore. Release preparation may use `chore(release): prepare 2.0.0`.
 
+Compare 1.9.3/1.9.4 using identical data/language/theme/viewport/scale, actual DOM/styles, screenshots, interactions and animation. Preserve intentional legacy bug fixes. Repair shared controls and dialogs at their owner. Components receive ApplicationServices, never direct transactions/legacy globals. Preserve expected-field checks, atomic batches, draft retention and fail-closed recovery. New messages require Chinese and English.
 
-Module ownership follows features. Reuse the existing data, backup, settings and theme APIs before adding another compatibility file; reducing line count alone does not complete a refactor.
+## Versions and dates
 
-### Style ownership and reuse
+release.json is the editable source for version, author, date, repository and updates. build:release synchronizes app-version.json, package and lock metadata. From 2.0.0, application and tags use independent three-part versions; 7.1.1 is provenance. Schema v3, backup exportVersion 2 and legacy Version='6.5' remain separate. Preserve historical reports, copyright and MIT texts.
 
-| Source | Responsibility |
-|---|---|
-| `src/main.css` | Legacy feature layout, typography, themes and vendor foundations across sidebar, tasks, timers, calendar, statistics and other application areas |
-| `src/local-controls.css` | Shared buttons, icon buttons, settings rows, menus, date pickers/popovers, tomato icons and text truncation; legacy class aliases share declarations while preserving specificity and required exceptions |
-| `src/local-ui.css` | Local feature layout and interaction states; common button borders, backgrounds, colors and cursors belong to controls |
-| `FocusSettings.selectStyles()` / `switchProps()` | Shared selects for Pomodoro, Appearance and language; shared switch parameters for Pomodoro and General settings. Read current theme colors when used |
-| `src/startup.css` | Independent inlined first screen, without application-control or external-font dependencies |
-| `src/purchase.css` / `src/resetpassword.css` | Original standalone-page layout; no local application theme variables, retaining existing isolation of legacy account networking |
+The date retains its local release/update-day meaning (YYYY-MM-DD). Maintain it during development as well; current 2.0.0 update is 2026-11-16. Update it if preparation changes on a later day. About uses the same metadata. Fixing the currently unpublished 2.0.0 does not require another version.
 
-Reuse an existing atom or compatibility alias before adding a control; retain feature layout in its owning module. Run `revise-controls-integration.cjs` after `revise-app-integration.cjs` and verify idempotence. A new root runtime stylesheet must be included in HTML, portable archives and the Pages allowlist.
+After publication, never move/delete/recreate/reuse a pushed tag, including failed, cancelled or unpublished candidates. Fixes need a fresh incremented patch tag. Never silently replace published assets. FocusTodo.releaseRead changes only when the latest entry is opened, not when viewing history.
 
-## Data rules
+## Validation
 
-Keep timer records and session cursors in one database transaction. A valid partial focus segment has at least 25 seconds; short pauses retain pending spans. Recovery confirmation does not automatically count time after a backup was taken. Reset restores the local user and 15 system navigation lists.
+Run build:release, check, build, build:standalone, npm test, standalone Node tests, test:standalone, test:browser, test:release-app, Python release/page gates, package-release/package-smoke and git diff --check. Exact scope and UI suites are in [Testing](TESTING.md). Documentation-only changes need link/anchor checks; package manifest changes also need extracted-package checks. Preserve effective assertions and pixel thresholds. Commit generated files, never private data or debug output.
 
-Maintenance ownership uses a separate `PomodoroDB6-maintenance-lock` transaction and owned `LocalMeta` phases. A suspended owner retains its lock; another tab waits until it resumes or closes. Settings recovery runs before the app starts. Theme recovery follows import recovery, and internal theme journals are excluded from backups and discarded from incoming backups. This does not provide strict cross-tab serialization for ordinary theme editing; see the single backlog entry.
+## CI and release boundaries
 
-Images remain data URLs in localStorage. Backup compression is lossless, but large image restoration remains subject to browser storage quota. Encoded and decoded backups are bounded to 128 MB. Automatic pre-import/reset backups always include wallpapers. Starting a download cannot confirm permanent disk storage.
+main is the stable default and sole Pages deployment source. Branch pushes run CI. Preparation runs local checks, commits/pushes, waits for the exact commit's applicable Actions jobs, then opens the authorized PR. Current PR targets dev from refactor/standalone-app; stop after creation without merging, tags or Release.
 
-## Language and local scope
+Preflight verifies generated files, syntax/types, production/isolated builds, release gates and archives. Windows/macOS/Linux × Node 22/24 run unit/contracts; Node 24 checks the same portable ZIP/tar.gz and Chromium. Linux also runs Firefox/WebKit capability and isolated business checks. Production browser tests exercise same-origin synthetic legacy upgrade, relative project base, version/date and downloaded backups. WebKit is not real Safari acceptance.
 
-General settings offer Follow system, Simplified Chinese and English. Other existing translations are selected only by Follow system. System language resolution tries an available language/base, then English. Missing legacy strings use the complete English catalog and a readable fallback rather than exposing keys. Changing a language reloads the page without moving browser data. The language preference is included in backups and retained by reset.
+Only after explicit release acceptance, push an unused tag equal to localVersion. Successful tag CI creates a Pre-release. An accepted stable release may use `gh workflow run ci.yml --ref <Tag> -f release_channel=stable`. Gate checks preserve version/checksum/artifact consistency and candidate history.
 
-Groups and online rankings remain disabled. The original forest UI uses local sunlight and one-time achievements. Legacy group-related backup tables remain for compatibility.
-
-## Focused verification
-
-New browser and benchmark evidence goes to `dist/acceptance/`. Set `FOCUS_ACCEPTANCE_DIR` to redirect browser evidence. `docs/acceptance/` preserves historical evidence and is not overwritten by current runs.
-
-Use checks appropriate to the change. Do not repeat expensive performance or manual-environment runs merely to re-confirm unrelated code.
-
-```bash
-npm run build:release
-npm run check
-npm test
-npm run test:browser
-git diff --check
-```
-
-The browser runner starts an isolated loopback server, uses fresh contexts and blocks outside network requests except explicit scenarios. Set `FOCUS_TEST_FILTER` for a targeted run; filtered evidence does not replace a complete CI result. CI installs Playwright Chromium with `FOCUS_TEST_BUNDLED_BROWSER=1`. Locally the runner can use Edge/Chrome or `FOCUS_TEST_BROWSER`.
-
-Python 3.12+ builds portable archives and checks extracted execution and documentation links:
-
-```bash
-python scripts/package-release.py
-python tests/release/package-smoke.py
-```
-
-`npm run benchmark:backup` runs the optional generated 1/10/50 MB benchmark. Its sampled JS heap and fixture responsiveness are not process peak memory or full UI throughput. Do not include private backups, credentials or images in test evidence.
-
-## Version and release
-
-Keep historical reports and public evidence as records of their time. New reports describe the problem, final behavior, validation and relevant failures; unfinished work belongs only in Backlog.
-
-`main` is the default stable branch; PR review is recommended, not mandatory. Any development branch can publish portable packages via a version tag without merging or deploying Pages. Feature-branch test releases default to Pre-release. A fully accepted release branch may explicitly publish a stable Release.
-
-Never move, delete/recreate or reuse a pushed version tag, even for unpublished, failed or cancelled candidates. Increment the patch version and create a fresh tag for every repaired candidate. Do not silently replace a published Pre-release: use a new version for fixes, or explicitly promote it after verifying its assets match the accepted build. Never overwrite a published stable Release or its assets; publish fixes as a new version. Preserve historical failures and necessary evidence.
-
-The 1.x series, including this 1.9.3 release, uses `7.1.1-local.<major>.<minor>.<patch>`; annotated Git tags use only the local version. **Starting with 2.0.0, both application version and tag use the independent three-part version `2.0.0`, followed by major, feature and patch increments. Keep 7.1.1 only as provenance metadata, outside the application version.** This version rule is decided. The database version and legacy settings marker `Version=6.5` remain separate.
-
-**Version 1.9.3 retains the old format:** current generators and metadata remain applicable. During 2.0.0 development, update generation, display, old/new version recognition, release history, packaging and deployment gates together. Verify old backups, notification reads, cache and data continuity. Renaming must not reset databases, preferences or records, or rewrite historical versions, tags or Releases. The [2.0.0 plan](plan/2.0.0.md) defines the implementation order; status stays in Backlog.
-
-Add the newest Chinese/English user-facing update and report to `release.json`, retaining history. Keep report links in repository documents, not application dialogs. `npm run build:release` resolves the configured GitHub remote, with `origin` as the fresh-clone fallback, and regenerates metadata. Check the repository URL.
-
-### Branch management
-
-- `main` is the default stable branch and the sole source for official GitHub Pages deployment. `dev` is the long-lived branch for daily development, fixes and testing; merge it into `main` after validation.
-- Create temporary `feature/<name>` and `fix/<name>` branches as needed, normally from up-to-date `dev`. Create `release/<version>` from the commit intended for acceptance and publication. Keep names concise and descriptive, using lowercase letters, digits and hyphens; use the relevant version number for releases.
-- Fetch remote updates before creating or syncing branches, integrate changes into the corresponding local branch and resolve conflicts before pushing. Do not force-push over others' work.
-- Merge validated feature and fix branches into `dev`, and validated `dev` into `main`. Merge accepted release changes into `main` and sync them back to `dev`. A PR is optional; local merges and direct pushes are allowed.
-- Once temporary branches are merged and no longer needed, verify their commits are retained before deleting local and remote branches. Keep `main`, `dev` and historical archive branches. Non-`main` branches can publish a Release independently via a tag; only `main` deploys official Pages.
-
-Develop and validate on a branch; use a PR when review is useful. Update release metadata and bilingual reports for application releases. Push an annotated tag equal to `localVersion` from the intended commit. Tag pushes run full CI and create a Pre-release; avoid `[skip ci]` on release commits. After full acceptance of a release branch, run `gh workflow run ci.yml --ref <version-tag> -f release_channel=stable` to run full CI again and create a stable Release or explicitly promote the matching Pre-release. The operator's stable selection confirms acceptance; branch names do not prove acceptance. Check Actions, assets and release evidence. Verify Pages separately when deploying main.
-
-Branch pushes, main PRs, version tags and manual runs use `.github/workflows/ci.yml`. Preflight checks generated files, syntax, Pages filtering and release tests, then builds the archives. Documentation-only PRs may use a reduced matrix; all other runs, including tags, run Windows/macOS/Linux × Node 22/24 tests. All three Node 24 jobs smoke-test the same archives and run Chromium acceptance. Publication requires the tag run's preflight and complete matrix, matching versions and verified assets; it does not require main ancestry or Pages. Pages deploys only from main after full tests and refuses superseded commits. Browser evidence is retained for seven days; preserve required release evidence in the report. Archives exclude npm dependencies, tests, evidence, Git state and credentials.
-
-## Documentation layout
-
-The user guides are `docs/GUIDE.md` and `docs/en/GUIDE.md`; shared screenshots live in `docs/guide-images/` and ship in portable archives. Chinese and English release reports are in `docs/releases/` and `docs/en/releases/`. Old redirect pages are removed; links point directly to archived reports. When moving documents, update relative links, release metadata, generators and package contents, and check paths and anchors. Existing English reports are preserved by the generator.
-
-Engineering version plans live in `docs/plan/`, mirrored in `docs/en/plan/`, and record scope, priority, implementation order and acceptance criteria. Backlog alone tracks task status. Engineering documents and entertainment design-theory documents stay separate without cross-links; theory documents do not generate contributing guides or development requirements. Entertainment theory is excluded from portable runtime packages; all documentation stays out of the Pages runtime artifact.
-
-## GitHub Pages
-
-The site is [FocusTodo Local](https://menggou1.github.io/FocusTodo-Local/). `main` keeps the complete project. Repository Settings → Pages → Source must be **GitHub Actions**. `.github/workflows/ci.yml` deploys main after its full test matrix succeeds and supports manual runs on main. The `gh-pages` branch is no longer maintained or required.
-
-Official `configure-pages`, `upload-pages-artifact` and `deploy-pages` actions publish through the `github-pages` environment. Build has `contents: read` and `pages: read`; deployment has `pages: write` and `id-token: write`. No personal token is required. Deployments run serially without cancelling an active deployment.
-
-The shared whitelist `scripts/runtime-layout.json` maps committed `src/` and `public/` files to their original browser paths. The Pages artifact adds `.nojekyll` and `deployment.json`, excluding tooling, tests and docs. The workflow uploads `dist/pages`. Portable archives add launchers and release documentation to the same runtime files.
-
-Build a local preview with Python 3.12+ into a new directory:
-
-```bash
-python scripts/deploy-pages.py --output dist/pages-preview
-```
-
-The preview builds committed `HEAD` by default; use `--ref` to preview another commit. To redeploy, run **Test, deploy and release** on main in Actions. The build script no longer accepts `--push` or `--remote` and does not write a deployment branch. This migration keeps the application version, historical tags and Releases unchanged. It does not upload local browser databases. Verify the successful workflow, live manifest and actual startup under the project path. The online origin has separate storage from local loopback; moving data requires backup/import.
+Successful main CI builds Pages from committed matching production inputs, publishing manifest assets plus .nojekyll/deployment.json. Exclude legacy src, scripts, tests, private maps, docs, databases and CNAME. Deployment rechecks main to avoid stale overwrite. Actual live deployment, downloadable release assets and release-only checks remain future verification until release occurs.
 
 ## Provenance
 
-`upstream/7.1.1` preserves original commit `fe15a1d9201c6298f1c28c16dcb0b58c481f9999` and its original history. Keep the author and LICENSE. Main keeps the local product; the official Pages workflow publishes a filtered artifact. The repository left the fork network in October 2026; the upstream archive remains independent of that relationship. Do not modify or merge the archive into current development.
+Lexible maintains the local app from [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1. Original commit fe15a1d9201c6298f1c28c16dcb0b58c481f9999 and complete history remain on upstream/7.1.1 with upstream author/LICENSE. That branch is archived and never deployed. THIRD-PARTY-NOTICES.txt and complete third-party licenses ship with builds. Entertainment design literature is outside development rules and runtime distribution.
 
-## Startup feedback and performance sampling
+## Documentation
 
-After editing `src/startup.css` or `src/js/local-startup.js`, run `npm run build:release` to regenerate the inlined first screen. `node tests/browser/startup-acceptance.cjs` runs the startup and font cases; the full `npm run test:browser` includes them. For an optional cold-start comparison, run `node tests/performance/startup-performance.cjs <verified baseline commit>`. It uses isolated data and the project subpath, 150 ms synthetic latency and 200 KiB/s download throughput, aborting optional images/fonts equally. The JSON evidence is not a live Pages speed guarantee or a CI timing threshold.
-
-List management component integration is maintained by `node scripts/revise-project-management.cjs`.
-
-## Commit messages
-
-Use Conventional Commits for future commits: `type(optional-scope): short description`. Use `fix:` for repairs, `feat:` for new features, and `docs:`, `refactor:`, `test:` or `chore:` for their respective changes. Preserve published history.
-
-## Full-application style refactoring and visual acceptance
-
-Declare the refactoring scope, reference and intended visual changes before editing. **The 1.8.2 refactor covers all styles**, including sidebar, settings, timer, calendar, forest and other pages; there are no excluded target regions. Selectors, ownership and reuse may change while visuals and interactions remain stable by default. Explicit changes such as the language menu and collect-all action have their own acceptance criteria. Refactoring CSS organization does not require changing typography or layout.
-
-Measure a known pre-change revision with the same locale, theme, viewport, zoom and isolated data. Screenshot pixels are not CSS pixels. Keep independent computed-style evidence and deliberately injected regression checks covering geometry, clipping, popovers, keyboard input and control states. The existing sidebar fixture `tests/fixtures/sidebar-typography-cfd6449.json` remains visual regression evidence, not a freeze on CSS files or selector ownership. Future visual baseline changes need clear requirements and independent evidence; local feature changes should constrain their effects. Correct regressions locally while preserving useful changes. Passing test counts do not replace visual acceptance.
-
-Candidate tags 1.7.0, 1.7.1 and 1.7.2 are preserved; their unfinished updates are consolidated in the 1.7.3 report, with no separate formal report or Release. Current publication rules are described in Version and release above. Existing expanded English historical reports are retained. Task reminders use persistent task/date read identities independently of release reads; forest collection respects reduced motion.
-
-
-A pushed version tag must never be moved or reused, including failed, cancelled or unpublished candidates. Increment the patch version for every repaired candidate. Daily development reuses `D:\Program Files\Focustodo` on the long-lived branch `dev`, without creating a worktree for every task.
+Current Chinese/English docs live in docs and docs/en; reports use releases/. Contracts moved into Architecture, baseline/verification evidence into Testing; the temporary docs/2.0.0 tree is retired. Historical reports retain historical facts. Only [docs/BACKLOG.md](../BACKLOG.md) maintains unfinished work and acceptance status. Update package manifests and links when moving documentation.

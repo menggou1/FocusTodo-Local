@@ -8,6 +8,7 @@ import '../styles/app.css';
 
 const abort = new AbortController();
 const startup = document.getElementById('prototype-startup')!;
+declare const __APP_ISOLATED__: boolean;
 declare const __LOCAL_VERSION__: string;
 declare const __SOURCE_VERSION__: string;
 declare global {
@@ -25,7 +26,8 @@ try {
     });
   }));
   if (window.__prototypeBoot.failed || startup.dataset.state === 'error') throw new Error('Required resource failed');
-  await verifyIsolation(abort.signal, true);
+  if (__APP_ISOLATED__) await verifyIsolation(abort.signal, true);
+  else if (!['http:', 'https:'].includes(location.protocol)) throw new Error('Use an HTTP server');
   const core = await createBrowserServices(versionMetadata(__LOCAL_VERSION__, __SOURCE_VERSION__).appVersion);
   const { repository, ...services } = core;
   void repository;
@@ -45,8 +47,8 @@ try {
 } catch (error) {
   startup.dataset.state = 'error';
   document.getElementById('prototype-status')!.textContent = navigator.language.startsWith('zh')
-    ? '无法启动独立应用预览。请使用全新浏览器上下文和候选服务器；已有数据未更改。'
-    : 'Cannot start the independent app preview. Use a fresh browser context and the preview server; existing data was not changed.';
+    ? (__APP_ISOLATED__ ? '无法启动独立应用预览。请使用全新浏览器上下文和候选服务器；已有数据未更改。' : '无法启动 FocusTodo。请检查浏览器存储和必需资源，然后重试。')
+    : (__APP_ISOLATED__ ? 'Cannot start the independent app preview. Use a fresh browser context and the preview server; existing data was not changed.' : 'Cannot start FocusTodo. Check browser storage and required resources, then retry.');
   document.getElementById('prototype-retry')!.hidden = false;
   console.error(error instanceof Error ? error.name : 'Prototype startup failed');
 }

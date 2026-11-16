@@ -1,17 +1,10 @@
-# English documentation
+# Documentation
 
-[Application guide](../../README_en.md) · [中文文档](../../README.md)
+[Application README](../../README_en.md) · [中文](../../README.md)
 
-All current user and maintenance guidance is available here. Historical English release reports are concise technical accounts of the original reports, preserving their delivered behavior and public evidence.
-
-| Topic | Document |
-|---|---|
-| Install and run | [Application guide](../../README_en.md) |
-| Tasks, timer, calendar and backups | [User guide](GUIDE.md) |
-| 2.0.0 scope, stages and release criteria | [2.0.0 plan](plan/2.0.0.md) |
-| Develop, diagnose and publish | [Maintenance](MAINTENANCE.md) |
-| Modules, persistence and integration | [Architecture](ARCHITECTURE.md) |
-| Release history | [Changelog](CHANGELOG.md) |
-| Open work, verification and offline feature proposal | [Backlog](BACKLOG.md) |
-
-The English backlog mirrors the same item IDs as the canonical Chinese backlog. It is not a separate list of commitments. Completed work belongs in release reports.
+- [Guide](GUIDE.md): installation, tasks, focus, calendar, history, forest and backups.
+- [Maintenance](MAINTENANCE.md): source builds, CI, packaging, versions and release boundaries.
+- [Architecture](ARCHITECTURE.md): React components, service contracts and data compatibility.
+- [Testing](TESTING.md): commands, legacy UI comparisons and evidence limits.
+- [Changelog](CHANGELOG.md): bilingual release history.
+- [Unfinished work](../BACKLOG.md): the sole maintained task/acceptance list.

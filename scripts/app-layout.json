@@ -1,0 +1,15 @@
+{
+  "siteDirectory": "dist/app/site",
+  "debugDirectory": "dist/app/debug",
+  "files": [
+    "index.html",
+    "build-info.json",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.txt",
+    "runtime-manifest.json"
+  ],
+  "directories": [
+    "assets",
+    "licenses"
+  ]
+}

@@ -1,247 +1,81 @@
-# FocusTodo (专注清单) 前端架构文档
+# React standalone 架构
 
-## 项目概述
+[维护](MAINTENANCE.md) · [测试](TESTING.md) · [English](en/ARCHITECTURE.md)
 
-FocusTodo 是一款番茄钟 + 任务管理 Web 应用。原始版本依赖后端服务进行数据同步，经由 **Lexible** 修改后将任务、专注记录与设置保存在浏览器本地。外部联网默认关闭，用户开启后才允许 Bing 壁纸访问明确的外部来源。
+## 入口与构建
 
-当前本地版保留原森林界面并在本地计算阳光与成就；小组和在线排名仍排除。Group/GroupUser/Message 表保留旧备份兼容，不代表这些在线功能可用。
+FocusTodo 2.0.0 从 standalone/ 的完整 React / TypeScript 源码经 Vite 构建。standalone/app/main.tsx 等待必需样式后构造浏览器能力和服务，挂载错误边界与 App。正式构建不加载 src/js/main.js、patch.js、旧 React/Redux 或 FocusLocal 全局。src/ 与相关 revise 工具只用于旧版兼容、差分与历史 UI 基准。
 
-当前应用版本 `7.1.1-local.1.9.3`。版本变化与验收报告从[更新记录](CHANGELOG.md)进入，开发与发布见[维护指南](MAINTENANCE.md)，未完成工作只见[统一待办与验收](BACKLOG.md)。本文件说明模块边界，保留的原 bundle 推测结构不能替代可重建的组件源码。
-
-维护导航：[README](../README.md) → [维护指南](MAINTENANCE.md) → 本文的模块边界。计时与数据边界、加载顺序是当前明确接入；下方原组件树和 Redux 概览包含历史推测，改动前需要回到 bundle 实际代码核对。
-
-## 正式入口与 B/C/D 候选边界
-
-正式 `src/index.html` 继续加载旧 bundle 和本地模块，下文既有业务流程均描述该入口。`standalone/` 是独立 React + TypeScript + Vite 候选，从完整源码构建，不替换正式入口或进入正式 Pages/普通便携包。工程及兼容证据见[开发与验证依据](2.0.0/evidence.md)，命令见[维护指南](MAINTENANCE.md)。
-
-`app/` 负责启动，`services/application.mjs` 组合显式能力，`browser.ts` 是原生存储、时钟、媒体、图片、通知、网络和生命周期适配边界。`core.d.mts` 冻结服务合同；给 `features/` 的 `ApplicationServices` 在构造时剔除 repository，组件不取得事务或旧全局。`domain/` 保留计时、重复、日历、报表、成就与版本纯规则；`shared/catalog.json` 从既有词库生成。导航使用显式本地状态，不依赖旧 Redux 或路由库。
-
-首屏和必需样式先就绪；隔离校验、协议/数据库导入日志、主题日志、身份/设置、计时恢复、业务快照和调度依次初始化，再挂载错误边界及组件。字体使用本地资源与 swap 回退，不阻塞挂载。`features/workspace/` 负责任务/清单、计时、日程、历史/报表、森林/成就、设置/备份与通知/更新等完整本地领域 UI；`App` 负责应用壳、导航与快照投影。UI 仅订阅已提交快照，编辑保留打开时的原值，逐字段自动保存通过 `business.command` 的 `expected` 防止覆盖冲突，多行排序/清单管理用 `business.batch` 在同一事务提交；失败保留草稿，不兼容则停写。语言与亮暗从 `settings` 订阅。`Timer` 保持在导航外挂载，投影同一个 C 会话；原生 PiP 使用 React portal，共享命令且不另开数据库写入者。`SoundSettings` 只提交偏好与显式试听，后台音频归 C。对照结果见[开发与验证依据](2.0.0/evidence.md)，不构成人工视觉验收。设置弹窗、报表/森林与计时全屏保留底层工作区，关闭恢复选中状态；后台奖励刷新不占用用户命令锁。D-R 及 D-V 授权门禁见实施路线。
-
-候选只打开 `FocusTodoStandalone.PomodoroDB6` v3 与独立锁库，设置使用 `FocusTodoStandalone.data.`；未知/正式数据库、外部存储、不可枚举数据库及不兼容 schema/protocol 拒绝继续。备份保留 `PomodoroDB6` 逻辑元信息、原键和未知兼容字段。Firefox 需 126+。相对 base、独立运行白名单和私有 debug 目录保持；hidden map 不服务或入包。本地音频/词库随候选构建，外网默认关闭。无 service worker，离线指本地 HTTP 服务可用、实际外网阻断。
-
-每秒 tick、提醒、音频锁、跨页刷新和恢复由服务管理。无广播时使用有限轮询和焦点/存储事件；无 Web Locks 时维护仍由活 IDB 事务保护，自动背景音关闭。非缓存离开释放资源，缓存恢复只暂停/恢复。旧客户端、并发与降级限制见 C 兼容矩阵。
-
-版本服务分别识别 1.x 完整版本和 2.x 独立三段式，保留来源、schema、备份版本与原已读键。实际应用仍为 `7.1.1-local.1.9.3`；版本命名不触发数据重置，正式版本切换由发布准备处理。
-
-## 当前计时与数据边界
-
-首屏由 `startup.css` / `js/local-startup.js` 经版本生成器内联到 HTML，先于外部应用资源显示骨架与真实步骤进度。样式异步下载，脚本使用 `defer` 并行下载、按原顺序执行；真实应用和必要样式就绪后展示，不等待图片和字体。中英文复用同步词库，其他系统语言使用异步旧解析器；数据与主题恢复的先后边界保持不变。
-
-- `local-timer-core.js`：纯状态转换和实际时间片段结算；不足 25 秒的待结算专注不写入历史，短暂停保留有效区间供继续累计；停止/模式切换/解除任务会清零会话显示，历史记录独立保留。完成事件与部分记录分开表达。
-- `local-data.js`：数据库 v3 升级、计时事务、完整备份、导入恢复日志；记录和会话在同一事务提交。重置事务恢复默认系统清单；启动补回缺失系统清单并保留已有清单设置。跨标签页广播已提交记录以刷新各页统计。
-- 无 Web Locks 的维护使用独立 `PomodoroDB6-maintenance-lock` 数据库事务；其生命周期覆盖主库日志与设置写入，拥有者页关闭后自动释放，暂停时保留锁。主库 `LocalMeta` 保存操作 ID、拥有者和设置/回滚阶段，接管必须先取得事务锁；未完成日志保留并阻止旧写入。浏览器数据备份包含主库业务数据和设置，锁数据库不承载用户内容。
-- `local-achievements.js`：森林收取动画、成就条件、原排行榜样式的本地界面和刷新调度；动画完成后刷新阳光，保留稳定位置并在失败或卸载时取消。解锁记录及阳光余额由数据服务在单个本地设置值中保存，扫描已提交的番茄和任务。
-- `local-timer-ui.js`：连接旧 React 计时器，管理恢复确认、事件重绑定、卸载清理、完成提示和音频恢复。音频使用独立 Web Lock，后台页面暂停白噪音。
-- `local-release.js`：从 `release.json` 和 Git remote 生成版本及更新元信息。
-- `local-backup.js`：紧凑 JSON/Gzip 编码、内容识别、128 MB 解压边界、备份范围和体积分析；业务表和计时快照校验仍由数据层负责。主题图片仍保留 data URL，不引入数据库升级。
-- `local-app-ui.js`：任务到时提醒、通知更新详情、关于页版本与 GitHub 图标、无需密码的 5 秒删除确认。任务按 ID/提醒时间保存已读状态，在事务提交和跨页变更后重算红点，与版本更新已读状态独立。
-- `local-theme-storage.js`：协调主题 JSON、激活 ID 和 Theme 三键，用不含图片副本的小日志恢复对应元信息。主题模块在导入日志恢复后完成主题恢复，再启动主题界面；内部日志不进入备份。
-- `local-i18n.js` / `local-settings-ui.js`：同步决定界面语言，提供原界面和本地补丁的回退；通用设置只显式提供完整中文/英语，其他既有翻译由系统选择，缺项不显示键名。用户数据不经过 DOM 翻译。
-- 用户更新与维护报告分开：详情只显示标题、日期、版本、作者和简短条目，不展示 Markdown 按钮；报告在仓库 docs 中提供，`release.json` 的 report 字段仅供维护和一致性检查。
-- 加载顺序：`local-release.js` → `local-timer-core.js` → `local-data.js` → `local-achievements.js` → `local-timer-ui.js` → `local-app-ui.js` → `local-backup.js` → `local-theme-storage.js` → `local-settings-ui.js` → `local-network.js` → `patch.js` → `js/main.js`。应用启动等待 `FocusLocalReady` 完成导入日志与主题恢复。
-- `scripts/revise-timer-integration.cjs` 只更新明确的计时接入边界，可重复执行；旧 `upgrade-*.cjs` 仍是一次性改造记录，不能当作最终版本完整构建脚本。
-- `scripts/revise-app-integration.cjs` 维护关于、通知、森林接入、删除及项目刷新保护；与计时脚本共用 `scripts/lib/bundle-editor.cjs` 的检查和写入流程。
-- 本地账号读取统一使用 localStorage，避免旧浏览器 Cookie 覆盖重置/导入后的用户名。`local-ui.css` 使用原应用主题变量，使通知、独立弹窗及导入/导出按钮跟随外观切换。
-- 经典主题选择通过 `scripts/revise-app-integration.cjs` 接入 `FocusThemes.selectClassic`，等待维护事务锁下的主题提交后，在同一回调中移除自定义背景覆盖和选中标记。主题提交比较旧值，发现跨标签冲突时拒绝覆盖；没有 Web Locks 时仍复用 IndexedDB 事务锁，不按超时接管。Bing、上传和自动刷新结果按最新选择序号决定是否激活，下载缓存与激活分开。
-- 本地服务优先采用 `scripts/server.cjs`，只绑定 loopback，支持 GET/HEAD 和单段音频范围请求。
-
-### 修改路径与约束
-
-计时操作依次经过旧 React 的明确回调、`local-timer-ui.js`、`local-data.js` 事务以及 `local-timer-core.js` 状态转换，提交成功后再刷新界面。纯计时模块不直接操作 DOM 或 IndexedDB。用户更新/删除窗口由 `local-app-ui.js` 负责，删除调用同一数据服务，不经过账号密码或后端端点。
-
-显示版本统一来自 `release.json` 的生成结果；数据库 v3 和旧设置 Version 不是产品版本，不应同步改名。涉及旧组件接入的变更需要同时保存脚本和改后的 `js/main.js`，两者不能当作完整源码/构建产物的关系处理。
-
-本地昵称和头像通过数据服务直接保存，并遵守导入/重置维护锁；旧云账号模拟不负责这些写入。Web Locks 提供跨页写入和音频互斥；自动背景音使用可取消的排队请求交接，缺少该能力时按需说明并暂停自动背景音，保留试听和完成提示音；无 Web Locks 的计时记录去重及导入/重置维护归属已分别实现并验收，维护由独立 IndexedDB 事务锁保护。任何数据库结构变更须保留旧备份兼容与回退设计，具体维护规则见[维护指南](MAINTENANCE.md)。
-
-## 技术栈
-
-| 层 | 技术 | 说明 |
-|---|------|------|
-| 视图 | React 16.14.0 | Class 组件为主 (PureComponent)，Redux 状态管理 |
-| 样式 | CSS (main.css) | 410KB，单文件，CSS Modules 风格 |
-| 工具库 | jQuery, Moment.js, Bootstrap Datepicker | 全部打包进 main.js |
-| 加密 | jsrsasign | RSA 加解密，用于许可证校验 |
-| 运行 | 纯静态文件 | 内置 Node.js loopback 服务器，Python 备用启动器 |
-| i18n | 自定义 key-value | 32 种语言，文件在 `i18n/` 目录 |
-
-## 文件结构
-
-| 目录 | 内容 |
-| --- | --- |
-| `src/` | HTML、CSS、`patch.js`、压缩 React 主包 `js/main.js` 与本地模块；没有 React 重新打包步骤 |
-| `public/` | 图标、图片、字体、音频和语言资源 |
-| `standalone/` | Phase B 隔离候选的入口、合同、领域、服务、组件、共享文案、样式与可选资源 |
-| `scripts/` | 本地服务和启动、版本生成、AST 维护、便携包及 Pages 构建 |
-| `tests/` | `unit/`、`browser/`、`release/`、`performance/` 和共用 `fixtures/` |
-| `docs/` | 教程、架构、维护、版本报告和历史验收证据 |
-
-本地服务将 `src/`、`public/` 按 `scripts/runtime-layout.json` 映射到原有 URL。Pages 和便携包把文件映射到相同的平铺运行目录（如 `index.html`、`js/main.js`、`img/`），因此浏览器加载顺序、资源相对地址和本地数据来源保持兼容。
-
-## 加载时序
-
-HTML 内联首屏先显示；应用样式异步加载，以下脚本并行下载并按顺序执行。
-
-```text
-local-i18n-catalog → local-i18n → local-release → local-timer-core
-  → local-data → local-timer-ui → local-app-ui → local-backup
-  → local-theme-storage → local-settings-ui → local-network → patch → local-calendar → main
-```
-
-`patch.js` 按数据身份/存储、网络、备份界面、设置兼容和主题依次安装。身份复用数据服务原生写入能力；导入日志恢复后才恢复主题设置；主应用等待同一 `FocusLocalReady`。当前界面删除直接调用本地 reset，用户名和头像通过本地资料服务保存。日程任务与安排由同一事务创建，提交后沿用现有通道刷新其他页面；数据库仍为 v3。应用与必要样式就绪后展示，图片和字体继续加载。
-
-## 数据存储
-
-### 1. IndexedDB — `PomodoroDB6` (version 3)
-
-原有 8 张业务表保留，另加 2 张本地状态表，共 10 个 Object Store：
-
-| Store | keyPath | 索引 | 用途 |
-|-------|---------|------|------|
-| **Project** | `id` | state, sync, parentId | 清单（任务列表） |
-| **Task** | `id` | projectId, deadline, reminderDate, finishedDate, sync | 任务 |
-| **Subtask** | `id` | taskId, sync, finishedDate | 子任务 |
-| **Pomodoro** | `id` | taskId, subtaskId, endDate, sync | 番茄计时记录 |
-| **Schedule** | `id` | taskId, subtaskId, endDate, sync | 日程/日程事件 |
-| **Group** | `groupId` | groupLeader, createdDate, secret | 小组 |
-| **GroupUser** | `id` | groupId, uuid, sync, name, todayPomodoroTime, weekPomodoroTime, focusEndDate | 小组成员 |
-| **Message** | `messageId` | groupId, userId, state, sync, creationDate, replyUserId, replyMessageId, parentId, username | 小组留言 |
-| **TimerSession** | `id` | 无 | 当前计时状态、任务关联、进度、片段和待确认区间 |
-| **LocalMeta** | `id` | 无 | 数据维护标记、跨存储导入恢复日志 |
-
-### 2. localStorage
-
-约 60+ 个 key，按类别：
-
-| 类别 | Key 示例 | 说明 |
-|------|---------|------|
-| 凭证 | `cookie.ACCT`, `cookie.NAME`, `cookie.PID`, `cookie.UID` | 用户身份（Base64 编码） |
-| 番茄 | `WorkInterval`, `ShortBreakInterval`, `LongBreakInterval`, `LongBreakPomodoros` | 计时设置 |
-| 功能开关 | `AutoWork`, `AutoBreak`, `BanBreak`, `Forest`, `Group`, `RnkLst` | 功能启用/禁用 |
-| 外观 | `Theme`, `DarkMode`, `Countdown` | 主题与显示 |
-| 音效 | `WorkAlarm`, `BreakAlarm`, `BgMusic`, `RtnVol`, `WNVol` | 铃声与音量 |
-| 高级版 | `ExpiredDate`, `Price`, `PriceUSD`, `PriceInfo`, `Receipt` | 订阅状态 |
-| 专注森林 | `FocusTodo.forestState` | 本地阳光余额、收取记录及成就；旧 `Sunlight`、奖励键可迁入 |
-| 小组件 | `WidgetExpanded`, `Widgets`, `AllWidgets` | 计时器小组件 |
-| 定时器 | `timingTaskId`, `timingSubtaskId` | 当前计时的任务 |
-| 同步 | `SyncTimestamp`, `ConfigTimestamp`, `ServerTimestamp` | 同步时间戳 |
-| 自定义主题 | `lexible-custom-themes`, `lexible-active-custom-theme` | Bing每日壁纸 + 本地上传主题 |
-
-## 应用架构
-
-### 状态管理 (Redux)
-
-```
-<Provider store={rootStore}>
-  <App />
-</Provider>
-```
-
-- 使用 `react-redux` 的 `connect()` 连接组件
-- 主要 Reducer 推测包含: `userInfo`, `preference`, `goals`, `tasks`, `projects`, `pomodoros` 等
-
-### 路由/导航
-
-使用内部状态驱动的视图切换（无 React Router），通过侧边栏菜单切换主视图：
-
-| 菜单项 | 视图 | 说明 |
-|--------|------|------|
-| 任务列表 | 默认视图 | 按清单分组显示任务 |
-| 今日事 | MyDay | 今日待办 |
-| 日程 | Calendar | 日程视图 |
-| 已完成 | History | 历史任务 |
-| 搜索 | Search | 关键词搜索 |
-| 报表 | Report | 专注时间统计图表 |
-| 设置 | Settings | 子菜单：账号/高级版/通用/番茄/清单管理/关于 |
-
-### 组件树（推测结构）
-
-```
-App
-├── Sidebar (侧边栏)
-│   ├── UserInfo (头像、用户名)
-│   ├── ProjectList (清单列表)
-│   ├── FolderList (清单夹)
-│   └── MenuItems (导航菜单)
-├── MainContent (主内容区)
-│   ├── TaskList (任务列表视图)
-│   │   ├── TaskItem
-│   │   └── SubtaskItem
-│   ├── CalendarView (日程视图)
-│   ├── ReportView (报表视图)
-│   │   ├── PomodoroChart
-│   │   ├── TaskChart
-│   │   └── ProjectTimeDistribution
-│   ├── SearchView (搜索视图)
-│   └── SettingsView (设置视图)
-│       ├── AccountSettings (账号设置) ★ 导出/导入按钮
-│       ├── PurchaseSettings (高级版)
-│       ├── AppearanceSettings (外观设置) ★ 自定义主题
-│       ├── GeneralSettings (通用设置) ★ 功能开关已隐藏
-│       ├── PomodoroSettings (番茄设置)
-│       ├── ProjectManagement (清单管理)
-│       └── AboutSettings (关于)
-├── Timer (番茄计时器)
-│   ├── TimerDisplay (倒计时)
-│   ├── TaskSelector (任务选择)
-│   └── Widgets (小组件)
-├── ModalRoot (弹窗容器 #modal-root)
-│   ├── LoginDialog
-│   ├── PasswordConfirmDialog ★ 被 patch.js 替换
-│   ├── ConfirmDialog
-│   └── UpgradePromptDialog
-└── ForestView (专注森林)
-```
-
-## 本地功能模块
-
-入口 `patch.js` 只组织安装顺序，逻辑按所属功能维护。
-
-| 模块 | 当前职责 |
+| 目录 | 职责 |
 |---|---|
-| `local-data.js` | 数据、备份快照、重置/恢复、原生存储能力及本地身份保护 |
-| `local-calendar.js` | 日程快速创建、重叠布局、详情/跨页刷新、日程启动本地计时与生命周期；数据写入复用本地数据服务 |
-| `local-network.js` | XHR/fetch 策略、精确 Bing 白名单和现存账号操作兼容 |
-| `local-backup.js` | 编码/解码/下载与导入导出界面，统一 `installUI` 入口 |
-| `local-settings-ui.js` | 语言/通知设置、旧偏好和隐藏功能分类的兼容安装 |
-| `local-theme-storage.js` | 主题写入/恢复日志与主题界面，恢复在导入之后 |
-| `main.css` / `local-ui.css` | 按语言设置默认字体，附带字体加载后应用；组件可保留自己的字体规则 |
+| standalone/app | 入口、应用合同、错误启动反馈 |
+| standalone/features/workspace | 任务、清单、计时、日程、历史、报表、森林、设置与共享弹窗 |
+| standalone/domain | 计时纯核心、重复规则、日程布局、统计、版本和统一格式 |
+| standalone/services | 数据事务/日志、设置、业务快照、计时、主题、声音、网络、森林及备份 |
+| standalone/shared | 界面文案、生成词库及类型 |
+| standalone/styles | 应用与按功能归属的样式；共享控件和弹窗由其拥有者维护 |
+| public | 来源资源、字体、音频及翻译目录 |
+| scripts | 元信息生成、正式/隔离构建、启动、打包与 Pages 门禁 |
 
-上述安装入口可重复调用，避免重复包装存储和网络 API、重复恢复主题。没有全局 jQuery 轮询或手动修改用户名的调试入口。
+正式 build 输出 dist/app/site；独立预览输出 dist/standalone/site。两者均使用相对资源 URL 支持项目子路径，资源 manifest 为本地服务和分发白名单。私有 sourcemap 与 Vite manifest 放独立 debug 目录，不进入浏览器运行包。生产构建摘要覆盖源码、资源、配置、元信息及锁文件；打包拒绝陈旧产物，Pages 还验证已提交来源。
 
-## 国际化 (i18n)
+## 数据及恢复
 
-- 格式: `key = value` (类似 Java Properties)
-- 默认语言: `zh` (简体中文)
-- 语言文件路径: `i18n/strings_{lang}.txt`
-- 应用内使用: `e.i18n.prop("key")` 获取翻译文本
-- 语言检测: 读取 `localStorage.getItem("app_language")` 或浏览器语言
+正式浏览器适配器明确选择 PomodoroDB6 和不带前缀的既有设置；隔离构建使用 FocusTodoStandalone.PomodoroDB6 与 FocusTodoStandalone.data.*，启动前核对 loopback 证明、数据库与设置隔离。正式构建不依赖候选证明接口或 indexedDB.databases，因此可以在 Pages 上运行。数据服务默认仍拒绝正式数据库，只有正式适配器提供匹配的显式能力才允许使用。
 
-## 关键技术细节
+数据库版本为 3。Project、Task、Subtask、Pomodoro、Schedule 保存业务数据；Group、GroupUser、Message 仅保留旧备份兼容；TimerSession 保存计时；LocalMeta 保存客户端协议、维护及恢复日志。Group 的主键为 groupId，Message 为 messageId，其余为 id。Group 索引包括 membersNum。锁库独立于业务数据库。应用版本2.0.0不改变 schema、exportVersion 2 或旧偏好 Version='6.5'。
 
-### Base64 编码
-应用使用自定义 UTF-8 Base64 编码存储用户名/账号:
-```
-编码: btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, ...))
-解码: decodeURIComponent(atob(str).split('').map(c => '%' + c.charCodeAt(0).toString(16)).join(''))
-```
+启动依次恢复导入/主题日志、身份和设置、计时及业务快照，再显示界面。维护锁、协议检查与原值校验覆盖并发写入。导入/清空先等待完整安全备份确认，再通过日志保持 IndexedDB 和设置的一致性；失败回滚，恢复未完成则停写。旧 JSON 和 Gzip 均验证格式、引用、容量及业务字段，未知兼容数据保留。
 
-### 高级版机制
-- `ExpiredDate = '0'` → 永不过期（patch.js 强制设置）
-- `ExpiredDate = 时间戳` → 到期时间
-- 应用读取 `Base64.decode(cookie.ACCT)` 获取账号
-- 收据验证: `Receipt` key 存储购买凭证
+计时核心使用持久会话及事件投影；组件不持有另一套计时真相。有效段达到25秒才进入记录，中断超过5分钟要求确认。页面后台、跨窗口和重载通过服务生命周期协调。原生小窗通过 React portal 复用会话和命令，不创建第二个数据库写入者。自动背景音需 Web Locks 所有权；不支持时保留显式试听/铃声，关闭自动背景播放。
 
-### 番茄计时
-- 默认 25 分钟专注 / 5 分钟短休 / 15 分钟长休
-- 每 4 个番茄触发长休
-- 计时模式: 倒计时 / 正向计时
-- 支持白噪音背景音和完成铃声
+## 界面与布局
 
-### 自定义主题系统
-- Bing 每日壁纸：外部联网默认关闭；开启后多 API 容错（biturl.top → bing.com），按 12 小时及跨日刷新。元数据与 HTTPS Bing 图片通过拒绝重定向、可取消的 fetch 获取，图片转成本地 Blob/data URL，失败保留缓存。
-- 本地上传：最大 10MB，压缩至 1920×1080，生成 240×160 缩略图
-- 存储结构：`lexible-custom-themes` (JSON) + `lexible-active-custom-theme` (ID)
-- 背景守护：1秒轮询检测 Theme 变化，自动恢复自定义背景
+App 负责工作区导航与选择，Timer 在导航外持续挂载。次级页面保留底层工作区；原生 dialog 顶层容纳设置、森林、表单和确认框。ConfirmDialog 统一停止/删除/安全确认；Dialog 管理标题、错误、焦点恢复和关闭动画；专用选择器保留自己的草稿与确认语义。弹层和编辑控件通过 portal 避免被详情栏或滚动容器裁切。
 
-`cookie.NAME` 等名称是兼容旧组件的 localStorage 键，用户名不依赖浏览器 Cookie。启动、改名及旧 NAME 写入入口会清理遗留的浏览器 NAME Cookie；旧控制台改名调试函数已移除。
+报表时间轴在 render 中计算完整行高，layout effect 在首帧前以最终 CSS 高度同步画布像素和坐标轴；记录随后从下往上揭示。ResizeObserver 和字体就绪只触发重绘，不通过延迟隐藏修饰错误布局。已完成页按完成/记录结束日分组，记录与任务卡片使用旧版背景、日期格式及中性完成图标。运行图标仅在 work 状态关联该任务时使用秒表；暂停、停止和完成恢复相应图标。森林入口订阅已提交的 forestEnabled 偏好。
+
+## 服务合同
+
+权威类型为 standalone/services/core.d.mts 的 ApplicationServices，组合入口 createCoreServices，浏览器入口 createBrowserServices。组件只接收 ApplicationServices，不接收 repository、事务或旧全局。接口变更应同步实现、类型与差分证据。
+
+| 服务 | 界面使用的合同 |
+|---|---|
+| `timer` / `startForTask` | `getSnapshot`、`subscribe`、`command`、`view`；任务/子任务启动用 `startForTask`，提交时再次校验关联。`refresh/recover` 属服务/生命周期入口。会话和嵌套配置不可变；同一数据重复刷新保持快照身份。tick 由服务调度，组件只显示投影。 |
+| `business` | 一个事务内提交判别联合 `BusinessCommand`：清单/文件夹、任务/重复完成、子任务、日程及手动记录。`expected` 对指定字段做同事务原值检查，冲突拒绝；ID 与未知兼容字段保留。`tasksInView/search/history/progress/report/buckets` 从已提交快照查询。 |
+| `calendar` | `events` 保留真实时间戳与来源记录；`layoutEvents` 是纯区间布局，`deadlineInSevenDays` 用本地日历。`createTask` 原子创建任务及计划；`put` 以原值保护拖动/删除。界面自行把数据投影为日/周/月界面，不重写历史时间戳。 |
+| `settings` / `language` | 设置单键命令在维护所有权内提交，失败不发布新值；保留旧默认值和范围。语言显式选项 auto/zh-CN/en，系统语言使用现有词库和回退，用户任务/备注不翻译。资料通过 `saveProfile` 验证昵称/头像，历史未知设置只随完整备份保留。 |
+| `themes` / `wallpaper` | `themes.read/commit` 保留原主题日志；图片通过 `wallpaper.add/select/classic/remove/bing`。联网默认关闭，Bing 取消代际及 guard 在取得锁后再次验证；自定义原图与 Bing 缩略图各保留旧处理顺序。 |
+| `network` | 唯一显式请求入口；同源与精确 Bing 白名单、拒绝重定向、无凭证/referrer、大小/超时/取消。界面不绕过此入口直接 fetch 云账号或壁纸；没有云模拟成功响应。 |
+| `audio` / `notifications` / `reminders` | 自动背景音要求原生 Web Locks；缺失/失败则关闭自动播放，保留显式试听/铃声。通知权限只在用户明确操作时请求，未授权不调用系统显示。提醒保留 `[taskId, reminderDate]` 已读标识和独立调度。原生资源由浏览器适配器注入。 |
+| `forest` | 规范账本、奖励标记和余额在一个 localStorage 值内提交；维护锁保护并发收取。重复收取不加分，成就从已提交记录计算并幂等奖励。界面动画不拥有数据写入。 |
+| `backup` | `export` 返回 bytes、格式、MIME、大小和范围；界面负责下载交互。`restore/reset` 默认先等待备份接收器，随后以日志维护数据/设置一致性；成功后刷新服务。`backup:false` 只供显式隔离测试装载，产品确认流程使用默认。 |
+| `release` | 元信息来自 `release.json`，识别旧完整版本和独立版本，schema/备份版本各自独立。只有打开当前最新条目才 `markRead`；展示历史条目不清除最新提示。 |
+
+`refresh/suspend/resume/dispose` 是组合生命周期入口。非缓存离开释放连接、活事务、广播、计时与提醒调度、监听和媒体；缓存恢复只暂停/恢复，不销毁 React 或数据。组件取消订阅只释放自己的订阅，不能销毁共享服务。
+
+领域失败使用 `validation`、`conflict`、`network-blocked`、`timeout`、`cancelled`、`incompatible-client`、`disposed` 等代码。底层 IndexedDB 可保留 `ConstraintError/VersionError/AbortError`；恢复错误保留 `rolledBack/recoveryRequired`。只有成功提交才更新事实快照；通知回调失败不能把成功提交改写为失败。恢复未完成或协议/schema 不兼容时必须停写、保留存储并提示重建兼容服务，不能重置数据库“修复”。
+
+
+### 批次、目标、主题订阅与报表投影
+
+| 新入口/适配 | 行为与边界 |
+|---|---|
+| business.batch(commands) | 接受 1–2000 条 updateTask/updateSubtask/updateProject/removeProject，与单命令共享校验、关联及 expected 检查。全部在一个事务提交，任一冲突/失败全部回滚；后续命令读取同批先前更新。仅成功后发布快照，未知字段保留。用于任务/子任务原子排序和清单批量移动/删除，不是任意 repository 访问。 |
+| settings.goals() / setGoal(minutes) | 使用旧 Goals JSON 和分钟单位，缺省 180；提交保留 {time,type:'TIME',value,sync:false}。0 表示移除目标，范围 0–1440 整数。24 小时内修改替换最后目标，旧历史保留，服务维护锁保护设置写入。 |
+| forest.dailyLaunch() / rewards() | 按本地日记录一次启动，保留连续天数及既有 LaunchReward 字段；查询未收取且成熟的专注/任务/每日/连续奖励。每日 30、连续 6*min(days,80)、任务 5、专注 max(floor(minutes),1)；24–48 小时可收取。实际收取仍调用 v1 的规范账本/幂等提交，不由 UI 自加余额。 |
+| 浏览器通知标题 | 组合适配器提供按当前中英语言解析的标题；直接服务调用保留默认值，权限和调度合同不变。 |
+| 浏览器备份接收器 | 产品先下载完整替换前备份，再要求用户确认“已保存且可读”。取消抛 cancelled，恢复/清空不会继续。仅发出下载不自动算接收成功，产品不使用 backup:false。 |
+
+
+
+`wallpaper.subscribe/getSnapshot` 提供不可变 `{loading, version}`：`loading` 表示共享 Bing 请求，取消、失败或完成后释放；`version` 只在主题命令成功提交后递增。设置页据此展示下载及缓存激活，计时器仅订阅版本更新背景，组件卸载不取消共享下载。现有命令、取消代际、持久化日志和存储格式不变。`network-services.test.cjs` 与 `settings-interactions.cjs` 覆盖过期缓存先激活、请求中途切换/关闭重开、失败和重试。
+
+
+`business.getSnapshot().projects` 是清单顺序的唯一来源：所有系统清单（type >= 4000）在自定义清单之前，两组内按持久化 order 稳定排序，等值保留来源次序。清单夹的 parentId 和 expanded 仅控制侧栏/日程的层级展示，不重写子清单的 order；隐藏、删除的过滤仍由使用方决定。组件过滤快照而不再各自重排，拖动预览调用相同的 `orderedProjects`。主工作区按快照中的清单位置排列分组，去掉默认清单的局部特殊权重。排序命令、expected 冲突校验与持久化格式保持原合同。
+
+`business.report(start,end)` 在同一已提交业务快照内复用冻结的聚合结果；任何成功刷新都会使缓存失效，失败事务不发布新事实。缓存有容量上限，不跨快照保存，不改变秒数、区间重叠计算、任务归属或数据库记录。图表的分钟舍入属于显示投影；原始区间总秒数仍由聚合服务返回。
+
+## 资源、网络和许可
+
+外部联网默认关闭，Bing 通过显式网络服务白名单访问；同源资源本地交付。源码、翻译、音频及图像保留上游来源，根 LICENSE 保留上游和本地版权；React/ReactDOM/scheduler 与 Noto 字体完整许可随运行包交付。语言词库由 build:release 生成，系统语言缺项回退英文，用户内容不翻译。

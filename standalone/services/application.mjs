@@ -2,7 +2,7 @@ import { createDataService } from './data.mjs';
 import { createTimerCore } from '../domain/timer-core.mjs';
 import { createBackupCodec } from './backup-codec.mjs';
 import { createThemeJournal } from './theme-journal.mjs';
-import { createScopedStorage, dataDatabaseName } from './scoped-storage.mjs';
+import { createScopedStorage, dataDatabaseName, dataStoragePrefix } from './scoped-storage.mjs';
 import { createTimerService } from './timer.mjs';
 import { createPreferencesService } from './preferences.mjs';
 import { createLanguageService } from './language.mjs';
@@ -20,13 +20,13 @@ import releaseConfig from '../../release.json' with { type: 'json' };
 
 /** Frozen C contracts; browser resources/lifecycle are injected at the edge. */
 export async function createCoreServices({ storage: physicalStorage, indexedDB, now, randomUUID, random,
-    appVersion, releaseConfig: metadataSource = releaseConfig, encodeBase64, decodeBase64 = value => decodeURIComponent(escape(atob(value))),
+    appVersion, databaseName = dataDatabaseName, storagePrefix = dataStoragePrefix, releaseConfig: metadataSource = releaseConfig, encodeBase64, decodeBase64 = value => decodeURIComponent(escape(atob(value))),
     compression, locks, channel, saveBackup, translate, languages = ['en'],
     origin = 'http://127.0.0.1', fetch: transport = () => Promise.reject(new Error('Network transport unavailable')),
     createAudio, image = () => Promise.reject(new Error('Image converter unavailable')), notification, notificationIcon,
     visible = () => true, focus = () => {}, setTimeout: schedule = setTimeout, clearTimeout: cancel = clearTimeout,
     observe = () => () => {}, onEvent = () => {}, onError = () => {}, fault }) {
-    const storage = createScopedStorage(physicalStorage), releases = releaseMetadata(metadataSource);
+    const storage = createScopedStorage(physicalStorage, storagePrefix), releases = releaseMetadata(metadataSource);
     invariant(!appVersion || appVersion === releases.version, 'Application/release metadata mismatch');
     const report = error => { try { onError(error); } catch (_) { /* Observer. */ } };
     const core = createTimerCore({ translate }), codec = createBackupCodec({ compression, translate });
@@ -38,7 +38,7 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
         if (disposed || halted || !ready || data.maintenance) return;
         settings.refresh(); await Promise.all([business.refresh(), timer.refresh()]); reminders.refresh();
     };
-    data = createDataService({ indexedDB, storage, databaseName: dataDatabaseName, timerCore: core, backupCodec: codec,
+    data = createDataService({ indexedDB, storage, databaseName, allowLegacyData: databaseName === 'PomodoroDB6' && storagePrefix === '', timerCore: core, backupCodec: codec,
         now, randomUUID, appVersion: appVersion || releases.version, encodeBase64, locks, channel, saveBackup, translate, fault,
         recoverTheme: () => journal.recover(),
         emit(type, detail) {

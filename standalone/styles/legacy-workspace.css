@@ -37,6 +37,7 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 .workspace-summary-number{font:30px/36px DINCond;color:var(--workspace-accent);margin-left:4px}.workspace-summary-number:first-child{margin-left:0}.workspace-summary-unit{display:inline-block;margin-left:1px;font-size:12px;color:var(--workspace-muted);transform:scale(.91);transform-origin:left}
 .workspace-summary-title{height:20px;line-height:20px;margin-top:2px;font-size:12px;text-align:center;vertical-align:middle;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--workspace-muted)}
 .workspace-add-task{height:48px;min-height:48px;gap:0;padding:0 8px;border-radius:8px;margin:0 0 24px;border:1px solid transparent}
+.workspace-add-task[data-empty=true]{margin-bottom:20px}
 .workspace-add-task:focus-within{border-color:#ff5155}.workspace-shell .workspace-add-task input{flex:1;width:0;padding:0;border:0;background:transparent;height:30px;font-size:14px;outline:0}
 .workspace-add-task input::placeholder{color:var(--workspace-muted)}.workspace-add-task>.workspace-plus{flex:none;width:32px;height:24px;font-size:0;background:left center/25px 24px no-repeat url('../../public/img/tsk-new.png')}
 .workspace-quick-pomos{position:relative;flex:none;display:flex;align-items:center;justify-content:flex-end;width:120px;height:24px;padding-right:6px}

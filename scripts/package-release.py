@@ -8,12 +8,13 @@ import tarfile
 import zipfile
 
 from runtime_layout import ROOT, checkout_files
+from app_runtime import built_files, version as app_version
 
 
 def build(output, tag=None):
     config = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))
     version = config['localVersion']
-    full_version = config['officialVersion'] + '-local.' + version
+    full_version = app_version(config)
     if not re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', version):
         raise ValueError('Invalid release version')
     if tag is not None and tag != version:
@@ -22,15 +23,19 @@ def build(output, tag=None):
     if package['version'] != full_version or config['updates'][0]['version'] != full_version:
         raise ValueError('Run npm run build:release before packaging')
     # Explicit runtime allowlist: no credentials, dependencies, screenshots or Git state.
-    files = checkout_files()
+    production = int(version.split('.')[0]) >= 2
+    files = built_files() if production else checkout_files()
     extras = [ROOT / name for name in (
         'package.json', 'README.md', 'README_en.md', 'start.ps1', 'start.sh',
         '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs', 'scripts/serve-static.py',
         'scripts/runtime-layout.json', 'scripts/runtime-paths.cjs', 'scripts/runtime_layout.py',
+        'scripts/app-server.cjs', 'scripts/standalone-server.cjs',
+        'scripts/app-layout.json', 'scripts/standalone-layout.json',
     )]
-    for directory in ('docs', 'docs/en', 'docs/plan', 'docs/en/plan', 'docs/2.0.0', 'docs/en/2.0.0', 'docs/releases', 'docs/en/releases'):
+    for directory in ('docs', 'docs/en', 'docs/plan', 'docs/en/plan', 'docs/releases', 'docs/en/releases'):
         extras.extend(p for p in (ROOT / directory).glob('*.md') if p.name != 'CONTRIBUTING.md')
     extras.extend((ROOT / 'docs/guide-images').glob('*.png'))
+    extras.extend((ROOT / 'docs/acceptance/2.0.0-final').glob('*.json'))
     for file in extras:
         if not file.is_file() or file.resolve() != file:
             raise ValueError('Expected a regular portable file: ' + str(file))

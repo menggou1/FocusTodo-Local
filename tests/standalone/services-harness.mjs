@@ -1,3 +1,4 @@
+import publishedHistory from '../../release.json';
 /* Built only by services-browser.cjs. This API never enters the application. */
 import { createCoreServices } from '../../standalone/services/core.mjs';
 import { verifyIsolation as verifyOldIsolation } from '../fixtures/standalone-isolation-139d0f9.ts';
@@ -17,7 +18,7 @@ window.startServices = async ({ noLocks = false, noChannel = false, failAt = nul
     window.coreServices = await createCoreServices({
         storage: localStorage, indexedDB, now: () => window.syntheticClock,
         randomUUID: () => crypto.randomUUID(), random: () => Math.random(),
-        appVersion: '7.1.1-local.1.9.3', encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
+        appVersion: '7.1.1-local.1.9.3', releaseConfig: {...publishedHistory, localVersion:'1.9.3', date:'2026-11-07', updates:publishedHistory.updates.filter(row=>row.version.startsWith('7.1.1-'))}, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
         compression: window, locks: noLocks ? null : navigator.locks,
         origin: location.origin, fetch: (...args) => fetch(...args), languages: navigator.languages,
         visible: () => window.serviceVisible,

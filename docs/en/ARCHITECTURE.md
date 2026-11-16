@@ -1,107 +1,72 @@
-# Architecture
+# React standalone architecture
 
-[Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Open work](BACKLOG.md)
+[Maintenance](MAINTENANCE.md) · [Testing](TESTING.md) · [中文](../ARCHITECTURE.md)
 
-The production FocusTodo Local app combines the preserved 7.1.1 React bundle with explicit local modules. Its version remains `7.1.1-local.1.9.3`. Tasks, focus records, sessions and settings are browser-local. External networking is off by default; opting in permits the allowed Bing sources. The application does not require an account server; groups and server rankings are excluded. The original forest interface uses local sunlight and achievements.
+## Entry and distribution
 
-## B/C/D candidate boundary
+FocusTodo 2.0.0 builds from complete React/TypeScript sources under standalone/ with Vite. app/main.tsx waits for required styles, constructs explicit browser capabilities/services, then mounts ErrorBoundary and App. Production never loads the legacy bundle, patch.js, Redux or FocusLocal globals. Legacy src/ and revise tools remain only for compatibility/differential/UI-oracle tests.
 
-Production `src/index.html` still loads the legacy bundle/local modules described below. `standalone/` is an independently built React + TypeScript + Vite candidate, excluded from production Pages and normal portable releases. See the [development evidence](../2.0.0/evidence.md) and [Maintenance](MAINTENANCE.md).
+features/workspace owns business views and shared dialogs; domain owns pure timer/recurrence/calendar/report/version rules; services owns data, settings, transactions, timers, audio, wallpaper, network, forest and backups. shared owns generated catalogs and types; public owns upstream assets. Scripts own generation, builds, startup, packaging and deployment gates.
 
-`app/` bootstraps; `services/application.mjs` composes explicit capabilities; `browser.ts` adapts native storage/clock/media/images/notifications/network/lifecycle. `core.d.mts` freezes contracts. Components receive `ApplicationServices` with the repository physically omitted, without transactions or legacy globals. `domain/` owns pure timer/recurrence/calendar/report/achievement/version rules. `shared/catalog.json` is generated from existing catalogs. Navigation uses explicit local state without legacy Redux/router dependencies.
+Production outputs dist/app/site, isolated preview dist/standalone/site. Relative resource URLs support project subpaths. Explicit manifests constrain distributed/served files; maps and Vite metadata stay in private debug folders. A source/resource/config/lock digest rejects stale packages. Pages also verifies committed inputs.
 
-Required startup/styles precede isolation, protocol/DB import recovery, theme recovery, identity/preferences, timer, business snapshots/schedulers, then React/error-boundary mounting. Local fonts use swap fallback without blocking mount. `features/workspace/` owns task/list, timer, calendar, history/report, forest/achievement, settings/backup and notification/update UI; `App` owns shell/navigation/snapshot projections. UI subscribes to committed snapshots; edits retain their opened revision and field autosave uses `business.command` with `expected`, while multi-row ordering/list management uses one-transaction `business.batch`. Failures retain drafts and incompatibility stops writes. Language/dark mode subscribe to core settings. `Timer` stays mounted outside navigation and projects the same C session; native PiP uses a React portal with shared commands, not another DB writer. `SoundSettings` submits preferences and explicit auditions; C owns background audio. The [development evidence](../2.0.0/evidence.md) does not establish human visual acceptance. Settings overlays and full-screen Reports/Forest/timer preserve the underlying workspace/selection. Background reward refresh does not hold the user command lock. The roadmap defines mandatory D-R and D-V authorization gates.
+## Data and lifecycle
 
-Only `FocusTodoStandalone.PomodoroDB6` v3 and its separate lock DB are opened; settings use `FocusTodoStandalone.data.`. Foreign/production databases or storage, opaque enumeration and incompatible schema/protocol reject startup. Backups retain legacy logical metadata/keys and unknown fields. Firefox needs 126+. Relative base, a separate runtime allowlist and private debug maps remain. Audio/catalogs are local, networking defaults off, and there is no service worker; offline means local HTTP with Internet blocked.
+Production explicitly selects PomodoroDB6 v3 and legacy unprefixed preferences. Preview uses FocusTodoStandalone.PomodoroDB6 and FocusTodoStandalone.data.*, rejecting unrelated data before service creation. Production does not require preview attestation or indexedDB.databases and can run on Pages. Data services still default to rejecting the legacy database unless the production adapter supplies matching explicit capabilities.
 
-Services own ticks, reminders, audio locks, cross-page refresh and recovery. Without broadcasts, bounded polling and focus/storage events refresh; without Web Locks, live IDB transactions retain maintenance ownership while automatic background audio is disabled. Non-cached departure disposes resources; cached restoration suspends/resumes. The C matrix defines legacy/concurrency/downgrade restrictions.
+Project, Task, Subtask, Pomodoro and Schedule hold business data; Group/GroupUser/Message preserve backup compatibility only; TimerSession holds the timer and LocalMeta holds protocol/recovery state. Group uses groupId, Message messageId, others id. Group indexes include membersNum. Locks use a separate database. App version 2.0.0 does not change schema v3, backup exportVersion 2 or legacy Version='6.5'.
 
-Version services distinguish legacy full versions from independent three-part versions, retaining provenance/schema/backup versions and read keys. Production remains `7.1.1-local.1.9.3`; naming never resets data. Actual version switching belongs to release preparation.
+Startup recovers import/theme journals before preferences, timer and business snapshots. Maintenance ownership, protocol checks and expected fields protect concurrent writes. Restore/reset wait for a complete safety-backup confirmation, preserve DB/settings consistency through journals and fail closed when recovery cannot complete. Legacy JSON/Gzip validate format, references, capacity and fields while preserving unknown compatible data.
 
-## Project layout
+The service timer is the single persisted truth: eligible focus segments require 25 seconds; gaps over five minutes require review. Native PiP portals reuse commands/session, not another DB writer. Automatic background audio requires Web Locks ownership; without it, explicit audition/effects remain available.
 
-| Directory | Contents |
-| --- | --- |
-| `src/` | HTML, CSS, `patch.js`, the preserved React bundle `js/main.js` and local modules |
-| `public/` | Icons, images, fonts, audio and translation assets |
-| `standalone/` | B/C/D candidate entry, contracts, domain rules, services, workspace components, messages, styles and resources |
-| `scripts/` | Local launch, generation, bundle maintenance, portable packaging and Pages build |
-| `tests/` | Unit, browser, release and performance suites, plus fixtures |
-| `docs/` | Guides, architecture, maintenance, version reports and historical evidence |
+## UI
 
-The local server maps `src/` and `public/` to the original browser URLs using `scripts/runtime-layout.json`. Pages and portable archives use the same flat runtime layout (for example `index.html`, `js/main.js` and `img/`). Browser resource paths and storage origins remain the same.
+App owns workspace navigation/selection; Timer remains mounted outside navigation. Native top-layer dialogs preserve the workspace below them. ConfirmDialog unifies stop/delete/safety confirmation; Dialog owns titles, errors, focus return and close motion. Dedicated selectors retain draft/confirm semantics; portals avoid inspector/scroll clipping.
 
-## Startup and module flow
+Report rows calculate their full CSS height during render. A layout effect synchronizes bitmap dimensions and axes before first paint, followed by bottom-up record reveal. Fonts/resize repaint rather than hiding delayed layout. Completed history groups tasks and records by completion/end day with legacy card backgrounds, dates and neutral done icons. Running work shows the stopwatch; pause/stop/completion restore appropriate icons. The forest header subscribes to committed forestEnabled preferences.
 
-The version generator inlines `startup.css` and `js/local-startup.js` into HTML so the skeleton and real step progress can appear before external assets. Styles load asynchronously; deferred scripts download in parallel and execute in the preserved order. Reveal the workspace when the application and required styles are ready, without waiting for optional images/fonts. Chinese and English reuse the generated catalog; other locales retain the legacy parser with asynchronous requests. Database and theme recovery still precede mounting.
+## Service contracts
 
-```text
-local-i18n-catalog -> local-i18n -> local-release -> local-timer-core
-    -> local-data -> local-achievements -> local-timer-ui -> local-app-ui -> local-backup
-    -> local-theme-storage -> local-settings-ui -> local-network -> patch -> local-calendar -> legacy main
-```
+ApplicationServices in standalone/services/core.d.mts is authoritative. createCoreServices composes services; createBrowserServices injects native capabilities. Components receive neither repository transactions nor legacy globals. Changes update implementation, types and differential evidence together.
 
-Feature ownership is explicit: identity/raw-storage policy belongs to data, backup UI to backup, legacy preferences to settings, and theme UI to theme storage/recovery. Network has its own policy module. The bootstrap installs these idempotent APIs in the original order; it contains no feature implementations.
+| Service | UI contract |
+|---|---|
+| Timer / startForTask | Committed immutable snapshots, subscriptions, commands and views. Task/subtask startup rechecks associations inside the write transaction. Service scheduling owns ticks; components display projections. Repeated unchanged refresh retains snapshot identity. |
+| Business | Discriminated commands atomically manage projects/folders/tasks/recurrence/subtasks/schedules/manual records. Expected fields are compared in the same transaction; stale edits reject. Queries/search/history/progress/reports use committed snapshots and preserve IDs/unknown fields. |
+| Calendar | Events retain real timestamps/source records. Pure interval layout and local-calendar deadlines; task/plan quick-create is atomic, plan edits compare originals. The UI owns day/week/month projection without rewriting historical timestamps. |
+| Preferences / language | Single-key commits share maintenance ownership and publish after storage succeeds. Preserve legacy defaults/clamps. Explicit auto/zh-CN/en and existing system catalogs/fallback; never translate user content. Profile commands validate local names/avatars. Unknown settings survive complete backups. |
+| Themes / wallpaper | Journal-backed theme read/commit; image add/select/classic/remove/Bing commands. External networking defaults off. Cancellation guards are rechecked after acquiring storage ownership. Preserve distinct legacy custom/Bing thumbnail order. |
+| Network | Explicit same-origin/exact Bing client; redirects, credentials/referrer, sizes, timeout and cancellation are constrained. The UI does not bypass it for wallpaper/cloud traffic. No simulated cloud success. |
+| Audio / notifications / reminders | Automatic background audio requires native ownership locks; unavailable/failed ownership disables it while effects/audition remain. Permission requests require explicit user action. Reminders persist task/reminder-date read keys and own scheduling. Native resources are injected. |
+| Forest | Balance and reward markers commit as one value under maintenance ownership. Duplicate collection and achievement rewards are idempotent. Animation never owns persistence. |
+| Backup | Export returns bytes/format/MIME/size/scope for the download UI. Restore/reset first await the backup sink, then preserve row/settings consistency through journals and refresh services. `backup:false` is for explicit isolated fixture loading; product confirmation uses defaults. |
+| Release | Metadata comes from release.json; old/independent versions, schema and backup versions remain distinct. Mark read only after opening the current latest entry; history does not clear its badge. |
 
-The legacy entry waits for `FocusLocalReady`. This restores import/reset journals, then theme settings, before application data is used. Language selection is resolved synchronously before the legacy translation loader. The legacy formatter is retained; missing messages are supplied by the fallback catalog.
+Composition lifecycle uses refresh/suspend/resume/dispose. Non-cached departure releases connections, transactions, broadcasts, schedulers, listeners and media; cached restoration pauses/resumes without destroying React/data. Component cleanup removes only its own subscriptions.
 
-```text
-legacy timer callback
-  -> local-timer-ui
-  -> local-data transaction
-  -> pure local-timer-core transition
-  -> commit session + focus rows
-  -> refresh legacy UI / notify peers
-```
+Domain failures include validation/conflict/network-blocked/timeout/cancelled/incompatible-client/disposed. IndexedDB may retain ConstraintError/VersionError/AbortError; recovery retains rolledBack/recoveryRequired. Failed writes do not publish uncommitted state; observer failures cannot reverse a committed command. Recovery/protocol/schema failure stops writes and preserves storage, never resets it as a repair.
 
-Timer transitions keep completed focus events distinct from historical recovery and partial segments. Under-25-second pending work is excluded when abandoned; a short pause preserves spans so resumed active work can qualify. Stop, mode changes and detachment settle valid work and clear session display state. Historical rows remain independent.
 
-## Persistence
+## Additional business contracts
 
-The database is `PomodoroDB6` v3. Business stores are Project, Task, Subtask, Pomodoro, Schedule, Group, GroupUser, Message and TimerSession. LocalMeta holds internal maintenance and settings-recovery records, not exported business data. Group-related stores are retained for old backup compatibility, without a group UI or server activity.
+Frozen v1 commands/behavior remain valid. These additions supply the complete UI without direct component writes, partial sequential ordering commits or fabricated rewards/goals. DB v3, backup exportVersion 2, namespaces and client protocol 1 are unchanged.
 
-Owned maintenance phases use operation and owner IDs. A separate database transaction, `PomodoroDB6-maintenance-lock`, covers the journal and synchronous settings work. Its lifetime proves liveness: close/crash releases it, suspension retains it. Timer and legacy writes check the main database maintenance boundary. Settings rollback decisions persist so startup can retry the correct phase.
+| Entry/adapter | Contract |
+|---|---|
+| business.batch(commands) | 1–2000 updateTask/updateSubtask/updateProject/removeProject commands share v1 validation, associations and expected checks. One transaction commits all; any failure/conflict rolls everything back. Later commands see prior writes in the batch. Publish only after success and preserve unknown fields. Used for ordering and multi-select list management, not arbitrary repository access. |
+| settings.goals() / setGoal(minutes) | Legacy Goals JSON in minutes, default 180; records retain {time,type:'TIME',value,sync:false}. Integer 0–1440, with zero removing the goal. Edits within 24 hours replace the last goal; older history remains. Service maintenance ownership protects writes. |
+| forest.dailyLaunch() / rewards() | Once per local day, retaining streak/count and LaunchReward fields. Query unclaimed mature focus/task/daily/streak rewards: 30 daily, 6*min(days,80) streak, 5 per task, max(floor(minutes),1) focus. Claim window 24–48 hours. Actual claims use the existing canonical idempotent ledger, never UI balance arithmetic. |
+| Native notification title | Composition supplies a localized current-language title; direct service defaults, permission and scheduling stay unchanged. |
+| Browser backup sink | Download a complete pre-replacement backup and require explicit confirmation that it is saved/readable. Cancel throws cancelled before restore/reset. Initiating a download is insufficient; product code never uses backup:false. |
 
-Theme changes coordinate three existing localStorage values: theme JSON, active custom ID and Theme. A small recovery journal records metadata and fingerprints, not a second image copy. Recovery matches the current atomic JSON value to its corresponding metadata group. This is single-operation recovery, not a claim of strict cross-process localStorage transactions.
 
-## Backup and restore
+## D-V read-only wallpaper subscription (2026-11-15)
 
-The data layer takes a consistent business snapshot. `local-backup.js` produces compact JSON or Gzip and sniffs incoming content. Gzip does not change the business backup version. v1/v2 JSON remains readable. The decoder enforces an expanded-size bound before replacement. Business validation checks tables, IDs, time values, sessions and settings. Imported timer configurations must already match every timer-core setting type and bound before replacement.
+`wallpaper.subscribe/getSnapshot` exposes immutable `{loading, version}`. Loading describes the shared Bing request and clears on cancellation, failure or completion. Version increments only after a successful theme commit. Settings observes downloads and cached activation; the timer subscribes only to version changes to refresh its background. Component unmount does not cancel a shared download. Existing commands, cancellation guards, journals and storage formats remain unchanged. Network service and settings interaction tests cover stale-cache activation, switching during downloads, reopening settings, failure and retry.
 
-Full backups retain image data URLs. Wallpaper omission is explicit in the scope and filename; restore removes unavailable theme references and uses Leaf. Safety backups before import and reset are always complete. Imported running sessions become recovery confirmations, so no post-export offline time starts automatically.
+## Additional contracts
 
-## UI and localization
+business.batch accepts 1–2000 supported commands atomically, sharing validation, associations and expected checks. Goals retain legacy JSON/minutes/history; setGoal accepts integer 0–1440 (zero removes the target). Forest daily launch and claims use local days and the canonical idempotent ledger. wallpaper.subscribe/getSnapshot exposes immutable loading/version; unmount does not cancel shared downloads. Project snapshots own global order, preserving parent/expanded fields; reports cache frozen aggregation only within one committed snapshot and invalidate on refresh.
 
-The local app module renders updates, About and reset confirmation. Release details contain user-facing dates and notes, with no maintenance-report buttons. Dialogs manage focus, Escape and shortcuts. Local CSS follows the legacy light/dark variables.
-
-The local text catalog translates static UI strings and errors. It never rewrites task text, notes or filenames in the DOM. General settings expose only the two fully adapted explicit languages; partial translations remain system-selected. English release metadata and documentation accompany the runtime. General settings also provide explicit notification permission and a test action, with no startup permission prompt.
-
-Classic theme selection hooks the actual legacy event. After committing under the existing IndexedDB maintenance transaction lock, it clears custom overlays and markers in the same callback, including reselecting a cached classic theme. Compare the previous values before writing and reject stale edits. The transaction lock also works without Web Locks and never uses timeout-based takeover. Bing caches are reused; refresh, download and upload activation obey the latest selection. Settings-window lifetime does not own the download request.
-
-## Serving and network
-
-`scripts/server.cjs` binds loopback, serves GET/HEAD, disables caching and supports one byte range for local audio. It rejects private paths and writes. `scripts/start.cjs` opens the native browser without a shell and supports ports/headless mode. The portable runtime needs Node.js but no npm install.
-
-External networking is off by default. With explicit opt-in, fetch allows exact HTTPS Bing origins, rejects redirects and omits credentials/referrers. Remote XHR stays blocked; wallpapers are downloaded as Blob and rendered locally, with CORS, timeout and failure fallback. CSP disallows direct remote images. Repository navigation happens only when the user clicks its link. No browser database is uploaded by packaging or deployment.
-
-## Legacy integration boundary
-
-React 16.14, Redux, Moment, jQuery and styles remain inside the legacy assets. Historical component-tree descriptions are not a source build. The AST scripts maintain known module boundaries and retain the changed bundle. UI navigation, task lists and reports still use the legacy component model; data and timer rules have explicit local boundaries. Current module ownership and release commands are in the maintenance guide; unfinished engineering lives only in the backlog.
-
-## Local profile and audio ownership
-
-Names and avatars are saved directly through the local data service under import/reset maintenance ownership. Failed writes retain the saved profile and report the error. Background sound queues an abortable Web Lock for immediate handoff; without Web Locks, automatic background audio stays paused with an on-demand explanation. Manual previews and completion effects remain available.
-
-`cookie.NAME` is a legacy-compatible localStorage key, not a browser cookie. Startup, name saves and the legacy NAME setter remove the obsolete browser NAME cookie. The old console rename helper remains removed.
-
-## Local calendar
-
-`local-calendar.js` attaches through the checked calendar integration script. It owns selection, quick task UI, overlap layout, plan-to-focus controls, date/scroll behavior and removable refresh subscriptions. `local-data.js` commits new tasks and planned blocks together, enforces maintenance journals and broadcasts only committed changes. The database stays v3, with the existing backup schema. The official account/telemetry and Windows native window bridges are not imported.
-
-## Focus forest and achievements
-
-The original forest UI uses local reward state in `FocusTodo.forestState`. The data service serializes collections and achievement awards; each achievement and its sunlight credit are written together. `local-achievements.js` evaluates committed records and renders the offline drawer using the original ranking styles and bundled trophy icons. Full backups include the state; the database schema remains v3.
-
-The forest adapter keeps each sunlight item until its original flight completes, preserves other positions and cancels animations on failure or unmount. Reduced motion skips the flight and tree pulse. Persistence commits independently of animation.
-
-`local-app-ui.js` shows due task reminders before release history and saves reads per task ID/reminder time in `FocusTodo.taskRemindersRead`. Successful task transactions and cross-tab messages refresh active reminders; completion, deletion and rescheduling recompute the badge. Release reads remain independent in `FocusTodo.releaseRead`.
+Network defaults off and permits only explicit same-origin/Bing requests. Generated language catalogs preserve system fallbacks without translating user content. Root MIT and complete bundled dependency/font licenses retain applicable copyright and provenance.

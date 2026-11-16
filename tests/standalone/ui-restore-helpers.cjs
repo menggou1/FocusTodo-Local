@@ -5,7 +5,7 @@ const {createStandaloneServer}=require('../../scripts/standalone-server.cjs');
 const {execFileSync}=require('node:child_process');
 const baseline='f102da8919e810006b6611aabcef5f0159057d61';
 async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMotion='reduce',recordVideo}={}){
- assert.equal(execFileSync('git',['diff','--name-only',baseline,'--','src','public','scripts/server.cjs','scripts/runtime-layout.json'],{cwd:root,encoding:'utf8'}).trim(),'','Legacy oracle must remain the audited 1.9.3 runtime');
+ assert.equal(execFileSync('git',['diff','--name-only',baseline,'--','src','public','scripts/server.cjs','scripts/runtime-layout.json',':!src/index.html',':!src/js/local-release.js'],{cwd:root,encoding:'utf8'}).trim(),'','Legacy business/style oracle must remain audited 1.9.3; only generated version/title/cache metadata may evolve');
  const shared=process.env.FOCUS_RESTORE_SHARED==='1';
  const servers=shared?[]:[createServer(),createStandaloneServer()];
  for(const server of servers)await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));

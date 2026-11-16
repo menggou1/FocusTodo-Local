@@ -1,6 +1,6 @@
 /* R4/R5: independent legacy oracle, isolated contexts and synthetic data only. */
 const {paired,copyFixture,assert,fs,path,root}=require('./ui-restore-helpers.cjs');
-const out=path.join(root,'.agent-temp/d-v-r4-r5');
+const out=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance/final-2.0/r4-r5');
 const settle=p=>p.waitForTimeout(300);
 async function ready(p){await p.waitForFunction(()=>window.FocusLocalReady&&!document.documentElement.classList.contains('focus-starting'));await p.evaluate(()=>FocusLocalReady);await p.evaluate(()=>document.fonts.ready)}
 async function seed(pair){

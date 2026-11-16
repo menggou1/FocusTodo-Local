@@ -132,15 +132,15 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     if (number(row.type) === 1000) setConfirm({ row, kind: 'delete' });
     else void removeProject(row);
   }
-  async function removeProject(row: Entity) {
+  async function removeProject(row: Entity, dismiss=()=>setConfirm(null)) {
     if (await run(() => services.business.command({ type: 'removeProject', id: row.id, expected: row }))) {
-      setConfirm(null);
+      dismiss();
       if (view.kind === 'project' && view.id === row.id) navigate(fallbackView(), false);
     }
   }
-  async function hideProject(row: Entity) {
+  async function hideProject(row: Entity, dismiss=()=>setConfirm(null)) {
     if (await run(() => services.business.command({ type: 'setProjectHidden', id: row.id, hidden: true, expected: expected(row, ['state']) }))) {
-      setConfirm(null);
+      dismiss();
       if (view.kind === 'project' && view.id === row.id) navigate(fallbackView(), false);
     }
   }
@@ -261,7 +261,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     {menuRow && <SidebarMenu row={menuRow} x={menu!.x} y={menu!.y} close={() => closeMenu()} edit={() => edit(menuRow)} hide={() => requestHide(menuRow)} remove={() => requestDelete(menuRow)} />}
     {editor && <ProjectEditor row={editor.row} type={editor.type} projects={projects} close={() => setEditor(null)} />}
     {confirm && <ConfirmDialog canClose={!busy} title={confirm.kind === 'hide' ? services.language.legacyText('prj_hide') : services.language.legacyText('prj_del_title', confirm.row.name)} message={confirm.kind === 'hide' ? services.language.legacyText('prj_hide_prompt') : services.language.legacyText('prj_del_prompt')} close={() => setConfirm(null)}>{dismiss=><>
-      <button type="button" onClick={dismiss}>{services.language.legacyText('cmm_cancel')}</button><button type="button" className="primary" disabled={busy || blocked} onClick={() => { if (confirm.kind === 'hide') void hideProject(confirm.row); else void removeProject(confirm.row); }}>{services.language.legacyText('cmm_ok')}</button>
+      <button type="button" onClick={dismiss}>{services.language.legacyText('cmm_cancel')}</button><button type="button" className="primary" disabled={busy || blocked} onClick={() => { if (confirm.kind === 'hide') void hideProject(confirm.row,dismiss); else void removeProject(confirm.row,dismiss); }}>{services.language.legacyText('cmm_ok')}</button>
     </>}</ConfirmDialog>}
   </nav>;
 }

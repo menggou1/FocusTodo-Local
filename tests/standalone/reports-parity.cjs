@@ -3,31 +3,10 @@ process.env.FOCUS_RESTORE_SHARED='1';
 const {paired,copyFixture,metrics,assert,fs,path}=require('./ui-restore-helpers.cjs');
 const output=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'.agent-temp/d-v-reports');
 const results=[];
-async function seed(pair){
- await pair.old.evaluate(async()=>{
-  const d=FocusLocalData,s=await d.snapshot(),base=s.indexedDB.Project.find(row=>row.type===7005),db=await d.open(),day=new Date();day.setHours(0,0,0,0);
-  localStorage.setItem('Goals',JSON.stringify([{time:+new Date(2026,9,1),type:'TIME',value:180}]));
-  await d.transaction(db,['Project','Task','Pomodoro'],'readwrite',tx=>{
-   for(const row of [
-    {id:'z-blue',name:'Blue list',type:1000,parentId:'folder',order:-90000,color:'4670F6'},
-    {id:'folder',name:'Reports folder',type:2000,parentId:'',order:0,color:'F4658C'},
-    {id:'a-red',name:'Red list',type:1000,parentId:'',order:10000,color:'EC6B66'},
-    {id:'c-green',name:'Green list',type:1000,parentId:'',order:20000,color:'A0CE62'},
-    {id:'tag',name:'Reports tag',type:3000,parentId:'',order:30000,color:'C540B5'},
-   ])tx.objectStore('Project').put({...base,...row,state:0,expanded:true});
-   for(let i=0;i<5;i++){
-    const task={id:'reports-task-'+i,objType:'TASK',creationDate:+day+i,state:0,name:'Reports task '+i,order:i*10000,projectId:['z-blue','a-red','c-green','id-task-tasks','z-blue'][i],deadline:0,isFinished:i<4,finishedDate:i<4?+day+(9+i)*3600000:0,pomodoroInterval:1500,actualPomoNum:1,estimatePomoNum:2,priority:i%4,tags:'tag',remark:'',rCycle:0,rId:'',reminderDate:0};
-    tx.objectStore('Task').put(task);
-    tx.objectStore('Pomodoro').put({id:'reports-record-'+i,objType:'POMODORO',creationDate:+day,state:0,taskId:task.id,subtaskId:'',endDate:+day+(8+i)*3600000,interval:[3620,1500,90,30,25][i],pomodoroInterval:1500,isManual:true,sync:0});
-   }
-  });
- });
- await pair.old.reload();await pair.old.waitForFunction(()=>window.FocusLocalReady&&!document.documentElement.classList.contains('focus-starting'));
- await copyFixture(pair);
-}
+const {seed}=require('./ui-fixtures.cjs');
 function near(a,b,label,props=['x','y','width','height']){for(const prop of props)assert(Math.abs(a[prop]-b[prop])<=1,`${label}.${prop}: ${a[prop]} vs ${b[prop]}`)}
 async function colors(page,selector){return page.locator(selector).evaluate(canvas=>{const d=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data,colors=new Set();for(let i=0;i<d.length;i+=4)if(d[i+3])colors.add([d[i],d[i+1],d[i+2]].join(','));return [...colors]})}
-async function reports(pair){await pair.old.locator('[class*=HomeHeader-report]').click();const p=pair.new;await p.evaluate(()=>{window.reportFrames=[];const start=performance.now(),sample=()=>{const root=document.querySelector('[data-testid=reports-page]');if(root)window.reportFrames.push({t:performance.now()-start,busy:root.getAttribute('aria-busy'),reveal:document.querySelector('.legacy-review-scroll canvas')?.dataset.reveal});if(performance.now()-start<500)requestAnimationFrame(sample)};requestAnimationFrame(sample)});await pair.new.locator('[data-view=reports]').click();await pair.new.getByTestId('report-total').waitFor();await pair.old.waitForTimeout(350)}
+async function reports(pair){await pair.old.locator('[class*=HomeHeader-report]').click();const p=pair.new;await p.evaluate(()=>{window.reportFrames=[];const start=performance.now(),sample=()=>{const root=document.querySelector('[data-testid=reports-page]');if(root)window.reportFrames.push({t:performance.now()-start,busy:root.getAttribute('aria-busy'),reveal:document.querySelector('.legacy-review-scroll canvas')?.dataset.reveal,height:document.querySelector('.legacy-review-scroll canvas')?.clientHeight,pixels:document.querySelector('.legacy-review-scroll canvas')?.height,dpr:devicePixelRatio});if(performance.now()-start<500)requestAnimationFrame(sample)};requestAnimationFrame(sample)});await pair.new.locator('[data-view=reports]').click();await pair.new.getByTestId('report-total').waitFor();await pair.old.waitForTimeout(350)}
 async function closeReports(pair){await pair.old.locator('[class*=Report-close]').click();await pair.new.getByTestId('close-page').click()}
 async function run(locale,dark){
  const zh=locale.startsWith('zh'),pair=await paired({locale,dark,reducedMotion:'no-preference'}),o=pair.old,p=pair.new,key=locale+'-'+(dark?'dark':'light');
@@ -64,7 +43,7 @@ async function run(locale,dark){
   // Observe the actual opening sequence, then compare the settled frame.
 
   await reports(pair);
-  const opening=await p.evaluate(()=>window.reportFrames);assert(opening.some(row=>row.busy==='true'),'Base frame paints before projections');assert(opening.some(row=>Number(row.reveal)>0&&Number(row.reveal)<1),'Records reveal progressively: '+JSON.stringify(opening));
+  const opening=await p.evaluate(()=>window.reportFrames);assert(opening.filter(row=>row.height).every(row=>Math.abs(row.pixels-row.height*row.dpr)<=1),'Every visible frame uses final canvas geometry');assert(opening.some(row=>Number(row.reveal)>0&&Number(row.reveal)<1),'Records reveal progressively: '+JSON.stringify(opening));
   assert.equal(await p.locator('.legacy-review-scroll canvas').getAttribute('data-reveal'),'1');
   const oldMetrics=await metrics(o,{frame:'[class*=Report-width]',stat:'[class*=Summary-item]',review:'[class*=ReviewChart-root]',focus:'[class*=FocusTime-root]',distribution:'[class*=ProjectChart-root]',goals:'[class*=DailyGoal-root]',bar:'[class*=BarChart-root]'}),nextMetrics=await metrics(p,{frame:'.legacy-reports',stat:'.legacy-report-stat',review:'.legacy-review-chart',focus:'.legacy-focus-time',distribution:'.legacy-project-chart',goals:'.legacy-goals',bar:'.legacy-bar-chart'});
   for(const part of Object.keys(oldMetrics))near(oldMetrics[part],nextMetrics[part],'report '+part);
@@ -87,7 +66,7 @@ async function run(locale,dark){
   await p.locator('.legacy-goals header button').click();const wheel=p.locator('.legacy-goal-popover [role=listbox]');await wheel.focus();await p.keyboard.press('ArrowDown');assert.equal(await wheel.locator('[aria-selected=true]').innerText(),zh?'4小时':'4h');
   const before=await wheel.evaluate(e=>e.scrollTop);await wheel.hover();await p.mouse.wheel(0,35);await p.waitForTimeout(80);assert((await wheel.evaluate(e=>e.scrollTop))>before);assert.equal(await p.locator('.legacy-goal-popover').count(),1);
   await p.locator('.legacy-report-overlay>.domain-overlay-body').evaluate(e=>e.scrollTop=30);await p.locator('.legacy-goal-popover').waitFor({state:'hidden'});
-  await p.locator('.legacy-goals header button').click();await p.locator('.legacy-goal-popover [role=listbox]').focus();await p.keyboard.press('ArrowUp');await p.locator('.legacy-goal-popover footer .primary').click();
+  await p.locator('.legacy-goals header button').click();await p.locator('.legacy-goal-popover [role=listbox]').focus();await p.keyboard.press('ArrowUp');await p.locator('.legacy-goal-popover footer .primary').click();await p.locator('.legacy-goal-popover').waitFor({state:'hidden'});
   assert((await p.evaluate(()=>JSON.parse(localStorage.getItem('FocusTodoStandalone.data.Goals')).at(-1).value))===120);
   // Every chart granularity retains fifteen real buckets and returns to day.
   for(const label of [zh?'时长图周期':'Focus chart period',zh?'任务图周期':'Task chart period'])for(const value of ['week','month','year','day']){await p.getByLabel(label,{exact:true}).selectOption(value);await p.waitForTimeout(20);assert.equal(JSON.parse(await p.locator('.legacy-bar-canvas').first().getAttribute('data-series')).length,15)}

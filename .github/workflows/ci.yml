@@ -62,6 +62,8 @@ jobs:
           git diff --exit-code
           test -z "$(git ls-files --others --exclude-standard)"
       - run: npm run check
+      - name: Build production React application
+        run: npm run build
       - name: Build and package the isolated Phase B prototype
         run: |
           npm run build:standalone
@@ -120,11 +122,14 @@ jobs:
         node: ['22', '24']
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
+      - run: npm run build
       - run: npm test
       - name: Standalone contracts and isolated server
         run: node --test tests/standalone/*.test.cjs
@@ -168,6 +173,8 @@ jobs:
           node tests/standalone/domain-pages.cjs
           node tests/standalone/services-browser.cjs
           node tests/standalone/package-smoke.cjs
+          npm run test:release-app
+          node tests/standalone/final-ui-parity.cjs
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_STANDALONE_ENGINES: chromium
@@ -215,6 +222,12 @@ jobs:
       pages: read
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'

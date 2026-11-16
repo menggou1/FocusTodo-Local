@@ -31,7 +31,7 @@
 .workspace-task-scroll:has(>.legacy-history)>.workspace-summary{display:none}
 .legacy-history{position:relative;min-height:calc(100% - 58px)}.legacy-history-add{position:absolute!important;right:-6px;top:-58px;width:40px;height:40px;padding:0!important;border-radius:5px!important;background:var(--workspace-panel)!important}.legacy-history-empty{position:absolute;top:190px;left:0;right:0;text-align:center;font-size:14px;line-height:20px;margin:0}
 .legacy-history-day{margin:24px 0 0}.legacy-history-day h2{font-size:14px;font-weight:500;line-height:20px;margin:0 4px 8px}
-.legacy-history .domain-history-row,.legacy-history .legacy-history-task{display:flex;align-items:center;gap:12px;padding:6px 12px;margin:4px 0 0;border:0;background:transparent;border-radius:8px;flex-wrap:nowrap;cursor:default}
+.legacy-history .domain-history-row,.legacy-history .legacy-history-task{display:flex;align-items:center;gap:12px;padding:6px 12px;margin:4px 0 0;border:0;background:var(--workspace-panel);border-radius:8px;flex-wrap:nowrap;cursor:default}
 .legacy-history .domain-history-row{height:50px;min-height:50px}.legacy-history .domain-history-row:hover,.legacy-history .legacy-history-task:hover{background:var(--workspace-panel)}
 .legacy-history-pomo{width:20px;height:20px;background:center/20px url('../../public/img/pomo.png') no-repeat;flex:none}
 .legacy-history-record-title{display:flex;flex-direction:column;flex:1;min-width:0;text-align:left;padding:0!important;gap:0;background:transparent;font:14px/20px var(--workspace-font)}.legacy-history-record-title>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-top:1px}

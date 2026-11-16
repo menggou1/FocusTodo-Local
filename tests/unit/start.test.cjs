@@ -35,7 +35,7 @@ test('launcher serves the app from an unrelated working directory and fails on a
     });
     const response = await fetch(`http://127.0.0.1:${port}/`);
     assert.equal(response.status, 200);
-    assert.match(await response.text(), /local-release.js/);
+    const html=await response.text();assert.match(html, /assets\/index-[^\"]+\.js/);assert.doesNotMatch(html, /js\/main\.js|patch\.js/);
     assert.equal(response.headers.get('cache-control'), 'no-store');
     const busy = spawnSync(process.execPath, args, { cwd: path.parse(root).root, encoding: 'utf8', timeout: 5000 });
     assert.equal(busy.status, 1, busy.stderr);

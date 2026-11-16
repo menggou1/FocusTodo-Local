@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "date": "2026-11-16",
+  "baseline": "1.9.3 / f102da8919e810006b6611aabcef5f0159057d61",
+  "method": "Fresh Playwright contexts; generated data only; Shanghai timezone; same locale/theme/viewport/DPR; legacy5513 and isolated5511/5512; no stable5500 or daily profiles.",
+  "unit": {
+    "passed": 92,
+    "platform_skipped": 1,
+    "failed": 0
+  },
+  "service_contracts": {
+    "passed": 64,
+    "failed": 0
+  },
+  "browser_suites": {
+    "startup_three_engines": 42,
+    "workspace_three_engines": 60,
+    "domains_three_engines": 33,
+    "services_three_engines": 31,
+    "isolated_archives": 2,
+    "legacy_core_browser": 66,
+    "final_ui_matrix": 8,
+    "reports_matrix": 4,
+    "settings_drag_matrix": 4,
+    "timer_forest": 8,
+    "calendar_overlay_matrix": 4,
+    "overlays_and_task_states": 52,
+    "settings_measurements": 64,
+    "settings_behavior": 8
+  },
+  "production_upgrade_and_download": true,
+  "production_zip_tar_and_python_startup": true,
+  "release_gates": 6,
+  "markdown_files_and_anchors": 76,
+  "ci": "Recorded by the exact commit workflow linked from the release PR; this file records local checks.",
+  "limitations": "Human UI acceptance, real Safari/system media/downloads/Bing and release-only live checks remain in docs/BACKLOG.md."
+}

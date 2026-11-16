@@ -4,9 +4,13 @@
 
 This guide follows the main screen, tasks, timer, reports and settings, with calendar, forest and backup instructions for the local edition. Its organization is inspired by [Lexible's Windows guide](https://zhuanlan.zhihu.com/p/31498089). Screenshots contain isolated test data; dates and counts are examples.
 
+## Installation and upgrade
+
+2.0.0 is an independent React app. Extract portable archives and run the launcher without npm install. Source checkouts must generate metadata and build first; see [Maintenance](MAINTENANCE.md). Export a complete backup before upgrading. Production retains same-origin legacy data; preview5511 is isolated. About reads release metadata, while live-site updates depend on actual deployment.
+
 ## Concepts and first steps
 
-A pomodoro is a period of focus followed by a break. A task is a concrete piece of work; a list groups related tasks. Open [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/) or follow the [startup instructions](../../README_en.md#quick-start). No account is required. Keep the same browser, host and port to see the same local data.
+A pomodoro is a period of focus followed by a break. A task is a concrete piece of work; a list groups related tasks. Open [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/) or follow the [startup instructions](../../README_en.md#install-and-run). No account is required. Keep the same browser, host and port to see the same local data.
 
 ![Main screen](../guide-images/home.png)
 

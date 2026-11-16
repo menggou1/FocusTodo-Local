@@ -1,8 +1,8 @@
+import { ConfirmDialog } from './ConfirmDialog';
 import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from 'react';
 import type { Entity } from '../../services/core.mjs';
 import { useWorkspace } from './Context';
 import { ProjectIcon } from './ProjectIcon';
-import { useWindowClose } from './Dialog';
 import { expected, number, projectName } from './model';
 
 /** Settings only reorders system lists. Custom lists keep their workspace order. */
@@ -61,9 +61,7 @@ export function SettingsProjects({projects}:{projects:readonly Entity[]}) {
  </div>;
 }
 
-function SettingsProjectDelete({row,close:onClose}:{row:Entity;close():void}){
- const {services,text,run,busy,blocked}=useWorkspace(),ref=useRef<HTMLDialogElement>(null),{close,motion}=useWindowClose(onClose);
- const title=services.language.legacyText('prj_del_title',row.name);
- useEffect(()=>{const previous=document.activeElement as HTMLElement|null,dialog=ref.current!;dialog.showModal();return()=>{dialog.close();if(previous?.isConnected)previous.focus()}},[]);
- return <dialog ref={ref} className={'legacy-task-delete legacy-settings-project-delete-dialog '+motion} aria-label={title} onCancel={e=>{e.preventDefault();if(!busy)close()}}><div className="legacy-delete-content"><img src={new URL('../../../public/img/WarningTip.png',import.meta.url).href} alt=""/><div><strong>{title}</strong><p>{services.language.legacyText('prj_del_prompt')}</p></div></div><footer><button disabled={busy} onClick={close}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(()=>services.business.command({type:'removeProject',id:row.id,expected:row})))close()}}>{services.language.legacyText('cmm_ok')}</button></footer></dialog>;
+function SettingsProjectDelete({row,close}:{row:Entity;close():void}){
+ const {services,text,run,busy,blocked}=useWorkspace();
+ return <ConfirmDialog className="legacy-settings-project-delete-dialog" title={services.language.legacyText('prj_del_title',row.name)} message={services.language.legacyText('prj_del_prompt')} canClose={!busy} close={close}>{dismiss=><><button disabled={busy} onClick={dismiss}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(()=>services.business.command({type:'removeProject',id:row.id,expected:row})))dismiss()}}>{services.language.legacyText('cmm_ok')}</button></>}</ConfirmDialog>;
 }

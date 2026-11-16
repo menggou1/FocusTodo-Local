@@ -1,6 +1,6 @@
 {
   "name": "focustodo",
-  "version": "7.1.1-local.1.9.3",
+  "version": "2.0.0",
   "description": "FocusTodo web version",
   "scripts": {
     "dev": "vite --config vite.standalone.config.mjs",
@@ -19,7 +19,9 @@
     "test:browser": "node tests/browser/startup-acceptance.cjs && node tests/browser/browser-acceptance.cjs && node tests/browser/maintenance-acceptance.cjs && node tests/browser/list-ordering-acceptance.cjs && node tests/browser/audio-coordination-acceptance.cjs && node tests/browser/profile-acceptance.cjs && node tests/browser/calendar-acceptance.cjs && node tests/browser/forest-acceptance.cjs && node tests/browser/achievements-acceptance.cjs && node tests/browser/reminders-acceptance.cjs && node tests/browser/controls-acceptance.cjs && node tests/browser/release-1.9-acceptance.cjs",
     "benchmark:backup": "node tests/performance/backup-performance.cjs",
     "test:compat": "node tests/browser/capability-acceptance.cjs",
-    "check": "node scripts/check-syntax.cjs"
+    "check": "node scripts/check-syntax.cjs && node scripts/check-docs.cjs",
+    "build": "npm run typecheck:standalone && node scripts/build-standalone.mjs --production",
+    "test:release-app": "node tests/standalone/production-browser.cjs"
   },
   "keywords": [],
   "author": "Lexible",

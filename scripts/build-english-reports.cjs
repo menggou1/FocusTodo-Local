@@ -23,7 +23,7 @@ const notes={
  'patch.1':'The first two local patch phases established pure timer transitions, durable sessions and recoverable imports. Complete focus blocks retain historical boundaries; partial work is preserved and interrupted time requires confirmation. Records and cursor commit together and retries do not duplicate records. Stop/detach/mode changes cannot resurrect stale elapsed time. Full backups include business tables, settings and timer snapshots; validation rejects settings-only replacement. Imported running snapshots become recovery, and settings rollback is journaled. Cross-tab refresh, event cleanup, audio resumption and an independent audio Web Lock were added. The loopback server gained correct single audio ranges and failure reporting. Later releases supersede the original temporary status and old unfinished lists.'
 };
 fs.mkdirSync('docs/en/releases',{recursive:true});
-let changelog='# Changelog\n\n[Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)\n\nCurrent application: **'+config.officialVersion+'-local.'+config.localVersion+'**, author '+config.author+'.\n';
+let changelog='# Changelog\n\n[Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)\n\nCurrent application: **'+(Number(config.localVersion.split('.')[0])>=2?config.localVersion:config.officialVersion+'-local.'+config.localVersion)+'**, author '+config.author+'.\n';
 for(const u of config.updates){
  const local=u.version.replace('7.1.1-local.','').replace('7.1.1-patch.1','patch.1');
  const name=path.basename(u.report), original=fs.existsSync(u.report)?fs.readFileSync(u.report,'utf8'):'';

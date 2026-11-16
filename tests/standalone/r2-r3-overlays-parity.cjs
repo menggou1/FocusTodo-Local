@@ -3,7 +3,7 @@
 process.env.FOCUS_RESTORE_SHARED='1';
 const {paired,copyFixture,assert,fs,path,root}=require('./ui-restore-helpers.cjs');
 const {assertNoLegacyRuntime}=require('./helpers.cjs');
-const out=path.join(root,'.agent-temp/d-v-r2-r3'),results=[];
+const out=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance/final-2.0/r2-r3'),results=[];
 const prior=process.env.FOCUS_RETEST_FAILED==='1'&&fs.existsSync(path.join(out,'results.json'))?JSON.parse(fs.readFileSync(path.join(out,'results.json'),'utf8')):[];
 const task=(p,name)=>p.locator('[class*=TaskItem-task],.workspace-task').filter({has:p.locator('[class*=TaskItem-name-],.workspace-task-name').filter({hasText:new RegExp('^'+name+'(?:\\s*#|$)')})}).first();
 const settle=p=>p.waitForTimeout(320);
