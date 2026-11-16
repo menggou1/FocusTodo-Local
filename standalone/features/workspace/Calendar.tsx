@@ -1,10 +1,11 @@
+import { formatCompactDuration as durationLabel, formatClock } from '../../domain/display.mjs';
 import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Entity } from '../../services/core.mjs';
 import { useWorkspace } from './Context';
 import { range, shift, stamp } from './Dates';
 import { RecordEditor } from './RecordEditor';
-import { dateInput, number, ordered, projectName } from './model';
+import { dateInput, number, projectName } from './model';
 import { PickerField } from './PickerField';
 import { DatePicker } from './Pickers';
 import { ProjectIcon } from './ProjectIcon';
@@ -14,7 +15,7 @@ import { useWindowClose } from './Dialog';
 type CalendarEvent={id:string;type:string;start:number;end:number;record:Entity};
 type Preview={day:number;start:number;end:number;title?:string;id?:string};
 type Editor={row?:Entity;start?:number;interval?:number;quick?:boolean;anchored?:boolean;kind:'schedule'|'record'};
-const durationLabel=(s:number)=>s<60?`${s}s`:s>=3600?`${Math.floor(s/3600)}h${Math.round(s%3600/60)?Math.round(s%3600/60)+'m':''}`:`${Math.round(s/60)}m`;
+
 
 /** Pointer previews remain local; services receive only the final committed gesture. */
 export function Calendar({startTask}:{startTask(id:string,child?:string):void;openTask(id:string):void}) {
@@ -30,7 +31,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
   const days=Array.from({length:dayCount},(_,i)=>shift(first,i,'day')),last=shift(days.at(-1)!,1,'day');
   const events=services.calendar.events(first,last) as CalendarEvent[],hourHeight=mode==='day'?124:64,today=range(now).start,dual=mode==='day'&&range(date).start<=today;
   const paneView=snapshot.projects.find(project=>project.id===paneProject);
-  const paneProjects=ordered(snapshot.projects.filter(project=>project.state===0&&![7001,7003,7002].includes(number(project.type))));
+  const paneProjects=snapshot.projects.filter(project=>project.state===0&&![7001,7003,7002].includes(number(project.type)));
   const paneOptions=paneProjects.filter(row=>!row.parentId||!paneProjects.some(parent=>parent.id===row.parentId&&parent.type===2000)).flatMap(row=>row.type===2000?[row,...paneProjects.filter(child=>child.parentId===row.id)]:[row]);
   const descendants=new Set<string>();
   function collect(id:string){if(descendants.has(id))return;descendants.add(id);paneProjects.filter(row=>row.parentId===id).forEach(row=>collect(row.id))}
@@ -38,7 +39,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
   const paneTasks=(paneView?.type===2000?snapshot.tasks.filter(row=>row.state===0&&descendants.has(String(row.projectId))):paneView?.type===3000?snapshot.tasks.filter(row=>row.state===0&&String(row.tags||'').split(',').includes(paneView.id)):paneView?services.business.tasksInView({id:paneView.id,type:number(paneView.type)}):[]).slice().sort((a,b)=>a.order!==undefined&&b.order!==undefined&&a.order!==b.order?number(a.order)-number(b.order):number(a.creationDate)-number(b.creationDate));
   useEffect(()=>{if(!paneOptions.some(row=>row.id===paneProject))setPaneProject(paneOptions[0]?.id||'')},[snapshot.projects,paneProject]);
   const eventTitle=(row:Entity)=>String(snapshot.subtasks.find(child=>child.id===row.subtaskId)?.name||snapshot.tasks.find(task=>task.id===row.taskId)?.name||services.language.text('未指定任务'));
-  const time=(at:number)=>new Date(at).toLocaleTimeString(services.language.locale,{hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+  const time=(at:number)=>formatClock(at);
   useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),60000),refresh=()=>setNow(Date.now());window.addEventListener('focus',refresh);return()=>{clearInterval(timer);window.removeEventListener('focus',refresh);gesture.current?.()}},[]);
   useEffect(()=>{const el=scroll.current;if(el)el.scrollTop=Number(sessionStorage.getItem('FocusTodo.calendarScroll'))||0},[mode]);
   const previousPeriod=useRef({date,mode});

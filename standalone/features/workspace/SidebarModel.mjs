@@ -1,6 +1,7 @@
+import { orderedProjects } from '../../domain/project-order.mjs';
 /* Read-only layout and hover projection reconstructed from legacy modules 863/868. */
 export function sidebarItems(projects, collapsed = new Set()) {
-  const rows = projects.filter(row => row.state === 0 && [1000, 2000, 3000].includes(row.type)).slice().sort((a,b)=>a.order-b.order||a.id.localeCompare(b.id));
+  const rows = orderedProjects(projects.filter(row => row.state === 0 && [1000, 2000, 3000].includes(row.type)));
   const ids = new Set(rows.map(row=>row.id)), roots=[],children=new Map();
   for(const row of rows){if(row.parentId&&ids.has(row.parentId)){if(!children.has(row.parentId))children.set(row.parentId,[]);children.get(row.parentId).push(row)}else roots.push(row)}
   const result=[];

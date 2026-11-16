@@ -45,8 +45,8 @@ try {
 } catch (error) {
   startup.dataset.state = 'error';
   document.getElementById('prototype-status')!.textContent = navigator.language.startsWith('zh')
-    ? '无法启动隔离原型。请使用全新浏览器上下文和候选服务器；已有数据未更改。'
-    : 'Cannot start the isolated prototype. Use a fresh browser context and the prototype server; existing data was not changed.';
+    ? '无法启动独立应用预览。请使用全新浏览器上下文和候选服务器；已有数据未更改。'
+    : 'Cannot start the independent app preview. Use a fresh browser context and the preview server; existing data was not changed.';
   document.getElementById('prototype-retry')!.hidden = false;
   console.error(error instanceof Error ? error.name : 'Prototype startup failed');
 }

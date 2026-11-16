@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import type { Entity } from '../../services/core.mjs';
 import { useWorkspace } from './Context';
 import { LegacyIcon } from './LegacyIcon';
-import { number,ordered,projectName,dateInput,timestamp } from './model';
+import { number,projectName,dateInput,timestamp } from './model';
 import { deadlineChanges } from '../../domain/task-edits.mjs';
 import { DatePicker } from './Pickers';
 import { ProjectIcon } from './ProjectIcon';
@@ -48,7 +48,7 @@ export function TaskContextMenu({ task, x, y, close, remove }: { task: Entity; x
   useEffect(()=>()=>{if(submenuTimer.current)clearTimeout(submenuTimer.current)},[]);
   const [tagDraft,setTagDraft]=useState(()=>String(task.tags||'').split(',').filter(Boolean));
   const tagRef=useRef(tagDraft),tagChanged=useRef(false);
-  const projects=ordered(services.business.getSnapshot().projects.filter(row=>row.state===0));
+  const projects=services.business.getSnapshot().projects.filter(row=>row.state===0);
   const destinations=projects.filter(row=>[1000,7005].includes(number(row.type))&&row.id!==task.projectId),tags=projects.filter(row=>row.type===3000);
   const labels = [text.normal, text.low, text.medium, text.high];
   const deadlineItems = [

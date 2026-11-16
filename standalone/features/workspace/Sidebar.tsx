@@ -8,7 +8,7 @@ import { ProjectEditor } from './Projects';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useRowDrag } from './useRowDrag';
 import { sidebarItems, sidebarMinutes, sidebarMove } from './SidebarModel.mjs';
-import { expected, number, ordered, projectName } from './model';
+import { expected, number, projectName } from './model';
 
 export type SidebarView = { kind: 'project'; id: string } | { kind: 'search' | 'timer' | 'reports' | 'forest' | 'settings' };
 type Summary = { count: number; minutes: number };
@@ -44,7 +44,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   const [dragging, setDragging] = useState(''), [overId, setOverId] = useState('');
   const [preview, setPreview] = useState<DropPreview | null>(null);
   const folderExpand = useRef<{ id: string; timer: ReturnType<typeof setTimeout> } | null>(null);
-  const presets = ordered(projects.filter(row => row.state === 0 && number(row.type) >= 4000 && number(row.type) !== 7002));
+  const presets = projects.filter(row => row.state === 0 && number(row.type) >= 4000 && number(row.type) !== 7002);
   const baseItems = sidebarItems(projects);
   const displayProjects = preview ? projects.map(row => row.id === preview.id ? { ...row, order: preview.order, parentId: preview.parentId } : row) : projects;
   const items = preview ? sidebarItems(displayProjects) : baseItems;

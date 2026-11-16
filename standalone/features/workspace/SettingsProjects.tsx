@@ -3,15 +3,15 @@ import type { Entity } from '../../services/core.mjs';
 import { useWorkspace } from './Context';
 import { ProjectIcon } from './ProjectIcon';
 import { useWindowClose } from './Dialog';
-import { expected, number, ordered, projectName } from './model';
+import { expected, number, projectName } from './model';
 
 /** Settings only reorders system lists. Custom lists keep their workspace order. */
 export function SettingsProjects({projects}:{projects:readonly Entity[]}) {
  const {services,text,run,busy,blocked}=useWorkspace(),lt=(s:string)=>services.language.text(s) as string;
  const root=useRef<HTMLDivElement>(null),cleanup=useRef<()=>void>(()=>{}),animations=useRef(new Set<Animation>()),positions=useRef<Map<string,number>|null>(null),moving=useRef('');
  const [saving,setSaving]=useState(false),[remove,setRemove]=useState<Entity|null>(null);
- const presets=ordered(projects.filter(p=>p.state!==-1&&number(p.type)>=4000&&![4000,7002,7005].includes(number(p.type))));
- const custom=ordered(projects.filter(p=>p.state!==-1&&p.type===1000));
+ const presets=projects.filter(p=>p.state!==-1&&number(p.type)>=4000&&![4000,7002,7005].includes(number(p.type)));
+ const custom=projects.filter(p=>p.state!==-1&&p.type===1000);
  const rows=()=>Array.from(root.current?.querySelectorAll<HTMLElement>('[data-project-group=presetProjects]')||[]);
  const legacyNames:Record<number,string>={4001:'prj_tomorrow',4002:'prj_upcoming',4003:'prj_someday',4004:'prj_next7days',4006:'prj_overdue',4007:'prj_week',5001:'tsk_priority_low',5002:'tsk_priority_middle',5003:'tsk_priority_high',7000:'prj_all',7001:'prj_calendar',7003:'prj_history'};
  const label=(row:Entity)=>legacyNames[number(row.type)]?services.language.legacyText(legacyNames[number(row.type)]):projectName(row,text);

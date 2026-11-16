@@ -1,3 +1,4 @@
+import { formatDateTime } from '../../domain/display.mjs';
 import { PickerField } from './PickerField';
 import { useEffect, useRef, useState } from 'react';
 import type { Entity, CompatibleRecord } from '../../services/core.mjs';
@@ -38,11 +39,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
   const drag = useState(() => ({ current: null as Entity | null }))[0];
   const chinese=services.language.locale.startsWith('zh');
   const repeatIcon=[repeatNoPriority,repeatLow,repeatMedium,repeatHigh][number(task.priority)]||repeatNoPriority;
-  const reminderValue=(value:string)=>{if(!value)return text.none;const date=new Date(value);const zh=services.language.locale.startsWith('zh');const hours=date.getHours()%12||12,minutes=String(date.getMinutes()).padStart(2,'0');
-    const time=date.getHours()*100+date.getMinutes();
-    const period=time<600?'凌晨':time<900?'早上':time<1130?'上午':time<1230?'中午':time<1800?'下午':'晚上';
-    if(zh)return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${period}${hours}:${minutes}`;
-    const month=date.toLocaleDateString('en-US',{month:'short'});return `${date.getDate()} ${month} ${date.getFullYear()} ${hours}:${minutes} ${date.getHours()<12?'am':'pm'}`};
+  const reminderValue=(value:string)=>value?formatDateTime(+new Date(value),services.language.locale):text.none;
   useEffect(()=>{const reset=(event:Event)=>{const element=event.target as HTMLDetailsElement;if(element.open&&element.closest('.workspace-details'))setPickerVersion(value=>value+1)};document.addEventListener('toggle',reset,true);return()=>document.removeEventListener('toggle',reset,true)},[]);
   const closeFields=()=>{document.querySelectorAll<HTMLDetailsElement>('.workspace-details details[open]').forEach(element=>element.open=false)};
   const dueLabel=!draft.deadline?text.someday:formatTaskDate(new Date(draft.deadline.length===10?draft.deadline+'T12:00':draft.deadline).getTime(),services.language.locale);
@@ -130,7 +127,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
     </section>
     <textarea ref={note} className="legacy-detail-note" aria-label={text.remark} placeholder={chinese?'添加备注...':'Add note...'} value={draft.remark} onChange={event=>{set('remark',event.target.value);resizeNote()}} onFocus={()=>resizeNote()} onBlur={()=>{void save('remark')}}/>
     </div>
-    <footer className="legacy-detail-bottom"><button type="button" aria-label={text.close} onClick={close}><LegacyIcon name="detail-close"/></button><span>{chinese?'创建于':'Created '}{dateInput(task.createDate||task.createdDate||Date.now())===dateInput(Date.now())?text.today:dateInput(task.createDate||task.createdDate)}</span><button type="button" aria-label={chinese?'手动补记':'Add focus record'} onClick={()=>{setCreateRecord(true)}}><LegacyIcon name="add-pomodoro"/></button><button type="button" aria-label={text.remove} disabled={busy||blocked} onClick={event=>{event.currentTarget.focus();setEditing(null);setDeleting(true)}}><LegacyIcon name="detail-delete"/></button></footer>
+    <footer className="legacy-detail-bottom"><button type="button" aria-label={text.close} onClick={close}><LegacyIcon name="detail-close"/></button><span>{chinese?'创建于':'Created '}{formatTaskDate(number(task.creationDate||task.createDate||task.createdDate),services.language.locale)}</span><button type="button" aria-label={chinese?'手动补记':'Add focus record'} onClick={()=>{setCreateRecord(true)}}><LegacyIcon name="add-pomodoro"/></button><button type="button" aria-label={text.remove} disabled={busy||blocked} onClick={event=>{event.currentTarget.focus();setEditing(null);setDeleting(true)}}><LegacyIcon name="detail-delete"/></button></footer>
     </div>
     {(deleting || editing) && <Dialog title={deleting ? text.confirmDelete : text.editSubtask} close={() => { setDeleting(false); setEditing(null); }}>
       <form onSubmit={async event => {

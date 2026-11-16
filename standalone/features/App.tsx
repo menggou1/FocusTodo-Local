@@ -1,3 +1,4 @@
+import { durationParts } from '../domain/display.mjs';
 import { useRowDrag } from './workspace/useRowDrag';
 import { ProfileMenu } from './workspace/ProfileMenu';
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
@@ -73,7 +74,7 @@ function Workspace() {
   useEffect(() => {
     if (focusHeading.current && !mobileNav) { focusHeading.current = false; heading.current?.focus(); }
   }, [view, mobileNav]);
-  const projects = ordered(snapshot.projects.filter(row => row.state !== -1));
+  const projects = snapshot.projects.filter(row => row.state !== -1);
   const fallback = projects.find(row => row.type === 7005);
   const project = view.kind === 'project' ? projects.find(row => row.id === view.id && row.state === 0) || fallback : undefined;
   const selectedTask = snapshot.tasks.find(row => row.id === selected && row.state === 0);
@@ -87,7 +88,7 @@ function Workspace() {
   const completedTasks = project?.type === 3000 ? ordered(snapshot.tasks.filter(row => row.state === 0 && row.isFinished && String(row.tags).split(',').includes(project.id))) : project && !completedView && isTasks ? [4000,4007].includes(number(project.type)) ? completedInRange(number(project.type)) : ordered(services.business.tasksInView({ id: project.id, type: number(project.type) }, true)) : [];
   const summaryPresetOnly = [4001,4002,4003,4004,4006].includes(number(project?.type));
   const completedSection = !!project && view.kind==='project' && ![4001,4002,4003,4006,7001,7003].includes(number(project.type));
-  const duration=(seconds:number)=>{const total=Math.round(seconds/60),hours=Math.floor(total/60),minutes=Math.round(total%60),zh=services.language.locale.startsWith('zh');const parts=hours>0?(minutes>0?[[hours,zh?'小时':'h'],[minutes,zh?'分钟':'m']]:[[hours,zh?'小时':'h']]):[[minutes,zh?'分钟':'m']];return <>{parts.flatMap(([value,unit])=>[<span key={'n'+unit} className="workspace-summary-number">{value}</span>,<span key={'u'+unit} className="workspace-summary-unit">{unit}</span>])}</>};
+  const duration=(seconds:number)=>{const {hours,minutes}=durationParts(seconds/60),zh=services.language.locale.startsWith('zh');const parts=hours>0?(minutes>0?[[hours,zh?'小时':'h'],[minutes,zh?'分钟':'m']]:[[hours,zh?'小时':'h']]):[[minutes,zh?'分钟':'m']];return <>{parts.flatMap(([value,unit])=>[<span key={'n'+unit} className="workspace-summary-number">{value}</span>,<span key={'u'+unit} className="workspace-summary-unit">{unit}</span>])}</>};
   const finished = showCompleted ? completedTasks : [];
   const completedCount = completedView || view.kind === 'search' ? active.filter(row => row.isFinished).length : completedTasks.length;
   const actualPomodoros=(task:Entity)=>snapshot.records.filter(row=>row.state!==-1&&row.taskId===task.id).reduce((sum,row)=>sum+Math.min(number(row.interval)/(number(row.pomodoroInterval)||preferences.workInterval),1),0);

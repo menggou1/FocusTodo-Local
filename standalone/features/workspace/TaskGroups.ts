@@ -1,3 +1,5 @@
+import { formatTaskDate } from '../../domain/display.mjs';
+export { formatMinutesDuration, formatTaskDate } from '../../domain/display.mjs';
 import type { Entity } from '../../services/core.mjs';
 import type { WorkspaceText } from '../../shared/workspace';
 import { dateInput, number, ordered, projectName, string } from './model';
@@ -12,29 +14,7 @@ export function completedTaskGroups(rows: readonly Entity[], locale: string) {
     if (!groups.has(id)) groups.set(id,{id,title:formatTaskDate(value,locale),rows:[]});
     groups.get(id)!.rows.push(row);
   }
-  return [...groups.values()];
-}
-
-export function formatMinutesDuration(minutes: number, locale: string) {
-  const zh = locale.startsWith('zh'), total = Math.max(0, Math.round(minutes));
-  const hours = Math.floor(total / 60), rest = Math.round(total % 60);
-  if (hours > 0 && rest > 0) return zh ? `${hours}小时${rest}分钟` : `${hours}h ${rest}m`;
-  if (hours > 0) return zh ? `${hours}小时` : `${hours}h`;
-  return zh ? `${rest}分钟` : `${rest}m`;
-}
-
-/** Legacy LocalDate: cross-year YMD, other past/future MD, then Today/Tomorrow. */
-export function formatTaskDate(value: number, locale: string, now = new Date()) {
-  const zh = locale.startsWith('zh'), date = new Date(value), start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  const day = new Date(date); day.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(start); tomorrow.setDate(tomorrow.getDate() + 1);
-  if (day.getTime() === start.getTime()) return zh ? '今天' : 'Today';
-  if (day.getTime() === tomorrow.getTime()) return zh ? '明天' : 'Tomorrow';
-  const sameYear = date.getFullYear() === now.getFullYear();
-  if (zh) return sameYear ? `${date.getMonth() + 1}月${date.getDate()}日` : `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-  const month = date.toLocaleDateString('en-US', { month: 'short' });
-  return sameYear ? `${date.getDate()} ${month}` : `${date.getDate()} ${month} ${date.getFullYear()}`;
+  return [...groups.values()].map(group=>({...group,rows:group.rows.sort((a,b)=>number(a.finishedDate)-number(b.finishedDate))}));
 }
 
 /** Group heading used by legacy TaskGroup: relative/absolute date + weekday, or 待定. */
@@ -62,9 +42,9 @@ export function taskGroups(rows: readonly Entity[], project: Entity | undefined,
     const date = dateInput(row.deadline);
     const id = rule === 0 ? string(row.projectId) : rule === 1 ? date : String(number(row.priority));
     const title = rule === 0 ? parent ? projectName(parent, text) : text.none : rule === 1 ? formatTaskDateGroup(number(row.deadline), locale, text, now) : priorityLabel(number(row.priority), locale);
-    // Legacy module 917 places the default Tasks group before every custom
-    // project, then uses each project's own order (including folder children).
-    const order = rule === 0 ? parent?.type===7005 ? -Infinity : number(parent?.order) : rule === 1 ? number(row.deadline) || Number.MAX_SAFE_INTEGER : -number(row.priority);
+    // The business snapshot owns project order, including preset precedence.
+    const position=projects.findIndex(item=>item.id===row.projectId);
+    const order = rule === 0 ? position<0?Number.MAX_SAFE_INTEGER:position : rule === 1 ? number(row.deadline) || Number.MAX_SAFE_INTEGER : -number(row.priority);
     if (!groups.has(id)) groups.set(id, { id, title, order, rows: [] });
     groups.get(id)!.rows.push(row);
   }

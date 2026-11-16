@@ -18,13 +18,24 @@ async function launch(engine) {
             'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
             'C:/Program Files/Google/Chrome/Application/chrome.exe'
         ].find(fs.existsSync)));
-    return playwright[engine].launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
+    return playwright[engine].launch({ headless: true, ...(engine==='chromium'?{args:['--mute-audio']}:{ }), ...(executablePath ? { executablePath } : {}) });
 }
 
 async function contextFor(browser, origin, options = {}) {
     const context = await browser.newContext({
         locale: 'zh-CN', timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 },
         reducedMotion: 'reduce', deviceScaleFactor: 1, ...options
+    });
+    // Headless UI checks must not play alarms or background music on the host.
+    // Keep native playback and volume semantics; mute only the output.
+    await context.addInitScript(() => {
+        const prototype = HTMLMediaElement.prototype;
+        const muted = Object.getOwnPropertyDescriptor(prototype, 'muted');
+        const play = prototype.play;
+        if (muted?.set) {
+            Object.defineProperty(prototype, 'muted', { ...muted, set() { muted.set.call(this, true); } });
+            prototype.play = function (...args) { muted.set.call(this, true); return play.apply(this, args); };
+        }
     });
     const external = [];
     await context.route(url => ['http:', 'https:'].includes(url.protocol) && url.origin !== origin,

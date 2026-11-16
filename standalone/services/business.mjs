@@ -1,6 +1,7 @@
 import { invariant, snapshotSource } from './errors.mjs';
 import { repetitionDeadline } from '../domain/recurrence.mjs';
 import { aggregateRecords, reportBuckets, reminderState, visibleRecord, calendarRange } from '../domain/reports.mjs';
+import { orderedProjects } from '../domain/project-order.mjs';
 
 const tables = ['Project', 'Task', 'Subtask', 'Schedule', 'Pomodoro', 'TimerSession'];
 const names = ['projects', 'tasks', 'subtasks', 'schedules', 'records', 'sessions'];
@@ -17,10 +18,11 @@ function collect(tx, done, fail, apply, beforeCommit = () => {}) {
 export function createBusinessService({ data, core, now, randomUUID, settings, onError, fault = () => {} }) {
     const state = snapshotSource({ projects: [], tasks: [], subtasks: [], schedules: [], records: [], sessions: [] }, onError);
     let disposed = false, revision = 0;
+    const reportCache = new Map();
     const refresh = async () => {
         invariant(!disposed, 'Service disposed', 'disposed'); const request = ++revision;
         const value = await data.read(tables, (tx, done, fail) => collect(tx, done, fail, value => value));
-        if (request === revision) state.publish(value); return state.getSnapshot();
+        if (request === revision) { reportCache.clear(); state.publish({ ...value, projects: orderedProjects(value.projects) }); } return state.getSnapshot();
     };
     const projectDefaults = () => ({ id: randomUUID(), objType: 'PROJECT', creationDate: now(), state: 0, name: '', order: 0,
         color: 'AEBDC3', isDefault: false, parentId: '', orderingRule: 3, type: 1000, imageName: '', expanded: true, sync: 0 });
@@ -184,7 +186,16 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 || String(row.tags || '').split(',').some(id => tags.get(id.trim())?.includes(query))
                 || value.subtasks.some(child => child.taskId === row.id && child.state === 0 && child.name.toLowerCase().includes(query))));
         },
-        report(start, end) { const value = state.getSnapshot(); return aggregateRecords(value.records, start, end, value.tasks); },
+        report(start, end) {
+            const key = `${start}:${end}`;
+            if (!reportCache.has(key)) {
+                if (reportCache.size >= 2048) reportCache.clear();
+                const value = state.getSnapshot(), report = aggregateRecords(value.records, start, end, value.tasks);
+                Object.freeze(report.byTask); Object.freeze(report.byProject);
+                reportCache.set(key, Object.freeze(report));
+            }
+            return reportCache.get(key);
+        },
         tasksInView(view, finished = false) {
             const {start,end} = calendarRange(now()), tomorrow = calendarRange(end), week = calendarRange(now(),'week');
             const seven = new Date(start); seven.setDate(seven.getDate()+7);
