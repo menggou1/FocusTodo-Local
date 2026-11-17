@@ -43,3 +43,7 @@ A history longer than 70 days tests final CSS/bitmap/DPR dimensions, axes and bo
 Forest reward tests fix the clock before startup and move to a deterministic next-day instant after task completion. Exact assertions for 41g collection, 61g balance and idempotence remain unchanged, avoiding engine clock-install millisecond boundaries.
 
 Current-commit results belong in the release report. Historical evidence keeps its sampling date and does not certify the current SHA. Automation does not establish human visual acceptance, long-term user-data upgrade, Safari, physical audio/notifications, saved downloads or real Bing boundaries. Only [Backlog](../BACKLOG.md) maintains unfinished work and release checks.
+
+`node tests/standalone/settings-regression.cjs` validates current settings, avatars, theme loading, dropdowns, audio feedback and file-selection outcomes with synthetic data on random isolated ports. `node tests/standalone/settings-legacy-reference.cjs` checks only the required historical controls and VolumeTip resource against immutable 1.9.4.
+
+Set `FOCUS_TEST_BUNDLED_BROWSER=1` to use bundled Chromium without a daily browser profile. Chromium/Firefox volume-feedback checks use an identical WAV Blob and allow Blob media only in that test page. Windows WebKit checks the real packaged URL with the original CSP; other regressions retain the product transport and security policy.

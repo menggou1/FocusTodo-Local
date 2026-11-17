@@ -1,9 +1,11 @@
 import { invariant } from './errors.mjs';
 /** A browser lock owns automatic background playback. No timeout steals it. */
-export function createAudioService({ createAudio, locks, settings, visible, onError = () => {}, notice = () => {} }) {
+export function createAudioService({ createAudio, locks, settings, visible, onError = () => {}, notice = () => {}, setTimeout: schedule = globalThis.setTimeout, clearTimeout: cancel = globalThis.clearTimeout }) {
     let background = null, audition = null, timerState = 'initial', suspended = false, disposed = false;
     let requesting = false, controller = null, release = null, failed = false, explained = false;
     const effects = new Set();
+    let tipTimer = null, tip = null;
+    const stopTip = () => { cancel(tipTimer); tipTimer = null; stop(tip); tip = null; };
     const stop = audio => { if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); } };
     const report = error => { try { onError(error); } catch (_) { /* Observer. */ } };
     const play = (file, volume, loop) => {
@@ -46,10 +48,15 @@ export function createAudioService({ createAudio, locks, settings, visible, onEr
             invariant(!disposed, 'Audio service disposed', 'disposed'); stopBackground(); stop(audition); audition = play(file, volume, false);
             if (audition) audition.onended = audition.onerror = () => { stop(audition); audition = null; update(); };
         },
+        volumeTip(volume) {
+            invariant(!disposed, 'Audio service disposed', 'disposed');
+            stopTip();
+            if (volume > 0) tipTimer = schedule(() => { tipTimer = null; tip = play('VolumeTip.wav', volume, false); if (tip) tip.onended = tip.onerror = stopTip; }, 100);
+        },
         auditionVolume(value) { if (audition) audition.volume = Math.max(0, Math.min(1, value)); },
         stopAudition() { stop(audition); audition = null; update(); },
-        suspend() { suspended = true; stopBackground(); stop(audition); audition = null; effects.forEach(stop); effects.clear(); },
+        suspend() { stopTip(); suspended = true; stopBackground(); stop(audition); audition = null; effects.forEach(stop); effects.clear(); },
         resume() { suspended = false; update(); },
-        dispose() { disposed = true; unsubscribe(); stopBackground(); stop(audition); effects.forEach(stop); effects.clear(); },
+        dispose() { stopTip(); disposed = true; unsubscribe(); stopBackground(); stop(audition); effects.forEach(stop); effects.clear(); },
     });
 }

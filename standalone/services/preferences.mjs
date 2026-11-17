@@ -49,6 +49,7 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
         if (field === 'isDarkMode') invariant(value === null || typeof value === 'boolean', 'Invalid theme preference');
         if (field === 'defaultDeadline') invariant(Number.isFinite(value) && Math.abs(value) <= 8.64e15, 'Invalid default deadline');
         if (field === 'widgetOrder' || field === 'visibleWidgets') invariant(Array.isArray(value) && value.every(item=>[0,1,2].includes(item)) && new Set(value).size===value.length, 'Invalid timer widgets');
+        if (Object.is(state.getSnapshot()[field], value)) return state.getSnapshot();
         onIntent(field, value);
         await data.themeStorageOperation(() => value === null ? storage.removeItem(definition[0]) : storage.setItem(definition?.[0] || 'DefaultDeadline', Array.isArray(value)?value.join(','):String(value)));
         const result = refresh(); data.changed('settings'); return result;

@@ -30,7 +30,7 @@ const release=require('../../release.json');
   assert.equal(await p.evaluate(async()=>(await indexedDB.databases()).some(db=>db.name.startsWith('FocusTodoStandalone.'))),false);
   await p.locator('.workspace-add-task input').fill('New React task');await p.locator('.workspace-add-task input').press('Enter');await p.getByText('New React task',{exact:true}).waitFor();assert.equal((await rows()).length,before.indexedDB.Task.length+1);
   await p.locator('[data-view=settings]').click();await p.getByRole('button',{name:'About',exact:true}).click();
-  assert((await p.getByTestId('settings-page').innerText()).includes('2.0.0'));assert((await p.getByTestId('settings-page').innerText()).includes(release.date));
+  assert((await p.getByTestId('settings-page').innerText()).includes(release.localVersion));assert((await p.getByTestId('settings-page').innerText()).includes(release.date));
   await p.getByRole('button',{name:'Profile',exact:true}).click();await p.getByRole('button',{name:'Export data',exact:true}).click();await p.locator('.legacy-backup-analysis').waitFor();
   const download=p.waitForEvent('download',{timeout:30000});download.catch(()=>{});await p.getByRole('button',{name:'Create and download',exact:true}).click();const saved=await download,file=await saved.path();let bytes=fs.readFileSync(file);if(saved.suggestedFilename().endsWith('.gz'))bytes=gunzipSync(bytes);const backup=JSON.parse(bytes.toString('utf8'));
   assert(backup.indexedDB.Task.some(row=>row.id===before.indexedDB.Task[0].id));assert.equal(backup.localStorage.WorkInterval,'1800');assert.equal(backup.meta.exportVersion,2);

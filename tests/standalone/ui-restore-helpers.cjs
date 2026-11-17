@@ -4,7 +4,7 @@ const {createServer}=require('../helpers/legacy-runtime.cjs');
 const {createStandaloneServer}=require('../../scripts/standalone-server.cjs');
 const {execFileSync}=require('node:child_process');
 const baseline=require('../helpers/legacy-runtime.cjs').commit;
-async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMotion='reduce',recordVideo}={}){
+async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMotion='reduce',recordVideo,volumeTipFixture=false}={}){
  // The separate immutable archive supplies the historical UI.
 
  const shared=process.env.FOCUS_RESTORE_SHARED==='1';
@@ -13,7 +13,7 @@ async function paired({locale='zh-CN',dark=false,width=1280,height=900,reducedMo
  const browser=await launch('chromium'),handles=[];
  try{for(let i=0;i<2;i++){
   const origin=shared?'http://127.0.0.1:'+(i?Number(process.env.FOCUS_RESTORE_NEW_PORT||5511):5513):'http://127.0.0.1:'+servers[i].address().port;
-  const h=await contextFor(browser,origin,{locale,viewport:{width,height},colorScheme:dark?'dark':'light',reducedMotion,...(recordVideo?{recordVideo}:{})});
+  const h=await contextFor(browser,origin,{locale,viewport:{width,height},colorScheme:dark?'dark':'light',reducedMotion,volumeTipFixture,...(recordVideo?{recordVideo}:{})});
   handles.push(h);await h.page.clock.setFixedTime(new Date('2026-11-08T12:00:00+08:00'));
   await h.context.addInitScript(({prefix,locale,dark})=>{localStorage.setItem(prefix+'FocusTodo.language',locale);localStorage.setItem(prefix+'DarkMode',String(dark))},{prefix:i?'FocusTodoStandalone.data.':'',locale,dark});
   await h.page.goto(origin);if(i)await h.page.getByTestId('app-shell').waitFor();else{await h.page.waitForFunction(()=>window.FocusLocalReady&&!document.documentElement.classList.contains('focus-starting'));await h.page.evaluate(()=>FocusLocalReady)}

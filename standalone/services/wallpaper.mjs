@@ -26,10 +26,11 @@ export function createWallpaperService({ themes, settings, network, image, parse
             await save({ themes: libraryJSON(rows), active: id, theme: id }, token); return id;
         },
         async select(id) {
+            if (themes.read().active === id) return;
             cancel(); const rows = read(); invariant(rows[id]?.dataUrl, 'Missing theme image');
             await save({ active: id, theme: id }, revision);
         },
-        async classic(id) { cancel(); invariant(typeof id === 'string' && !id.startsWith('custom_') && id !== '__bing_daily__', 'Invalid classic theme'); await save({ active: null, theme: id }, revision); },
+        async classic(id) { if (!themes.read().active && (themes.read().theme === 'Sea' ? 'Ocean' : themes.read().theme || 'Leaf') === id) return; cancel(); invariant(typeof id === 'string' && !id.startsWith('custom_') && id !== '__bing_daily__', 'Invalid classic theme'); await save({ active: null, theme: id }, revision); },
         async remove(id) {
             cancel(); const rows = read(); invariant(rows[id], 'Theme no longer exists'); delete rows[id];
             const active = themes.read().active === id;

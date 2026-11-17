@@ -184,6 +184,8 @@ jobs:
           npm run test:release-app
           node tests/standalone/final-ui-parity.cjs
           node tests/standalone/inspector-dialog-parity.cjs
+          node tests/standalone/settings-legacy-reference.cjs
+          node tests/standalone/settings-regression.cjs
         env:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_STANDALONE_ENGINES: chromium
@@ -203,6 +205,7 @@ jobs:
           node tests/standalone/workspace-browser.cjs
           node tests/standalone/domain-pages.cjs
           node tests/standalone/services-browser.cjs
+          node tests/standalone/settings-regression.cjs
         env:
           FOCUS_STANDALONE_ENGINES: firefox,webkit
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance/standalone-firefox-webkit

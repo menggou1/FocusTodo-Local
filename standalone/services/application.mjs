@@ -53,7 +53,7 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
     const language = createLanguageService({ settings, catalog, languages, encodeBase64 });
     const notifications = createNotificationService({ api: notification, focus, onError: report, icon: notificationIcon });
     business = createBusinessService({ data, core, now, randomUUID, settings, onError: report, fault });
-    if (createAudio) audio = createAudioService({ createAudio, locks, settings, visible, onError: report, notice: message => onEvent('notice', message) });
+    if (createAudio) audio = createAudioService({ createAudio, locks, settings, visible, onError: report, notice: message => onEvent('notice', message), setTimeout: schedule, clearTimeout: cancel });
     timer = createTimerService({ data, core, now, randomUUID, onError: report, onCommit(result) {
         for (const event of result.events) {
             const preferences = settings.getSnapshot(), alarm = event.type === 'work' ? preferences.workAlarm : preferences.breakAlarm;
@@ -124,9 +124,9 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
         },
         backup: Object.freeze({ export: async options => codec.encode(await data.snapshot(), options),
             async inspect(input) { const decoded = await codec.decode(input); data.validate(decoded.data); return decoded; },
-            async reset() { wallpaper.cancel();network.cancel();audio?.suspend();const backup=await data.reset();await refresh();audio?.resume();return backup; },
+            async reset() { wallpaper.cancel();network.cancel();audio?.suspend();try { const backup=await data.reset();await refresh();return backup; } finally { if (!data.maintenance && !halted) audio?.resume(); } },
             async restore(input, options) { const decoded = await codec.decode(input); wallpaper.cancel(); network.cancel(); audio?.suspend();
-                const backup = await data.replace(decoded.data, options); await refresh(); audio?.resume(); return backup; },
+                try { const backup = await data.replace(decoded.data, options); await refresh(); return backup; } finally { if (!data.maintenance && !halted) audio?.resume(); } },
         }),
         dispose,
     });

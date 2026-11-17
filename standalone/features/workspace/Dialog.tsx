@@ -15,7 +15,7 @@ export function useWindowClose(close: () => void, immediate = false) {
   return { close: requestClose, motion: closing ? 'legacy-window-exit' : 'legacy-window-enter' };
 }
 
-export function Dialog({ title, close, children, className='',inline=false, motion }: { title: string; close(): void; children: ReactNode|((dismiss:()=>void)=>ReactNode);className?:string;inline?:boolean; motion?:string }) {
+export function Dialog({ title, close, children, className='',inline=false, motion, showClose=true }: { title: string; close(): void; children: ReactNode|((dismiss:()=>void)=>ReactNode);className?:string;inline?:boolean; motion?:string;showClose?:boolean }) {
   const ownMotion = useWindowClose(close), requestClose = motion ? close : ownMotion.close;
   const ref = useRef<HTMLDialogElement>(null), heading = useId();
   const { busy, text, error } = useWorkspace();
@@ -27,8 +27,8 @@ export function Dialog({ title, close, children, className='',inline=false, moti
   }, [inline]);
   const content = typeof children==='function'?children(requestClose):children;
   if(inline)return <section className={'legacy-inline-dialog '+className} aria-label={title}>{content}</section>;
-  return createPortal(<dialog data-app-interaction-root ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { event.preventDefault(); if (!busy) requestClose(); }}>
-    <header><h2 id={heading}>{title}</h2><button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button></header>
+  return createPortal(<dialog data-app-interaction-root ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { if(event.target!==event.currentTarget)return;event.preventDefault(); if (!busy) requestClose(); }}>
+    <header><h2 id={heading}>{title}</h2>{showClose&&<button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button>}</header>
     {error && <p className="danger" role="alert" data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</p>}
     {content}
   </dialog>, document.body);
@@ -41,5 +41,5 @@ export function PageOverlay({title,close:onClose,children,full=false}:{title:str
  useEffect(()=>{const previous=document.activeElement as HTMLElement|null;if(report){const escape=(event:KeyboardEvent)=>{if(event.key==='Escape'&&!event.defaultPrevented&&!document.querySelector('dialog[open]')){event.preventDefault();close()}};document.addEventListener('keydown',escape);return()=>{document.removeEventListener('keydown',escape);if(previous?.isConnected)previous.focus()}}const dialog=ref.current!;dialog.showModal();return()=>{dialog.close();if(previous?.isConnected)previous.focus()}},[report]);
  const header=<header><h1 id={heading}>{title}</h1><button data-testid="close-page" aria-label={text.close} onClick={close}>×</button></header>;
  if(report)return <section className={'domain-overlay full legacy-report-overlay '+motion} role="dialog" aria-modal="true" aria-labelledby={heading}>{header}<div className="domain-overlay-body">{children}</div></section>;
- return <dialog ref={ref} className={'domain-overlay '+motion+(full?' full':'')} aria-labelledby={heading} onCancel={event=>{event.preventDefault();close()}}>{header}<div className="domain-overlay-body">{children}</div></dialog>;
+ return <dialog ref={ref} className={'domain-overlay '+motion+(full?' full':'')} aria-labelledby={heading} onCancel={event=>{if(event.target!==event.currentTarget)return;event.preventDefault();close()}}>{header}<div className="domain-overlay-body">{children}</div></dialog>;
 }

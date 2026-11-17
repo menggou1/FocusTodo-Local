@@ -136,8 +136,8 @@ async function run(pair,locale,dark){
  });
  await check('version',async()=>{
  // Independent candidate version; published history remains unchanged.
- await n.locator('[data-view=settings]').click();await n.getByTestId('settings-page').waitFor();await n.getByRole('button',{name:zh?'关于':'About',exact:true}).click();assert((await n.locator('.legacy-account-row').allTextContents()).some(s=>s.includes('2.0.0')));assert.equal(await n.title(),'FocusTodo 2.0.0');
- assert.equal((await rows(n,'LocalMeta')).find(x=>x.id==='client-protocol').appVersion,'2.0.0');
+ await n.locator('[data-view=settings]').click();await n.getByTestId('settings-page').waitFor();await n.getByRole('button',{name:zh?'关于':'About',exact:true}).click();assert((await n.locator('.legacy-account-row').allTextContents()).some(s=>s.includes(require('../../release.json').localVersion)));assert.equal(await n.title(),(zh?'专注清单':'FocusTodo ')+require('../../release.json').localVersion);
+ assert.equal((await rows(n,'LocalMeta')).find(x=>x.id==='client-protocol').appVersion,require('../../release.json').localVersion);
  });
  await check('record-inputs',async()=>{
   if(await n.locator('.domain-overlay[open]').count()){await n.getByTestId('close-page').click();await settle(n)}

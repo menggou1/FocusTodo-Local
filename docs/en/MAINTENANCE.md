@@ -86,3 +86,5 @@ After successful main checks, Pages publishes only the production manifest plus 
 Lexible maintains the local app, based on [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1. Upstream commit fe15a1d9201c6298f1c28c16dcb0b58c481f9999 remains on upstream/7.1.1. archive/1.9.4 preserves the last 1.x local version and never deploys Pages. Preserve MIT and copyright, with complete React/ReactDOM/scheduler/Noto notices in distributions.
 
 Current documents live in docs and docs/en; reports use releases. Historical reports retain historical facts. Only docs/BACKLOG.md maintains unfinished engineering, human acceptance and post-release checks. Update links, metadata and package manifests when moving documents.
+
+Successful `release/2.0.x` branches are temporary: after Release, Pages and downloaded-package verification, delete their remote refs and audit older release branches. First ensure all valid commits remain reachable. Preserve immutable tags, Releases and complete effective history.

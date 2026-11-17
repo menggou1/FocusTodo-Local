@@ -1,3 +1,4 @@
+import { Avatar } from './workspace/Avatar';
 import { durationParts } from '../domain/display.mjs';
 import { useRowDrag } from './workspace/useRowDrag';
 import { ProfileMenu } from './workspace/ProfileMenu';
@@ -19,7 +20,7 @@ import { Timer } from './workspace/Timer';
 import { Calendar } from './workspace/Calendar';
 import { History, Reports } from './workspace/Reports';
 import { Forest } from './workspace/Forest';
-import { Settings } from './workspace/Settings';
+import { Settings, preloadThemes } from './workspace/Settings';
 import { Updates } from './workspace/Updates';
 import { PageOverlay } from './workspace/Dialog';
 import { LegacyScrollbars } from './workspace/LegacyScrollbars';
@@ -31,13 +32,14 @@ type View = SidebarView;
 export function App({ services }: { services: ApplicationServices }) {
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
   const text = workspaceText(services.language.locale);
+  useEffect(()=>{preloadThemes()},[]);
   useEffect(() => {
     document.documentElement.lang = services.language.locale;
-    document.title = 'FocusTodo '+services.release.metadata.version;
+    document.title = (services.language.locale==='zh-CN'?'专注清单':'FocusTodo ')+services.release.metadata.version;
   }, [services, preferences.language, text.preview]);
   useLayoutEffect(() => {
     const media = matchMedia('(prefers-color-scheme: dark)');
-    const apply = () => { document.documentElement.dataset.theme = (preferences.isDarkMode ?? media.matches) ? 'dark' : 'light'; };
+    const apply = () => { const theme=(preferences.isDarkMode ?? media.matches) ? 'dark' : 'light'; if(document.documentElement.dataset.theme!==theme)document.documentElement.dataset.theme=theme; };
     apply(); media.addEventListener('change', apply); return () => media.removeEventListener('change', apply);
   }, [preferences.isDarkMode]);
   return <WorkspaceProvider services={services} text={text}><AppInteractions/><Workspace /></WorkspaceProvider>;
@@ -220,7 +222,7 @@ function Workspace() {
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
     <header className="workspace-header">
       <button className="workspace-mobile-toggle" aria-label={text.navigation} aria-expanded={mobileNav} onClick={() => setMobileNav(value => !value)}>☰</button>
-      <div className="workspace-profile-container"><button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} aria-expanded={profileMenu} onContextMenu={event=>{event.preventDefault();setProfileMenu(!profileMenu)}} onClick={()=>setProfileMenu(!profileMenu)}>{services.settings.profile().avatar?<img className="workspace-avatar" src={services.settings.profile().avatar} alt=""/>:<LegacyIcon className="workspace-avatar" name="header-portrait"/>}<span>{services.settings.profile().name}</span><LegacyIcon className="workspace-profile-arrow" name="user-dropdown"/></button>{profileMenu&&<ProfileMenu close={()=>setProfileMenu(false)} account={()=>{setProfileMenu(false);setSettingsTab('account');setOverlay('settings')}}/>}</div>
+      <div className="workspace-profile-container"><button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} aria-expanded={profileMenu} onContextMenu={event=>{event.preventDefault();setProfileMenu(!profileMenu)}} onClick={()=>setProfileMenu(!profileMenu)}><Avatar className="workspace-avatar" src={services.settings.profile().avatar} alt=""/><span>{services.settings.profile().name}</span><LegacyIcon className="workspace-profile-arrow" name="user-dropdown"/></button>{profileMenu&&<ProfileMenu close={()=>setProfileMenu(false)} account={()=>{setProfileMenu(false);setSettingsTab('account');setOverlay('settings')}}/>}</div>
       <nav aria-label={text.navigation}>{(['forest','reports'] as const).filter(item=>item!=='forest'||preferences.forestEnabled).map(item=><button key={item} title={text[item]} aria-label={text[item]} data-view={item} aria-current={overlay===item?'page':undefined} onClick={()=>navigate({kind:item})}><LegacyIcon name={item==='forest'?'header-forest':'header-report'}/>{item==='forest'&&forestReward>0&&<small className="legacy-forest-header-count">{forestReward}</small>}</button>)}<Updates openTask={openTask}/><button title={text.settings} aria-label={text.settings} data-view="settings" aria-current={overlay==='settings'?'page':undefined} onClick={()=>navigate({kind:'settings'})}><LegacyIcon name="header-setting"/></button></nav>
     </header>
     <div className={'workspace-layout' + (selectedTask && isTasks ? ' has-details' : '')}>

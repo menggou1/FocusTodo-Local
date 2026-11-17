@@ -24,7 +24,7 @@ export function usePreferenceChanges() {
     } finally { saving.current = false; }
   }
   function change<K extends WritablePreference>(key: K, value: PreferenceState[K]) {
-    if (blocked) return;
+    if (blocked || Object.is(pending.current.has(key)?pending.current.get(key):(Object.hasOwn(draft,key)?draft[key]:stored[key]),value)) return;
     setDraft(previous => ({ ...previous, [key]: value }));
     pending.current.set(key, value);
     void flush();

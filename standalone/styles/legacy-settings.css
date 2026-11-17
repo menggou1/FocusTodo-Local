@@ -102,8 +102,8 @@
 
 .legacy-settings{align-items:stretch}
 .legacy-settings-select{position:relative;display:inline-block;flex:none;width:200px;height:30px;vertical-align:middle}.legacy-settings-select>select{display:block;margin:0!important;max-width:none!important;width:100%;height:30px;cursor:pointer}.legacy-settings-select>select:focus-visible{outline:0;box-shadow:none}
-.legacy-settings-menu{position:fixed;z-index:100000;background:var(--workspace-panel);color:var(--workspace-text);border-radius:4px;box-shadow:0 0 0 1px #0000001a,0 4px 11px #0000001a;padding:4px 0;max-height:300px;overflow:auto;scrollbar-width:none;font:14px/20px var(--workspace-font)}
-.legacy-settings-menu>button{display:block;box-sizing:border-box;width:100%;min-height:37px;line-height:21px;text-align:left;border:0;border-radius:0;background:transparent;padding:8px 12px;color:inherit;font:inherit}.legacy-settings-menu>button[data-active=true],.legacy-settings-menu>button:hover{background:var(--workspace-selected)}.legacy-settings-menu>button:disabled{opacity:.5}
+.legacy-settings-menu-surface{position:fixed;z-index:100000}.legacy-settings-menu{position:relative;background:var(--workspace-panel);color:var(--workspace-text);border-radius:4px;box-shadow:0 0 0 1px #0000001a,0 4px 11px #0000001a;padding:4px 0;max-height:300px;overflow:auto;scrollbar-width:none;font:14px/20px var(--workspace-font)}
+.legacy-settings-menu>[role=option]{display:block;box-sizing:border-box;width:100%;min-height:37px;line-height:21px;text-align:left;border:0;border-radius:0;background:transparent;padding:8px 12px;color:inherit;font:inherit}.legacy-settings-menu>[role=option][data-active=true],.legacy-settings-menu>[role=option]:hover{background:var(--workspace-selected)}.legacy-settings-menu>[role=option]:disabled{opacity:.5}
 
 .legacy-notification-popover{color:#333}.legacy-notification-popover .legacy-notification-entry{color:var(--workspace-text);line-height:20px}.legacy-notification-entry>span{line-height:18px}:root[data-theme=dark] .legacy-notification-popover{background:#2d2d37}
 .legacy-settings,.legacy-backup-dialog{--legacy-setting-border:#e5e5e5;--legacy-setting-split:#f4f4f4;--legacy-setting-muted:#aeaeae}
@@ -119,7 +119,7 @@
 
 :root[data-theme=dark] .legacy-settings .legacy-language{background:#2d2d37}
 .legacy-settings-select[data-query=true]>select{color:transparent}.legacy-settings .legacy-settings-select>.legacy-settings-search{position:absolute;top:5px;left:8px;width:calc(100% - 48px)!important;max-width:none!important;height:20px!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:var(--workspace-text);outline:0;font:14px/20px var(--workspace-font);box-shadow:none!important}
-.legacy-settings-menu>button{min-height:36px}
+.legacy-settings-menu>[role=option]{min-height:36px}
 
 .legacy-settings-no-options{padding:8px 12px;color:#999;text-align:center;font:14px/20px var(--workspace-font)}
 .legacy-sound-settings>.legacy-noise-grid{display:grid}.legacy-settings .legacy-sound-row input[type=range]{border-radius:0}
@@ -182,9 +182,24 @@
 .legacy-settings-project-toggle>.legacy-switch{transform:translateY(-1px)}
 .legacy-settings-project-name{transform:translateY(2px)}
 
-.legacy-settings-menu[data-selected-mark=true]>button[aria-selected=true]{background-image:url('../../public/img/new-task-project-selected.png');background-repeat:no-repeat;background-size:24px 24px;background-position:right center}
+.legacy-settings-menu[data-selected-mark=true]>[role=option][aria-selected=true]{background-image:url('../../public/img/new-task-project-selected.png');background-repeat:no-repeat;background-size:24px 24px;background-position:right center}
 .legacy-settings-project-delete-dialog::backdrop{background:rgba(0,0,0,.3)}
 :root[data-theme=dark] .domain-overlay:has(.legacy-settings)::backdrop,:root[data-theme=dark] .legacy-settings-project-delete-dialog::backdrop{background:rgba(0,0,0,.63)}
 .legacy-settings-project-delete-dialog .legacy-delete-content strong{display:block;margin-bottom:8px}
 .legacy-settings-project-delete-dialog .legacy-delete-content p{margin:0 0 10px}
 .legacy-settings-project-delete-dialog footer button:not(.primary){border-color:var(--legacy-setting-border)}
+
+/* Ranges own only their rail and thumb, never the shared text-input border. */
+.legacy-sound-row input[type=range]{border:0;border-radius:0;box-shadow:none}
+.legacy-sound-row input[type=range]::-moz-range-track{height:3px;background:#fd5553;border:0;border-radius:2px}
+.legacy-sound-row input[type=range]::-moz-range-thumb{width:10px;height:10px;border:0;border-radius:50%;background:#fd5553}
+.legacy-settings-menu>[role=option]{position:relative;padding-right:36px;cursor:pointer}
+.legacy-settings-menu>.legacy-settings-option{display:flex;align-items:center;padding-right:62px}
+.legacy-alarm-option-preview{position:absolute;right:34px;top:50%;transform:translateY(-50%);width:20px;height:20px;padding:3px;border:0;background:transparent;cursor:pointer}
+.legacy-alarm-option-preview img{display:block;width:14px;height:14px}
+.legacy-release-dialog article>footer{display:flex;justify-content:flex-end;gap:8px;margin:20px 0 0}
+.legacy-release-dialog article>footer button{height:30px;min-width:75px;border-radius:6px;font:12px/28px var(--workspace-font);padding:0 16px;background:var(--workspace-accent);color:#fff}
+
+/* A transaction locks actions without flashing the entire settings control set. */
+.legacy-settings button:disabled,.legacy-settings input:disabled,.legacy-settings select:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}
+.legacy-settings input.legacy-switch:disabled{opacity:1}

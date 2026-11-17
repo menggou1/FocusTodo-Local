@@ -24,6 +24,7 @@ export function WorkspaceProvider({ services, text, children }: { services: Appl
     try { await action(); publishCommit(v=>v+1); return true; }
     catch (failure) {
       const code = (failure as { code?: string; name?: string; recoveryRequired?: boolean });
+      if (code.code==='cancelled'&&!code.recoveryRequired) return false;
       if (['incompatible-client', 'disposed'].includes(code.code || '') || code.recoveryRequired || ['VersionError', 'InvalidStateError'].includes(code.name || '')) {
         stopped.current = true; setBlocked(true); setError('blocked');
       } else setError(code.code === 'conflict' ? 'conflict' : code.code === 'validation' ? 'validation' : 'failed');

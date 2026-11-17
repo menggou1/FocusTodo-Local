@@ -43,3 +43,5 @@ paired 对照默认为归档和隔离 React 各启动随机端口，均使用临
 森林奖励场景在应用启动前固定时钟，并在完成任务后切换到确定的次日时刻；41g 收取、61g 余额及重复收取不加分保持精确断言，避免引擎安装时钟时的毫秒边界影响结果。
 
 当前提交结果写入版本报告；历史验证文件注明取样日期，不能当作当前 SHA 的复测。自动化不证明人工视觉接受、真实长期数据升级、Safari、系统声音/通知、下载保存或真实 Bing 边界。未完成范围和发布前检查只维护在 [BACKLOG](BACKLOG.md)。
+
+`node tests/standalone/settings-regression.cjs` 使用合成数据、随机隔离端口验证设置、头像、主题解码、菜单、音频反馈及文件选择结果；`node tests/standalone/settings-legacy-reference.cjs` 只核对指定的旧版控件与 VolumeTip 资源。Windows 使用 `FOCUS_TEST_BUNDLED_BROWSER=1` 选择 Playwright 自带 Chromium，使用独立浏览器安装；不要接入日常 Profile。Chromium/Firefox 的短 WAV 提示音专项测试通过同字节 Blob 执行原生解码与播放，仅在该测试页面允许 Blob 媒体，以避免宿主下载管理器截获响应；Windows WebKit 不支持这条 Blob 播放路径，使用真实打包 URL 和原有 CSP。专项测试同时核对正式构建内 WAV 字节，其他回归保持产品的原始传输与安全策略。
