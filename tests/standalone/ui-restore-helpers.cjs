@@ -27,5 +27,12 @@ async function copyFixture(pair){
  await pair.new.evaluate(async backup=>{for(const [key,value]of Object.entries(backup.localStorage||{}))localStorage.setItem('FocusTodoStandalone.data.'+key,String(value));await new Promise((resolve,reject)=>{const request=indexedDB.open('FocusTodoStandalone.PomodoroDB6',3);request.onerror=()=>reject(request.error);request.onsuccess=()=>{const db=request.result,names=Object.keys(backup.indexedDB).filter(name=>db.objectStoreNames.contains(name)),tx=db.transaction(names,'readwrite');for(const name of names){const store=tx.objectStore(name);store.clear();for(const row of backup.indexedDB[name])store.put(row)}tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>reject(tx.error)}})},backup);
  await pair.new.reload();await pair.new.getByTestId('app-shell').waitFor();await pair.new.evaluate(()=>document.fonts.ready);return backup;
 }
-async function metrics(page,selectors){return page.evaluate(selectors=>Object.fromEntries(Object.entries(selectors).map(([name,selector])=>{const el=document.querySelector(selector);if(!el)return[name,null];const r=el.getBoundingClientRect(),s=getComputedStyle(el);if(!r.width||!r.height)return[name,null];return[name,{x:r.x,y:r.y,width:r.width,height:r.height,font:s.font,fontSize:s.fontSize,fontWeight:s.fontWeight,lineHeight:s.lineHeight,color:s.color,background:s.backgroundColor,borderRadius:s.borderRadius,padding:s.padding,display:s.display}]})),selectors)}
+async function metrics(page,selectors){return page.evaluate(async selectors=>{
+ // A newly mounted dialog can request a previously unused font weight. The
+ // startup font promise and a fixed animation wait do not cover that request.
+ // Reading the boxes first flushes layout, including font demand for new text.
+ for(const selector of Object.values(selectors))document.querySelector(selector)?.getBoundingClientRect();
+ await document.fonts.ready;
+ return Object.fromEntries(Object.entries(selectors).map(([name,selector])=>{const el=document.querySelector(selector);if(!el)return[name,null];const r=el.getBoundingClientRect(),s=getComputedStyle(el);if(!r.width||!r.height)return[name,null];return[name,{x:r.x,y:r.y,width:r.width,height:r.height,font:s.font,fontSize:s.fontSize,fontWeight:s.fontWeight,lineHeight:s.lineHeight,color:s.color,background:s.backgroundColor,borderRadius:s.borderRadius,padding:s.padding,display:s.display}]}));
+},selectors)}
 module.exports={paired,copyFixture,metrics,assert,fs,path,root};

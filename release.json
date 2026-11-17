@@ -1,10 +1,31 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "2.0.1",
+  "localVersion": "2.0.2",
   "author": "Lexible",
   "date": "2026-11-17",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "2.0.2",
+      "date": "2026-11-17",
+      "title": "设置交互、主题与头像可靠性修复",
+      "titleEn": "Settings, theme and avatar reliability fixes",
+      "items": [
+        "统一默认头像与无效图片回退，更新详情使用标准弹窗和确定按钮。",
+        "修复设置与主题切换反馈、菜单开合及选中标识，优化主题图片预加载。",
+        "恢复旧版铃声选项试听与音量提示音，改进滑块精度并复用自定义滚动条。",
+        "简体中文标题随实际版本更新，取消头像上传或数据导入时保留设置。",
+        "修复视觉对照对新弹窗字体加载的竞态，保留严格像素断言；发布复用同提交已验证的 CI 与原始产物。"
+      ],
+      "itemsEn": [
+        "Share default avatars and invalid-image fallbacks; use the standard update dialog with an OK button.",
+        "Fix settings and theme feedback, dropdown toggling and selected marks, and preload theme images.",
+        "Restore ringtone option previews and volume feedback, improve slider precision and share custom scrollbars.",
+        "Use the current version in the Simplified Chinese title and preserve settings when uploads or imports are cancelled.",
+        "Synchronize visual comparisons with newly requested dialog fonts without relaxing pixel assertions; reuse verified exact-commit CI and original tested archives."
+      ],
+      "report": "docs/releases/UPDATE-2.0.2.md"
+    },
     {
       "version": "2.0.1",
       "date": "2026-11-17",

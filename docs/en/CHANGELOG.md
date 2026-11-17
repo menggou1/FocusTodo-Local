@@ -2,7 +2,17 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.0.1**, author Lexible.
+Current application: **2.0.2**, author Lexible.
+
+## 2.0.2 · 2026-11-17
+
+- Share default avatars and invalid-image fallbacks; use the standard update dialog with an OK button.
+- Fix settings and theme feedback, dropdown toggling and selected marks, and preload theme images.
+- Restore ringtone option previews and volume feedback, improve slider precision and share custom scrollbars.
+- Use the current version in the Simplified Chinese title and preserve settings when uploads or imports are cancelled.
+- Synchronize visual comparisons with newly requested dialog fonts without relaxing pixel assertions; reuse verified exact-commit CI and original tested archives.
+
+[English report](releases/UPDATE-2.0.2.md).
 
 ## 2.0.1 · 2026-11-17
 

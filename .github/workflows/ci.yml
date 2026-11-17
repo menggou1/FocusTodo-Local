@@ -194,6 +194,7 @@ jobs:
           node tests/standalone/services-browser.cjs
           node tests/standalone/package-smoke.cjs
           npm run test:release-app
+          node tests/standalone/ui-font-readiness.cjs
           node tests/standalone/final-ui-parity.cjs
           node tests/standalone/inspector-dialog-parity.cjs
           node tests/standalone/settings-legacy-reference.cjs

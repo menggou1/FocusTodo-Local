@@ -1,6 +1,6 @@
 # FocusTodo
 
-Local browser focus and task app · **2.0.0** · **Lexible** · [中文](README.md)
+Local browser focus and task app · **2.0.2** · **Lexible** · [中文](README.md)
 
 The application builds from complete React, TypeScript and Vite sources. Tasks, focus history and preferences stay in the browser; no account server is required. It derives from [Lâm Ngọc Khương's FocusTodo 7.1.1](https://github.com/lamngockhuong/focustodo). Original source and history remain on `upstream/7.1.1`.
 
@@ -8,7 +8,7 @@ Branches: `dev` integrates daily work, `release/x.x.x` freezes releases, and `ma
 
 ## Install and run
 
-Download a portable ZIP or tar.gz from [Releases](https://github.com/menggou1/FocusTodo-Local/releases) and verify it with SHA256SUMS.txt from the same release. This guide describes FocusTodo 2.0.0.
+Download a portable ZIP or tar.gz from [Releases](https://github.com/menggou1/FocusTodo-Local/releases) and verify it with SHA256SUMS.txt from the same release. This guide describes FocusTodo 2.0.2.
 
 Extract ZIP or tar.gz, install Node.js 22.12+, and run `node scripts/start.cjs` or `npm start`. Portable packages need no npm dependencies. Windows: `启动.bat`; macOS/Linux: `sh start.sh`. The launcher opens `http://127.0.0.1:5500/index.html`. Use `--no-browser` for headless environments or `--port 5511` for another origin. Python 3.7+ can run `python scripts/serve-static.py`. Packages contain checksums, but no language runtime.
 
@@ -40,7 +40,7 @@ Groups, cloud sync and server rankings are excluded. System notifications, sound
 
 ## Data and upgrades
 
-Production retains `PomodoroDB6` v3 and legacy setting keys. The application uses independent version `2.0.0`; source version 7.1.1, schema, backup format and legacy `Version='6.5'` remain separate. Keep the browser, hostname and port to retain the same origin. Another origin needs backup import. Development previews use `FocusTodoStandalone.PomodoroDB6` and `FocusTodoStandalone.data.*`.
+Production retains `PomodoroDB6` v3 and legacy setting keys. The application uses independent version `2.0.2`; source version 7.1.1, schema, backup format and legacy `Version='6.5'` remain separate. Keep the browser, hostname and port to retain the same origin. Another origin needs backup import. Development previews use `FocusTodoStandalone.PomodoroDB6` and `FocusTodoStandalone.data.*`.
 
 Export a complete backup before upgrading. Import accepts legacy JSON and content-detected Gzip, with 128 MB file/decoded limits. Export falls back to JSON without compression support; older apps need decompressed JSON. Wallpaper data remains in localStorage and is quota-limited. Replacement/reset downloads a complete safety backup and requires confirmation that it is saved/readable. Cancel preserves data. Clearing site storage deletes local content.
 
