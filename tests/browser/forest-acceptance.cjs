@@ -158,4 +158,3 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);console.log('PASS forest switch, animation, live closed-drawer badges, maturity/expiry, bulk over 100, immature exclusion, keyboard, write failure/retry, concurrent deduplication, backup, reduced motion and offline');
  }finally{await context.close();await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e.stack);process.exitCode=1});
-
