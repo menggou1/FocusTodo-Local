@@ -15,10 +15,11 @@ window.oldImage = async (blob, compressed = false) => {const url=URL.createObjec
 window.convertImage = createImageConverter({ createImage: () => new Image(), createCanvas: () => document.createElement('canvas'),
     createObjectURL: blob => URL.createObjectURL(blob), revokeObjectURL: url => URL.revokeObjectURL(url), setTimeout, clearTimeout });
 window.startServices = async ({ noLocks = false, noChannel = false, failAt = null } = {}) => {
+    // Replay the 1.9.3 baseline without release entries added after that version.
     window.coreServices = await createCoreServices({
         storage: localStorage, indexedDB, now: () => window.syntheticClock,
         randomUUID: () => crypto.randomUUID(), random: () => Math.random(),
-        appVersion: '7.1.1-local.1.9.3', releaseConfig: {...publishedHistory, localVersion:'1.9.3', date:'2026-11-07', updates:publishedHistory.updates.filter(row=>row.version.startsWith('7.1.1-'))}, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
+        appVersion: '7.1.1-local.1.9.3', releaseConfig: {...publishedHistory, localVersion:'1.9.3', date:'2026-11-07', updates:publishedHistory.updates.slice(publishedHistory.updates.findIndex(row => row.version === '7.1.1-local.1.9.3'))}, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
         compression: window, locks: noLocks ? null : navigator.locks,
         origin: location.origin, fetch: (...args) => fetch(...args), languages: navigator.languages,
         visible: () => window.serviceVisible,

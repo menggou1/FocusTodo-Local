@@ -57,10 +57,11 @@ module.exports = { MemoryStorage, createHarness, rows, seed };
 module.exports.createApplication = async options => {
     const harness = await createHarness(options);
     const { createCoreServices } = await import('../../standalone/services/core.mjs');
+    // Replay the 1.9.3 baseline without release entries added after that version.
     const app = await createCoreServices({ indexedDB: harness.indexedDB, storage: harness.physicalStorage,
         now: () => harness.clock.value, randomUUID, random: () => 0.5, encodeBase64: value => Buffer.from(value).toString('base64'),
         decodeBase64: value => Buffer.from(value, 'base64').toString('utf8'), compression: globalThis,
-        appVersion: '7.1.1-local.1.9.3', releaseConfig: {...require('../../release.json'), localVersion:'1.9.3', date:'2026-11-07', updates:require('../../release.json').updates.filter(row=>row.version.startsWith('7.1.1-'))}, saveBackup: async value => harness.backups.push(clone(value)),
+        appVersion: '7.1.1-local.1.9.3', releaseConfig: {...require('../../release.json'), localVersion:'1.9.3', date:'2026-11-07', updates:require('../../release.json').updates.slice(require('../../release.json').updates.findIndex(row => row.version === '7.1.1-local.1.9.3'))}, saveBackup: async value => harness.backups.push(clone(value)),
         ...options?.application });
     return { ...harness, app, dispose() { app.dispose(); harness.dispose(); } };
 };
