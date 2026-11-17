@@ -28,6 +28,18 @@ Tests must never access stable port 5500, daily profiles, real databases or priv
 
 Historical tests read the existing archive/1.9.4 checkout or FOCUS_LEGACY_ROOT. tests/helpers/legacy-runtime.cjs verifies the fixed commit and unchanged runtime sources. CI checks out that immutable revision only in test jobs. Build, packaging and Pages do not read it.
 
+## Authorization for AI-created pull requests
+
+- AI agents must not create Pull Requests on their own by default.
+- Each PR creation requires explicit user authorization for that specific operation. General authorization to develop, commit, push or release does not authorize PR creation; previous authorization does not automatically apply to another PR.
+- Before creation, inspect the source branch, target branch, commit relationship and actual differences to confirm that changes need integration.
+- If the branches have no differences requiring integration, do not create a PR or manufacture meaningless commits.
+- PR creation must not be treated as a mandatory development or release step. A documented release process does not authorize an AI agent to create a PR.
+
+### Administrative mistake: PR #3 (2026-11-17)
+
+[PR #3](https://github.com/menggou1/FocusTodo-Local/pull/3) was mistakenly created and merged by an AI execution agent when no PR was needed. The agent should first have checked branch relationships and whether a PR was actually necessary instead of mechanically following a release process. The PR is already merged; GitHub does not support deleting an individual merged PR or reclaiming its number. Keep this record to describe the mistake accurately without reverting the merge or rewriting history. The release-process documentation changes included in the PR remain valid. No future Pull Request may be created without the repository owner's explicit authorization for that specific operation.
+
 ## Source and generated files
 
 Components use ApplicationServices. Preserve expected-value conflict checks and batch transactions; retain drafts on failure. Incompatible schema/protocol or incomplete recovery stops writes without resetting data. Shared controls and dialogs belong to their common owner.
@@ -60,7 +72,7 @@ main is the stable default and sole Pages source. Branch pushes run Windows/macO
 2. Create release/x.x.x from dev. For 2.0.0 only, create release/2.0.0 from main because main was already synchronized with dev.
 3. Complete metadata, documentation, tests, defect fixes and release acceptance on the release branch. Maintain dates according to actual update/publication events and synchronize final information before publication; an untagged version may receive normal date updates. Keep unfinished acceptance and evidence limits only in Backlog; automation does not establish human acceptance.
 4. Validate locally, commit and push the release branch, then wait for every applicable CI job on that exact SHA to finish successfully. Review the Backlog release checklist without weakening gates.
-5. Integrate the release branch into main, using PR review when there are differences. Fast-forward integration is allowed; do not require meaningless merge commits. Verify all applicable checks on the final main release commit.
+5. Inspect the source and target branches and actual differences, then integrate release changes that need merging into main. A PR is not mandatory; an AI agent may create one only with explicit user authorization for that specific creation. If there are no differences requiring integration, do not create a PR or manufacture meaningless commits. Fast-forward integration is allowed; do not require meaningless merge commits. Verify all applicable checks on the final main release commit.
 6. Create and push the exact version tag (for example 2.0.0) on that final main commit. Use existing GitHub Actions: tag pushes publish Stable/Latest after tests succeed. Explicit tag dispatch supports release_channel=prerelease; stable dispatch may promote a verified prerelease only after matching its published assets, without replacement or bypassing gates.
 7. Download final assets, verify SHA-256, version/author/date and build provenance, and test archive/Python fallback startup in temporary directories on ephemeral loopback ports with generated data. Verify main Pages source SHA, project subpaths and live version. Announce success only after both the formal Release and deployment verification finish.
 8. Synchronize release fixes back to dev while preserving other worktrees and uncommitted changes. Remote branches may fast-forward without modifying an open local worktree. The release branch may be deleted after completion; retain tags, Releases and complete history.
