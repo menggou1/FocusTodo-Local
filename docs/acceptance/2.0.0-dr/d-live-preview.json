@@ -1,0 +1,10 @@
+{
+  "url": "http://127.0.0.1:5512/",
+  "http": 200,
+  "browser": "157.0.4341.42",
+  "appShell": true,
+  "errors": [],
+  "external": [],
+  "legacyRuntime": false,
+  "isolatedContext": true
+}

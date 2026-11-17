@@ -9,6 +9,7 @@ import sys
 import tarfile
 
 from runtime_layout import ROOT, runtime_entries, output_path, verify_runtime
+from app_runtime import built_files, version as app_version
 
 os.environ.setdefault('GIT_TERMINAL_PROMPT', '0')
 os.environ.setdefault('GCM_INTERACTIVE', 'never')
@@ -23,9 +24,27 @@ def git(*args, data=None, env=None):
 def build(ref='HEAD', output=Path('dist/pages')):
     source = git('rev-parse', '--verify', '--end-of-options', ref + '^{commit}').decode().strip()
     release = json.loads(git('show', source + ':release.json'))
-    version = release['officialVersion'] + '-local.' + release['localVersion']
+    version = app_version(release)
     if json.loads(git('show', source + ':package.json'))['version'] != version:
         raise ValueError('Committed package version does not match release.json')
+    if int(release['localVersion'].split('.')[0]) >= 2:
+        inputs = json.loads(subprocess.check_output(['node', '-e', "console.log(JSON.stringify(require('./scripts/app-inputs.cjs').inputs))"], cwd=ROOT))
+        git('diff', '--exit-code', source, '--', *inputs)
+        if git('ls-files', '--others', '--exclude-standard', '--', *inputs).strip():
+            raise ValueError('Commit production build inputs before deploying')
+        files = built_files()
+        output = output.resolve()
+        if output.exists():
+            raise FileExistsError('Choose a new Pages output directory: ' + str(output))
+        output.mkdir(parents=True)
+        for name, file in files.items():
+            destination = output / name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_bytes(file.read_bytes())
+        (output / '.nojekyll').write_bytes(b'')
+        (output / 'deployment.json').write_text(json.dumps({'version': version, 'sourceCommit': source, 'sourceRef': ref}, indent=2) + '\n', encoding='utf-8')
+        print('Pages React app:', version, source)
+        return
     flat = not git('ls-tree', source, '--', 'src/index.html')
     mounts = list(runtime_entries(flat))
     paths = [path for path, _ in mounts]

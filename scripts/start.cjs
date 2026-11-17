@@ -1,6 +1,6 @@
 /* One dependency-free launcher for Windows, macOS and Linux. */
 const { spawn } = require('node:child_process');
-const { createServer } = require('./server.cjs');
+const { createAppServer: createServer } = require('./app-server.cjs');
 
 function parseArgs(args, env = process.env) {
     let port = env.FOCUS_PORT || '5500', noBrowser = false, help = false;

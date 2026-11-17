@@ -1,0 +1,1930 @@
+{
+  "baseline": "f102da8919e810006b6611aabcef5f0159057d61",
+  "browser": "156.0.4314.58",
+  "node": "v24.16.0",
+  "platform": "10.0.26200",
+  "cpu": "11th Gen Intel(R) Core(TM) i5-11260H @ 2.60GHz",
+  "method": "Fresh isolated synthetic context per locale/theme, 1280x900 DPR 1, reduced motion, network blocked, default app time; screenshots are point-in-time baseline, not exhaustive feature validation.",
+  "results": [
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "empty",
+      "filename": "zh-CN-light-empty.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "task",
+      "filename": "zh-CN-light-task.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "task-detail",
+      "filename": "zh-CN-light-task-detail.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "timer",
+      "filename": "zh-CN-light-timer.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "calendar-day",
+      "filename": "zh-CN-light-calendar-day.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(174, 174, 174)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "calendar-week",
+      "filename": "zh-CN-light-calendar-week.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(174, 174, 174)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "calendar-month",
+      "filename": "zh-CN-light-calendar-month.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(174, 174, 174)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "history",
+      "filename": "zh-CN-light-history.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "notification",
+      "filename": "zh-CN-light-notification.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "report",
+      "filename": "zh-CN-light-report.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "forest",
+      "filename": "zh-CN-light-forest.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "achievements",
+      "filename": "zh-CN-light-achievements.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        ".focus-achievements": {
+          "width": 276,
+          "height": 447,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "settings",
+      "filename": "zh-CN-light-settings.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "account",
+      "filename": "zh-CN-light-account.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": false,
+      "scene": "backup",
+      "filename": "zh-CN-light-backup.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "empty",
+      "filename": "zh-CN-dark-empty.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "task",
+      "filename": "zh-CN-dark-task.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "task-detail",
+      "filename": "zh-CN-dark-task-detail.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "timer",
+      "filename": "zh-CN-dark-timer.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "calendar-day",
+      "filename": "zh-CN-dark-calendar-day.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(143, 143, 145)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "calendar-week",
+      "filename": "zh-CN-dark-calendar-week.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(143, 143, 145)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "calendar-month",
+      "filename": "zh-CN-dark-calendar-month.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(143, 143, 145)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "history",
+      "filename": "zh-CN-dark-history.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "notification",
+      "filename": "zh-CN-dark-notification.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "report",
+      "filename": "zh-CN-dark-report.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "forest",
+      "filename": "zh-CN-dark-forest.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "achievements",
+      "filename": "zh-CN-dark-achievements.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        ".focus-achievements": {
+          "width": 276,
+          "height": 447,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "settings",
+      "filename": "zh-CN-dark-settings.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "account",
+      "filename": "zh-CN-dark-account.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "zh-CN",
+      "dark": true,
+      "scene": "backup",
+      "filename": "zh-CN-dark-backup.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "empty",
+      "filename": "en-light-empty.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "task",
+      "filename": "en-light-task.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "task-detail",
+      "filename": "en-light-task-detail.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "timer",
+      "filename": "en-light-timer.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "calendar-day",
+      "filename": "en-light-calendar-day.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(174, 174, 174)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "calendar-week",
+      "filename": "en-light-calendar-week.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(174, 174, 174)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "calendar-month",
+      "filename": "en-light-calendar-month.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(174, 174, 174)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "history",
+      "filename": "en-light-history.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "notification",
+      "filename": "en-light-notification.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "report",
+      "filename": "en-light-report.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "forest",
+      "filename": "en-light-forest.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "achievements",
+      "filename": "en-light-achievements.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        ".focus-achievements": {
+          "width": 276,
+          "height": 447,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "settings",
+      "filename": "en-light-settings.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "account",
+      "filename": "en-light-account.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": false,
+      "scene": "backup",
+      "filename": "en-light-backup.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgb(255, 255, 255)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(82, 82, 82)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "empty",
+      "filename": "en-dark-empty.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "task",
+      "filename": "en-dark-task.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "task-detail",
+      "filename": "en-dark-task-detail.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "timer",
+      "filename": "en-dark-timer.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "calendar-day",
+      "filename": "en-dark-calendar-day.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(143, 143, 145)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "calendar-week",
+      "filename": "en-dark-calendar-week.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(143, 143, 145)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "calendar-month",
+      "filename": "en-dark-calendar-month.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": {
+          "width": 60,
+          "height": 32,
+          "font": "14px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(143, 143, 145)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "history",
+      "filename": "en-dark-history.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "notification",
+      "filename": "en-dark-notification.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "report",
+      "filename": "en-dark-report.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        }
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "forest",
+      "filename": "en-dark-forest.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "achievements",
+      "filename": "en-dark-achievements.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": null,
+        "[class*=Forest-container]": {
+          "width": 708,
+          "height": 529,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        ".focus-achievements": {
+          "width": 276,
+          "height": 447,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "settings",
+      "filename": "en-dark-settings.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "account",
+      "filename": "en-dark-account.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    },
+    {
+      "locale": "en",
+      "dark": true,
+      "scene": "backup",
+      "filename": "en-dark-backup.png",
+      "metrics": {
+        "#root": {
+          "width": 1280,
+          "height": 900,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(51, 51, 51)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=HomeHeader-root]": {
+          "width": 1280,
+          "height": 50,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgb(26, 26, 32)"
+        },
+        "[class*=Settings-root]": {
+          "width": 820,
+          "height": 600,
+          "font": "14px / 20px \"Focus Noto Sans\", -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+          "color": "rgb(232, 232, 235)",
+          "background": "rgba(0, 0, 0, 0)"
+        },
+        "[class*=Forest-container]": null,
+        ".focus-achievements": null,
+        ".focus-schedule-view": null,
+        "[class*=Report]": null
+      },
+      "errors": []
+    }
+  ]
+}

@@ -29,20 +29,32 @@ class PagesBuildTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / 'site'
             pages.build('HEAD', output)
+            release = json.loads(pages.git('show', 'HEAD:release.json'))
+            production = int(release['localVersion'].split('.')[0]) >= 2
+            if production:
+                from app_runtime import built_files
+                runtime = built_files()
+                actual = {p.relative_to(output).as_posix() for p in output.rglob('*') if p.is_file()}
+                self.assertEqual(actual, set(runtime) | {'.nojekyll', 'deployment.json'})
+                for name, file in runtime.items():
+                    self.assertEqual((output / name).read_bytes(), file.read_bytes(), name)
+                self.assertFalse((output / 'js/main.js').exists())
+                self.assertFalse((output / 'prototype-build.json').exists())
             expected = pages.git('ls-tree', '-rz', 'HEAD', '--', *sources)
             names = [entry.split(b'\t', 1)[1].decode() for entry in expected.split(b'\0') if entry]
             actual = {p.relative_to(output).as_posix() for p in output.rglob('*') if p.is_file()}
-            self.assertEqual(actual, {output_path(name, mounts) for name in names} | {'.nojekyll', 'deployment.json'})
+            if not production:
+                self.assertEqual(actual, {output_path(name, mounts) for name in names} | {'.nojekyll', 'deployment.json'})
             with tarfile.open(fileobj=io.BytesIO(pages.git('archive', 'HEAD', '--', *sources))) as archive:
                 for member in archive.getmembers():
-                    if member.isfile():
+                    if member.isfile() and not production:
                         self.assertEqual((output / output_path(member.name, mounts)).read_bytes(), archive.extractfile(member).read(), member.name)
             for excluded in ('CNAME', 'package.json', 'README.md', '.github', 'scripts', 'tests', 'docs', 'src', 'public', 'startup.css'):
                 self.assertFalse((output / excluded).exists(), excluded)
             manifest = json.loads((output / 'deployment.json').read_text(encoding='utf-8'))
             release = json.loads(pages.git('show', 'HEAD:release.json'))
             self.assertEqual(manifest, {
-                'version': release['officialVersion'] + '-local.' + release['localVersion'],
+                'version': pages.app_version(release),
                 'sourceCommit': pages.git('rev-parse', 'HEAD').decode().strip(),
                 'sourceRef': 'HEAD',
             })

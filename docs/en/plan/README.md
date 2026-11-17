@@ -1,7 +1,3 @@
-# Version plans
+# Engineering plans
 
-[Documentation](../README.md) · [Backlog](../BACKLOG.md) · [Maintenance](../MAINTENANCE.md)
-
-Plans record version scope, priorities, implementation order and acceptance criteria. Current plan: [1.9.0](1.9.0.md) · [2.0.0](2.0.0.md), also available in [Chinese](../../plan/2.0.0.md).
-
-Task status, progress and unfinished verification live only in the canonical backlog and its English translation. Plans reference the same item IDs without duplicating progress. Completed results belong in release reports. Unassessed delivery dates are not commitments.
+Stable architecture and contracts are in [Architecture](../ARCHITECTURE.md), execution/release order in [Maintenance](../MAINTENANCE.md), and validation methods in [Testing](../TESTING.md). Only [Backlog](../../BACKLOG.md) maintains unfinished task status.

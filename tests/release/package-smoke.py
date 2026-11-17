@@ -17,6 +17,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 DIST = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / 'dist'
 version = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))['localVersion']
+production = int(version.split('.')[0]) >= 2
 stem = 'FocusTodo-' + version
 checksums = dict(line.split('  ', 1)[::-1] for line in (DIST / 'SHA256SUMS.txt').read_text().splitlines())
 
@@ -39,7 +40,9 @@ for suffix in ('.zip', '.tar.gz'):
         for name in names:
             parts = Path(name).parts
             assert parts[0] == stem and '..' not in parts
-            assert not any(p.startswith('.') or p in ('node_modules', 'tests', 'acceptance') for p in parts)
+            assert not any(p.startswith('.') or p in ('node_modules', 'tests') for p in parts)
+            if 'acceptance' in parts:
+                assert name == stem + '/docs/acceptance/2.0.0-final/verification.json', 'Unexpected debug evidence in package'
         site = target / stem
         assert not (site / '.git').exists() and not (site / 'node_modules').exists()
         assert not (site / 'src').exists() and not (site / 'public').exists()
@@ -64,13 +67,29 @@ for suffix in ('.zip', '.tar.gz'):
             while True:
                 try:
                     with urllib.request.urlopen(f'http://127.0.0.1:{port}/', timeout=1) as response:
-                        assert response.status == 200 and b'local-release.js' in response.read()
+                        html = response.read()
+                        assert response.status == 200
+                        assert (b'assets/index-' in html and b'js/main.js' not in html) if production else b'local-release.js' in html
                     break
                 except (OSError, TimeoutError):
                     if process.poll() is not None or time.monotonic() >= deadline:
                         raise RuntimeError('Extracted server did not start')
                     time.sleep(0.1)
-            for resource in ('local-controls.css', 'js/main.js', 'js/local-calendar.js', 'js/local-release.js', 'js/local-backup.js', 'js/local-theme-storage.js', 'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js', 'img/github.svg', 'audio/alm_AlarmBeep.mp3'):
+            if production:
+                manifest = json.loads((site / 'runtime-manifest.json').read_text(encoding='utf-8'))['files']
+                assert (site / 'build-info.json').is_file()
+                assert not (site / 'js/main.js').exists() and not (site / 'patch.js').exists()
+                assert not (site / 'prototype-build.json').exists()
+                html = (site / 'index.html').read_text(encoding='utf-8')
+                assert 'assets/index-' in html and 'Preview' not in html
+                for name in manifest:
+                    assert (site / name).is_file() and not name.endswith('.map'), name
+                resources = ['index.html', 'build-info.json', 'runtime-manifest.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt']
+                for extension in ('.js', '.css', '.png', '.mp3', '.m4a', '.ttf', '.otf'):
+                    resources.append(next(name for name in manifest if name.endswith(extension)))
+            else:
+                resources = ('local-controls.css', 'js/main.js', 'js/local-calendar.js', 'js/local-release.js', 'js/local-backup.js', 'js/local-theme-storage.js', 'js/local-i18n.js', 'js/local-i18n-catalog.js', 'js/local-settings-ui.js', 'img/github.svg', 'audio/alm_AlarmBeep.mp3')
+            for resource in resources:
                 with urllib.request.urlopen(f'http://127.0.0.1:{port}/{resource}', timeout=3) as response:
                     assert response.status == 200 and len(response.read()) > 0
             if sys.platform != 'win32':
@@ -90,7 +109,7 @@ for suffix in ('.zip', '.tar.gz'):
                 fallback = re.search(r'http://127\.0\.0\.1:(\d+)/index\.html', line)
                 assert fallback, line
                 base = 'http://127.0.0.1:' + fallback[1]
-                for resource in ('index.html', 'js/main.js', 'img/github.svg'):
+                for resource in (resources if production else ('index.html', 'js/main.js', 'img/github.svg')):
                     with urllib.request.urlopen(f'{base}/{resource}', timeout=3) as response:
                         assert response.status == 200 and response.read(), resource
                 print('PASS Python fallback starts the extracted app')

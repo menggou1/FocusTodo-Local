@@ -1,0 +1,18 @@
+FocusTodo 2.0.0
+
+FocusTodo source, translations, audio, icons, backgrounds and forest illustrations:
+Lâm Ngọc Khương, FocusTodo 7.1.1, https://github.com/lamngockhuong/focustodo
+Copyright (c) 2025 Lâm Ngọc Khương. MIT; the full text is in LICENSE.
+Local application: Copyright (c) 2026 Lexible. MIT; see LICENSE.
+
+React, ReactDOM and scheduler: Meta Platforms, Inc. and affiliates. MIT.
+The complete copyright and license texts are in licenses/react.txt,
+licenses/react-dom.txt and licenses/scheduler.txt in built distributions.
+
+Noto Sans and Noto Sans SC: The Noto Project Authors.
+SIL Open Font License 1.1; the full text is in licenses/NotoSans-OFL.txt
+in built distributions and public/font/OFL-NotoSans.txt in the source tree.
+
+Other upstream font assets retain their upstream attribution under the
+FocusTodo MIT distribution. Build tools and development dependencies are
+not included in the browser runtime or portable archives.

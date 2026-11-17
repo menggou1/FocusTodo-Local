@@ -1,0 +1,173 @@
+{
+  "method": "Temporary origins, synthetic namespaced data, real IndexedDB; no production profile. WebKit is not real Safari.",
+  "engines": [
+    "chromium",
+    "firefox",
+    "webkit"
+  ],
+  "versions": {
+    "chromium": "157.0.4341.42",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "results": [
+    {
+      "engine": "chromium",
+      "name": "namespaced persistence, timer rollback and reload recovery",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "crash between rows and settings resumes durable import journal",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "two tabs without Web Locks or broadcasts cannot duplicate focus records",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "broadcast refresh and schema versionchange invalidate stale clients",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "maintenance owner page closes and a peer recovers without Web Locks or broadcasts",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "blocked schema upgrade rejects startup, preserves rows and can be retried",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "fixed Phase B client rejects persisted C data and newer protocols reject C writers",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "native fetch rejects redirects before the target is contacted; image conversion and theme persistence work",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "native Web Locks transfer automatic audio ownership when a page suspends",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "no-broadcast polling refreshes peer tasks and no-lock mode preserves manual audio",
+      "passed": true
+    },
+    {
+      "engine": "chromium",
+      "name": "renderer crash releases ownership and a new page recovers the committed import journal",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "namespaced persistence, timer rollback and reload recovery",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "crash between rows and settings resumes durable import journal",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "two tabs without Web Locks or broadcasts cannot duplicate focus records",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "broadcast refresh and schema versionchange invalidate stale clients",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "maintenance owner page closes and a peer recovers without Web Locks or broadcasts",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "blocked schema upgrade rejects startup, preserves rows and can be retried",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "fixed Phase B client rejects persisted C data and newer protocols reject C writers",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "native fetch rejects redirects before the target is contacted; image conversion and theme persistence work",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "native Web Locks transfer automatic audio ownership when a page suspends",
+      "passed": true
+    },
+    {
+      "engine": "firefox",
+      "name": "no-broadcast polling refreshes peer tasks and no-lock mode preserves manual audio",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "namespaced persistence, timer rollback and reload recovery",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "crash between rows and settings resumes durable import journal",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "two tabs without Web Locks or broadcasts cannot duplicate focus records",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "broadcast refresh and schema versionchange invalidate stale clients",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "maintenance owner page closes and a peer recovers without Web Locks or broadcasts",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "blocked schema upgrade rejects startup, preserves rows and can be retried",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "fixed Phase B client rejects persisted C data and newer protocols reject C writers",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "native fetch rejects redirects before the target is contacted; image conversion and theme persistence work",
+      "passed": true,
+      "expectedPageErrors": [
+        "/127.0.0.1:14424/redirect due to access control checks."
+      ]
+    },
+    {
+      "engine": "webkit",
+      "name": "native Web Locks transfer automatic audio ownership when a page suspends",
+      "passed": true
+    },
+    {
+      "engine": "webkit",
+      "name": "no-broadcast polling refreshes peer tasks and no-lock mode preserves manual audio",
+      "passed": true
+    }
+  ]
+}

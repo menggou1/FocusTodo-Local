@@ -1,0 +1,119 @@
+/* Shared overlays live outside scroll clipping and navigation layout rules. */
+.workspace-picker-surface{position:fixed;z-index:4000;display:block;width:max-content;height:auto;margin:0;padding:0;border:0;animation:legacy-picker-enter 150ms linear both;font:14px/20px "Helvetica Neue",Helvetica,Arial,sans-serif;--workspace-panel:#fff;--workspace-text:#525252;--workspace-muted:#aeaeae}
+.workspace-picker-surface>.legacy-detail-popover{position:relative;inset:auto;margin:0;border:0;padding:0;box-shadow:0 0 20px 1px rgba(197,197,197,.5);border-radius:8px}
+.workspace-picker-surface>.legacy-detail-popover:before{left:var(--picker-arrow);right:auto;top:-6px;margin-left:-7px;width:0;height:0;border:7px solid;border-color:var(--workspace-panel) var(--workspace-panel) transparent transparent;transform:rotate(-45deg);border-radius:3px;box-shadow:2px -2px 2px -2px rgba(197,197,197,.5)}
+.workspace-picker-surface button{font:inherit;color:inherit;border:0;background:transparent;cursor:default}
+.workspace-picker-surface.is-closing{animation:legacy-picker-exit 150ms linear both;pointer-events:none}
+details.legacy-priority-picker>summary{height:28px;margin-top:0}
+details.legacy-priority-picker>summary>.legacy-icon{width:22px;height:22px;padding:1px}
+.legacy-detail-tag-row{padding:4px 12px 16px;border-bottom:1px solid var(--workspace-line);margin-bottom:6px;line-height:20px}
+details.legacy-detail-tags{display:inline-block;vertical-align:top;height:20px;margin:0 0 0 4px;padding:0;border:0}
+details.legacy-detail-tags>summary{display:block;height:20px;line-height:18px;padding:0 10px 0 3px;border:1px dashed var(--workspace-muted);border-radius:10px;transform:none;font-size:12px}
+.legacy-tag-add-content{display:block;height:18px;white-space:nowrap}
+.legacy-tag-add-content>.legacy-icon{display:inline-block;width:18px;height:18px;vertical-align:top}
+.legacy-tag-add-content>span{display:inline-block;vertical-align:top;line-height:18px;height:18px}
+.legacy-detail-tag{display:inline-block;height:20px;line-height:20px;border-radius:10px;margin-left:4px;padding:0 3px 0 10px}
+.legacy-detail-tag>span{display:inline-block;max-width:248px;height:20px;font-size:12px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workspace-shell .legacy-detail-tag>button{display:inline-block;width:20px;height:20px;margin:0;padding:0;border:0;border-radius:0;mask:url('../../public/img/tag-delete.png') center/20px 20px no-repeat;vertical-align:baseline}
+.workspace-picker-surface .legacy-detail-popover footer{margin:16px 0 0;padding:0;display:flex;gap:8px;height:30px}
+.workspace-picker-surface .legacy-detail-popover footer>button{flex:1;height:30px;padding:0;border:1px solid #e5e5e5;border-radius:6px;background:var(--workspace-panel);font:12px/28px var(--workspace-font)}
+.workspace-picker-surface .legacy-detail-popover footer>button.primary{color:#fff;border-color:#fd5553;background:#fd5553}
+.workspace-picker-surface .legacy-tags-popover{width:240px}
+.workspace-picker-surface .legacy-tags-options{max-height:170px;overflow:auto}
+.workspace-picker-surface .legacy-tags-options>label{display:flex;align-items:center;gap:12px;height:34px;padding:0 12px 0 16px;font:14px/20px var(--workspace-font)}
+.workspace-picker-surface .legacy-tags-options input{appearance:none;flex:none;width:24px;height:24px;padding:0;border:0;background:center/24px url('../../public/img/tag-unchecked.png') no-repeat}
+.workspace-picker-surface .legacy-tags-options input:checked{background-image:url('../../public/img/folder_project_checked.png')}
+.workspace-picker-surface .legacy-tags-create{width:100%;height:34px;display:flex;align-items:center;gap:12px;padding:0 8px 0 16px;color:#fd5553;text-align:left}
+.workspace-picker-surface .legacy-tags-picker footer{margin:16px 16px 0}
+.workspace-picker-surface .legacy-detail-priority-options{width:max-content;min-width:126px;padding:8px 0;display:block}
+.legacy-detail-priority-options>button{display:flex;align-items:center;width:100%;height:34px;padding:0 8px 0 12px;gap:0;text-align:left;white-space:nowrap;line-height:34px}
+.legacy-detail-priority-options>button:hover,.workspace-picker-surface .legacy-record-duration-picker>button:hover{background:var(--workspace-selected)}
+.legacy-detail-priority-options .legacy-icon{width:20px;height:20px;margin-right:6px}
+.legacy-detail-priority-options>button:after{content:'';width:24px;height:34px;flex:none}
+.legacy-detail-priority-options>button:has(.legacy-option-check):after{display:none}
+.legacy-option-check{display:block;flex:none;width:24px;height:34px;background:center/24px url('../../public/img/new-task-project-selected.png') no-repeat;margin-left:auto}
+.workspace-picker-surface .legacy-pomodoro-popover{width:276px}
+.legacy-pomodoro-picker{width:281px;padding:16px 18px 16px 16px;text-align:center}
+.legacy-pomodoro-picker h3{font:500 14px/20px "Helvetica Neue",Helvetica,Arial,sans-serif}
+.legacy-pomodoro-picker>p{margin:0;font:12px/17.1429px "Helvetica Neue",Helvetica,Arial,sans-serif}
+.legacy-wheels{height:auto;margin:17px 0 15px;gap:8px}
+.legacy-wheels>div{width:calc((100% - 8px)/2);font:12px/17.1429px "Helvetica Neue",Helvetica,Arial,sans-serif}
+.legacy-wheels>div>span{display:block;padding-top:2px}
+.legacy-wheels>div:first-child>span{padding-right:4px}
+.legacy-wheels>div:last-child>span{padding-left:4px}
+.workspace-picker-surface .legacy-pomodoro-picker footer{margin-top:4px}
+.legacy-scroll-wheel{height:150px;margin:1px 0;position:relative;border-radius:6px;overflow:hidden}
+.legacy-scroll-wheel ul{height:150px;overflow-x:hidden;overflow-y:scroll;padding:0 0 0 6px;margin:0;list-style:none;background:#f5f5f5;font:14px/20px "Helvetica Neue",Helvetica,Arial,sans-serif;scrollbar-width:thin;scrollbar-color:transparent transparent}
+.legacy-scroll-wheel li{height:30px;line-height:30px;font-size:14px;border-radius:6px;text-align:center;color:#525252;user-select:none}
+.legacy-scroll-wheel li[role=option]:hover{background:#ebebeb}
+.legacy-scroll-wheel ul::-webkit-scrollbar{width:6px;background:transparent}
+.legacy-scroll-wheel ul::-webkit-scrollbar-thumb{border-radius:10px;background:transparent}
+.legacy-scroll-wheel ul[data-scrollbar]{scrollbar-color:rgba(174,174,174,.5) transparent}
+.legacy-scroll-wheel ul[data-scrollbar]::-webkit-scrollbar-thumb{background:rgba(174,174,174,.5)}
+.legacy-scroll-wheel ul[data-highlight]::-webkit-scrollbar-thumb{box-shadow:inset 0 0 6px #0005}
+.legacy-wheel-top,.legacy-wheel-bottom{position:absolute;left:34%;width:32%;height:1px;background:var(--workspace-muted);opacity:.3;pointer-events:none}
+.legacy-wheel-top{top:59px}.legacy-wheel-bottom{top:90px}
+.workspace-picker-surface .legacy-record-duration-popover{width:190px;padding:8px 0}
+.workspace-picker-surface .legacy-record-duration-picker{width:190px;height:170px;max-height:none;overflow:auto;margin:0;padding:0}
+.workspace-picker-surface .legacy-record-duration-picker>button{display:flex;align-items:center;width:100%;height:34px;border:0;border-radius:0;padding:0 0 0 16px;text-align:left;background:transparent;font:14px/34px "Helvetica Neue",Helvetica,Arial,sans-serif}
+.legacy-record-duration-picker>button>.legacy-option-check{width:30px}
+.legacy-record-field>summary>.legacy-icon{width:24px;height:24px}
+.workspace-picker-surface .legacy-record-task-picker{width:200px;padding:0}
+.legacy-record-project-picker{padding:8px 0;width:200px;color:var(--workspace-text)}
+.legacy-record-project-scroll{min-height:120px;max-height:240px;overflow:auto}
+.workspace-picker-surface .legacy-record-project-option{display:flex;align-items:center;width:100%;height:34px;padding:0 16px;border:0;border-radius:0;text-align:left;font:14px/34px "Helvetica Neue",Helvetica,Arial,sans-serif;gap:0}
+.legacy-record-project-option:hover,.legacy-record-project-option[aria-expanded=true]{background:var(--workspace-selected)}
+.legacy-record-project-artwork{width:24px;height:34px;flex:none;display:flex;align-items:center}
+.legacy-record-project-artwork>.workspace-nav-icon{width:24px;height:24px;margin:0}
+.legacy-record-project-artwork>i{display:block;width:11px;height:11px;border-radius:50%;margin:0 7px}
+.legacy-record-project-option>span:nth-child(2){flex:1;min-width:0;padding-left:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.legacy-record-project-arrow{width:8px;height:34px;flex:none;background:left center/8px 11px url('../../public/img/menu-triangle.png') no-repeat}
+.legacy-record-task-submenu{position:fixed;z-index:4001;width:200px;padding:8px 0;border-radius:8px;background:var(--workspace-panel);box-shadow:0 0 20px 1px rgba(197,197,197,.5);opacity:0;transform:scale(.1);transition:opacity 250ms ease-out,transform 250ms ease-out;overflow:hidden;font:14px/20px var(--workspace-font)}
+.legacy-record-task-submenu.is-open{opacity:1;transform:scale(1)}
+.workspace-picker-surface.is-closing .legacy-record-task-submenu,.legacy-record-task-submenu.is-closing{opacity:0;transform:scale(.1);transition-timing-function:ease-in}
+.legacy-record-task-scroll{min-height:120px;max-height:240px;overflow:auto}
+.legacy-record-task-scroll h4{height:42px;margin:0;padding:0 16px;background:#f5f5f5;font:500 14px/42px var(--workspace-font)}
+.workspace-picker-surface .legacy-record-task-scroll button{display:flex;align-items:center;width:100%;height:34px;padding:0 16px;border-radius:0;gap:0;text-align:left;font:14px/34px var(--workspace-font)}
+.legacy-record-task-scroll button>span{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.legacy-record-task-scroll button:hover{background:var(--workspace-selected)}
+.legacy-record-no-task{height:120px;display:flex;align-items:center;justify-content:center;padding:16px 8px 8px}
+.workspace-picker-surface .legacy-record-time{gap:0;font:14px/24px "Helvetica Neue",Helvetica,Arial,sans-serif;border-radius:6px}
+.workspace-picker-surface .legacy-record-time select{outline:0;border:0;border-radius:0;appearance:none;width:28px;height:24px;padding:0 12px 0 0;font:14px/24px "Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--workspace-text);background:var(--workspace-panel) right center/6px 9px url('../../public/img/detail-repetition-arrow.png') no-repeat}
+.workspace-picker-surface.legacy-record-field .legacy-date-days>button:hover:not([data-selected]){background:var(--workspace-selected)}
+.legacy-record-field>summary>.legacy-record-unlink{width:20px;height:42px;margin-left:-8px;background:right center/10px 10px url('../../public/img/detail-subtask-delete.png') no-repeat;font-size:0}
+:root[data-theme=dark] .legacy-record-project-arrow{background-image:url('../../public/img/menu-triangle-dark.png')}
+:root[data-theme=dark] .legacy-record-task-submenu{box-shadow:0 0 20px 1px #0e0d12}
+:root[data-theme=dark] .legacy-record-task-scroll h4{background:#45454c}
+.workspace-sidebar>footer{gap:0}
+.workspace-sidebar>footer button{height:24px;width:24px;flex:none}
+.workspace-sidebar>footer button:first-child{margin:0;flex:1}
+.workspace-sidebar>footer button:last-child{width:36px;display:flex;justify-content:flex-end}
+.workspace-sidebar>footer .legacy-icon{width:24px;height:24px}
+.legacy-profile-layer{position:fixed;inset:0;z-index:3000;font:14px/20px var(--workspace-font)}
+.legacy-profile-mask{position:absolute;inset:0}
+.legacy-profile-layer .workspace-profile-menu{position:absolute;top:50px;left:16px;min-width:170px;width:auto;max-width:400px;padding:8px 0;border-radius:6px;background:#fff;box-shadow:0 0 20px 1px rgba(197,197,197,.5);transform-origin:center top;opacity:0;transform:scale(.1);transition:opacity 250ms ease-in,transform 250ms ease-in}
+.legacy-profile-layer .workspace-profile-menu.is-open{opacity:1;transform:scale(1);animation:legacy-profile-enter 250ms ease-out both}
+@keyframes legacy-profile-enter{from{opacity:0;transform:scale(.1)}to{opacity:1;transform:scale(1)}}
+.legacy-profile-layer .workspace-profile-menu>button{display:block;width:100%;height:24px;padding:0 16px;border:0;border-radius:0;background:transparent;color:var(--workspace-text);font:14px/24px var(--workspace-font);text-align:left;cursor:default}
+.legacy-profile-layer .workspace-profile-menu>button:hover{background:var(--workspace-selected)}
+.legacy-context-submenu{box-shadow:0 0 20px 1px rgba(197,197,197,.5)}
+.legacy-context-submenu.is-closing{opacity:0;transform:scale(.1);transition-timing-function:ease-in;pointer-events:none}
+.legacy-context-submenu button{border:0;cursor:default}
+.legacy-context-submenu .legacy-date-picker{padding:9px 16px 7px;font-family:var(--workspace-font)}
+.legacy-context-submenu .legacy-date-picker .legacy-date-month{height:24px}
+.legacy-context-submenu .legacy-date-days>button:hover:not([data-selected]){background:var(--workspace-selected)}
+:root[data-theme=dark] .legacy-context-submenu{box-shadow:0 0 20px 1px #0e0d12}
+.workspace-task-status{flex:none;align-self:stretch;width:19px;min-height:31px;margin:0;background-position:right center;background-size:15px 15px;background-repeat:no-repeat}
+.workspace-task-reminder{background-image:url('../../public/img/task-reminder.png')}
+.workspace-task-reminder[data-expired]{background-image:url('../../public/img/task-reminder-expired.png')}
+.workspace-task-status~.workspace-task-date{margin-left:4px}
+:root[data-theme=dark] .workspace-picker-surface{--workspace-panel:#2d2d37;--workspace-muted:#8f8f91;--workspace-text:#e8e8eb}
+:root[data-theme=dark] :is(.workspace-picker-surface,.legacy-context-submenu,.legacy-context-menu,.legacy-profile-layer){--workspace-selected:rgba(255,255,255,.09)}
+:root[data-theme=dark] .workspace-picker-surface>.legacy-detail-popover,:root[data-theme=dark] .legacy-profile-layer .workspace-profile-menu{background:#2d2d37;box-shadow:0 0 20px 1px #0e0d12}
+:root[data-theme=dark] .legacy-scroll-wheel ul{background:#45454c}
+:root[data-theme=dark] .legacy-scroll-wheel li{color:#e8e8eb}
+:root[data-theme=dark] .legacy-scroll-wheel li[role=option]:hover{background:#5d5d62}
+:root[data-theme=dark] .workspace-picker-surface .legacy-detail-popover footer>button{border-color:rgba(255,255,255,.18)}
+@keyframes legacy-picker-enter{from{opacity:0}to{opacity:1}}
+@keyframes legacy-picker-exit{from{opacity:1}to{opacity:0}}
+@media(prefers-reduced-motion:reduce){.workspace-picker-surface{animation:none}.legacy-profile-layer .workspace-profile-menu{transition:none;animation:none}}

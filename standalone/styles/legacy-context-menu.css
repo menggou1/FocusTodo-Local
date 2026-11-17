@@ -1,0 +1,49 @@
+/* Legacy ContextMenu geometry, hierarchy and 250ms motion; only the migrated priority group is rendered. */
+.legacy-context-layer{position:fixed;inset:0;z-index:3000}
+.legacy-context-mask{position:absolute;inset:0}
+.legacy-context-menu{position:fixed;z-index:10000;min-width:190px;max-width:400px;background:var(--workspace-panel);box-shadow:0 0 20px 1px #0002;border-radius:8px;opacity:0;transform:scale(.1);visibility:hidden;transition:opacity 250ms ease-out,transform 250ms ease-out}
+.legacy-context-menu.ready{visibility:visible}
+.legacy-context-menu.is-open{opacity:1;transform:scale(1)}
+.legacy-context-menu.is-closing{opacity:0;transform:scale(.1);transition:opacity 120ms ease-in,transform 120ms ease-in}
+.legacy-context-group{padding:8px 0;border-bottom:1px solid var(--workspace-line)}
+.legacy-context-group:last-child{border-bottom:0}
+.legacy-estimate-menu{min-height:52px;padding:0 24px 0 16px}
+.legacy-deadline-menu{display:flex;flex-direction:column}
+.legacy-deadline-menu button{display:block;width:100%;height:24px;padding:0 40px 0 16px;border:0;border-radius:0;background:transparent;color:var(--workspace-text);text-align:left;font:14px/24px var(--workspace-font)}
+.legacy-deadline-menu button:hover{background:var(--workspace-selected)}
+.legacy-deadline-menu button:focus-visible{outline:2px solid var(--workspace-accent);outline-offset:-2px}
+.legacy-estimate-title{color:var(--workspace-muted);margin-bottom:4px;font-size:12px;line-height:17px}
+.legacy-pomodoro-selection{display:flex;align-items:center;justify-content:space-between;width:130px;height:34px;border:1px solid var(--workspace-line);border-radius:8px;background:var(--workspace-panel);box-sizing:border-box}
+.legacy-pomodoro-value{display:flex;align-items:center;min-width:0}
+.legacy-pomodoro-icon{display:block;width:16px;height:16px;margin-right:3px;background:url('../../public/img/detail-pomo-estimation.png') center/16px 16px no-repeat}
+.legacy-pomodoro-input{height:32px;min-width:9px;padding:0;border:0;outline:0;background:transparent;color:var(--workspace-text);font:14px/32px var(--workspace-font);text-align:left}
+.legacy-pomodoro-input::-webkit-inner-spin-button,.legacy-pomodoro-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.legacy-pomodoro-input::-ms-clear,.legacy-pomodoro-input::-ms-reveal{display:none}
+.legacy-pomodoro-minus,.legacy-pomodoro-plus{flex:0 0 24px;width:24px;height:32px;padding:0;border:0;background-color:transparent;background-position:center;background-repeat:no-repeat;background-size:24px 24px}
+.legacy-pomodoro-minus{margin-left:5px;background-image:url('../../public/img/pomo-minus-icon.png')}
+.legacy-pomodoro-plus{margin-right:5px;background-image:url('../../public/img/pomo-plus-icon.png')}
+:root[data-theme=dark] .legacy-pomodoro-minus{background-image:url('../../public/img/pomo-minus-icon-dark.png')}
+:root[data-theme=dark] .legacy-pomodoro-plus{background-image:url('../../public/img/pomo-plus-icon-dark.png')}
+.legacy-pomodoro-input:focus-visible,.legacy-pomodoro-minus:focus-visible,.legacy-pomodoro-plus:focus-visible{outline:2px solid var(--workspace-accent);outline-offset:1px}
+.legacy-pomodoro-width{position:absolute;visibility:hidden;white-space:pre;font-size:16px;line-height:1}
+.legacy-priority-menu{height:51px;padding:0 24px 0 16px}
+.legacy-priority-title{height:17px;line-height:17px;margin-bottom:4px;color:var(--workspace-muted);font-size:12px}
+.legacy-priority-options{display:flex;height:30px}
+.legacy-context-menu .legacy-priority-options>button{flex:0 0 30px;width:30px;height:30px;padding:0;border:0;border-radius:4px;background:transparent;display:grid;place-items:center;line-height:30px}
+.legacy-priority-options button[aria-checked=true]{background:var(--workspace-selected)}
+.legacy-priority-options button:focus-visible{outline:2px solid var(--workspace-accent);outline-offset:1px}
+.legacy-priority-options .legacy-icon{width:20px;height:20px}
+:root[data-theme=dark] .legacy-context-menu{box-shadow:0 0 20px 1px #0008}
+.legacy-context-menu,.legacy-context-submenu{--workspace-panel:#fff;background:var(--workspace-panel)}
+:root[data-theme=dark] .legacy-context-menu,:root[data-theme=dark] .legacy-context-submenu{--workspace-panel:#2d2d37}
+.legacy-context-parent>button,.legacy-menu-actions>button{position:relative;display:block;width:100%;height:24px;padding:0 40px 0 16px;border:0;border-radius:0;background:transparent;color:var(--workspace-text);text-align:left;font:14px/24px var(--workspace-font);white-space:nowrap}
+.legacy-context-parent>button:hover,.legacy-menu-actions>button:hover,.legacy-menu-projects>button:hover,.legacy-menu-tags>label:hover{background:var(--workspace-selected)}
+.legacy-context-parent>button:disabled{color:var(--workspace-muted)}.legacy-context-parent>button>i{position:absolute;right:12px;top:0;width:8px;height:24px;background:center/8px 10px url('../../public/img/menu-triangle.png') no-repeat}
+:root[data-theme=dark] .legacy-context-parent>button>i{background-image:url('../../public/img/menu-triangle-dark.png')}
+.legacy-context-submenu{position:fixed;z-index:10001;border-radius:8px;box-shadow:0 0 20px 1px #0002;overflow:hidden;opacity:0;transform:scale(.1);transition:opacity 250ms ease-out,transform 250ms ease-out;color:var(--workspace-text)}
+.legacy-context-submenu.is-open{opacity:1;transform:scale(1)}.legacy-context-submenu .legacy-date-picker{width:240px;padding:5px 16px 13px;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+.legacy-context-submenu .legacy-date-picker .legacy-date-month{height:28px}.legacy-context-submenu .legacy-date-days{margin-bottom:0}
+.legacy-menu-projects{width:200px;max-height:300px;overflow:auto}.legacy-menu-projects>button{display:flex;align-items:center;gap:8px;width:100%;height:34px;border:0;padding:0 16px;background:transparent;color:var(--workspace-text);text-align:left;font-size:14px}
+.legacy-menu-tags{width:240px;padding:8px 0;min-height:136px;max-height:256px;overflow:auto}.legacy-menu-tags>label{height:34px;padding:0 12px 0 16px;display:flex;align-items:center;gap:12px;font-size:14px}.legacy-menu-tags>label>span:nth-child(2){flex:1}.legacy-menu-tags .workspace-tag-color{width:16px;height:34px}
+.legacy-menu-tags input{appearance:none;width:24px;height:24px;border:0;background:center/24px url('../../public/img/tag-unchecked.png') no-repeat}.legacy-menu-tags input:checked{background-image:url('../../public/img/folder_project_checked.png')}
+@media(prefers-reduced-motion:reduce){.legacy-context-menu,.legacy-context-submenu{transition:none}}

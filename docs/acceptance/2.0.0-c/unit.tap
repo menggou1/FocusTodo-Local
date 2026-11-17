@@ -1,0 +1,304 @@
+TAP version 13
+# Subtest: automatic background audio hands off a browser lock, suspends on hide/dispose and never steals ownership
+ok 1 - automatic background audio hands off a browser lock, suspends on hide/dispose and never steals ownership
+  ---
+  duration_ms: 13.4361
+  type: 'test'
+  ...
+# Subtest: no-lock audio fails closed for automatic playback but allows completion effects and manual audition
+ok 2 - no-lock audio fails closed for automatic playback but allows completion effects and manual audition
+  ---
+  duration_ms: 0.801
+  type: 'test'
+  ...
+# Subtest: reminders schedule the nearest future task, persist read keys and only request notification permission explicitly
+ok 3 - reminders schedule the nearest future task, persist read keys and only request notification permission explicitly
+  ---
+  duration_ms: 161.2929
+  type: 'test'
+  ...
+# Subtest: the service scheduler owns ticks and completion audio; subtask switches settle the prior attribution
+ok 4 - the service scheduler owns ticks and completion audio; subtask switches settle the prior attribution
+  ---
+  duration_ms: 63.6666
+  type: 'test'
+  ...
+# Subtest: audio effects, audition volumes and background lifecycle match the old adapter for the same commands
+ok 5 - audio effects, audition volumes and background lifecycle match the old adapter for the same commands
+  ---
+  duration_ms: 13.1296
+  type: 'test'
+  ...
+# Subtest: projects/tasks/subtasks CRUD, completion, search and tombstones match legacy managers
+ok 6 - projects/tasks/subtasks CRUD, completion, search and tombstones match legacy managers
+  ---
+  duration_ms: 1221.9629
+  type: 'test'
+  ...
+# Subtest: recurrence matches old calendar arithmetic through leap days, month clamp, weekdays and catch-up
+ok 7 - recurrence matches old calendar arithmetic through leap days, month clamp, weekdays and catch-up
+  ---
+  duration_ms: 43.4783
+  type: 'test'
+  ...
+# Subtest: history/report total, fractions, task/project aggregation and local day boundaries match legacy
+ok 8 - history/report total, fractions, task/project aggregation and local day boundaries match legacy
+  ---
+  duration_ms: 25.1823
+  type: 'test'
+  ...
+# Subtest: settings defaults, values and clamps match old getters and failed writes retain snapshots
+ok 9 - settings defaults, values and clamps match old getters and failed writes retain snapshots
+  ---
+  duration_ms: 33.226
+  type: 'test'
+  ...
+# Subtest: language fallback and release reads agree with old adapters without resetting storage
+ok 10 - language fallback and release reads agree with old adapters without resetting storage
+  ---
+  duration_ms: 14.6066
+  type: 'test'
+  ...
+# Subtest: task detach and history commit atomically, stale edits and duplicate IDs cannot partially complete commands
+ok 11 - task detach and history commit atomically, stale edits and duplicate IDs cannot partially complete commands
+  ---
+  duration_ms: 15.3118
+  type: 'test'
+  ...
+# Subtest: preset task queries, calendar layout and record progress match legacy rules
+ok 12 - preset task queries, calendar layout and record progress match legacy rules
+  ---
+  duration_ms: 42.7562
+  type: 'test'
+  ...
+# Subtest: project visibility/folders/reordering and schedule/record edits preserve unrelated fields
+ok 13 - project visibility/folders/reordering and schedule/record edits preserve unrelated fields
+  ---
+  duration_ms: 52.9651
+  type: 'test'
+  ...
+# Subtest: forest rewards and achievement metrics match the old ledger and remain idempotent
+ok 14 - forest rewards and achievement metrics match the old ledger and remain idempotent
+  ---
+  duration_ms: 16.4554
+  type: 'test'
+  ...
+# Subtest: all import commit boundaries either preserve originals or recover a durable journal
+ok 15 - all import commit boundaries either preserve originals or recover a durable journal
+  ---
+  duration_ms: 158.3802
+  type: 'test'
+  ...
+# Subtest: every import database transaction and settings-key write boundary survives a one-shot failure
+ok 16 - every import database transaction and settings-key write boundary survives a one-shot failure
+  ---
+  duration_ms: 207.759
+  type: 'test'
+  ...
+# Subtest: recurring completion aborts parent, next task and copied subtasks as one transaction
+ok 17 - recurring completion aborts parent, next task and copied subtasks as one transaction
+  ---
+  duration_ms: 58.0553
+  type: 'test'
+  ...
+# Subtest: newer client protocol and legacy database names reject writers before mutation
+ok 18 - newer client protocol and legacy database names reject writers before mutation
+  ---
+  duration_ms: 15.6002
+  type: 'test'
+  ...
+# Subtest: version naming migration preserves schema, data, unknown keys and old release read state
+ok 19 - version naming migration preserves schema, data, unknown keys and old release read state
+  ---
+  duration_ms: 34.1101
+  type: 'test'
+  ...
+# Subtest: v1/v2 imports preserve historical compatibility records and unsupported formats never start maintenance
+ok 20 - v1/v2 imports preserve historical compatibility records and unsupported formats never start maintenance
+  ---
+  duration_ms: 19.6438
+  type: 'test'
+  ...
+# Subtest: theme journal failure at each key boundary matches legacy rollback and preserves corrupt journals
+ok 21 - theme journal failure at each key boundary matches legacy rollback and preserves corrupt journals
+  ---
+  duration_ms: 8.0001
+  type: 'test'
+  ...
+# Subtest: candidate origin requires a loopback server attestation before inspecting storage
+ok 22 - candidate origin requires a loopback server attestation before inspecting storage
+  ---
+  duration_ms: 7.0709
+  type: 'test'
+  ...
+# Subtest: candidate rejects absent or mismatching attestation and opaque databases
+ok 23 - candidate rejects absent or mismatching attestation and opaque databases
+  ---
+  duration_ms: 7.0325
+  type: 'test'
+  ...
+# Subtest: candidate permits its preference namespace and rejects every legacy or unknown key
+ok 24 - candidate permits its preference namespace and rejects every legacy or unknown key
+  ---
+  duration_ms: 8.6808
+  type: 'test'
+  ...
+# Subtest: version metadata models the future independent version without changing DB schema
+ok 25 - version metadata models the future independent version without changing DB schema
+  ---
+  duration_ms: 2.7469
+  type: 'test'
+  ...
+# Subtest: language resolution retains explicit preferences and complete bilingual fallback
+ok 26 - language resolution retains explicit preferences and complete bilingual fallback
+  ---
+  duration_ms: 3.1394
+  type: 'test'
+  ...
+# Subtest: explicit network policy matches legacy same-origin/exact Bing opt-in without wrapping browser globals
+ok 27 - explicit network policy matches legacy same-origin/exact Bing opt-in without wrapping browser globals
+  ---
+  duration_ms: 172.3295
+  type: 'test'
+  ...
+# Subtest: network redirects, response size, timeout and cancellation fail without committing settings
+ok 28 - network redirects, response size, timeout and cancellation fail without committing settings
+  ---
+  duration_ms: 43.8811
+  type: 'test'
+  ...
+# Subtest: wallpaper cache expires across a local day and TTL; offline failure retains cached selection
+ok 29 - wallpaper cache expires across a local day and TTL; offline failure retains cached selection
+  ---
+  duration_ms: 30.5079
+  type: 'test'
+  ...
+# Subtest: new theme selection and opt-out cancel in-flight/queued Bing work before persistence
+ok 30 - new theme selection and opt-out cancel in-flight/queued Bing work before persistence
+  ---
+  duration_ms: 15.0302
+  type: 'test'
+  ...
+# Subtest: opt-out intent cancels a queued cached activation before either operation acquires storage ownership
+ok 31 - opt-out intent cancels a queued cached activation before either operation acquires storage ownership
+  ---
+  duration_ms: 17.1481
+  type: 'test'
+  ...
+# Subtest: candidate server attests its exact origin and serves the explicit project-path manifest
+ok 32 - candidate server attests its exact origin and serves the explicit project-path manifest
+  ---
+  duration_ms: 52.4339
+  type: 'test'
+  ...
+# Subtest: candidate server excludes source maps, checkout files and resources outside its mount
+ok 33 - candidate server excludes source maps, checkout files and resources outside its mount
+  ---
+  duration_ms: 34.1405
+  type: 'test'
+  ...
+# Subtest: migrated timer matches legacy states, records, events and errors for deterministic action traces
+ok 34 - migrated timer matches legacy states, records, events and errors for deterministic action traces
+  ---
+  duration_ms: 189.9086
+  type: 'test'
+  ...
+# Subtest: candidate database schema/indexes, logical backup keys and unknown compatibility fields remain intact
+ok 35 - candidate database schema/indexes, logical backup keys and unknown compatibility fields remain intact
+  ---
+  duration_ms: 45.5625
+  type: 'test'
+  ...
+# Subtest: timer persistence publishes only after an atomic records/session commit and allows retry after an abort
+ok 36 - timer persistence publishes only after an atomic records/session commit and allows retry after an abort
+  ---
+  duration_ms: 11.1896
+  type: 'test'
+  ...
+# Subtest: reload recovery retains paused rest and never counts a backwards clock interval
+ok 37 - reload recovery retains paused rest and never counts a backwards clock interval
+  ---
+  duration_ms: 10.6678
+  type: 'test'
+  ...
+# Subtest: pre-import backup failure and row-transaction abort preserve both original datasets
+ok 38 - pre-import backup failure and row-transaction abort preserve both original datasets
+  ---
+  duration_ms: 37.2697
+  type: 'test'
+  ...
+# Subtest: interrupted replacement keeps a durable journal, blocks writes, and resumes settings after recreation
+ok 39 - interrupted replacement keeps a durable journal, blocks writes, and resumes settings after recreation
+  ---
+  duration_ms: 8.0982
+  type: 'test'
+  ...
+# Subtest: a failed or missing pre-import backup sink cancels replacement before writing target rows
+ok 40 - a failed or missing pre-import backup sink cancels replacement before writing target rows
+  ---
+  duration_ms: 16.9848
+  type: 'test'
+  ...
+# Subtest: repository business reads and writes reject an orphan maintenance marker
+ok 41 - repository business reads and writes reject an orphan maintenance marker
+  ---
+  duration_ms: 11.2941
+  type: 'test'
+  ...
+# Subtest: settings quota failure restores the original rows and settings; rollback failures remain recoverable
+ok 42 - settings quota failure restores the original rows and settings; rollback failures remain recoverable
+  ---
+  duration_ms: 31.6749
+  type: 'test'
+  ...
+# Subtest: two instances without Web Locks serialize maintenance and reject writes during import
+ok 43 - two instances without Web Locks serialize maintenance and reject writes during import
+  ---
+  duration_ms: 10.1242
+  type: 'test'
+  ...
+# Subtest: old/new backup codecs and validation agree for v1/v2, JSON/Gzip, scope and invalid inputs
+ok 44 - old/new backup codecs and validation agree for v1/v2, JSON/Gzip, scope and invalid inputs
+  ---
+  duration_ms: 85.012
+  type: 'test'
+  ...
+# Subtest: migrated calendar task/plan transactions match legacy fields and reject stale edits
+ok 45 - migrated calendar task/plan transactions match legacy fields and reject stale edits
+  ---
+  duration_ms: 20.7415
+  type: 'test'
+  ...
+# Subtest: calendar creation aborts task and planned blocks together on a storage constraint failure
+ok 46 - calendar creation aborts task and planned blocks together on a storage constraint failure
+  ---
+  duration_ms: 9.1566
+  type: 'test'
+  ...
+# Subtest: reset saves a readable pre-reset backup, keeps language and restores default projects
+ok 47 - reset saves a readable pre-reset backup, keeps language and restores default projects
+  ---
+  duration_ms: 12.4929
+  type: 'test'
+  ...
+# Subtest: theme journal differential preserves images, recovers interrupted metadata and rolls back quota errors
+ok 48 - theme journal differential preserves images, recovers interrupted metadata and rolls back quota errors
+  ---
+  duration_ms: 12.5718
+  type: 'test'
+  ...
+# Subtest: schema versionchange and disposed instances reject future writes without deleting data
+ok 49 - schema versionchange and disposed instances reject future writes without deleting data
+  ---
+  duration_ms: 7.0212
+  type: 'test'
+  ...
+1..49
+# tests 49
+# suites 0
+# pass 49
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1845.7576

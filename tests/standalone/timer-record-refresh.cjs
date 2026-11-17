@@ -1,0 +1,23 @@
+process.env.FOCUS_RESTORE_SHARED='1';
+const {paired,copyFixture,assert,fs,path}=require('./ui-restore-helpers.cjs');
+const out=path.resolve('dist/acceptance/d-v-timer-refinement');
+async function records(page,old){return old?page.evaluate(async()=>(await FocusLocalData.snapshot()).indexedDB.Pomodoro):page.evaluate(()=>new Promise((resolve,reject)=>{const r=indexedDB.open('FocusTodoStandalone.PomodoroDB6',3);r.onsuccess=()=>{const db=r.result,q=db.transaction('Pomodoro').objectStore('Pomodoro').getAll();q.onsuccess=()=>{db.close();resolve(q.result)}};r.onerror=()=>reject(r.error)}))}
+(async()=>{const pair=await paired({locale:'en',reducedMotion:'no-preference'}),evidence=[];try{
+ await pair.old.locator('input').last().fill('Refresh task');await pair.old.locator('input').last().press('Enter');await pair.old.waitForFunction(async()=>!!(await FocusLocalData.snapshot()).indexedDB.Task.length);
+ await pair.old.evaluate(async()=>{const row=(await FocusLocalData.snapshot()).indexedDB.Task[0];await new Promise((resolve,reject)=>{const r=indexedDB.open('PomodoroDB6',3);r.onsuccess=()=>{const db=r.result,tx=db.transaction('Task','readwrite');tx.objectStore('Task').put({...row,pomodoroInterval:60});tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>reject(tx.error)}});localStorage.setItem('Countdown','false')});await pair.old.reload();await pair.old.waitForFunction(()=>window.FocusLocalReady&&!document.documentElement.classList.contains('focus-starting'));await copyFixture(pair);
+ for(const [page,old]of [[pair.old,true],[pair.new,false]]){await page.locator(old?'[class*=FloatTimer-root]':'[data-testid=timer-floating]').hover();await page.locator(old?'[class*=FloatTimer-zoomup]':'.legacy-timer-float-expand').click();await page.waitForTimeout(350);await page.locator(old?'.FullscreenTimer-menu-2RT9S':'.legacy-timer-menus button').nth(1).click();await page.locator(old?'[class*=TimerModeSelector-option-]':'.legacy-timer-mode-selector [role=radio]').nth(1).click();await page.locator(old?'[class*=TimerModeSelector-confirm-]':'.legacy-timer-mode-selector footer button:last-child').click();await page.locator(old?'[class*=TimerModeSelector-root]':'.legacy-timer-mode-selector').waitFor({state:'hidden'});await page.clock.install({time:new Date('2026-11-08T12:00:00+08:00')});await page.locator(old?'.TodayTaskItem-play-1v7cN':'.timer-widget-play').click();}
+ for(const [page,old]of [[pair.old,true],[pair.new,false]]){
+  await page.locator(old?'.FullscreenTimer-actionWithoutBackground-3Lyki':'[data-testid=timer-expanded][data-state=work]').waitFor();
+  await page.clock.fastForward(35000);await page.locator(old?'.FullscreenTimer-actionWithoutBackground-3Lyki':'.legacy-timer-actions button').click();
+  await page.locator(old?'.TodayDetailItem-root-1f39X':'.timer-history-record').waitFor();const rows=await records(page,old);assert.equal(rows.length,1);
+  if(!old)assert(Number(await page.locator('.timer-history-canvas-content>canvas').getAttribute('data-now-y'))>1450,'Record commit also redraws the current-time line');const now=await page.evaluate(()=>Date.now());assert(now<new Date('2026-11-08T12:01:00+08:00').getTime(),'Must update before the minute timer');
+  evidence.push({label:old?'old':'new',stage:'pause-before-minute',now,rows:rows.map(r=>({interval:r.interval,endDate:r.endDate})),timeline:old?null:await page.locator('.timer-history-canvas-content>canvas').getAttribute('data-now-y')});
+  await page.screenshot({path:path.join(out,(old?'old':'new')+'-immediate-record.png'),fullPage:true});
+  console.log('PASS '+(old?'old':'new')+' pause record before minute redraw');
+  await page.locator(old?'.FullscreenTimer-continue-3eIVQ':'.legacy-timer-actions button.primary').click();await page.locator(old?'.FullscreenTimer-actionWithoutBackground-3Lyki':'[data-testid=timer-expanded][data-state=work]').waitFor();await page.clock.fastForward(65000);
+  await page.waitForFunction(old=>document.querySelectorAll(old?'.TodayDetailItem-root-1f39X':'.timer-history-record').length>=2,old);const during=await records(page,old);assert(during.length>=2);
+  if(!old)assert.equal(await page.getByTestId('timer-expanded').getAttribute('data-state'),'work');
+  evidence.push({label:old?'old':'new',stage:'countup-running-boundary',rows:during.map(r=>({interval:r.interval,endDate:r.endDate}))});
+ }
+ fs.writeFileSync(path.join(out,'refresh.json'),JSON.stringify(evidence,null,2));console.log('PASS old/new record commit before minute redraw, and live countup record boundary');
+}finally{fs.writeFileSync(path.join(out,'refresh.json'),JSON.stringify(evidence,null,2));await pair.close()}})().catch(e=>{console.error(e);process.exitCode=1});

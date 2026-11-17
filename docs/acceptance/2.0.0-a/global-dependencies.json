@@ -1,0 +1,363 @@
+{
+  "baseline": "f102da8919e810006b6611aabcef5f0159057d61",
+  "method": "Acorn static non-computed window/root/globalThis member expressions starting Focus or webBridge, occurrence counts; does not resolve aliases, dynamic property names, computed access, indirect calls or reachability. IDs are audit references only.",
+  "legacy": [
+    {
+      "module": 13,
+      "globals": {
+        "FocusLocalData": 10
+      }
+    },
+    {
+      "module": 24,
+      "globals": {
+        "FocusLocalData": 3
+      }
+    },
+    {
+      "module": 32,
+      "globals": {
+        "FocusI18n": 2,
+        "FocusLocal": 2,
+        "FocusLocalData": 2
+      }
+    },
+    {
+      "module": 55,
+      "globals": {
+        "FocusI18n": 1,
+        "FocusLocalData": 1
+      }
+    },
+    {
+      "module": 77,
+      "globals": {
+        "FocusLocalData": 3
+      }
+    },
+    {
+      "module": 91,
+      "globals": {
+        "FocusI18n": 3
+      }
+    },
+    {
+      "module": 104,
+      "globals": {
+        "webBridge": 2
+      }
+    },
+    {
+      "module": 106,
+      "globals": {
+        "FocusLocalData": 1
+      }
+    },
+    {
+      "module": 107,
+      "globals": {
+        "FocusLocal": 1
+      }
+    },
+    {
+      "module": 254,
+      "globals": {
+        "webBridge": 6
+      }
+    },
+    {
+      "module": 256,
+      "globals": {
+        "FocusLocal": 1,
+        "FocusLocalData": 1
+      }
+    },
+    {
+      "module": 586,
+      "globals": {
+        "FocusCalendar": 1,
+        "FocusI18n": 1,
+        "FocusLocal": 5
+      }
+    },
+    {
+      "module": 692,
+      "globals": {
+        "FocusAppUI": 1,
+        "FocusI18n": 3,
+        "FocusLocalReady": 1
+      }
+    },
+    {
+      "module": 821,
+      "globals": {
+        "FocusAppUI": 6,
+        "FocusForest": 4,
+        "FocusI18n": 1
+      }
+    },
+    {
+      "module": 862,
+      "globals": {
+        "FocusAppUI": 2,
+        "FocusI18n": 2
+      }
+    },
+    {
+      "module": 863,
+      "globals": {
+        "FocusLocalData": 1
+      }
+    },
+    {
+      "module": 935,
+      "globals": {
+        "FocusLocal": 2
+      }
+    },
+    {
+      "module": 976,
+      "globals": {
+        "FocusLocal": 1
+      }
+    },
+    {
+      "module": 1018,
+      "globals": {
+        "FocusLocal": 2
+      }
+    },
+    {
+      "module": 1019,
+      "globals": {
+        "FocusLocal": 2
+      }
+    },
+    {
+      "module": 1021,
+      "globals": {
+        "FocusCalendar": 1
+      }
+    },
+    {
+      "module": 1033,
+      "globals": {
+        "FocusCalendar": 1
+      }
+    },
+    {
+      "module": 1036,
+      "globals": {
+        "FocusCalendar": 2
+      }
+    },
+    {
+      "module": 1040,
+      "globals": {
+        "FocusLocal": 2
+      }
+    },
+    {
+      "module": 1043,
+      "globals": {
+        "FocusLocal": 3,
+        "FocusLocalReady": 1,
+        "webBridge": 5
+      }
+    },
+    {
+      "module": 1044,
+      "globals": {
+        "FocusLocal": 1
+      }
+    },
+    {
+      "module": 1049,
+      "globals": {
+        "FocusLocal": 6
+      }
+    },
+    {
+      "module": 1145,
+      "globals": {
+        "FocusSettings": 4
+      }
+    },
+    {
+      "module": 1147,
+      "globals": {
+        "FocusAppUI": 1,
+        "FocusRelease": 1
+      }
+    },
+    {
+      "module": 1148,
+      "globals": {
+        "FocusAppUI": 3
+      }
+    },
+    {
+      "module": 1153,
+      "globals": {
+        "FocusSettings": 6
+      }
+    },
+    {
+      "module": 1154,
+      "globals": {
+        "FocusSettings": 1,
+        "FocusThemes": 2
+      }
+    },
+    {
+      "module": 1174,
+      "globals": {
+        "FocusI18n": 1,
+        "FocusLocal": 1,
+        "FocusSettings": 2
+      }
+    },
+    {
+      "module": 1181,
+      "globals": {
+        "FocusForest": 6,
+        "FocusLocal": 1
+      }
+    },
+    {
+      "module": 1190,
+      "globals": {
+        "FocusAchievements": 1
+      }
+    }
+  ],
+  "local": [
+    {
+      "file": "src/js/local-achievements.js",
+      "globals": {
+        "FocusAchievements": 1,
+        "FocusForest": 1,
+        "FocusI18n": 4,
+        "FocusLocal": 4,
+        "FocusLocalData": 6,
+        "FocusLocalReady": 3
+      }
+    },
+    {
+      "file": "src/js/local-app-ui.js",
+      "globals": {
+        "FocusAppUI": 1,
+        "FocusI18n": 47,
+        "FocusLocal": 5,
+        "FocusLocalData": 4,
+        "FocusLocalReady": 2,
+        "FocusRelease": 1
+      }
+    },
+    {
+      "file": "src/js/local-backup.js",
+      "globals": {
+        "FocusI18n": 154,
+        "FocusLocalBackup": 4,
+        "FocusLocalData": 3,
+        "FocusLocalReady": 2
+      }
+    },
+    {
+      "file": "src/js/local-calendar.js",
+      "globals": {
+        "FocusCalendar": 1,
+        "FocusI18n": 3,
+        "FocusLocal": 1,
+        "FocusLocalData": 11
+      }
+    },
+    {
+      "file": "src/js/local-data.js",
+      "globals": {
+        "FocusAchievements": 2,
+        "FocusI18n": 94,
+        "FocusLocalBackup": 2,
+        "FocusLocalData": 1,
+        "FocusLocalReady": 2,
+        "FocusRelease": 1,
+        "FocusThemeStore": 2,
+        "FocusTimerCore": 3
+      }
+    },
+    {
+      "file": "src/js/local-i18n-catalog.js",
+      "globals": {
+        "FocusLocaleCatalog": 1
+      }
+    },
+    {
+      "file": "src/js/local-i18n.js",
+      "globals": {
+        "FocusI18n": 1,
+        "FocusLocaleCatalog": 1
+      }
+    },
+    {
+      "file": "src/js/local-network.js",
+      "globals": {
+        "FocusI18n": 2,
+        "FocusLocalNetwork": 1,
+        "FocusSettings": 2
+      }
+    },
+    {
+      "file": "src/js/local-release.js",
+      "globals": {
+        "FocusRelease": 1
+      }
+    },
+    {
+      "file": "src/js/local-settings-ui.js",
+      "globals": {
+        "FocusI18n": 1,
+        "FocusLocal": 3,
+        "FocusLocalData": 2,
+        "FocusSettings": 2
+      }
+    },
+    {
+      "file": "src/js/local-startup.js",
+      "globals": {
+        "FocusLocalReady": 2,
+        "FocusStartup": 1
+      }
+    },
+    {
+      "file": "src/js/local-theme-storage.js",
+      "globals": {
+        "FocusI18n": 67,
+        "FocusLocal": 6,
+        "FocusLocalData": 5,
+        "FocusLocalReady": 4,
+        "FocusSettings": 8,
+        "FocusThemes": 1,
+        "FocusThemeStorage": 5,
+        "FocusThemeStore": 1
+      }
+    },
+    {
+      "file": "src/js/local-timer-core.js",
+      "globals": {
+        "FocusI18n": 14,
+        "FocusTimerCore": 1
+      }
+    },
+    {
+      "file": "src/js/local-timer-ui.js",
+      "globals": {
+        "FocusI18n": 44,
+        "FocusLocal": 1,
+        "FocusLocalData": 1,
+        "FocusLocalReady": 2,
+        "FocusRelease": 1,
+        "FocusTimerCore": 1
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@ const sandbox = { window: {} }; vm.runInNewContext(read('src/js/local-release.js
 const release = JSON.parse(JSON.stringify(sandbox.window.FocusRelease));
 
 test('published metadata, package and page all use the same official/local release', () => {
-    const version = config.officialVersion + '-local.' + config.localVersion;
+    const version = Number(config.localVersion.split('.')[0]) >= 2 ? config.localVersion : config.officialVersion + '-local.' + config.localVersion;
     assert.equal(config.officialVersion, '7.1.1');
     assert.equal(pkg.version, version); assert.equal(pkg.author, config.author);
     const lock = JSON.parse(read('package-lock.json'));

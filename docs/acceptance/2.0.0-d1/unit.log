@@ -1,0 +1,61 @@
+
+> focustodo@7.1.1-local.1.9.3 test:standalone
+> node --test tests/standalone/*.test.cjs && node tests/standalone/browser-acceptance.cjs && node tests/standalone/workspace-browser.cjs && node tests/standalone/services-browser.cjs && node tests/standalone/package-smoke.cjs
+
+✔ automatic background audio hands off a browser lock, suspends on hide/dispose and never steals ownership (9.5359ms)
+✔ no-lock audio fails closed for automatic playback but allows completion effects and manual audition (0.6967ms)
+✔ reminders schedule the nearest future task, persist read keys and only request notification permission explicitly (92.5379ms)
+✔ the service scheduler owns ticks and completion audio; subtask switches settle the prior attribution (61.1982ms)
+✔ audio effects, audition volumes and background lifecycle match the old adapter for the same commands (11.8049ms)
+✔ projects/tasks/subtasks CRUD, completion, search and tombstones match legacy managers (1061.4004ms)
+✔ recurrence matches old calendar arithmetic through leap days, month clamp, weekdays and catch-up (35.466ms)
+✔ history/report total, fractions, task/project aggregation and local day boundaries match legacy (17.4102ms)
+✔ settings defaults, values and clamps match old getters and failed writes retain snapshots (15.4505ms)
+✔ language fallback and release reads agree with old adapters without resetting storage (9.145ms)
+✔ task detach and history commit atomically, stale edits and duplicate IDs cannot partially complete commands (9.5993ms)
+✔ preset task queries, calendar layout and record progress match legacy rules (31.0444ms)
+✔ project visibility/folders/reordering and schedule/record edits preserve unrelated fields (42.2424ms)
+✔ forest rewards and achievement metrics match the old ledger and remain idempotent (13.2132ms)
+✔ all import commit boundaries either preserve originals or recover a durable journal (179.9958ms)
+✔ every import database transaction and settings-key write boundary survives a one-shot failure (224.9816ms)
+✔ recurring completion aborts parent, next task and copied subtasks as one transaction (48.4508ms)
+✔ newer client protocol and legacy database names reject writers before mutation (17.7231ms)
+✔ version naming migration preserves schema, data, unknown keys and old release read state (27.2473ms)
+✔ v1/v2 imports preserve historical compatibility records and unsupported formats never start maintenance (21.2849ms)
+✔ theme journal failure at each key boundary matches legacy rollback and preserves corrupt journals (6.3731ms)
+✔ candidate origin requires a loopback server attestation before inspecting storage (4.8068ms)
+✔ candidate rejects absent or mismatching attestation and opaque databases (3.6512ms)
+✔ candidate permits its preference namespace and rejects every legacy or unknown key (4.4008ms)
+✔ version metadata models the future independent version without changing DB schema (1.239ms)
+✔ language resolution retains explicit preferences and complete bilingual fallback (1.6735ms)
+✔ explicit network policy matches legacy same-origin/exact Bing opt-in without wrapping browser globals (183.6899ms)
+✔ network redirects, response size, timeout and cancellation fail without committing settings (54.9504ms)
+✔ wallpaper cache expires across a local day and TTL; offline failure retains cached selection (26.1838ms)
+✔ new theme selection and opt-out cancel in-flight/queued Bing work before persistence (25.221ms)
+✔ opt-out intent cancels a queued cached activation before either operation acquires storage ownership (13.6931ms)
+✔ candidate server attests its exact origin and serves the explicit project-path manifest (36.9083ms)
+✔ candidate server excludes source maps, checkout files and resources outside its mount (16.5591ms)
+✔ migrated timer matches legacy states, records, events and errors for deterministic action traces (190.4407ms)
+✔ candidate database schema/indexes, logical backup keys and unknown compatibility fields remain intact (34.8171ms)
+✔ timer persistence publishes only after an atomic records/session commit and allows retry after an abort (13.0195ms)
+✔ reload recovery retains paused rest and never counts a backwards clock interval (6.7637ms)
+✔ pre-import backup failure and row-transaction abort preserve both original datasets (19.5894ms)
+✔ interrupted replacement keeps a durable journal, blocks writes, and resumes settings after recreation (10.6999ms)
+✔ a failed or missing pre-import backup sink cancels replacement before writing target rows (11.3008ms)
+✔ repository business reads and writes reject an orphan maintenance marker (5.8428ms)
+✔ settings quota failure restores the original rows and settings; rollback failures remain recoverable (14.5555ms)
+✔ two instances without Web Locks serialize maintenance and reject writes during import (10.0642ms)
+✔ old/new backup codecs and validation agree for v1/v2, JSON/Gzip, scope and invalid inputs (59.3028ms)
+✔ migrated calendar task/plan transactions match legacy fields and reject stale edits (13.3694ms)
+✔ calendar creation aborts task and planned blocks together on a storage constraint failure (4.8117ms)
+✔ reset saves a readable pre-reset backup, keeps language and restores default projects (6.7484ms)
+✔ theme journal differential preserves images, recovers interrupted metadata and rolls back quota errors (9.2824ms)
+✔ schema versionchange and disposed instances reject future writes without deleting data (3.9058ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1507.0554

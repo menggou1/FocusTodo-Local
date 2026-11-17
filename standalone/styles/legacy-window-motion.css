@@ -1,0 +1,15 @@
+/* 1.9.3 Overlay/Report CSSTransition: opacity only, no translation or scale. */
+.legacy-window-enter{animation:legacy-window-enter 250ms ease-out both}
+.legacy-window-exit{animation:legacy-window-exit 250ms ease-out both;pointer-events:none}
+dialog.legacy-window-enter::backdrop{animation:legacy-window-enter 250ms ease-out both}
+dialog.legacy-window-exit::backdrop{animation:legacy-window-exit 250ms ease-out both}
+@keyframes legacy-window-enter{from{opacity:.01}to{opacity:1}}
+@keyframes legacy-window-exit{from{opacity:1}to{opacity:.01}}
+/* Only enhanced regions hide native paint; their native wheel/keyboard scroll remains. */
+.legacy-scroll-view{scrollbar-width:none!important}
+.legacy-scroll-view::-webkit-scrollbar{width:0!important;height:0!important}
+.legacy-scroll-track{position:fixed;width:6px;border-radius:3px;background:transparent;opacity:0;transition:opacity .2s ease,background-color .2s ease;pointer-events:none;z-index:5}
+.legacy-scroll-track[data-visible=true]{opacity:1;pointer-events:auto}
+.legacy-scroll-thumb{position:absolute;top:0;left:0;width:100%;border-radius:3px;background:rgba(200,200,200,.5);cursor:default;transition:background-color .2s ease,box-shadow .2s ease;will-change:transform;touch-action:none;user-select:none}
+.legacy-scroll-track[data-highlight=true]>.legacy-scroll-thumb{box-shadow:inset 0 0 6px rgba(0,0,0,.3);background:rgba(174,174,174,.7)}
+@media(prefers-reduced-motion:reduce){.legacy-window-enter,.legacy-window-exit,dialog.legacy-window-enter::backdrop,dialog.legacy-window-exit::backdrop{animation:none}.legacy-scroll-track,.legacy-scroll-thumb{transition:none}}

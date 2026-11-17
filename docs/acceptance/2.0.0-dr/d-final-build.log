@@ -1,0 +1,128 @@
+
+> focustodo@7.1.1-local.1.9.3 build:standalone
+> npm run typecheck:standalone && node scripts/build-standalone.mjs
+
+
+> focustodo@7.1.1-local.1.9.3 typecheck:standalone
+> tsc --project standalone/tsconfig.json
+
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 163 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/standalone/site/assets/project-DcvT0T6Q.png                           0.25 kB
+dist/standalone/site/assets/folder-DFfr9XgB.png                            0.74 kB
+dist/standalone/site/assets/project-upcoming-Dhlmsfk_.png                  0.90 kB
+dist/standalone/site/assets/project-tasks-B43VW0VZ.png                     0.92 kB
+dist/standalone/site/assets/project-priority-high-BPf25RyP.png             0.94 kB
+dist/standalone/site/assets/project-priority-medium-B5dzHPyw.png           0.94 kB
+dist/standalone/site/assets/project-priority-low-CB_v6G7k.png              0.98 kB
+dist/standalone/site/assets/project-calendar-CPAze2uc.png                  1.01 kB
+dist/standalone/site/assets/project-overdue-BwOXub3N.png                   1.07 kB
+dist/standalone/site/assets/project-week-ChcP1Xso.png                      1.11 kB
+dist/standalone/site/assets/favicon-CaaNEsRw.ico                           1.15 kB
+dist/standalone/site/assets/project-next7days-BBs4cP9I.png                 1.15 kB
+dist/standalone/site/assets/project-tomorrow-DDpZJsqK.png                  1.15 kB
+dist/standalone/site/assets/project-someday-CWq5Apw0.png                   1.23 kB
+dist/standalone/site/assets/prj-history-CeXbN6jm.png                       1.55 kB
+dist/standalone/site/assets/project-today-bJJ-4DV-.png                     1.82 kB
+dist/standalone/site/assets/project-all-BpZTTs4R.png                       1.83 kB
+dist/standalone/site/index.html                                            3.86 kB │ gzip:   1.68 kB
+dist/standalone/site/assets/alm_AlarmBeep-2IATlana.mp3                     5.97 kB
+dist/standalone/site/assets/alm_Music3-T3wnCdZJ.mp3                        7.00 kB
+dist/standalone/site/assets/timer-bg-desert-shortcut-DHyh9B1C.jpg          7.48 kB
+dist/standalone/site/assets/timer-bg-leaf-shortcut-DXKGWLi7.jpg            7.92 kB
+dist/standalone/site/assets/timer-bg-starrysky-shortcut-BO-Bdw3R.jpg       9.73 kB
+dist/standalone/site/assets/alm_Bell1-LkOe91IB.mp3                        11.12 kB
+dist/standalone/site/assets/alm_WindUp-DDRhjU9h.mp3                       11.40 kB
+dist/standalone/site/assets/tree-0-gtXOtW5D.png                           11.87 kB
+dist/standalone/site/assets/timer-bg-city-shortcut-xsbp0x8M.jpg           11.95 kB
+dist/standalone/site/assets/alm_CarHorn-BatBdEBF.mp3                      12.17 kB
+dist/standalone/site/assets/alm_Bell2-BJXk5W2E.mp3                        12.79 kB
+dist/standalone/site/assets/alm_Whistle-Rz6sPl7s.mp3                      12.98 kB
+dist/standalone/site/assets/timer-bg-beach-shortcut-B2m-2Zjx.jpg          14.86 kB
+dist/standalone/site/assets/timer-bg-forest-shortcut-Cneg6ulO.jpg         18.26 kB
+dist/standalone/site/.vite/manifest.json                                  19.17 kB │ gzip:   2.72 kB
+dist/standalone/site/assets/bgm_Mute-DPoVTvi9.m4a                         20.06 kB
+dist/standalone/site/assets/tree-1-CBLz71qe.png                           20.57 kB
+dist/standalone/site/assets/timer-bg-ocean-shortcut-utOtSqQR.jpg          21.71 kB
+dist/standalone/site/assets/timer-bg-mountain-shortcut-B2iE0O65.jpg       22.97 kB
+dist/standalone/site/assets/alm_CockCrow-UbEHhD7-.mp3                     28.33 kB
+dist/standalone/site/assets/alm_Satellite-DAOrLbt-.mp3                    28.33 kB
+dist/standalone/site/assets/alm_Victory-D2j9kaKs.mp3                      30.50 kB
+dist/standalone/site/assets/alm_SchoolBell-8OBL-H95.mp3                   30.62 kB
+dist/standalone/site/assets/tree-2-Df_W6kvf.png                           30.64 kB
+dist/standalone/site/assets/alm_Birdcall-DOlzAGRs.mp3                     31.42 kB
+dist/standalone/site/assets/alm_Cuckoo-DN68M3_c.mp3                       31.72 kB
+dist/standalone/site/assets/timer-bg-lake-shortcut-KfBbfZk_.jpg           38.82 kB
+dist/standalone/site/assets/tree-3-JuK-Gvsp.png                           42.05 kB
+dist/standalone/site/assets/timer-bg-trees-shortcut-BukpR63S.jpg          48.03 kB
+dist/standalone/site/assets/alm_Music2-DGqT2j6X.mp3                       48.10 kB
+dist/standalone/site/assets/alm_ToyNoisemakerHonk-pqIU5wmi.mp3            51.11 kB
+dist/standalone/site/assets/alm_Beeps-CKmptmwN.mp3                        53.99 kB
+dist/standalone/site/assets/tree-4-DPCIDxz2.png                           56.45 kB
+dist/standalone/site/assets/alm_PianoMusic-Hd2_hMT5.mp3                   56.88 kB
+dist/standalone/site/assets/alm_Music1-BvtnTKFS.mp3                       58.82 kB
+dist/standalone/site/assets/alm_WindChimes-CASOLPeV.mp3                   59.52 kB
+dist/standalone/site/assets/tree-5-D24ZvVXy.png                           60.71 kB
+dist/standalone/site/assets/Complete-UHwFTrfD.m4a                         61.98 kB
+dist/standalone/site/assets/Notification-CclRCtew.m4a                     65.63 kB
+dist/standalone/site/assets/alm_BicycleBell-J0vdwqzM.mp3                  67.39 kB
+dist/standalone/site/assets/alm_Percussion-C5r2_KKL.mp3                   68.95 kB
+dist/standalone/site/assets/alm_Fanfare-DknkbgB3.mp3                      72.98 kB
+dist/standalone/site/assets/alm_DrumCymbalCrash-Cco269KD.mp3              76.40 kB
+dist/standalone/site/assets/tree-7-CaOqv4hd.png                           83.23 kB
+dist/standalone/site/assets/alm_RingTone-Bb-pKjg5.mp3                     85.67 kB
+dist/standalone/site/assets/forest-bg-0-Dbbg1LPw.jpg                      85.76 kB
+dist/standalone/site/assets/forest-bg-3-DgGOGVwk.jpg                      85.94 kB
+dist/standalone/site/assets/forest-bg-1-BSIMqbqU.jpg                      88.28 kB
+dist/standalone/site/assets/tree-8-DpjBRcEo.png                           88.81 kB
+dist/standalone/site/assets/tree-6-B7ROn0I5.png                           90.72 kB
+dist/standalone/site/assets/forest-bg-2-Cub-nMSC.jpg                      91.37 kB
+dist/standalone/site/assets/alm_ClownHorn-Di1oxOBX.mp3                    96.23 kB
+dist/standalone/site/assets/alm_PartyHorn-D241-oco.mp3                    97.48 kB
+dist/standalone/site/assets/tree-9-CQLb73_N.png                          101.87 kB
+dist/standalone/site/assets/tree-10-CCz0HlCB.png                         111.64 kB
+dist/standalone/site/assets/alm_Timer-B-14ehKE.mp3                       124.06 kB
+dist/standalone/site/assets/bgm_Ticking-LXBt_g6q.m4a                     147.31 kB
+dist/standalone/site/assets/tree-11-DCR_GCeO.png                         158.41 kB
+dist/standalone/site/assets/bgm_Metronome-BXET8UP-.m4a                   268.21 kB
+dist/standalone/site/assets/VolumeTip-DpyfHEnR.wav                       282.97 kB
+dist/standalone/site/assets/bgm_FastTicking-9O6LxZ9n.m4a                 300.15 kB
+dist/standalone/site/assets/timer-bg-forest-mooYq9bE.jpg                 356.39 kB
+dist/standalone/site/assets/bgm_WindThroughTrees-BADjQ1O0.m4a            443.03 kB
+dist/standalone/site/assets/timer-bg-leaf-DwMASNQr.jpg                   530.86 kB
+dist/standalone/site/assets/timer-bg-city-iUXXGw_9.jpg                   594.74 kB
+dist/standalone/site/assets/bgm_BrownNoise-CrKJ4Sxy.m4a                  737.06 kB
+dist/standalone/site/assets/timer-bg-desert-DP0_SxWQ.jpg                 784.03 kB
+dist/standalone/site/assets/timer-bg-lake-CxgHU_T3.jpg                   800.79 kB
+dist/standalone/site/assets/timer-bg-ocean-M7UNqUXC.jpg                  814.85 kB
+dist/standalone/site/assets/bgm_Stream-BQushHUw.m4a                      840.11 kB
+dist/standalone/site/assets/bgm_OceanShore-B8D0hUP-.m4a                  881.46 kB
+dist/standalone/site/assets/bgm_Wilderness-vn2FPg6B.m4a                  908.24 kB
+dist/standalone/site/assets/timer-bg-starrysky-Balp9Onk.jpg              917.10 kB
+dist/standalone/site/assets/bgm_FireBurning-CCrG9xaS.m4a                 983.47 kB
+dist/standalone/site/assets/timer-bg-trees-CFenvCch.jpg                  989.19 kB
+dist/standalone/site/assets/timer-bg-beach-8uWHQzTJ.jpg                1,004.16 kB
+dist/standalone/site/assets/timer-bg-mountain-LLn2bLLj.jpg             1,023.00 kB
+dist/standalone/site/assets/bgm_WindWithCrickets-MFxZ9Z0P.m4a          1,158.81 kB
+dist/standalone/site/assets/bgm_Library-D6SyE7ym.m4a                   1,225.02 kB
+dist/standalone/site/assets/bgm_Frogs-CQJ6uSKa.m4a                     1,313.24 kB
+dist/standalone/site/assets/bgm_Rain-BCHlLB6h.m4a                      1,863.85 kB
+dist/standalone/site/assets/NotoSans-Variable-D7-AVeX-.ttf             2,049.09 kB
+dist/standalone/site/assets/bgm_Classroom-B0xrOfWC.m4a                 2,229.06 kB
+dist/standalone/site/assets/bgm_CofficeShop-Bk9PbMmv.m4a               2,855.28 kB
+dist/standalone/site/assets/NotoSansSC-Bold-d5-MnmD8.ttf              10,549.02 kB
+dist/standalone/site/assets/NotoSansSC-Medium-BzgrMc3U.ttf            10,552.44 kB
+dist/standalone/site/assets/NotoSansSC-Regular-j7Y_Znm4.ttf           10,559.28 kB
+dist/standalone/site/assets/index-DaX7DiiS.css                            27.57 kB │ gzip:   5.76 kB
+dist/standalone/site/assets/index-BNAfDsG5.js                          1,143.28 kB │ gzip: 322.36 kB │ map: 2,405.18 kB
+
+[plugin builtin:vite-reporter]
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 609ms
+Isolated prototype built in dist/standalone/site; private sourcemaps in dist/standalone/debug

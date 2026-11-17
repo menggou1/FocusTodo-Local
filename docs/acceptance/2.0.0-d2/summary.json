@@ -1,0 +1,74 @@
+{
+  "phase": "D-second-functional-batch",
+  "date": "2026-11-08",
+  "timezone": "Asia/Shanghai",
+  "baseCommit": "503fc629261e31a03085894cdaa041161910b56c",
+  "branch": "refactor/standalone-app",
+  "node": "v24.16.0",
+  "platform": "win32",
+  "os": "10.0.26200",
+  "sourceDigestMethod": "Sorted standalone text paths plus candidate build/package/server/config files; LF-normalized UTF-8",
+  "sourceDigest": "084a58890f4f9eda8ad9d623f8ca7e040c71b2cc22013d1202a40ac774af2b96",
+  "checks": {
+    "typecheckAndBuild": true,
+    "packaging": true,
+    "frozenV1AndProductionUnchanged": true,
+    "documentationLinks": true,
+    "standalone-results.json": {
+      "passed": 42,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "versions": {
+        "chromium": "157.0.4341.42",
+        "firefox": "153.0",
+        "webkit": "26.5"
+      }
+    },
+    "standalone-workspace-results.json": {
+      "passed": 49,
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "versions": {
+        "chromium": "157.0.4341.42",
+        "firefox": "153.0",
+        "webkit": "26.5"
+      }
+    },
+    "standalone-package-results.json": {
+      "passed": 2
+    }
+  },
+  "archives": [
+    {
+      "file": "FocusTodo-standalone-prototype.zip",
+      "bytes": 36974564,
+      "sha256": "96da60eda64604b0cee80c7a969138b4ed450c9e4f997d6bd56e101d776131df"
+    },
+    {
+      "file": "FocusTodo-standalone-prototype.tar.gz",
+      "bytes": 36904488,
+      "sha256": "9377de1fcafe9f7cd1375a37d2d113cbc6c04f3c91d3f63f0b8286f187ef6407"
+    }
+  ],
+  "scope": "D01/D02 additions and D03 integration. D overall remains incomplete. No D-R handoff or D-V authorization.",
+  "gates": {
+    "DR": "not started; requires every necessary page/function/interaction to work, and runnable preview/instructions/differences",
+    "DV": "requires completed D-R and explicit user authorization",
+    "E_F": "not entered"
+  },
+  "limits": [
+    "Current candidate contains explicitly unconnected later routes; they do not count as completed.",
+    "Remaining functional/interaction differences are tracked only in BACKLOG E09, not reclassified as visual-only.",
+    "Native Document PiP is tested in Chromium; Firefox/WebKit test unsupported-capability fallback.",
+    "Sound preference/media-call checks are not actual system playback acceptance.",
+    "WebKit is not real Safari; offline means external network blocked while local HTTP runs.",
+    "Synthetic fresh contexts only; no daily profile or private backups.",
+    "No push, remote CI, PR, merge or release."
+  ]
+}

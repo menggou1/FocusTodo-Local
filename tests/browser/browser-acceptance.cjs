@@ -11,7 +11,7 @@ function playwright() {
 const root = path.resolve(__dirname, '../..');
 const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'dist/acceptance'));
 const release = require('../../release.json');
-const releaseVersion = release.officialVersion + '-local.' + release.localVersion;
+const releaseVersion = Number(release.localVersion.split('.')[0]) >= 2 ? release.localVersion : release.officialVersion + '-local.' + release.localVersion;
 const server = createServer();
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -317,6 +317,8 @@ const server = createServer();
                 assert.match(await page.locator('[class*="Timer-bgi"]').getAttribute('style'), /data:image/);
                 await page.locator(`img[src="${image}"]`).click();
                 await page.waitForFunction(()=>localStorage.getItem('lexible-active-custom-theme')===null);
+                // Storage commits before the legacy image decoder publishes the painted background.
+                await page.waitForFunction(classic=>document.querySelector('[class*=\"Timer-bgi\"]').style.backgroundImage.includes('timer-bg-'+classic.toLowerCase()+'.jpg'),classic);
                 const result = await page.evaluate(async image => {
                     await new Promise(requestAnimationFrame);
                     const td = document.querySelector(`img[src="${image}"]`).closest('td');

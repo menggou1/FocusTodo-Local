@@ -12,6 +12,7 @@ import unittest
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'scripts'))
 spec = importlib.util.spec_from_file_location('gate', ROOT / 'scripts/verify-release-workflows.py')
 gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gate)
@@ -50,6 +51,21 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertNotIn('always()', release)
         self.assertIn("if: needs.preflight.outputs.full == 'true'", self.workflow)
         self.assertIn('full=true', self.workflow)
+
+    def test_modified_production_output_cannot_be_packaged(self):
+        from app_runtime import built_files
+        files = built_files()
+        script = next(file for name, file in files.items() if name.endswith('.js'))
+        original = script.read_bytes()
+        try:
+            script.write_bytes(original + b'\n/* corrupted after build */\n')
+            with tempfile.TemporaryDirectory() as temporary:
+                result = subprocess.run([sys.executable, str(ROOT / 'scripts/package-release.py'),
+                                         '--output', temporary], capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn('Production asset changed after build', result.stderr)
+        finally:
+            script.write_bytes(original)
 
     def test_version_mismatch_and_missing_or_damaged_assets_rejected(self):
         with self.assertRaises(ValueError):

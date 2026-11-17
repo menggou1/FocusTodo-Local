@@ -1,0 +1,177 @@
+{
+  "date": "2026-11-07",
+  "timezone": "Asia/Shanghai",
+  "baselineCommit": "c80de2a555ad7d8b2321d39e6ace970f81967a77",
+  "branch": "refactor/standalone-app",
+  "phase": "B",
+  "productVersion": "7.1.1-local.1.9.3",
+  "environment": {
+    "platform": "win32",
+    "node": "v24.16.0",
+    "npm": "11.16.0",
+    "python": "3.11.8",
+    "chromium": "156.0.4314.58",
+    "firefox": "153.0",
+    "webkit": "26.5"
+  },
+  "checks": {
+    "cleanNpmCi": true,
+    "typecheck": true,
+    "productionBuild": true,
+    "prototypeUnit": {
+      "pass": 7
+    },
+    "prototypeBrowser": {
+      "pass": 42,
+      "fail": 0
+    },
+    "extractedArchives": [
+      {
+        "archive": "FocusTodo-standalone-prototype.zip",
+        "passed": true,
+        "externalNetworkBlocked": true,
+        "pathWithSpacesAndUnicode": true
+      },
+      {
+        "archive": "FocusTodo-standalone-prototype.tar.gz",
+        "passed": true,
+        "externalNetworkBlocked": true,
+        "pathWithSpacesAndUnicode": true
+      }
+    ],
+    "legacyUnit": {
+      "pass": 92,
+      "skip": 1
+    },
+    "legacySyntax": true,
+    "releaseGateTests": 5,
+    "pagesBuildTests": 2,
+    "developmentEntrySmoke": true,
+    "npmAuditKnownVulnerabilities": 0,
+    "remoteCiExecuted": false,
+    "legacyPortableSmoke": true
+  },
+  "buildMetrics": {
+    "node": "v24.16.0",
+    "files": [
+      {
+        "file": "assets/index-DIShU2xj.css",
+        "bytes": 7283,
+        "gzipBytes": 1883
+      },
+      {
+        "file": "assets/index-hPk2P984.js",
+        "bytes": 234372,
+        "gzipBytes": 73306
+      },
+      {
+        "file": "assets/optional-preview-BrDYhzAJ.js",
+        "bytes": 443,
+        "gzipBytes": 312
+      },
+      {
+        "file": "assets/preview-C6Dq_Yow.json",
+        "bytes": 22,
+        "gzipBytes": 42
+      },
+      {
+        "file": "assets/rolldown-runtime-B8xr6ykz.js",
+        "bytes": 182,
+        "gzipBytes": 145
+      },
+      {
+        "file": "index.html",
+        "bytes": 4072,
+        "gzipBytes": 1714
+      },
+      {
+        "file": "LICENSE",
+        "bytes": 1126,
+        "gzipBytes": 701
+      },
+      {
+        "file": "licenses/react-dom.txt",
+        "bytes": 1088,
+        "gzipBytes": 661
+      },
+      {
+        "file": "licenses/react.txt",
+        "bytes": 1088,
+        "gzipBytes": 661
+      },
+      {
+        "file": "licenses/scheduler.txt",
+        "bytes": 1088,
+        "gzipBytes": 661
+      },
+      {
+        "file": "prototype-build.json",
+        "bytes": 441,
+        "gzipBytes": 282
+      },
+      {
+        "file": "runtime-manifest.json",
+        "bytes": 414,
+        "gzipBytes": 248
+      },
+      {
+        "file": "THIRD-PARTY-NOTICES.txt",
+        "bytes": 204,
+        "gzipBytes": 166
+      }
+    ],
+    "totalBytes": 251823
+  },
+  "archives": [
+    {
+      "name": "FocusTodo-standalone-prototype.zip",
+      "bytes": 86226,
+      "sha256": "891af64a26e4461bcb15caa3f19ab0a45360a701fc9d6b77a6f3a44e2e4d0ce7"
+    },
+    {
+      "name": "FocusTodo-standalone-prototype.tar.gz",
+      "bytes": 81249,
+      "sha256": "98d9891ec17b4bd5642fff110ee7d3fdad6f75abedfcb0ab36815a639b13e20c"
+    }
+  ],
+  "limitations": [
+    "No production entry switch, merge, release or data migration.",
+    "Offline means external network blocked while local HTTP server remains available.",
+    "ErrorBoundary uses an isolated test-only React harness, not production first-render fault injection.",
+    "Persisted page lifecycle uses synthetic events, not confirmed real bfcache hits.",
+    "WebKit automation is not real Safari; syntax targets do not prove minimum-version compatibility.",
+    "CI configuration was reviewed locally; no remote run is claimed."
+  ],
+  "sourceSha256": {
+    ".github/workflows/ci.yml": "1b3b8db78dbf0077e80fba0c0cc8a2dbb7e2f44c664196136845609ea2ecac09",
+    "package-lock.json": "4d6f785968e693948e48a66dd6263d656d3aeafb81d24a74c4ace015ea46ed98",
+    "package.json": "efb2fb74dacb1d0dde7feb8a2b15a25adccf7e2f6e2579282b7341316d8f5a8c",
+    "scripts/build-standalone.mjs": "e42474b9d33a50215cce01bed45b5de9d9586639d83f6b2f7c271a9154b3c120",
+    "scripts/package-standalone.py": "305771a0696fdb168b4863f2349bae6fab803e9aeb02cad668842234c560e8f1",
+    "scripts/standalone-layout.json": "dfc52a448aefd3454b3a9597a1a1ac2b12c983114d0854cab1b2dc612c5a5e0f",
+    "scripts/standalone-server.cjs": "6d3ada8124e2d19ed45ac8d84f1d210b1bdabea3bb72b4411b74f00fb09a601d",
+    "standalone/app/contracts.ts": "80402bc66049a57df7cc0aff622eaa59ff09f365546573d44e9ba5a05aaf2e09",
+    "standalone/app/main.tsx": "95ef8f1ab6e65c2bcc050d76efad72ba83228ec76ae820de4d24f34652edca68",
+    "standalone/assets/optional-preview.ts": "ee6db7c3c9583efc9675aa10e61373c618183d7e4a994f770a67076f73947202",
+    "standalone/assets/preview.json": "5df5b317bee2dcf708e9cd2703e301a1886e4970f094adf109887a43e8ff6b37",
+    "standalone/domain/version.ts": "359904d6b809e2b338650420944612f88d86c747e1b338c9027ccfaa1122c8ac",
+    "standalone/features/App.tsx": "344d0818c47c343c70618771296d9b270403fe9ecf1dcbcfc383cd62dec6dd7a",
+    "standalone/features/ErrorBoundary.tsx": "17e1a10f95f65e8398f5596e5beaea2b4d9c9e60435f37f1eeca165d32da31cc",
+    "standalone/index.html": "1b4728db84954d253e702ab648cba1b23ab55ac1a69557ddda194568203daa40",
+    "standalone/services/isolation.ts": "fa7d13b9c9f11aec69b3d139c4d458cdbcf643ea24ce5f7cfd0649b41dc98ebb",
+    "standalone/services/prototype.ts": "fdc28c8e43c0a44b2f081a62b1303ab9c7f9a7c16456e8d2b56b0c659bc77322",
+    "standalone/shared/i18n.ts": "9d52c108efbf27790b16cd95c6a31842668f088ec2cc25e7425dcbfc786b1ab6",
+    "standalone/styles/app.css": "a39ae6e39412fcc354d9fb6596969c743ddaf517c7d54c7f8c94982f0556d1e4",
+    "standalone/styles/shell.css": "ef9903853c8ce1f3f583662bb7254576f9b0ba0ca63775dac8bc510eabf6745d",
+    "standalone/tsconfig.json": "8887d98b23bcdee567e6bb134f8ca6e8bd54af1d17ab86a892b14558dce2d02f",
+    "tests/standalone/browser-acceptance.cjs": "1d3f20d67b729699177e21a4febd9f30c3359ec14e467d482d820fbab18e0097",
+    "tests/standalone/contracts.test.cjs": "f663d48e6472879c383912b31e8a6b17a6a859efd3bc40059577eba0157b34c4",
+    "tests/standalone/extract.py": "476b6af344fbf4bcb5d7c8a2fe98391052a79131e3840c6f236bcd55db967210",
+    "tests/standalone/helpers.cjs": "7fe69f80f6e83b7eecd27c69a9f4d1905df29cdf19a380d73b81e805520d87c4",
+    "tests/standalone/package-smoke.cjs": "0c680a01e96e0d0a8c7f4cf8207c5ef351a40dfdbbba3b0a937510ae0284eaa3",
+    "tests/standalone/render-error-harness.tsx": "b97b0ab1be4f7c831116ea7ab0cb39d431f823127859ddbcca0d96582633f28e",
+    "tests/standalone/render-error-server.cjs": "10677128f6418ff10fd4ba38864dee7e477bcb5317c34aa3f62296d416a01d5a",
+    "tests/standalone/server.test.cjs": "392aec0708dc084a1e5f22841b08b4b4d559ef742dee9a26655a0e56ea62dcd0",
+    "vite.standalone.config.mjs": "c6e409f06225ccc2742bc5d70f492d585dabc46246387698de66cd38536e2319"
+  }
+}
