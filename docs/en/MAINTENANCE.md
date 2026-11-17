@@ -46,7 +46,26 @@ Generate metadata and build both variants, then run all [test commands](TESTING.
 
 main is the stable default and sole Pages source. Branch pushes run Windows/macOS/Linux × Node 22/24. Node 24 verifies the same portable archives and Chromium; Linux also runs Firefox/WebKit. Preflight verifies generated files, builds, Pages allowlists and release gates. Archived regressions complement independent React startup, business, recovery, UI and production-entry tests.
 
-Validate locally, commit/push dev and wait for every applicable job for that exact SHA. Review [Backlog](../BACKLOG.md). PRs are recommended, not required; use the actual target branch. Create a new matching tag only under an explicit release instruction. Tag pushes default to a stable Release. Explicit dispatch supports prerelease and verified promotion to stable; stable assets cannot be overwritten.
+## Branches and formal release process
+
+| Ref | Responsibility |
+|---|---|
+| `main` | Stable default branch and sole Pages deployment source |
+| `dev` | Daily development and integration |
+| `release/x.x.x` | Release freeze created from dev; version fixes, release documentation, metadata and necessary release repairs only, without new features |
+| `x.x.x` tag | Immutable release commit identifier, exactly matching localVersion without a v prefix |
+| GitHub Release | Release notes, portable ZIP/tar.gz archives and SHA256SUMS.txt |
+
+1. Inspect worktrees, remote branches, tags, Releases and CI; confirm the version is unpublished. Reuse dev for daily work; perform releases in an independent worktree without switching, changing or cleaning other worktrees or the daily stable environment.
+2. Create release/x.x.x from dev. For 2.0.0 only, create release/2.0.0 from main because main was already synchronized with dev.
+3. Complete metadata, documentation, tests, defect fixes and release acceptance on the release branch. Maintain dates according to actual update/publication events and synchronize final information before publication; an untagged version may receive normal date updates. Keep unfinished acceptance and evidence limits only in Backlog; automation does not establish human acceptance.
+4. Validate locally, commit and push the release branch, then wait for every applicable CI job on that exact SHA to finish successfully. Review the Backlog release checklist without weakening gates.
+5. Integrate the release branch into main, using PR review when there are differences. Fast-forward integration is allowed; do not require meaningless merge commits. Verify all applicable checks on the final main release commit.
+6. Create and push the exact version tag (for example 2.0.0) on that final main commit. Use existing GitHub Actions: tag pushes publish Stable/Latest after tests succeed. Explicit tag dispatch supports release_channel=prerelease; stable dispatch may promote a verified prerelease only after matching its published assets, without replacement or bypassing gates.
+7. Download final assets, verify SHA-256, version/author/date and build provenance, and test archive/Python fallback startup in temporary directories on ephemeral loopback ports with generated data. Verify main Pages source SHA, project subpaths and live version. Announce success only after both the formal Release and deployment verification finish.
+8. Synchronize release fixes back to dev while preserving other worktrees and uncommitted changes. Remote branches may fast-forward without modifying an open local worktree. The release branch may be deleted after completion; retain tags, Releases and complete history.
+
+Never force-push or rewrite history to remove differences. On failure, first determine whether the tag was pushed. Never move, delete/recreate or reuse a pushed tag. Code, documentation or metadata repairs require a new patch version, including fixes after stable publication. Infrastructure-only failures may rerun the original gates at the same immutable commit without overwriting stable assets.
 
 After successful main checks, Pages publishes only the production manifest plus .nojekyll and deployment.json. It excludes source, scripts, tests, docs, maps, databases and CNAME. Deployment verifies the current main SHA to reject stale deployment. Pages generation on dev does not deploy. Verify live deployment, downloads, checksums and delivered startup after publication.
 

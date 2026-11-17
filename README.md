@@ -4,6 +4,8 @@
 
 FocusTodo 使用 React、TypeScript 和 Vite 从完整应用源码构建。任务、专注记录和设置保存在浏览器中，无需账号服务器。项目源自 [Lâm Ngọc Khương 的 FocusTodo 7.1.1](https://github.com/lamngockhuong/focustodo)，原版及完整历史保留在 `upstream/7.1.1`。
 
+分支与发布：`dev` 用于日常集成，`release/x.x.x` 用于发布冻结，`main` 用于稳定发布与 Pages；正式版本 Tag 指向通过检查的 main 提交。完整流程见[维护指南](docs/MAINTENANCE.md)。
+
 ## 安装与运行
 
 从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载便携 ZIP 或 tar.gz，并用同页的 SHA256SUMS.txt 核对文件。本文说明 2.0.0 的功能和运行方式。
