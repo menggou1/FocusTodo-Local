@@ -1,4 +1,4 @@
-// Shared, read-only AST discovery and checked edits for the supplied legacy bundle.
+// Read-only AST discovery for archived schedule conflict regression tests.
 const fs = require('node:fs'), acorn = require('acorn');
 function walk(node, visitor) {
     if (!node || typeof node !== 'object') return;
@@ -13,9 +13,7 @@ function load(file = require('./legacy-runtime.cjs').file('src/js/main.js')) {
     let modules;
     walk(ast, node => { if (node.type === 'ArrayExpression' && node.elements.length === 1484) modules = node.elements; });
     if (!modules) throw new Error('Legacy module array changed; inspect before applying.');
-    const edits = [];
-    const replace = (node, code) => edits.push({ start: node.start, end: node.end, code });
-    function method(id, name, code) {
+    function method(id, name) {
         const matches = [];
         walk(modules[id], node => {
             if (node.type !== 'ObjectExpression') return;
@@ -24,17 +22,8 @@ function load(file = require('./legacy-runtime.cjs').file('src/js/main.js')) {
             if (key && value && key.value.value === name) matches.push({ node, value: value.value });
         });
         if (matches.length !== 1) throw new Error(`Expected one method ${id}.${name}, found ${matches.length}`);
-        if (code) replace(matches[0].value, code);
         return matches[0];
     }
-    function assignment(id, name, code) {
-        const matches = [];
-        walk(modules[id], node => {
-            if (node.type === 'AssignmentExpression' && node.left.property && node.left.property.name === name && node.left.object.type === 'Identifier') matches.push(node.right);
-        });
-        if (matches.length !== 1) throw new Error(`Expected one assignment ${id}.${name}, found ${matches.length}`);
-        replace(matches[0], code);
-    }
-    return { source, modules, method, assignment };
+    return { source, modules, method };
 }
 module.exports = { walk, load };
