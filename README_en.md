@@ -6,7 +6,7 @@ The application builds from complete React, TypeScript and Vite sources. Tasks, 
 
 ## Install and run
 
-Choose an available version from [Releases](https://github.com/menggou1/FocusTodo-Local/releases). This document describes 2.0.0 release preparation; a release PR does not update the published release or live site.
+Download a portable ZIP or tar.gz from [Releases](https://github.com/menggou1/FocusTodo-Local/releases) and verify it with SHA256SUMS.txt from the same release. This guide describes FocusTodo 2.0.0.
 
 Extract ZIP or tar.gz, install Node.js 22.12+, and run `node scripts/start.cjs` or `npm start`. Portable packages need no npm dependencies. Windows: `启动.bat`; macOS/Linux: `sh start.sh`. The launcher opens `http://127.0.0.1:5500/index.html`. Use `--no-browser` for headless environments or `--port 5511` for another origin. Python 3.7+ can run `python scripts/serve-static.py`. Packages contain checksums, but no language runtime.
 
@@ -19,9 +19,10 @@ npm run build
 npm start
 ```
 
-`npm run dev` starts an isolated preview on 5511. It rejects ordinary profile data. The legacy oracle can run on 5513 using `node -e "require('./scripts/server.cjs').createServer().listen(5513,'127.0.0.1')"`. Never use the stable 5500 service for tests.
 
 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/) deploys only from successful `main` workflows. Its storage is separate from loopback; transfer data with backups. Opening HTML directly is unsupported.
+
+Development uses `npm run dev` on port 5511 with isolated storage. Historical UI comparisons use the separate archive/1.9.4 checkout; see [Testing](docs/en/TESTING.md). Tests must never connect to stable port 5500.
 
 ## Features
 

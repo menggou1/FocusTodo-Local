@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { gzipSync, gunzipSync } = require('node:zlib');
-const backup = require('../../src/js/local-backup.js');
+const backup = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js'));
 
 function fixture(version = 2) {
     return {
@@ -24,7 +24,7 @@ function fixture(version = 2) {
 }
 function withoutCapabilities() {
     const context = vm.createContext({ module: { exports: {} }, Blob, TextEncoder, TextDecoder, ArrayBuffer, Uint8Array });
-    vm.runInContext(fs.readFileSync(require.resolve('../../src/js/local-backup.js'), 'utf8'), context);
+    vm.runInContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js'), 'utf8'), context);
     return context.module.exports;
 }
 test('full compact JSON preserves complete data and unicode without mutating the snapshot', async () => {

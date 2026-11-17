@@ -2,79 +2,64 @@
 
 [首页](../README.md) · [架构](ARCHITECTURE.md) · [测试](TESTING.md) · [English](en/MAINTENANCE.md)
 
-## 环境和入口
+## 环境与正式入口
 
-Node.js 22.12+，npm 锁文件安装使用 `npm ci`；发布打包使用 Python 3.12+。便携包运行不需 npm 依赖，Python 备用服务仅使用标准库。
+FocusTodo 2.0.0 是 React / TypeScript / Vite standalone 应用。开发需要 Node.js 22.12+、npm 和 Python 3.12+，使用 npm ci 安装锁定依赖。便携包无需 npm 安装，Python 备用服务只用标准库。
 
-| 命令 | 作用 |
+| 命令 | 用途 |
 |---|---|
-| `npm run dev` | 5511 隔离 Vite/HMR 预览；禁止使用日常 Profile |
-| `npm run build:release` | 从 release.json 同步包版本、锁文件、候选版本文件、旧兼容元信息及中英文更新记录 |
-| `npm run build` | 类型检查并构建正式 React 应用到 dist/app/site，私有 sourcemap 放 dist/app/debug |
-| `npm start -- --no-browser --port 5512` | 启动正式构建的本地服务；默认端口为 5500 |
-| `npm run build:standalone` | 构建保持命名空间隔离的测试版本到 dist/standalone/site |
-| `npm run start:standalone -- --port 5512` | 只服务隔离测试构建，拒绝使用 5500 |
-| `npm run package:standalone` | 生成供 CI 复验的隔离 ZIP/tar.gz |
-| `python scripts/package-release.py` | 打包当前正式构建及发行文档，验证源文件摘要以拒绝陈旧构建 |
-| `python scripts/deploy-pages.py --output dist/pages-preview` | 从已提交来源和相符的正式构建生成 Pages 目录；输出必须不存在 |
+| `npm run build:release` | 从 release.json 同步版本、包与锁文件、词库和英文更新索引 |
+| `npm run build` | 类型检查并生成 dist/app/site，私有 sourcemap 放在 dist/app/debug |
+| `npm start -- --no-browser --port 5512` | 验证正式构建；日常启动默认端口为 5500 |
+| `npm run dev` | 5511 上的隔离 Vite/HMR 开发预览 |
+| `npm run build:standalone` | 同一应用源码的隔离测试构建，输出 dist/standalone/site |
+| `npm run start:standalone -- --port 5512` | 服务隔离构建，拒绝 5500 |
+| `npm run package:standalone` | 打包隔离测试产物，供三平台复验 |
+| `python scripts/package-release.py` | 打包正式 ZIP/tar.gz，核对来源摘要和资源校验和 |
+| `python scripts/deploy-pages.py --ref HEAD --output dist/pages-preview` | 从已提交来源和相符构建生成 Pages；输出目录必须不存在 |
 
-源码从 `standalone/app/main.tsx` 进入 `App`，组件、领域和显式服务分别维护在 `standalone/features`、`domain` 和 `services`。`src/` 的 1.x 主包和本地模块仅作兼容、历史差分和旧版 UI 基准；不进入 2.0 正式运行包或 Pages。`revise-*.cjs` 是旧包兼容工具，不是 2.0 应用构建步骤；`upgrade-*.cjs` 是历史一次性工具。
+浏览器入口为 standalone/app/main.tsx，本地启动器为 scripts/start.cjs。正式构建、便携包与 Pages 共用 React 资源 manifest。仓库不再包含旧 src 主包、补丁、登录/购买页和 revise/upgrade 工具。归档版不参与生产构建或分发。
 
-升级前关闭所有旧版窗口，避免旧新应用同时写入。正式构建使用旧 `PomodoroDB6` v3 和设置键；隔离预览使用独立数据库、前缀与 loopback 服务证明。不得为调试关闭隔离验证，不能访问或修改 5500 稳定版、真实数据库或私人备份。使用临时浏览器上下文和合成数据。调试文件可放 Codex 工作区或安全识别的临时目录；结束后只清理本轮文件，遇权限问题不得更改系统权限。
+## 工作区与数据保护
 
-## 开发约束
+日常复用常用目录与长期分支 dev。开始检查 git worktree list、分支和状态，保护已有改动；不强制切换、强推或修改其他工作树。提交使用 Conventional Commits，例如 `fix(timer): preserve paused state`；发布准备可用 `chore(release): prepare 2.0.0`，不改写已发布历史。
 
-复用常用开发目录与长期分支 `dev`；本次发布准备按用户要求使用 `refactor/standalone-app`。开始检查 Git 状态，保护原有改动，不强推。提交使用 Conventional Commits：`fix:`、`feat:`、`docs:`、`refactor:`、`test:`、`chore:`；发布准备可用 `chore(release): prepare 2.0.0`。不重写已发布历史。
+禁止开发测试访问稳定版 5500、日常 Profile、真实数据库或私人备份。使用随机 loopback 端口、临时浏览器上下文和合成数据。隔离构建校验服务证明与数据库/设置命名空间，不能关闭检查绕过保护。仅正式适配器接入同 origin 的 PomodoroDB6 v3 与既有设置键。升级前导出备份并关闭所有旧窗口，避免不同客户端同时写入。
 
-UI 优先对照 1.9.3 / 1.9.4，在相同数据、语言、主题、视口、缩放下核对真实 DOM、computed style、截图、交互和动画。已修复的旧版缺陷应保留。共享弹窗、控件和服务优先修根因，避免局部覆盖堆叠。输入/可复制区域保留文字选择，其余装饰资源不允许意外拖动。
+旧版 UI 对照使用已有 archive/1.9.4 工作树。tests/helpers/legacy-runtime.cjs 只读解析归档或显式 FOCUS_LEGACY_ROOT，并核对固定提交与未修改的运行源。CI 在测试作业单独检出相同归档提交。正式构建、打包和 Pages 不读取归档。
 
-组件仅使用 ApplicationServices，禁止直接写 IndexedDB 或通过旧全局接入。业务写入保留 `expected` 冲突检查，多行变更使用批次事务。失败保留草稿；不兼容 schema/protocol 或未完成恢复必须停写，不重置数据。新增文案同时提供中文和英文，并运行生成器。
+## 源码与生成文件
+
+组件只使用 ApplicationServices，不直接写 IndexedDB 或调用旧全局。写入保留 expected 冲突检查，批量操作使用事务；失败保留草稿。schema/protocol 不兼容或日志恢复未完成时停写，不清空数据库。共享弹窗、控件、滚动和服务由共同拥有者维护。
+
+新增文案同时提供中文和英文。public/i18n 是翻译源，build:release 生成 standalone/shared/catalog.json。public 只保留应用导入的图像、音频、字体和翻译/许可源；删除资源前核对显式导入、glob、CSS 及正式 manifest。Vite 使用相对资源 URL 支持项目子路径。
+
+设计理论文献仅供娱乐，不属于开发规范，不读取、修改或分发。调试输出只放本轮临时目录，不提交用户数据、凭证或截图。清理只针对本轮文件，权限失败不得通过修改系统权限绕过。
 
 <a id="4-版本与发布"></a>
 
 ## 版本与日期
 
-`release.json` 是版本、作者、日期、仓库及更新条目的人工编辑来源；`standalone/app-version.json`、包版本及锁文件通过 `build:release` 同步。2.0.0 起应用和 Tag 使用独立三段式，7.1.1 仅作来源信息。旧版本记录、MIT、版权及上游来源保留。数据库 v3、备份 exportVersion 2、兼容偏好 Version='6.5' 不随应用版本改写。
+release.json 是版本、作者、日期、仓库与更新条目的人工来源。build:release 同步 standalone/app-version.json、package.json 和锁文件；关于页读取同一份元信息。日期为 Asia/Shanghai 的 YYYY-MM-DD，跨日修改同步当前版本条目。应用和 Tag 使用独立三段式版本；7.1.1 是来源版本。schema v3、备份 exportVersion 2 和兼容偏好 Version='6.5' 独立维护。
 
-日期字段含义仍为本地发布/更新日，格式 YYYY-MM-DD。未发布版本在开发期间也要维护真实更新日期；当前 2.0.0 为 2026-11-16，正式发布前若跨日更新则同步日期与对应版本条目。关于页读取同一份元信息。当前未发布 2.0.0 的修复及 CI 不额外加版本号。
+Tag 一经推送不得移动、删除重建或复用，包括失败、取消及未公开候选；修复必须递增第三位并创建新 Tag。尚未创建 Tag 的版本准备修复可保留当前版本。不覆盖已公开附件；保留真实历史、归档、版权和许可证。
 
-正式发布后任何已推送 Tag 均不得移动、删除重建或复用，包括失败、取消及未公开的候选；修复必须递增第三位并创建新 Tag。不得覆盖已公开附件。更新已读键仍为 FocusTodo.releaseRead，仅打开当前最新条目后写入当前版本，查看历史不清除最新提示。
+## 质量门禁
 
-## 本地质量门禁
+先运行 build:release、check、build、build:standalone 和 package:standalone，再执行[测试指南](TESTING.md)列出的单元、合同、浏览器、正式升级、发布门禁和解压包验证。先提交构建输入，再运行 python tests/release/pages-build-test.py；该门禁必须核对已提交来源。最后运行 git diff --check。
 
-```powershell
-npm run build:release
-npm run check
-npm run build
-npm run build:standalone
-npm test
-node --test tests/standalone/*.test.cjs
-npm run test:standalone
-npm run test:browser
-npm run test:release-app
-python tests/release/release-gate-test.py
-python tests/release/pages-build-test.py
-python scripts/package-release.py
-python tests/release/package-smoke.py
-git diff --check
-```
+生成后检查并提交全部有效生成文件。不得删除必要测试、放宽断言、缩减数据或像素阈值来通过 CI。
 
-完整命令范围和 UI 专项见[测试说明](TESTING.md)。仅文档变化检查文件/锚点链接；打包清单变化额外验证解压包链接与启动。不能删除有效断言、跳过失败或放宽像素阈值让 CI 通过。生成后检查工作区差异并提交所有有效生成文件，禁止提交用户数据库、凭证或调试输出。
+## CI、发布与 Pages
 
-## CI、发布与部署
+main 是默认稳定分支和 Pages 唯一部署来源。分支推送运行完整 CI；PR 推荐但非必要。Windows/macOS/Linux × Node 22/24 验证单元与服务合同；Node 24 验证同一批 ZIP/tar.gz、Python 备用启动和 Chromium，Linux 另跑 Firefox/WebKit。预检检查生成差异、正式/隔离构建、Pages 白名单及发布门禁。历史回归补充独立 React 启动、业务、恢复、UI 和正式入口验证。
 
-main 是默认稳定分支及 Pages 唯一部署来源。分支推送触发 CI；PR 推荐但非必需。发布准备流程：本地验证、提交推送、等待本次提交的 Actions 全部适用作业结束，再创建审核 PR。当前 PR 为 `refactor/standalone-app` → `dev`；创建后停止，不合并、不创建 Tag/Release。
+发布顺序：本地验证，提交推送 dev，等待该 SHA 全部适用 CI 完成，核对 BACKLOG 发布检查清单。需要 PR 时按实际目标分支创建，不固定临时 PR 号或任务分支。正式发布指令下，才从验收提交创建与 localVersion 一致的新 Tag。Tag 推送默认发布正式 Release；显式调度 tag 可选 release_channel=prerelease，已验证预发行版可用 stable 调度晋升，流水线拒绝覆盖正式附件。
 
-CI 预检生成元信息、检查无未提交生成差异、检查语法/类型、构建正式和隔离版本、校验发布门禁并打包。Windows/macOS/Linux × Node 22/24 跑单元和服务合同；Node 24 复用预检打包产物、验证 ZIP/tar.gz 启动并运行 Chromium。Linux 额外运行 Firefox/WebKit 能力降级与隔离业务测试。正式构建另测同 origin 的合成旧数据升级、项目子路径、元信息和实际备份下载。WebKit 不代表真实 Safari 人工验收。
+main 完整检查成功后，Pages 仅发布 dist/app/site 的 manifest 资源及 .nojekyll、deployment.json。不发布源码、脚本、测试、私有 sourcemap、数据库、文档或 CNAME。部署前再次核对 main 当前 SHA，防止旧提交覆盖新部署。dev 的 Pages 生成测试不触发部署。正式发布后检查线上来源、项目子路径、下载校验和及附件启动。
 
-人工批准正式发布后，从通过验收的提交创建与 localVersion 完全一致的新 Tag。Tag 工作流完整通过后产生 Pre-release；正式版可在明确验收后用 `gh workflow run ci.yml --ref <Tag> -f release_channel=stable`。流水线核对 Tag、版本、校验和及已测试附件，保留失败候选历史。
+## 来源与文档
 
-main 完整检查成功后，Pages 构建检查已提交来源与正式构建摘要，发布 `dist/app/site` 的 manifest 资源及 `.nojekyll`、`deployment.json`。不发布 src、脚本、测试、私有 sourcemap、数据库、文档或 CNAME。部署作业再次核对 main 来源，防止旧提交覆盖新部署。发布后实际检查线上 deployment.json、项目子路径和附件下载，不能在发布准备中声称已完成。
+作者 Lexible；源自 [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1，上游提交 fe15a1d9201c6298f1c28c16dcb0b58c481f9999 保存在 upstream/7.1.1。archive/1.9.4 保留最后的 1.x 本地版，不继续开发、不部署 Pages。保留 MIT、上游与本地版权；React、ReactDOM、scheduler 和 Noto 完整许可随运行包交付。
 
-## 源码来源与原版归档
-
-作者 Lexible；源自 [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1，上游提交 `fe15a1d9201c6298f1c28c16dcb0b58c481f9999` 保留于 `upstream/7.1.1`，连同原作者、LICENSE 与完整历史保存。归档分支不继续开发，不用于 Pages。第三方许可文本随构建和便携包交付，见根 THIRD-PARTY-NOTICES.txt。娱乐性质的设计理论文献不属于开发规范，不修改或分发进运行包。
-
-## 文档维护
-
-中文正式文档位于 docs，英文位于 docs/en；版本报告分别使用 releases 子目录。服务合同已并入 ARCHITECTURE，基线与验证依据已并入 TESTING；不再维护 docs/2.0.0 临时阶段目录。历史版本报告保留当时事实；未完成工作和验收状态仅写 docs/BACKLOG.md。文档移动须同步报告元信息、打包清单和文件/锚点链接。
+中文正式文档在 docs，英文在 docs/en，版本报告使用 releases。历史报告保留当时事实；未完成工程、人工验收与发布后检查只维护在 docs/BACKLOG.md。文档移动同步更新链接、元信息和打包清单。

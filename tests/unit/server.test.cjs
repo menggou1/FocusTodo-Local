@@ -1,8 +1,11 @@
 const test = require('node:test'), assert = require('node:assert/strict');
 const http = require('node:http'), fs = require('node:fs'), path = require('node:path');
 const { spawn } = require('node:child_process');
-const { createServer } = require('../../scripts/server.cjs');
+const { createAppServer: createServer } = require('../../scripts/app-server.cjs');
 const root = path.resolve(__dirname, '../..');
+const site = path.join(root, 'dist/app/site');
+const assets = fs.readdirSync(path.join(site, 'assets'));
+const audio = 'assets/' + assets.find(name => name.startsWith('alm_AlarmBeep-') && name.endsWith('.mp3'));
 let server, base;
 test.before(async () => {
     server = createServer(); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -22,19 +25,19 @@ test('loopback server serves the actual app without cached content', async () =>
     assert.equal(server.address().address, '127.0.0.1');
     const res = await request('/'); assert.equal(res.status, 200);
     assert.equal(res.headers['cache-control'], 'no-store'); assert.match(res.headers['content-type'], /text\/html/);
-    assert.equal(res.body.toString(), fs.readFileSync(path.join(root, 'src/index.html'), 'utf8'));
-    assert.match((await request('/js/local-timer-core.js')).headers['content-type'], /javascript/);
+    assert.equal(res.body.toString(), fs.readFileSync(path.join(site, 'index.html'), 'utf8'));
+    assert.match((await request('/assets/' + assets.find(name => name.endsWith('.js')))).headers['content-type'], /javascript/);
 });
 test('HEAD returns metadata with no response body', async () => {
-    const res = await request('/audio/alm_AlarmBeep.mp3', {}, 'HEAD');
+    const res = await request('/' + audio, {}, 'HEAD');
     assert.equal(res.status, 200); assert.equal(res.body.length, 0);
-    assert.equal(Number(res.headers['content-length']), fs.statSync(path.join(root, 'public/audio/alm_AlarmBeep.mp3')).size);
+    assert.equal(Number(res.headers['content-length']), fs.statSync(path.join(site, audio)).size);
     assert.equal(res.headers['content-type'], 'audio/mpeg');
 });
 test('NUL bytes in decoded paths return 400 and leave the server running', { timeout: 5000 }, async t => {
     // Isolate the process so a regression cannot terminate or hang this suite.
     const child = spawn(process.execPath, ['-e',
-        "const server=require('./scripts/server.cjs').createServer();server.listen(0,'127.0.0.1',()=>console.log(server.address().port));"
+        "const server=require('./scripts/app-server.cjs').createAppServer();server.listen(0,'127.0.0.1',()=>console.log(server.address().port));"
     ], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
     const closed = new Promise(resolve => child.once('exit', resolve));
     let errors = ''; child.stderr.on('data', chunk => { errors += chunk; });
@@ -71,10 +74,10 @@ test('cancelled font downloads close their file streams', async t => {
         if (String(args[0]).includes('NotoSansSC-')) stream = opened;
         return opened;
     });
-    const font = fs.readdirSync(path.join(root, 'public/font')).find(name => name.startsWith('NotoSansSC-'));
+    const font = assets.find(name => name.startsWith('NotoSansSC-'));
     try {
         await new Promise((resolve, reject) => {
-            const req = http.get(base + '/font/' + font, res => {
+            const req = http.get(base + '/assets/' + font, res => {
                 res.once('data', () => { res.destroy(); resolve(); });
             });
             req.on('error', reject);
@@ -90,16 +93,16 @@ test('cancelled font downloads close their file streams', async t => {
     } finally { stream?.destroy(); }
 });
 test('closed, open and suffix audio ranges return the exact requested bytes', async () => {
-    const file = fs.readFileSync(path.join(root, 'public/audio/alm_AlarmBeep.mp3'));
+    const file = fs.readFileSync(path.join(site, audio));
     for (const [range, start, end] of [['bytes=0-15', 0, 15], ['bytes=16-', 16, file.length - 1], ['bytes=-16', file.length - 16, file.length - 1]]) {
-        const res = await request('/audio/alm_AlarmBeep.mp3', { Range: range });
+        const res = await request('/' + audio, { Range: range });
         assert.equal(res.status, 206); assert.equal(res.headers['content-range'], `bytes ${start}-${end}/${file.length}`);
         assert.deepEqual(res.body, file.subarray(start, end + 1));
     }
 });
 test('invalid or unsatisfiable audio ranges reject without sending the file', async () => {
     for (const range of ['bytes=999999-', 'bytes=16-4', 'bytes=-0', 'bytes=-', 'bytes=0-1,5-9', 'bytes=999999999999999999999-']) {
-        const res = await request('/audio/alm_AlarmBeep.mp3', { Range: range });
+        const res = await request('/' + audio, { Range: range });
         assert.equal(res.status, 416); assert.equal(res.body.length, 0); assert.match(res.headers['content-range'], /^bytes \*\//);
     }
 });
@@ -114,7 +117,7 @@ test('hidden files, private tooling, traversal and writes are inaccessible', asy
     }
 });
 test('symbolic links cannot expose files outside the root or protected paths', async t => {
-    const dir = fs.mkdtempSync(path.join(root, 'public/img/test-server-link-'));
+    const dir = fs.mkdtempSync(path.join(site, 'assets/test-server-link-'));
     const outside = fs.mkdtempSync(path.join(path.dirname(root), 'focustodo-server-'));
     t.after(() => { fs.rmSync(dir, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); });
     fs.writeFileSync(path.join(outside, 'private.txt'), 'private test data');
@@ -123,18 +126,18 @@ test('symbolic links cannot expose files outside the root or protected paths', a
         const type = process.platform === 'win32' ? 'junction' : 'dir';
         fs.symlinkSync(outside, path.join(dir, 'outside'), type);
         fs.symlinkSync(path.join(root, 'scripts'), path.join(dir, 'tool'), type);
-        fs.symlinkSync(path.join(root, 'public/font'), path.join(dir, 'images'), type);
+        fs.symlinkSync(path.join(site, 'licenses'), path.join(dir, 'images'), type);
     } catch (error) {
         if (['EPERM', 'EACCES', 'ENOSYS'].includes(error.code)) { t.skip('File symlinks unavailable'); return; }
         throw error;
     }
-    const prefix = '/img/' + path.basename(dir);
-    assert.equal((await request(prefix + '/outside/private.txt')).status, 403);
-    assert.equal((await request(prefix + '/tool/server.cjs')).status, 403);
-    assert.equal((await request(prefix + '/images/OFL-NotoSans.txt')).status, 200);
+    const prefix = '/assets/' + path.basename(dir);
+    assert.equal((await request(prefix + '/outside/private.txt')).status, 404);
+    assert.equal((await request(prefix + '/tool/server.cjs')).status, 404);
+    assert.equal((await request(prefix + '/images/NotoSans-OFL.txt')).status, 404);
 });
 test('a busy port reports failure and exits instead of claiming startup succeeded', async () => {
-    const child = spawn(process.execPath, [path.join(root, 'scripts/server.cjs')], { cwd: path.parse(root).root, env: { ...process.env, FOCUS_PORT: String(server.address().port) }, windowsHide: true });
+    const child = spawn(process.execPath, [path.join(root, 'scripts/start.cjs')], { cwd: path.parse(root).root, env: { ...process.env, FOCUS_PORT: String(server.address().port) }, windowsHide: true });
     let output = ''; child.stdout.on('data', chunk => { output += chunk; }); child.stderr.on('data', chunk => { output += chunk; });
     const code = await new Promise((resolve, reject) => { child.once('error', reject); child.once('exit', resolve); });
     assert.equal(code, 1); assert.match(output, /EADDRINUSE/); assert.doesNotMatch(output, /http:\/\//);

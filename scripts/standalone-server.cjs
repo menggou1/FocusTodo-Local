@@ -17,15 +17,16 @@ function createStandaloneServer(options = {}) {
       || name.endsWith('.map')) throw new Error('Unexpected runtime path');
   }
   return http.createServer((req, res) => {
-    const host = /^(127\.0\.0\.1|localhost):(\d{1,5})$/i.exec(req.headers.host || '');
-    if (!host || Number(host[2]) < 1 || Number(host[2]) > 65535 || !['GET', 'HEAD'].includes(req.method)) {
+    const host = /^(127\.0\.0\.1|localhost)(?::(\d{1,5}))?$/i.exec(req.headers.host || '');
+    if (!host || (host[2] && (Number(host[2]) < 1 || Number(host[2]) > 65535)) || !['GET', 'HEAD'].includes(req.method)) {
       res.writeHead(403); res.end(); return;
     }
     const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' };
     let pathname;
     try { pathname = decodeURIComponent(new URL(req.url, 'http://' + req.headers.host).pathname); }
     catch { res.writeHead(400); res.end(); return; }
-    if (/[\\\0]/.test(pathname) || pathname.split('/').some(part => part.startsWith('.'))) { res.writeHead(403); res.end(); return; }
+    if (pathname.includes('\0')) { res.writeHead(400); res.end(); return; }
+    if (/\\/.test(pathname) || pathname.split('/').some(part => part.startsWith('.') || ['node_modules', 'scripts', 'tests'].includes(part.toLowerCase()))) { res.writeHead(403); res.end(); return; }
     if (options.isolated !== false && pathname === base + '__prototype/session.json') {
       res.writeHead(200, { ...headers, 'Content-Type': 'application/json' });
       res.end(req.method === 'HEAD' ? undefined : JSON.stringify({ kind: 'isolated-prototype', origin: 'http://' + req.headers.host })); return;
@@ -40,9 +41,24 @@ function createStandaloneServer(options = {}) {
       fs.stat(real, (error, stat) => {
         if (error || !stat.isFile()) { res.writeHead(404); res.end(); return; }
         if (res.destroyed) return;
-        res.writeHead(200, { ...headers, 'Content-Length': stat.size, 'Content-Type': types[path.extname(real)] || 'application/octet-stream' });
-        if (req.method === 'HEAD') res.end();
-        else pipeline(fs.createReadStream(real), res, () => {});
+        const metadata = { ...headers, 'Content-Length': stat.size, 'Content-Type': types[path.extname(real)] || 'application/octet-stream', 'Accept-Ranges': 'bytes' };
+        let start = 0, end = stat.size - 1, status = 200;
+        if (req.headers.range) {
+          const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range);
+          if (range && (range[1] || range[2])) {
+            if (!range[1]) start = Math.max(0, stat.size - Number(range[2]));
+            else { start = Number(range[1]); if (range[2]) end = Math.min(end, Number(range[2])); }
+          }
+          if (!range || (!range[1] && (!range[2] || Number(range[2]) <= 0)) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) {
+            res.writeHead(416, { ...headers, 'Content-Range': 'bytes */' + stat.size }); res.end(); return;
+          }
+          status = 206;
+          metadata['Content-Range'] = `bytes ${start}-${end}/${stat.size}`;
+          metadata['Content-Length'] = end - start + 1;
+        }
+        res.writeHead(status, metadata);
+        if (req.method === 'HEAD' || stat.size === 0) res.end();
+        else pipeline(fs.createReadStream(real, { start, end }), res, () => {});
       });
     });
   });

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const core = require('../../src/js/local-timer-core.js');
+const core = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-core.js'));
 const START = Date.UTC(2026, 9, 3, 1);
 const minute = n => START + n * 60000;
 function start(extra = {}) {

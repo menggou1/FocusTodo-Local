@@ -2,8 +2,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const core = require('../../src/js/local-timer-core.js');
-const backup = require('../../src/js/local-backup.js');
+const core = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-core.js'));
+const backup = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js'));
 
 // Exercise the actual data-service validation without starting a browser or
 // altering a real IndexedDB database. Its asynchronous open is left pending.
@@ -13,7 +13,7 @@ function dataService() {
     const window = { FocusTimerCore: core, FocusLocalBackup: backup, FocusRelease: { version: 'test' }, dispatchEvent() {} };
     const context = vm.createContext({ window, Storage, IDBDatabase, localStorage: {}, navigator: {},
         crypto: { randomUUID: () => 'test-owner' }, indexedDB: { open: () => ({}) } });
-    vm.runInContext(fs.readFileSync(require.resolve('../../src/js/local-data.js'), 'utf8'), context);
+    vm.runInContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-data.js'), 'utf8'), context);
     return window.FocusLocalData;
 }
 const t = Date.UTC(2026, 9, 3, 1);

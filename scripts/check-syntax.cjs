@@ -1,8 +1,8 @@
 const fs = require('node:fs');
 const acorn = require('acorn');
-for (const file of ['src/patch.js', ...fs.readdirSync('src/js').filter(name => name.endsWith('.js')).map(name => 'src/js/' + name)]) {
-    acorn.parse(fs.readFileSync(file, 'utf8'), { ecmaVersion: 'latest' });
-    console.log('PASS syntax: ' + file);
+for (const name of fs.readdirSync('scripts').filter(name => /\.(cjs|mjs)$/.test(name))) {
+    acorn.parse(fs.readFileSync('scripts/' + name, 'utf8'), { ecmaVersion: 'latest', sourceType: name.endsWith('.mjs') ? 'module' : 'script' });
+    console.log('PASS syntax: scripts/' + name);
 }
 for (const file of fs.readdirSync('standalone', { recursive: true }).filter(name => name.endsWith('.mjs'))) {
     const target = 'standalone/' + file;

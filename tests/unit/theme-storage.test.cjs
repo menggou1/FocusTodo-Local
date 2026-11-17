@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { create, JOURNAL_KEY, KEYS, bingImageFromResponse } = require('../../src/js/local-theme-storage.js');
+const { create, JOURNAL_KEY, KEYS, bingImageFromResponse } = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-theme-storage.js'));
 
 test('Bing API image URLs are restricted to HTTPS on the exact Bing hosts', () => {
     const image = 'https://www.bing.com/th?id=OHR.example_1920x1080.jpg';

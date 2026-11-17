@@ -60,7 +60,7 @@ test('audio effects, audition volumes and background lifecycle match the old ada
         if(legacy){
             const window=new EventTarget(),document=new EventTarget();document.hidden=false;
             Object.assign(window,{FocusTimerCore:{},FocusLocalData:{},FocusI18n:{text:value=>value}});
-            vm.runInNewContext(fs.readFileSync(require.resolve('../../src/js/local-timer-ui.js'),'utf8'),{window,document,navigator:{locks},Audio:function(file){return media(file.replace('./audio/',''))},AbortController,Event,console,setTimeout,clearTimeout});
+            vm.runInNewContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-ui.js'),'utf8'),{window,document,navigator:{locks},Audio:function(file){return media(file.replace('./audio/',''))},AbortController,Event,console,setTimeout,clearTimeout});
             const player={timerState:'initial'};window.FocusLocal.attachAudio(player,preference);
             actions={start:()=>player.startBgm('work'),effect:()=>player.start('alm_Timer.mp3',0.75),audition:()=>player.startAudition('bgm_Rain.m4a',0.3),stop:()=>player.stopAudition(true)};
             dispose=()=>window.dispatchEvent(new Event('pagehide'));

@@ -93,7 +93,7 @@ test('v1/v2 imports preserve historical compatibility records and unsupported fo
     await assert.rejects(h.app.backup.restore(JSON.stringify(bad)));assert.deepEqual((await h.app.backup.export({format:'json'})).data.indexedDB,before.data.indexedDB);
 });
 test('theme journal failure at each key boundary matches legacy rollback and preserves corrupt journals',async()=>{
-    const {createThemeJournal}=await import('../../standalone/services/theme-journal.mjs'),oldFactory=require('../../src/js/local-theme-storage.js'),{MemoryStorage}=require('./core-helpers.cjs');
+    const {createThemeJournal}=await import('../../standalone/services/theme-journal.mjs'),oldFactory=require(require('../helpers/legacy-runtime.cjs').file('src/js/local-theme-storage.js')),{MemoryStorage}=require('./core-helpers.cjs');
     for(let failAt=1;failAt<=7;failAt++){
         const make=factory=>{
             const storage=new MemoryStorage();storage.setItem('Theme','Leaf');let writes=0;

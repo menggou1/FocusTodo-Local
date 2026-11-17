@@ -6,7 +6,7 @@ FocusTodo 使用 React、TypeScript 和 Vite 从完整应用源码构建。任�
 
 ## 安装与运行
 
-从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 选择已发布版本。本文描述正在准备的 2.0.0；创建发布 PR 不代表 Release 或线上站点已经更新。
+从 [Releases](https://github.com/menggou1/FocusTodo-Local/releases) 下载便携 ZIP 或 tar.gz，并用同页的 SHA256SUMS.txt 核对文件。本文说明 2.0.0 的功能和运行方式。
 
 便携 ZIP / tar.gz 解压后安装 Node.js 22.12+，运行 `node scripts/start.cjs` 或 `npm start`；无需安装 npm 依赖。Windows 可双击 `启动.bat`，macOS / Linux 可运行 `sh start.sh`。启动器默认打开 `http://127.0.0.1:5500/index.html`；无桌面环境使用 `--no-browser`，其他端口使用 `--port 5511`。Python 3.7+ 可用 `python scripts/serve-static.py` 作为备用服务。压缩包附有 `SHA256SUMS.txt`，不包含 Node/Python 运行时。
 
@@ -19,7 +19,7 @@ npm run build
 npm start
 ```
 
-开发预览使用 `npm run dev`（5511）。它使用独立数据库和设置，拒绝读取日常数据。旧版对照可运行 `node -e "require('./scripts/server.cjs').createServer().listen(5513,'127.0.0.1')"`。测试不得使用 5500 稳定服务。
+开发预览使用 `npm run dev`（5511）。它使用独立数据库和设置，拒绝读取日常数据。旧版 UI 对照由独立的 archive/1.9.4 归档提供，见[测试指南](docs/TESTING.md)。测试不得使用 5500 稳定服务。
 
 [GitHub Pages](https://menggou1.github.io/FocusTodo-Local/) 仅由 `main` 的成功流水线部署。网页与本地地址的浏览器存储不同，通过备份迁移数据；不能直接双击 HTML 运行。
 
@@ -37,7 +37,7 @@ npm start
 
 ## 数据与升级
 
-正式构建继续使用 `PomodoroDB6` v3 和既有设置键。版本标识变为独立三段式 `2.0.0`，来源版本 7.1.1 仅用于来源信息；数据库版本、备份格式和偏好 `Version='6.5'` 不随应用版本改写。同一浏览器、主机名、端口和站点路径下可继续使用原数据；更换 origin 需要导出/导入备份。开发预览使用 `FocusTodoStandalone.PomodoroDB6` 和 `FocusTodoStandalone.data.*`。
+正式构建继续使用 `PomodoroDB6` v3 和既有设置键。版本标识变为独立三段式 `2.0.0`，来源版本 7.1.1 仅用于来源信息；数据库版本、备份格式和偏好 `Version='6.5'` 不随应用版本改写。同一浏览器、协议、主机名和端口下可继续使用原数据；更换 origin 需要导出/导入备份。开发预览使用 `FocusTodoStandalone.PomodoroDB6` 和 `FocusTodoStandalone.data.*`。
 
 升级前导出完整备份。导入支持旧 JSON 和内容识别的 Gzip，文件与解压数据上限均为 128 MB。缺少压缩能力时导出 JSON；旧版需先解压 Gzip。图片目前仍存于 localStorage，受浏览器配额限制。覆盖或清空前下载完整安全备份，并要求确认已保存且可读；取消会保留现有数据。清除站点存储会丢失本地内容。
 

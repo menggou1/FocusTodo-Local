@@ -6,7 +6,7 @@ function ui(file) {
     Object.assign(window, { FocusRelease: { version: 'test' }, FocusI18n: { text: value => value },
         FocusLocalReady: Promise.resolve(), FocusLocalData: { maintenance: false },
         FocusLocal: { notice: value => notices.push(value), notifyCompletion() {} } });
-    vm.runInNewContext(fs.readFileSync(require.resolve('../../src/js/' + file), 'utf8'), {
+    vm.runInNewContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/' + file), 'utf8'), {
         window, document, localStorage: { getItem: () => null, setItem() {} },
         IDBKeyRange: { lowerBound: () => 1 }, clearTimeout() {},
         setTimeout: (fn, delay) => { scheduled.push({ fn, delay }); return scheduled.length; }

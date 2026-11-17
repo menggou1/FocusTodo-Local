@@ -12,10 +12,10 @@ async function localData() {
         removeItem(key) { this.values.delete(String(key)); }
     }
     const storage = new Storage(), window = new EventTarget();
-    Object.assign(window, { FocusTimerCore: require('../../src/js/local-timer-core.js'),
-        FocusLocalBackup: require('../../src/js/local-backup.js'),
+    Object.assign(window, { FocusTimerCore: require(require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-core.js')),
+        FocusLocalBackup: require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js')),
         FocusRelease: { version: 'audit-test' }, FocusI18n: { text: value => value } });
-    vm.runInNewContext(fs.readFileSync(require.resolve('../../src/js/local-data.js'), 'utf8'), {
+    vm.runInNewContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-data.js'), 'utf8'), {
         window, Storage, IDBDatabase, localStorage: storage, navigator: {}, crypto: webcrypto,
         indexedDB: new IDBFactory(), Event, CustomEvent, Blob, URL
     });

@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => ({
       });
     },
     transformIndexHtml(html, context) {
-      if (mode === 'release') html = html.replace(' — Preview', '');
+      html = html.replace('__FOCUS_APP_TITLE__', release.localVersion + (mode === 'release' ? '' : ' — Preview'));
       return context.server ? html.replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*") : html;
     },
   }],

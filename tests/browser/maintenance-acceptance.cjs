@@ -1,4 +1,4 @@
-const { streamFile } = require('../../scripts/server.cjs');
+const { streamFile } = require('../helpers/legacy-runtime.cjs');
 /* Dedicated no-Web-Locks maintenance acceptance; isolated origins/profiles only. */
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
 const assert = require('node:assert/strict');
@@ -9,7 +9,7 @@ const fixture = '<!doctype html><body><script>window.FocusRelease={version:"acce
 const server = http.createServer((req, res) => {
     if (req.url === '/') { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(fixture); return; }
     if (!['/js/local-timer-core.js', '/js/local-data.js'].includes(req.url)) { res.writeHead(404); res.end(); return; }
-    res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' }); streamFile(path.join(root, 'src', req.url), res);
+    res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' }); streamFile(path.join(require('../helpers/legacy-runtime.cjs').root, 'src', req.url), res);
 });
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

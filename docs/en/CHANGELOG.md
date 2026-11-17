@@ -4,11 +4,11 @@
 
 Current application: **2.0.0**, author Lexible.
 
-## 2.0.0 · 2026-11-16
+## 2.0.0 · 2026-11-17
 
 - Build from complete React/TypeScript sources with local tasks, timer, calendar, forest and backups.
 - Correct initial report layout, completed cards, active-task icons and the forest feature switch.
-- Unify confirmation dialogs and version metadata, with updated bilingual documentation.
+- Unify dialogs and version metadata, remove the legacy runtime and obsolete tools, and document the production architecture in both languages.
 
 [English report](releases/UPDATE-2.0.0.md).
 

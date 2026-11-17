@@ -1,4 +1,4 @@
-const { createServer } = require('../../scripts/server.cjs');
+const { createServer } = require('../helpers/legacy-runtime.cjs');
 /* Runs against an ephemeral loopback server and fresh browser profile only. */
 const fs = require('node:fs'), path = require('node:path');
 const assert = require('node:assert/strict');
@@ -10,7 +10,7 @@ function playwright() {
 }
 const root = path.resolve(__dirname, '../..');
 const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'dist/acceptance'));
-const release = require('../../release.json');
+const release = require(require('../helpers/legacy-runtime.cjs').file('release.json'));
 const releaseVersion = Number(release.localVersion.split('.')[0]) >= 2 ? release.localVersion : release.officialVersion + '-local.' + release.localVersion;
 const server = createServer();
 (async () => {
@@ -454,7 +454,7 @@ const server = createServer();
             await download.saveAs(savedPath);
             const buffer = fs.readFileSync(savedPath);
             assert.match(download.suggestedFilename(), /-full-.*\.json\.gz$/);
-            assert.equal((await require('../../src/js/local-backup.js').decode(buffer)).data.indexedDB.Task.length, 1);
+            assert.equal((await require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js')).decode(buffer)).data.indexedDB.Task.length, 1);
             await page.getByRole('button', { name: '关闭', exact: true }).click();
             const chooser = page.waitForEvent('filechooser', { timeout: 15000 });
             await page.getByRole('button', { name: '导入数据', exact: true }).click();
@@ -481,7 +481,7 @@ const server = createServer();
             const exported = page.waitForEvent('download');
             await page.getByRole('button', { name: '生成并下载', exact: true }).click();
             const download = await exported, buffer = fs.readFileSync(await download.path());
-            const decoded = await require('../../src/js/local-backup.js').decode(buffer);
+            const decoded = await require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js')).decode(buffer);
             assert.equal(decoded.scope, 'without-wallpapers');
             assert.deepEqual(decoded.data.indexedDB, before.indexedDB);
             await page.getByRole('button', { name: '关闭', exact: true }).click();
@@ -530,10 +530,10 @@ const server = createServer();
                 await app(async (page, context, errors, external) => {
                     assert.match(await page.locator('body').innerText(), /本地用户/);
                     assert.deepEqual(external, []);
-                    const name = fs.readdirSync(path.join(root, 'public/audio')).find(name => name.endsWith('.m4a'));
+                    const name = fs.readdirSync(path.join(require('../helpers/legacy-runtime.cjs').root, 'public/audio')).find(name => name.endsWith('.m4a'));
                     const response = await context.request.get(address + '/audio/' + name, { headers: { Range: 'bytes=0-15' } });
                     assert.equal(response.status(), 206); assert.equal(response.headers()['content-type'], 'audio/mp4');
-                    assert.deepEqual(await response.body(), fs.readFileSync(path.join(root, 'public/audio', name)).subarray(0, 16));
+                    assert.deepEqual(await response.body(), fs.readFileSync(path.join(require('../helpers/legacy-runtime.cjs').root, 'public/audio', name)).subarray(0, 16));
                 }, null, address);
             } finally { await new Promise(resolve => production.close(resolve)); }
         });

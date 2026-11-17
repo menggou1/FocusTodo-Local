@@ -1,7 +1,7 @@
 /* Test-only execution of the fixed legacy managers. Never bundled into runtime. */
 const vm = require('node:vm');
 const { IDBKeyRange } = require('fake-indexeddb');
-const { load } = require('../../scripts/lib/bundle-editor.cjs');
+const { load } = require('../helpers/legacy-bundle.cjs');
 let bundle;
 function legacyOracle({ db, storage, now, uuid }) {
     bundle ||= load(); const cache = new Map();

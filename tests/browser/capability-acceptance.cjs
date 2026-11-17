@@ -1,7 +1,7 @@
 /* Real Firefox/WebKit fallback checks, using isolated generated data only.
    Run after: npx playwright install firefox webkit. WebKit is not Safari. */
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const playwright=require('playwright'),{createServer}=require('../../scripts/server.cjs');
+const playwright=require('playwright'),{createServer}=require('../helpers/legacy-runtime.cjs');
 const evidence=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance');
 (async()=>{
  fs.mkdirSync(evidence,{recursive:true});const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));

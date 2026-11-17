@@ -1,6 +1,6 @@
 /* Same-origin upgrade using a synthetic 1.9.x database. Never connects to port 5500. */
 const http=require('node:http');
-const {createServer}=require('../../scripts/server.cjs');
+const {createServer}=require('../helpers/legacy-runtime.cjs');
 const {createAppServer}=require('../../scripts/app-server.cjs');
 const {assert,fs,path,evidence,launch,contextFor,assertNoLegacyRuntime}=require('./helpers.cjs');
 const {gunzipSync}=require('node:zlib');
@@ -34,10 +34,19 @@ const release=require('../../release.json');
   await p.getByRole('button',{name:'Profile',exact:true}).click();await p.getByRole('button',{name:'Export data',exact:true}).click();await p.locator('.legacy-backup-analysis').waitFor();
   const download=p.waitForEvent('download',{timeout:30000});download.catch(()=>{});await p.getByRole('button',{name:'Create and download',exact:true}).click();const saved=await download,file=await saved.path();let bytes=fs.readFileSync(file);if(saved.suggestedFilename().endsWith('.gz'))bytes=gunzipSync(bytes);const backup=JSON.parse(bytes.toString('utf8'));
   assert(backup.indexedDB.Task.some(row=>row.id===before.indexedDB.Task[0].id));assert.equal(backup.localStorage.WorkInterval,'1800');assert.equal(backup.meta.exportVersion,2);
+  await p.locator('.legacy-backup-export').getByRole('button',{name:'Close',exact:true}).click();
+  await p.getByTestId('close-page').click();await p.locator('.workspace-add-task input').fill('Post-export only');await p.locator('.workspace-add-task input').press('Enter');await p.getByText('Post-export only',{exact:true}).waitFor();
+  await p.locator('[data-view=settings]').click();await p.getByRole('button',{name:'Profile',exact:true}).click();
+  const choosing=p.waitForEvent('filechooser');await p.getByRole('button',{name:'Import data',exact:true}).click();await(await choosing).setFiles({name:'synthetic-upgrade.json',mimeType:'application/json',buffer:bytes});
+  const restoring=p.locator('.legacy-backup-restore');await restoring.locator('.legacy-backup-analysis').waitFor();
+  const safety=p.waitForEvent('download');await restoring.getByRole('button',{name:'Replace data and import',exact:true}).click();await safety;
+  await p.locator('.legacy-task-delete button.primary').click();await restoring.waitFor({state:'hidden'});
+  assert.deepEqual((await rows()).map(row=>row.id).sort(),backup.indexedDB.Task.map(row=>row.id).sort(),'Production restore retains the exported legacy and React IDs and removes later data');
+  assert.equal(await p.evaluate(()=>localStorage.getItem('WorkInterval')),'1800');
   await p.screenshot({path:path.join(evidence,'production-upgrade-backup.png')});
-  for(const forbidden of ['js/main.js','patch.js','scripts/start.cjs','standalone/app/main.tsx','__prototype/session.json'])assert.equal((await p.request.get(origin+'/FocusTodo-Local/'+forbidden)).status(),404,forbidden);
+  for(const forbidden of ['js/main.js','patch.js','scripts/start.cjs','standalone/app/main.tsx','__prototype/session.json'])assert.equal((await p.request.get(origin+'/FocusTodo-Local/'+forbidden)).status(),forbidden.startsWith('scripts/')?403:404,forbidden);
   assert.deepEqual(h.errors,[]);assert.deepEqual(h.external,[]);
-  fs.writeFileSync(path.join(evidence,'production-upgrade.json'),JSON.stringify({passed:true,version:release.localVersion,date:release.date,checks:['same-origin legacy IDs and settings','no namespace copy/reset','new React writes','about metadata','real backup download','relative project base','runtime allowlist','no legacy scripts/globals']},null,2));
-  console.log('PASS production React upgrade, project-base resources, metadata and downloaded backup');
+  fs.writeFileSync(path.join(evidence,'production-upgrade.json'),JSON.stringify({passed:true,version:release.localVersion,date:release.date,checks:['same-origin 1.9.4 IDs and settings','no namespace copy/reset','new React writes','about metadata','real backup download and confirmed restore with safety backup','relative project base','runtime allowlist','no legacy scripts/globals']},null,2));
+  console.log('PASS production React upgrade, project-base resources, metadata, downloaded backup and confirmed restore');
  }catch(error){for(const context of browser.contexts())for(const page of context.pages()){await page.screenshot({path:path.join(evidence,'production-failure.png')}).catch(()=>{});console.error((await page.locator('body').innerText()).slice(-3000))}throw error}finally{await browser.close();await new Promise(resolve=>server.close(resolve))}
 })().catch(error=>{console.error(error.stack);process.exitCode=1});

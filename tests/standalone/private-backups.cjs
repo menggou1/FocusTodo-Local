@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const {createHarness}=require('./core-helpers.cjs');
 const {localData}=require('../helpers/local-data.cjs');
-const legacyCodec=require('../../src/js/local-backup.js');
+const legacyCodec=require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js'));
 const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(key=>[key,canonical(value[key])])):value;
 function normalize(value){return canonical({localStorage:value.localStorage,indexedDB:Object.fromEntries(Object.entries(value.indexedDB).map(([table,rows])=>[table,rows.slice().sort((a,b)=>String(a[table==='Group'?'groupId':table==='Message'?'messageId':'id']).localeCompare(String(b[table==='Group'?'groupId':table==='Message'?'messageId':'id'])))]))})}
 async function main(){

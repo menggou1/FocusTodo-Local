@@ -10,7 +10,7 @@ test('explicit network policy matches legacy same-origin/exact Bing opt-in witho
     let enabled=false;const origin='http://127.0.0.1:59000';
     const window={FocusSettings:{networkEnabled:()=>enabled},XMLHttpRequest:function(){},fetch:async()=>true};window.window=window;
     const context=vm.createContext({window,location:{href:origin+'/',origin},URL,Request,Event,TextEncoder,Blob,DOMException,setTimeout,clearTimeout});
-    vm.runInContext(fs.readFileSync(require.resolve('../../src/js/local-network.js'),'utf8'),context);window.FocusLocalNetwork.install({});
+    vm.runInContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-network.js'),'utf8'),context);window.FocusLocalNetwork.install({});
     for(enabled of [false,true])for(const url of [origin+'/asset','https://www.bing.com/image','https://bing.com/image','https://th.bing.com/image','https://bing.biturl.top/?format=json','https://bing.com.attacker.invalid/image','http://www.bing.com/image','https://user@bing.com/image','https://www.bing.com:444/image']){
         const old=await window.fetch(url).then(()=>true,()=>false);assert.equal(permitsRequest(url,origin,enabled),old,url);
     }

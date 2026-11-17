@@ -1,8 +1,8 @@
 const test = require('node:test'), assert = require('node:assert/strict');
 const { IDBFactory } = require('fake-indexeddb');
 const { createHarness, MemoryStorage, rows, seed } = require('./core-helpers.cjs');
-const legacyTimer = require('../../src/js/local-timer-core.js');
-const legacyBackup = require('../../src/js/local-backup.js');
+const legacyTimer = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-core.js'));
+const legacyBackup = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-backup.js'));
 const { localData } = require('../helpers/local-data.cjs');
 const clone = value => JSON.parse(JSON.stringify(value));
 const recoveryRows = async data => (await rows(data, 'LocalMeta')).filter(row => row.id !== 'client-protocol');
@@ -311,7 +311,7 @@ test('reset saves a readable pre-reset backup, keeps language and restores defau
 
 test('theme journal differential preserves images, recovers interrupted metadata and rolls back quota errors', async t => {
     const h = await createHarness(); t.after(h.dispose);
-    const legacyThemes = require('../../src/js/local-theme-storage.js');
+    const legacyThemes = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-theme-storage.js'));
     const memory = new MemoryStorage(), legacy = legacyThemes.create({
         get: key => memory.getItem(key), set: (key, value) => memory.setItem(key, value), remove: key => memory.removeItem(key),
     });

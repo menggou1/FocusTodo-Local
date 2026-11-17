@@ -1,4 +1,4 @@
-const { createServer } = require('../../scripts/server.cjs');
+const { createServer } = require('../helpers/legacy-runtime.cjs');
 /* Real list drag interactions on an isolated origin and fresh browser profiles. */
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');

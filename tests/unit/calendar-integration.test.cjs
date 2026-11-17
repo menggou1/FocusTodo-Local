@@ -1,5 +1,5 @@
 const test = require('node:test'), assert = require('node:assert/strict');
-const { load, walk } = require('../../scripts/lib/bundle-editor.cjs');
+const { load, walk } = require('../helpers/legacy-bundle.cjs');
 test('all six legacy schedule edits pass their original row to the conflict check', async () => {
     const { source, modules, method } = load();
     let edits = 0;

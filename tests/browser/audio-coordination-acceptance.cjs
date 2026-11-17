@@ -3,7 +3,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs'), path = require('node:path'), http = require('node:http');
 const { chromium } = require('playwright');
-const modulePath = path.join(__dirname, '../../src/js/local-timer-ui.js');
+const modulePath = require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-ui.js');
 const server = http.createServer((request, response) => {
     if (request.url === '/audio.js') {
         response.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' });

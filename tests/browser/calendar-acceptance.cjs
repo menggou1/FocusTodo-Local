@@ -1,6 +1,6 @@
 /* Isolated real browser UI and IndexedDB transactions; no personal database. */
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
-const { createServer } = require('../../scripts/server.cjs');
+const { createServer } = require('../helpers/legacy-runtime.cjs');
 const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '../..');
 const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root, 'dist/acceptance'));

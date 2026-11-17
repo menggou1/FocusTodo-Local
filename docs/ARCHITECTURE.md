@@ -4,7 +4,7 @@
 
 ## 入口与构建
 
-FocusTodo 2.0.0 从 standalone/ 的完整 React / TypeScript 源码经 Vite 构建。standalone/app/main.tsx 等待必需样式后构造浏览器能力和服务，挂载错误边界与 App。正式构建不加载 src/js/main.js、patch.js、旧 React/Redux 或 FocusLocal 全局。src/ 与相关 revise 工具只用于旧版兼容、差分与历史 UI 基准。
+FocusTodo 2.0.0 从 standalone/ 的完整 React / TypeScript 源码经 Vite 构建。standalone/app/main.tsx 等待必需样式后构造浏览器能力和服务，挂载错误边界与 App。正式构建不加载 src/js/main.js、patch.js、旧 React/Redux 或 FocusLocal 全局。1.x 主包与补丁工具已从正式源码移除；历史差分和 UI 对照只读独立 archive/1.9.4 归档。
 
 | 目录 | 职责 |
 |---|---|
@@ -14,7 +14,7 @@ FocusTodo 2.0.0 从 standalone/ 的完整 React / TypeScript 源码经 Vite 构�
 | standalone/services | 数据事务/日志、设置、业务快照、计时、主题、声音、网络、森林及备份 |
 | standalone/shared | 界面文案、生成词库及类型 |
 | standalone/styles | 应用与按功能归属的样式；共享控件和弹窗由其拥有者维护 |
-| public | 来源资源、字体、音频及翻译目录 |
+| public | 正式应用导入的图像、字体、音频、翻译源及许可 |
 | scripts | 元信息生成、正式/隔离构建、启动、打包与 Pages 门禁 |
 
 正式 build 输出 dist/app/site；独立预览输出 dist/standalone/site。两者均使用相对资源 URL 支持项目子路径，资源 manifest 为本地服务和分发白名单。私有 sourcemap 与 Vite manifest 放独立 debug 目录，不进入浏览器运行包。生产构建摘要覆盖源码、资源、配置、元信息及锁文件；打包拒绝陈旧产物，Pages 还验证已提交来源。

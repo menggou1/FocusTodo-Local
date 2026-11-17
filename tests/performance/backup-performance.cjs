@@ -1,7 +1,7 @@
 /* Optional generated-data benchmark. Fresh browser contexts never touch user data. */
 const fs = require('node:fs');
 const path = require('node:path');
-const { createServer } = require('../../scripts/server.cjs');
+const { createServer } = require('../helpers/legacy-runtime.cjs');
 const os = require('node:os');
 const root = path.resolve(__dirname, '../..');
 function playwright() {

@@ -2,39 +2,44 @@
 
 [Maintenance](MAINTENANCE.md) · [Architecture](ARCHITECTURE.md) · [中文](../TESTING.md)
 
-## Isolation and evidence
+## Environment and isolation
 
-Use locked Playwright, fresh browser contexts, generated data and identical locale/theme/viewport/DPR/scale. The UI oracle is 1.9.3 (f102da8919e810006b6611aabcef5f0159057d61)/1.9.4. Preview comparison uses legacy5513 and isolated React5511. Never connect to stable5500 or daily profiles. Tests normally choose random loopback ports; FOCUS_RESTORE_SHARED=1 explicitly selects the preview pair. Verify process ownership first. FOCUS_RESTORE_NEW_PORT selects a built isolated server; FOCUS_ACCEPTANCE_DIR selects evidence output.
+Use locked Playwright, fresh browser contexts and generated data with Asia/Shanghai timezone. Comparisons use identical locale, theme, viewport, DPR, scale and animation preferences. Never connect to stable port 5500, daily profiles, real databases or private backups.
 
-Use DOM/computed styles, screenshots, frame samples, pointer/keyboard interactions, database readback and injected failures. Counts/screenshots alone do not establish UI acceptance. When a dedicated Playwright MCP is unavailable, the same locked runtime may be called through the MCP Node tool or repository scripts.
+Install engines with `npx playwright install chromium firefox webkit`; Linux CI adds --with-deps. Tests normally use ephemeral loopback ports. FOCUS_ACCEPTANCE_DIR selects evidence output. FOCUS_STANDALONE_ENGINES selects chromium,firefox,webkit; complete verification covers all three. FOCUS_TEST_FILTER is for diagnosis only and cannot establish a complete pass.
 
-## Suites
+## Production gates
 
-- `npm run build`, `npm run build:standalone`: types and production/isolated output.
-- `npm test`, `npm run check`: legacy compatibility units and syntax.
-- `node --test tests/standalone/*.test.cjs`: pure-core differential, transaction/rollback/concurrency, version and backup contracts.
-- `npm run test:standalone`: isolated startup, workspace, domains, services and extracted candidates.
-- `npm run test:release-app`: synthetic same-origin legacy upgrade, relative base, metadata and a real downloaded backup.
-- `npm run test:browser`: complete legacy compatibility browser suites.
-- `final-ui-parity.cjs`, `reports-parity.cjs`, `r2-r3-overlays-parity.cjs`, `r4-r5-settings-drag-parity.cjs`, `visual-settings.cjs`, `visual-timer-forest.cjs`, `calendar-overlay-equivalence.cjs`, `window-scroll-equivalence.cjs` under tests/standalone cover final UI, dialogs, selectors, settings, schedule/timer/forest and motion.
-- Python tests/release/release-gate-test.py and pages-build-test.py cover release/deployment gates; package-release.py and package-smoke.py verify both portable archives and fallback startup.
+First run npm ci, npm run build:release, npm run check, npm run build, npm run build:standalone and npm run package:standalone.
 
-CI covers three OSes × Node22/24, Chromium and Linux Firefox/WebKit. Do not remove effective assertions, skip failures or loosen pixel thresholds. Filters must be disclosed and old results cannot stand in for a current full audit.
+| Coverage | Command |
+|---|---|
+| Units, validation, production HTTP and release metadata | `npm test` |
+| Service contracts, timer differential, concurrency, rollback, compatibility and backups | `node --test tests/standalone/*.test.cjs` |
+| Three-engine React startup, workspace, domain pages, real storage and isolated archives | `npm run test:standalone` |
+| Production same-origin 1.9.4 upgrade, IDs/settings, backups, project base and allowlist | `npm run test:release-app` |
+| Complete historical browser regression against the separate archive | `npm run test:browser` |
+| Historical Firefox/WebKit capability fallback baseline | `npm run test:compat` |
+| Bilingual light/dark UI, shared dialogs and first-frame animation | `node tests/standalone/final-ui-parity.cjs` |
+| Inspector deletion, subtask flags and history preservation/removal | `node tests/standalone/inspector-dialog-parity.cjs` |
+| Version/checksum/tamper rejection and workflow gates | `python tests/release/release-gate-test.py` |
+| Production ZIP/tar.gz and Python fallback | `python scripts/package-release.py`, `python tests/release/package-smoke.py` |
+| Byte-for-byte Pages comparison with committed sources | `python tests/release/pages-build-test.py` after committing build inputs |
 
-## Dialog and first-frame methodology
+CI covers Windows/macOS/Linux × Node 22/24. Node 24 runs Chromium and the same portable archives; Linux also runs Firefox/WebKit. React suites cover startup failure/retry, lifecycle and namespace protection, tasks, schedules, timers, reports, forest, settings, download/import and maintenance. WebKit does not certify real Safari. Preserve assertions and diagnostics on failure; do not hide failures with skips, retries or weaker requirements.
 
-A history longer than70days exposes the former330px initial canvas height mismatch. Every visible frame must have final CSS/bitmap/DPR dimensions and axes, followed by bottom-up record reveal. Fonts/resize must repaint without compressing rows. Keep negative controls for size/layer/motion regressions.
+## Historical oracle and UI comparison
 
-Inventory: ordinary/repeating task deletion, timer stop, project hide/delete, project/folder/tag creation/editing and nested editors, manual records, schedule quick creation/details, settings, export/import/reset and safety-backup confirmation, wallpaper deletion, timer mode, white noise, widgets, interrupted-time recovery, updates/notifications and date/priority/tag/pomodoro/task popovers. Compare dimensions, fonts, button order, masks, theme, stacking, scroll, confirm/cancel, focus return and motion. File pickers, permission prompts and native PiP belong to the browser/system: verify invocation/fallback, not custom styling.
+The read-only tests/helpers/legacy-runtime.cjs uses archive/1.9.4 at b0ee5e26c133ea273e1634fa52b8a107e1649a69, or an explicit FOCUS_LEGACY_ROOT. CI checks out that fixed revision only in test jobs. No old implementation is copied into dev production sources or included in builds, archives or Pages. Historical units and differential tests preserve JSON/Gzip, timer, calendar, preference and unknown-field contracts; they do not establish that React itself works.
 
-## Preserved historical baseline
+Paired tests start independent ephemeral servers for the archive and isolated React application. FOCUS_RESTORE_SHARED=1 is only for manually prepared 5513/5511 comparison servers; verify their ownership first. FOCUS_RESTORE_NEW_PORT selects an isolated preview, never the daily stable service.
 
-The temporary docs/2.0.0 contract moved into Architecture. Reusable baseline facts are retained here; original rounds remain in Git history and docs/acceptance. Historical results do not imply current-commit or human acceptance.
+Specialist scripts remain under tests/standalone: reports-parity, r2-r3-overlays-parity, visual-settings, r4-r5-settings-drag-parity, visual-timer-forest, calendar-overlay-equivalence and window-scroll-equivalence. They compare real DOM, computed styles, screenshots, interactions and animation while preserving intentional legacy bug fixes. Obsolete one-time bundle audit tools are removed; their historical evidence remains in Git and docs/acceptance.
 
-The2026-11-07 Windows/Node24.16/npm11.16 baseline measured legacy bundle2231533bytes and CSS421259bytes uncompressed. Audit tools remain under tests/performance/audit-*.cjs. Ten authorized historical backups were compared in isolated memory; never publish private samples or equate them with in-place daily-profile acceptance. CI uses generated data.
+## Evidence and limits
 
-Previous checks covered three-engine protocol/schema rejection, transaction faults, theme journals, backup roundtrips and same-schema version naming. They do not establish arbitrary downgrade support. Historical UI work covered timer/forest/settings/workspace/calendar/reports, measured fonts/controls, original artwork, scroll and pointer/keyboard behavior. Shared achievement scrolling is an accepted intentional improvement.
+A history longer than 70 days tests final CSS/bitmap/DPR dimensions, axes and bottom-up reveal on every visible frame. Font/resize updates must not compress rows. Dialog checks cover timer stop, ordinary/repeating tasks, subtasks, projects/folders/tags, records, schedules, settings, backup/reset/safety confirmation, themes, widgets, recovery, updates and pickers. Verify cancel/confirm, focus return, layering and animation, retaining injected negative controls.
 
-The2026-11-15 historical settings round recorded60units,60workspace cases and31service browser cases across engines; Bing was simulated. Earlier motion samples contained long frames, and Vite development versus legacy production is not a controlled performance-equivalence claim. Known New York fall-back calendar-axis/history-offset issues are maintained under V03 in Backlog.
+Forest reward tests fix the clock before startup and move to a deterministic next-day instant after task completion. Exact assertions for 41g collection, 61g balance and idempotence remain unchanged, avoiding engine clock-install millisecond boundaries.
 
-See root MIT/third-party notices and complete bundled React/ReactDOM/scheduler/Noto licenses. Legacy static dependency detection is historical evidence, not the new runtime dependency list. Current results and class-by-class audit are in the [2.0.0 report](releases/UPDATE-2.0.0.md); only [Backlog](../BACKLOG.md) maintains unfinished status. Actual release attachments/live deployment are verified after release.
+Current-commit results belong in the release report. Historical evidence keeps its sampling date and does not certify the current SHA. Automation does not establish human visual acceptance, long-term user-data upgrade, Safari, physical audio/notifications, saved downloads or real Bing boundaries. Only [Backlog](../BACKLOG.md) maintains unfinished work and release checks.

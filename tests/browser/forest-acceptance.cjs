@@ -1,5 +1,5 @@
 /* Exercise the original forest UI with isolated local data and no external network. */
-const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),{createServer}=require('../../scripts/server.cjs');
+const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),{createServer}=require('../helpers/legacy-runtime.cjs');
 (async()=>{
  const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const executablePath=process.env.FOCUS_TEST_BROWSER||(!process.env.FOCUS_TEST_BUNDLED_BROWSER&&['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));

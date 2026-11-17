@@ -1,6 +1,6 @@
 const test = require('node:test'), assert = require('node:assert/strict');
 const { localData } = require('../helpers/local-data.cjs');
-const core = require('../../src/js/local-timer-core.js');
+const core = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-timer-core.js'));
 const now = Date.UTC(2026, 10, 6);
 const copy = value => JSON.parse(JSON.stringify(value));
 

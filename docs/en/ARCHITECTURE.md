@@ -4,7 +4,7 @@
 
 ## Entry and distribution
 
-FocusTodo 2.0.0 builds from complete React/TypeScript sources under standalone/ with Vite. app/main.tsx waits for required styles, constructs explicit browser capabilities/services, then mounts ErrorBoundary and App. Production never loads the legacy bundle, patch.js, Redux or FocusLocal globals. Legacy src/ and revise tools remain only for compatibility/differential/UI-oracle tests.
+FocusTodo 2.0.0 builds from complete React/TypeScript sources under standalone/ with Vite. app/main.tsx waits for required styles, constructs explicit browser capabilities/services, then mounts ErrorBoundary and App. Production never loads the legacy bundle, patch.js, Redux or FocusLocal globals. Legacy bundles and patch tools are removed from the production source tree. Differential and UI tests read the separate immutable archive/1.9.4 checkout.
 
 features/workspace owns business views and shared dialogs; domain owns pure timer/recurrence/calendar/report/version rules; services owns data, settings, transactions, timers, audio, wallpaper, network, forest and backups. shared owns generated catalogs and types; public owns upstream assets. Scripts own generation, builds, startup, packaging and deployment gates.
 
@@ -61,7 +61,7 @@ Frozen v1 commands/behavior remain valid. These additions supply the complete UI
 | Browser backup sink | Download a complete pre-replacement backup and require explicit confirmation that it is saved/readable. Cancel throws cancelled before restore/reset. Initiating a download is insufficient; product code never uses backup:false. |
 
 
-## D-V read-only wallpaper subscription (2026-11-15)
+## Wallpaper subscriptions
 
 `wallpaper.subscribe/getSnapshot` exposes immutable `{loading, version}`. Loading describes the shared Bing request and clears on cancellation, failure or completion. Version increments only after a successful theme commit. Settings observes downloads and cached activation; the timer subscribes only to version changes to refresh its background. Component unmount does not cancel a shared download. Existing commands, cancellation guards, journals and storage formats remain unchanged. Network service and settings interaction tests cover stale-cache activation, switching during downloads, reopening settings, failure and retry.
 

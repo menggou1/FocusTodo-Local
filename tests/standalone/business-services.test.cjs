@@ -98,7 +98,7 @@ test('language fallback and release reads agree with old adapters without resett
     for(const language of ['en','zh-CN']){
         await h.app.language.setPreference(language);
         const window={FocusLocaleCatalog:catalog},context=vm.createContext({window,localStorage:{getItem:()=>language},navigator:{languages:[language]},document:{documentElement:{}},btoa:value=>Buffer.from(value).toString('base64'),unescape,encodeURIComponent});
-        vm.runInContext(fs.readFileSync(require.resolve('../../src/js/local-i18n.js'),'utf8'),context);
+        vm.runInContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-i18n.js'),'utf8'),context);
         for(const text of ['本地用户','专注完成','Untranslated user task','未知内容'])assert.equal(h.app.language.text(text),window.FocusI18n.text(text));
         for(const key of ['app_name','missing-key'])assert.equal(h.app.language.lookup(key),window.FocusI18n.lookupLegacy(key));
     }
@@ -133,7 +133,7 @@ test('preset task queries, calendar layout and record progress match legacy rule
     for(const type of [1000,7005,7000,4000,4001,4002,4003,4004,4006,4007,5001,5002,5003]){
         const view={id:'id-task-tasks',type};assert.deepEqual(clone(h.app.business.tasksInView(view)),clone(await h.oracle.tasks().fetchTasksOfProject(view)),String(type));
     }
-    const oldCalendar=require('../../src/js/local-calendar.js');
+    const oldCalendar=require(require('../helpers/legacy-runtime.cjs').file('src/js/local-calendar.js'));
     const events=[{id:'a',start:start-60000,end:start+30000},{id:'b',start:start+60000,end:start+120000},{id:'c',start:start+120000,end:start+3600000}];
     assert.deepEqual(h.app.calendar.layoutEvents(events,start,start+86400000,1),oldCalendar.layoutEvents(events,start,start+86400000,1));
     assert.equal(h.app.calendar.deadlineInSevenDays(start),oldCalendar.deadlineInSevenDays(start));
@@ -175,7 +175,7 @@ test('project visibility/folders/reordering and schedule/record edits preserve u
 });
 test('forest rewards and achievement metrics match the old ledger and remain idempotent',async t=>{
     const h=await pair(t);h.clock.value=Date.now();
-    vm.runInNewContext(fs.readFileSync(require.resolve('../../src/js/local-achievements.js'),'utf8'),{window:h.old.window,document:{},setTimeout:()=>0,clearTimeout:()=>{}});
+    vm.runInNewContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-achievements.js'),'utf8'),{window:h.old.window,document:{},setTimeout:()=>0,clearTimeout:()=>{}});
     const reward={itemType:0,id:'synthetic-reward',date:h.clock.value-86401000,powerValue:5};
     assert.deepEqual(await h.app.forest.collect(reward),clone(await h.old.data.collectForest(reward)));
     assert.deepEqual(await h.app.forest.collect(reward),clone(await h.old.data.collectForest(reward)));

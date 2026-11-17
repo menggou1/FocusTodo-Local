@@ -7,7 +7,7 @@ import re
 import tarfile
 import zipfile
 
-from runtime_layout import ROOT, checkout_files
+from app_runtime import ROOT
 from app_runtime import built_files, version as app_version
 
 
@@ -23,12 +23,10 @@ def build(output, tag=None):
     if package['version'] != full_version or config['updates'][0]['version'] != full_version:
         raise ValueError('Run npm run build:release before packaging')
     # Explicit runtime allowlist: no credentials, dependencies, screenshots or Git state.
-    production = int(version.split('.')[0]) >= 2
-    files = built_files() if production else checkout_files()
+    files = built_files()
     extras = [ROOT / name for name in (
         'package.json', 'README.md', 'README_en.md', 'start.ps1', 'start.sh',
-        '启动.bat', 'scripts/server.cjs', 'scripts/start.cjs', 'scripts/serve-static.py',
-        'scripts/runtime-layout.json', 'scripts/runtime-paths.cjs', 'scripts/runtime_layout.py',
+        '启动.bat', 'scripts/start.cjs', 'scripts/serve-static.py',
         'scripts/app-server.cjs', 'scripts/standalone-server.cjs',
         'scripts/app-layout.json', 'scripts/standalone-layout.json',
     )]

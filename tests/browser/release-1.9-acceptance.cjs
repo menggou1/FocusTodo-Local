@@ -1,6 +1,6 @@
 /* Isolated 1.9 behavior and ownership regressions; no personal data or live APIs. */
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const {chromium}=require('playwright'),{createServer}=require('../../scripts/server.cjs');
+const {chromium}=require('playwright'),{createServer}=require('../helpers/legacy-runtime.cjs');
 const evidence=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance');
 const pixel=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aL1sAAAAASUVORK5CYII=','base64');
 const imageUrl='https://www.bing.com/acceptance.png';

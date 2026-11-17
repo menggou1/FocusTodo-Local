@@ -8,7 +8,7 @@ function walk(node, visitor) {
         else if (value && typeof value === 'object') walk(value, visitor);
     }
 }
-function load(file = require('node:path').resolve(__dirname, '../../src/js/main.js')) {
+function load(file = require('./legacy-runtime.cjs').file('src/js/main.js')) {
     const source = fs.readFileSync(file, 'utf8'), ast = acorn.parse(source, { ecmaVersion: 'latest' });
     let modules;
     walk(ast, node => { if (node.type === 'ArrayExpression' && node.elements.length === 1484) modules = node.elements; });
@@ -35,14 +35,6 @@ function load(file = require('node:path').resolve(__dirname, '../../src/js/main.
         if (matches.length !== 1) throw new Error(`Expected one assignment ${id}.${name}, found ${matches.length}`);
         replace(matches[0], code);
     }
-    function save() {
-        let result = source, previousStart = source.length;
-        for (const edit of edits.sort((a, b) => b.start - a.start)) {
-            if (edit.end > previousStart) throw new Error('Overlapping bundle edits.');
-            result = result.slice(0, edit.start) + edit.code + result.slice(edit.end); previousStart = edit.start;
-        }
-        acorn.parse(result, { ecmaVersion: 'latest' }); fs.writeFileSync(file, result);
-    }
-    return { source, modules, edits, replace, method, assignment, save };
+    return { source, modules, method, assignment };
 }
 module.exports = { walk, load };

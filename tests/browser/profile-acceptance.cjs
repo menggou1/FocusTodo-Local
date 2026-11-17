@@ -1,4 +1,4 @@
-const { createServer } = require('../../scripts/server.cjs');
+const { createServer } = require('../helpers/legacy-runtime.cjs');
 /* Local profile writes use isolated browser storage and genuine UI entry points. */
 const fs = require('node:fs'), path = require('node:path');
 const assert = require('node:assert/strict');

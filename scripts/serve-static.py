@@ -5,14 +5,14 @@ import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlsplit
 
-from runtime_layout import ROOT, public_path
+from pathlib import Path
+ROOT = Path(__file__).resolve().parent.parent
 
-FLAT = not (ROOT / 'src/index.html').is_file()
 
 
 # Portable React builds use the same explicit manifest as the Node server.
 APP_ROOT = ROOT if (ROOT / 'build-info.json').is_file() else ROOT / 'dist/app/site'
-APP_FILES = set(json.loads((APP_ROOT / 'runtime-manifest.json').read_text(encoding='utf-8'))['files']) if (APP_ROOT / 'runtime-manifest.json').is_file() else None
+APP_FILES = set(json.loads((APP_ROOT / 'runtime-manifest.json').read_text(encoding='utf-8'))['files'])
 
 class Handler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -35,11 +35,11 @@ class Handler(SimpleHTTPRequestHandler):
             return None
         if not name:
             name = 'index.html'
-        source = (name if name in APP_FILES else None) if APP_FILES is not None else public_path(name, FLAT)
+        source = name if name in APP_FILES else None
         if not source or '\0' in source:
             self.send_error(404)
             return None
-        file = (APP_ROOT if APP_FILES is not None else ROOT) / source
+        file = APP_ROOT / source
         if not file.is_file() or file.resolve() != file:
             self.send_error(404)
             return None

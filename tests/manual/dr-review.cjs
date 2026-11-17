@@ -1,6 +1,6 @@
 /* D-R only: temporary browser contexts, no daily browser profile. */
 const {chromium}=require('playwright');
-const {createServer}=require('../../scripts/server.cjs');
+const {createServer}=require('../helpers/legacy-runtime.cjs');
 const {createStandaloneServer}=require('../../scripts/standalone-server.cjs');
 const fs=require('node:fs');
 const path=require('node:path');

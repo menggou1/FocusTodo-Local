@@ -1,5 +1,5 @@
 const test = require('node:test'), assert = require('node:assert/strict');
-const { layoutEvents, deadlineInSevenDays } = require('../../src/js/local-calendar.js');
+const { layoutEvents, deadlineInSevenDays } = require(require('../helpers/legacy-runtime.cjs').file('src/js/local-calendar.js'));
 const minute = 60000;
 test('overlap groups share columns while touching and disconnected events reuse space', () => {
     const events = [[0, 60], [15, 45], [30, 90], [90, 120], [150, 180]].map(([start, end], id) => ({ id, start: start * minute, end: end * minute }));
@@ -26,7 +26,7 @@ test('day headers use the real translation catalog for today and other dates in 
             localStorage: { getItem: () => locale }, navigator: { languages: [locale] },
             document: { documentElement: {} } });
         for (const file of ['local-i18n-catalog.js', 'local-i18n.js', 'local-calendar.js']) {
-            vm.runInContext(fs.readFileSync(path.join(__dirname, '../../src/js', file), 'utf8'), context);
+            vm.runInContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/' + file), 'utf8'), context);
         }
         const React = { createElement: (type, props, ...children) => ({ type, props, children }) };
         for (const today of [true, false]) {

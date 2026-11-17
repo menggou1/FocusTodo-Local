@@ -23,7 +23,7 @@ function network(enabled=false) {
     }
     const location = new URL('http://127.0.0.1:5500/index.html');
     const window = { XMLHttpRequest: XHR, FocusSettings:{networkEnabled:()=>enabled}, fetch: (input,options) => {window.lastFetch=options;return Promise.resolve('native');} };
-    vm.runInNewContext(fs.readFileSync(require.resolve('../../src/js/local-network.js'), 'utf8'), {
+    vm.runInNewContext(fs.readFileSync(require('../helpers/legacy-runtime.cjs').file('src/js/local-network.js'), 'utf8'), {
         window, location, URL, Request, Event, ProgressEvent: Event, DOMException, Blob, TextEncoder,
         setTimeout, clearTimeout
     });

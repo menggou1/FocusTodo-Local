@@ -1,6 +1,6 @@
 /* Shared controls against pre-refactor 9d39be5 computed styles, in isolated data. */
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const {chromium}=require('playwright'),{createServer}=require('../../scripts/server.cjs');
+const {chromium}=require('playwright'),{createServer}=require('../helpers/legacy-runtime.cjs');
 const baseline=require('../fixtures/controls-9d39be5.json');
 const evidence=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance');
 const props=['fontSize','fontFamily','fontWeight','lineHeight','height','width','padding','borderRadius','borderWidth','backgroundColor','color'];
