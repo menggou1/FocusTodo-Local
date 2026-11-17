@@ -191,6 +191,7 @@ async function main() {
                 await run(browser, renderOrigin, renderOrigin + '/', engine + ': React render boundary exposes retry and recovers', async ({ page }) => {
                     await page.goto(renderOrigin + '/', { waitUntil: 'domcontentloaded' });
                     await page.getByTestId('error-boundary').waitFor();
+                    assert(!/preview|预览/i.test(await page.getByTestId('error-boundary').innerText()), 'Production recovery wording must not describe an unfinished preview');
                     assert(await page.getByTestId('error-boundary').getByRole('button').isVisible());
                     await page.getByTestId('error-boundary').getByRole('button').click();
                     await page.getByTestId('boundary-recovered').waitFor();

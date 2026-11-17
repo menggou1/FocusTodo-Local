@@ -52,7 +52,7 @@ release.json、package/lock、生成版本、关于及日期同步2.0.0/2026-11-
 
 ## 正式分发整理与本轮验证（2026-11-17）
 
-dev 移除 148 个旧路径：27 个 src 文件、15 个旧脚本路径、98 个未进入正式构建的资源、7 个一次性/旧版性能工具及 1 个失去消费者的字体测试夹具。旧 AST 工具只保留测试必需的只读解析部分，迁至 tests/helpers/legacy-bundle.cjs。完整删除清单见结构化验证文件的 releaseReadiness.removedPaths。历史 Tag、upstream/7.1.1、archive/1.9.4、版权与许可证不变。
+dev 移除 151 个旧路径：27 个 src 文件、15 个旧脚本路径、98 个未进入正式构建的资源、7 个一次性/旧版性能工具、1 个失去消费者的字体测试夹具及 3 个无消费者的阶段示例服务/资源文件。旧 AST 工具只保留测试必需的只读解析部分，迁至 tests/helpers/legacy-bundle.cjs。完整删除清单见结构化验证文件的 releaseReadiness.removedPaths。历史 Tag、upstream/7.1.1、archive/1.9.4、版权与许可证不变。
 
 保留数据、作用域存储、备份编码、主题日志、偏好、计时与重复规则兼容模块。正式构建沿用 PomodoroDB6 v3、exportVersion 2、既有设置及未知兼容字段。旧 UI 和差分测试只读独立 1.9.4 归档；元信息生成、React 构建、便携包和 Pages 不加载旧运行实现。正式 HTTP 服务补齐音频闭区间/开放区间/后缀 Range，继续验证 Host、NUL、白名单、下载取消及占用端口。
 
@@ -63,3 +63,5 @@ README、维护、架构、测试、使用教程、工程入口与中英文版�
 本轮类型、正式/隔离构建、语法和 78 份 Markdown 文件/锚点检查通过。单元 89 项通过、1 项原有 POSIX 用例在 Windows 跳过；服务合同 64 项通过。三引擎启动 42、工作区 60、领域 33、服务 31 项通过，两种隔离解压包通过。完整归档浏览器链及修正后的森林专项通过；最终 UI 8 组、详情删除 4 组通过。正式同 origin 的 1.9.4 合成升级保留 ID/设置，真实下载备份并通过安全备份确认恢复；正式 ZIP/tar.gz、Python 备用启动、6 项发布门禁和 2 项已提交来源 Pages 检查通过。
 
 [dev 实际 CI](https://github.com/menggou1/FocusTodo-Local/actions/workflows/ci.yml?query=branch%3Adev) 按最终交付 SHA 核对全部适用作业，交付记录给出确切 SHA 与运行链接。dev 不部署 Pages，不发布 Release。本轮不合并 main，不创建 Tag/Release。人工接受、长期数据库及实际系统/发布后边界只在 BACKLOG 维护，不以合成自动化替代。
+
+正式恢复入口另清除 Phase B 的无消费者服务、示例资源、类型和样式，以及“重新加载预览”等占位文案；保留实际 SnapshotSource 合同、错误恢复样式和隔离保护。语言合同测试现在直接验证生产语言服务，覆盖系统语言和显式选择；三引擎错误恢复继续验证重试，并断言不显示阶段预览文案。

@@ -183,6 +183,9 @@
       "src/reset-password.html",
       "src/resetpassword.css",
       "src/startup.css",
+      "standalone/assets/optional-preview.ts",
+      "standalone/assets/preview.json",
+      "standalone/services/prototype.ts",
       "tests/fixtures/official-timer-fonts.json",
       "tests/performance/audit-baseline.cjs",
       "tests/performance/audit-dependencies.cjs",
@@ -221,6 +224,7 @@
     },
     "ciWorkflow": "https://github.com/menggou1/FocusTodo-Local/actions/workflows/ci.yml?query=branch%3Adev",
     "ciPolicy": "Wait for every applicable job for the final pushed SHA; report that exact SHA and run at handoff. Pages deployment and Release are not applicable on dev.",
-    "limitations": "E09, V07 and actual-environment/post-release checks remain in docs/BACKLOG.md. Generated data is not human acceptance or long-term user data validation."
+    "limitations": "E09, V07 and actual-environment/post-release checks remain in docs/BACKLOG.md. Generated data is not human acceptance or long-term user data validation.",
+    "productionRecovery": "Removed unused Phase B services/assets/contracts/styles and sample-only copy; error recovery uses product wording and the language contract tests the active service."
   }
 }

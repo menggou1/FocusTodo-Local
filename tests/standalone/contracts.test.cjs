@@ -79,7 +79,7 @@ test('candidate permits its preference namespace and rejects every legacy or unk
     }
 });
 
-test('version metadata models the future independent version without changing DB schema', () => {
+test('application version metadata keeps independent version without changing DB schema', () => {
     const { versionMetadata } = loadTypeScript('domain/version.ts');
     const legacy = versionMetadata('1.9.3', '7.1.1');
     const independent = versionMetadata('2.0.0', '7.1.1');
@@ -93,10 +93,14 @@ test('version metadata models the future independent version without changing DB
     }
 });
 
-test('language resolution retains explicit preferences and complete bilingual fallback', () => {
-    const { resolveLocale, messages } = loadTypeScript('shared/i18n.ts', { navigator: { languages: ['zh-TW', 'en'] } });
-    assert.equal(resolveLocale('auto'), 'zh-CN');
-    assert.equal(resolveLocale('auto', ['de-DE', 'zh-CN']), 'en');
+test('production language resolution retains explicit preferences and complete bilingual fallback', async () => {
+    const { createLanguageService } = await import('../../standalone/services/language.mjs');
+    const { messages } = loadTypeScript('shared/i18n.ts');
+    const resolveLocale = (language, languages = ['zh-TW', 'en']) => createLanguageService({
+        settings: { getSnapshot: () => ({ language }) }, catalog: {}, languages,
+    }).locale;
+    assert.equal(resolveLocale('auto'), 'zh-TW');
+    assert.equal(resolveLocale('auto', ['de-DE', 'zh-CN']), 'de');
     assert.equal(resolveLocale('auto', ['unrecognized', 'zh_CN']), 'zh-CN');
     assert.equal(resolveLocale('auto', []), 'en');
     assert.equal(resolveLocale('en', ['zh-CN']), 'en');
@@ -105,4 +109,5 @@ test('language resolution retains explicit preferences and complete bilingual fa
     assert.deepEqual(Object.keys(english).sort(), Object.keys(chinese).sort());
     assert(Object.values(english).every(value => typeof value === 'string' && value.length));
     assert(Object.values(chinese).every(value => typeof value === 'string' && value.length));
+    assert(!/preview|Phase|预览|阶段/i.test([...Object.values(english), ...Object.values(chinese)].join(' ')), 'Product recovery copy must describe the application');
 });
