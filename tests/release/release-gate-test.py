@@ -92,6 +92,10 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("github.ref == 'refs/heads/main'", pages)
         self.assertIn("needs.validation.result == 'success'", pages)
         self.assertIn('needs: pages-build', pages)
+        deploy = pages.split('  deploy:\n', 1)[1]
+        self.assertIn("needs.pages-build.result == 'success'", deploy)
+        self.assertIn('!cancelled()', deploy)
+        self.assertIn("github.ref == 'refs/heads/main'", deploy)
         self.assertIn('if [[ "$current" != "$GITHUB_SHA" ]]', pages)
         release = self.workflow.split('  release:\n', 1)[1]
         self.assertNotIn('pages: write', release)
