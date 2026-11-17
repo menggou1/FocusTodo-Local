@@ -1,6 +1,7 @@
 /* Full-dialog inventory and final regressions. Fresh contexts and generated data only. */
 const {paired,copyFixture,metrics,assert,fs,path}=require('./ui-restore-helpers.cjs');
 const {seed}=require('./ui-fixtures.cjs');
+const {contextFor}=require('./helpers.cjs');
 const output=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'dist/acceptance/final-ui');
 const results=[];
 async function equal(pair,oldSelector,newSelector,label,fields=['x','y','width','height','font','background','borderRadius']){
@@ -86,11 +87,23 @@ async function run(locale,dark,width){
   // A long history exposes the former first-frame bitmap/CSS height mismatch.
   await n.evaluate(()=>new Promise((resolve,reject)=>{const r=indexedDB.open('FocusTodoStandalone.PomodoroDB6',3);r.onsuccess=()=>{const db=r.result,tx=db.transaction('Pomodoro','readwrite');for(let i=0;i<70;i++)tx.objectStore('Pomodoro').put({id:'long-'+i,state:0,taskId:'reports-task-4',endDate:Date.now()-i*86400000,interval:1500,pomodoroInterval:1500});tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>reject(tx.error)}}));
   await n.reload();await n.getByTestId('app-shell').waitFor();
-  await n.evaluate(()=>{window.chartFrames=[];let end=0;const sample=()=>{const c=document.querySelector('.legacy-review-scroll canvas');if(c){if(!end)end=performance.now()+600;window.chartFrames.push({height:c.clientHeight,pixels:c.height,dpr:devicePixelRatio,reveal:Number(c.dataset.reveal),left:Number(c.dataset.chartLeft)})}if(!end||performance.now()<end)requestAnimationFrame(sample);else window.chartSamplingDone=true};requestAnimationFrame(sample)});
-  await n.locator('[data-view=reports]').click();await n.waitForFunction(()=>window.chartSamplingDone);const frames=await n.evaluate(()=>window.chartFrames);
-  assert(frames.length>5);assert(frames.every(f=>f.height>1000&&Math.abs(f.pixels-f.height*f.dpr)<=1&&f.left>0),'Final row spacing and axes exist in every visible frame');
-  assert(frames.some(f=>f.reveal>0&&f.reveal<1)&&frames.at(-1).reveal===1,'Bottom-up reveal completes');
-  await n.screenshot({path:path.join(output,key+'.png')});
+  // A busy host can skip the complete 180ms animation between two native RAFs.
+  // Check its frames with a controlled clock in a fresh copy of the same data,
+  // installed before application timers. Keep every geometry/reveal assertion.
+  const state=await pair.handles[1].context.storageState({indexedDB:true});
+  const chart=await contextFor(pair.browser,new URL(n.url()).origin,{storageState:state,locale,viewport:{width,height:800},colorScheme:dark?'dark':'light',reducedMotion:'no-preference'});
+  let frames;
+  try{
+   const time=new Date('2026-11-08T12:00:00+08:00');await chart.page.clock.install({time});await chart.page.clock.pauseAt(time);
+   await chart.page.goto(n.url());await chart.page.getByTestId('app-shell').waitFor();await chart.page.evaluate(()=>document.fonts.ready);
+   await chart.page.evaluate(()=>{window.chartFrames=[];let end=0;const sample=()=>{const c=document.querySelector('.legacy-review-scroll canvas');if(c){if(!end)end=performance.now()+600;window.chartFrames.push({height:c.clientHeight,pixels:c.height,dpr:devicePixelRatio,reveal:Number(c.dataset.reveal),left:Number(c.dataset.chartLeft)})}if(!end||performance.now()<end)requestAnimationFrame(sample);else window.chartSamplingDone=true};requestAnimationFrame(sample)});
+   await chart.page.locator('[data-view=reports]').click();await chart.page.clock.runFor(650);await chart.page.waitForFunction(()=>window.chartSamplingDone);frames=await chart.page.evaluate(()=>window.chartFrames);
+   fs.writeFileSync(path.join(output,key+'-frames.json'),JSON.stringify(frames,null,2));
+   assert(frames.length>5);assert(frames.every(f=>f.height>1000&&Math.abs(f.pixels-f.height*f.dpr)<=1&&f.left>0),'Final row spacing and axes exist in every visible frame');
+   assert(frames.some(f=>f.reveal>0&&f.reveal<1)&&frames.at(-1).reveal===1,'Bottom-up reveal completes');
+   assert.deepEqual(chart.errors,[]);assert.deepEqual(chart.external,[]);
+   await chart.page.screenshot({path:path.join(output,key+'.png')});
+  }finally{await chart.context.close()}
   for(const h of pair.handles){assert.deepEqual(h.errors,[]);assert.deepEqual(h.external,[])}
   results.push({key,passed:true,checks,frames});console.log('PASS final UI '+key);
  }catch(error){await n.screenshot({path:path.join(output,key+'-failure.png')}).catch(()=>{});results.push({key,passed:false,error:error.stack});throw error}
