@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_type == 'tag' && github.ref || format('{0}-{1}-{2}', github.event_name, github.ref, github.event_name == 'pull_request' && 'latest' || github.sha) }}
@@ -27,6 +28,10 @@ jobs:
     timeout-minutes: 15
     outputs:
       full: ${{ steps.scope.outputs.full }}
+      reused: ${{ steps.reuse.outputs.reused }}
+      reused_run_id: ${{ steps.reuse.outputs.run_id }}
+      reused_artifact_id: ${{ steps.reuse.outputs.artifact_id }}
+      reused_artifact_digest: ${{ steps.reuse.outputs.artifact_digest }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -69,6 +74,7 @@ jobs:
           npm run build:standalone
           npm run package:standalone
       - run: python tests/release/release-gate-test.py
+      - run: python tests/release/ci-validation-test.py
       - run: python tests/release/pages-build-test.py
       - name: Build archives and verify tag version
         env:
@@ -80,8 +86,14 @@ jobs:
           else
             python scripts/package-release.py
           fi
-      - name: Check documentation and start both archives on documentation-only PRs
-        if: steps.scope.outputs.full == 'false'
+      - name: Restore verified dev archives for this exact commit when available
+        id: reuse
+        if: steps.scope.outputs.full == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/ci-validation.py reuse
+      - name: Start both archives on documentation-only or verified reuse runs
+        if: steps.scope.outputs.full == 'false' || steps.reuse.outputs.reused == 'true'
         run: python tests/release/package-smoke.py
       - name: Share the same archives across operating systems
         if: steps.scope.outputs.full == 'true'
@@ -97,7 +109,7 @@ jobs:
           overwrite: true
           retention-days: 1
       - name: Share the isolated preview across operating systems
-        if: steps.scope.outputs.full == 'true'
+        if: steps.scope.outputs.full == 'true' && steps.reuse.outputs.reused != 'true'
         uses: actions/upload-artifact@v6
         with:
           name: standalone-preview-test
@@ -111,7 +123,7 @@ jobs:
 
   test:
     needs: preflight
-    if: needs.preflight.outputs.full == 'true'
+    if: needs.preflight.outputs.full == 'true' && needs.preflight.outputs.reused != 'true'
     name: ${{ matrix.os }} / Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
@@ -224,9 +236,32 @@ jobs:
           overwrite: true
           retention-days: 7
 
-  pages-build:
+  validation:
     needs: [preflight, test]
-    if: github.ref == 'refs/heads/main'
+    if: always()
+    name: Verify CI evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Require successful checks or verified exact-commit evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREFLIGHT_RESULT: ${{ needs.preflight.result }}
+          TEST_RESULT: ${{ needs.test.result }}
+          FULL: ${{ needs.preflight.outputs.full }}
+          REUSED: ${{ needs.preflight.outputs.reused }}
+          REUSED_RUN_ID: ${{ needs.preflight.outputs.reused_run_id }}
+          REUSED_ARTIFACT_ID: ${{ needs.preflight.outputs.reused_artifact_id }}
+          REUSED_ARTIFACT_DIGEST: ${{ needs.preflight.outputs.reused_artifact_digest }}
+        run: python scripts/ci-validation.py gate
+
+  pages-build:
+    needs: [preflight, validation]
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.validation.result == 'success' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -281,8 +316,8 @@ jobs:
 
   release:
     name: Publish version tag
-    needs: [preflight, test]
-    if: github.ref_type == 'tag' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    needs: [preflight, validation]
+    if: ${{ !cancelled() && needs.preflight.result == 'success' && needs.validation.result == 'success' && github.ref_type == 'tag' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

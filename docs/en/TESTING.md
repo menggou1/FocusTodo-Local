@@ -47,3 +47,5 @@ Current-commit results belong in the release report. Historical evidence keeps i
 `node tests/standalone/settings-regression.cjs` validates current settings, avatars, theme loading, dropdowns, audio feedback and file-selection outcomes with synthetic data on random isolated ports. `node tests/standalone/settings-legacy-reference.cjs` checks only the required historical controls and VolumeTip resource against immutable 1.9.4.
 
 Set `FOCUS_TEST_BUNDLED_BROWSER=1` to use bundled Chromium without a daily browser profile. Chromium/Firefox volume-feedback checks use an identical WAV Blob and allow Blob media only in that test page. Windows WebKit checks the real packaged URL with the original CSP; other regressions retain the product transport and security policy.
+
+`python tests/release/ci-validation-test.py` checks exact-commit provenance, all six matrix jobs, artifact expiry/digest/test chronology, newer failures, unsafe skips and extraction. The release-gate tests enforce the independent evidence gate for publication and Pages.

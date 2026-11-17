@@ -56,7 +56,7 @@ Never move, recreate or reuse a pushed tag, including failed, cancelled or unpub
 
 Generate metadata and build both variants, then run all [test commands](TESTING.md), including units, service contracts, browsers, production upgrade/backup, archive startup and Python fallback. Commit build inputs before the committed-source Pages check. Commit valid generated output and run git diff --check. Never remove necessary tests, weaken assertions, shrink data or relax visual thresholds to pass CI.
 
-main is the stable default and sole Pages source. Branch pushes run Windows/macOS/Linux × Node 22/24. Node 24 verifies the same portable archives and Chromium; Linux also runs Firefox/WebKit. Preflight verifies generated files, builds, Pages allowlists and release gates. Archived regressions complement independent React startup, business, recovery, UI and production-entry tests.
+main is the stable default and sole Pages source. Development pushes run Windows/macOS/Linux × Node 22/24. Release/main/tag runs may reuse exact-commit dev evidence under the policy below. Node 24 verifies the same portable archives and Chromium; Linux also runs Firefox/WebKit. Preflight verifies generated files, builds, Pages allowlists and release gates. Archived regressions complement independent React startup, business, recovery, UI and production-entry tests.
 
 ## Branches and formal release process
 
@@ -88,3 +88,7 @@ Lexible maintains the local app, based on [lamngockhuong/focustodo](https://gith
 Current documents live in docs and docs/en; reports use releases. Historical reports retain historical facts. Only docs/BACKLOG.md maintains unfinished engineering, human acceptance and post-release checks. Update links, metadata and package manifests when moving documents.
 
 Successful `release/2.0.x` branches are temporary: after Release, Pages and downloaded-package verification, delete their remote refs and audit older release branches. First ensure all valid commits remain reachable. Preserve immutable tags, Releases and complete effective history.
+
+## Exact-commit CI reuse
+
+dev always runs the full matrix. Release/main/tag reuse requires successful jobs for all six matrix combinations in the same repository/workflow at the exact SHA, with an unexpired, checksummed archive batch created before all three Node 24 archive-testing jobs. Newer failed, cancelled or timed-out runs invalidate older success. Preflight still validates generated files, builds, metadata, Pages provenance and release gates. It restores the original tested archives only after checking the Actions artifact digest, portable checksums and byte-for-byte contents against a fresh build, then smoke-tests extraction/startup. Missing or unverifiable evidence falls back to full tests. An independent validation job rechecks evidence; failures, cancellation and unverified skips block deployment/publication. Sources appear in the Actions Step Summary. Existing main-only Pages, immutable-tag and cleanup rules remain. A failed candidate explicitly abandoned by the owner is never reused; the next requested modification/release increments the patch version.

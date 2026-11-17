@@ -2,6 +2,8 @@
 
 [Changelog](../CHANGELOG.md) · [Maintenance](../MAINTENANCE.md) · [Backlog](../BACKLOG.md)
 
+Status: abandoned failed candidate by owner instruction; no formal tag/Release was created. The next requested modification/release starts at 2.0.2.
+
 Date: 2026-11-17. Author: Lexible.
 
 ## Delivered behavior
@@ -26,3 +28,5 @@ Local checks passed: 89 unit tests (one existing platform skip), 66 standalone c
 The first remote run passed Windows and Linux; macOS failed the combined long-history reveal assertion. The failure screenshot showed the completed state, and the original sampler did not retain failing frames. Final visual checks now install a controlled clock before application timers in a fresh synthetic-data copy and save frame JSON. The same size/DPR/axis, intermediate-reveal and completion assertions remain. This checks animation logic and geometry, not host frame-time performance.
 
 Active white noise also follows the live fractional slider preview across timer publications without persistence on pointer motion. Matching commits release the preview; failures, settings closure and suspension restore stored volume. Service contracts and three-engine slider checks cover this path.
+
+CI now supports verified exact-commit dev evidence and the original tested archives, while retaining fresh build/content/provenance/startup checks and an independent publication gate. dev remains full; newer failures invalidate older success. Remaining work and the next 2.0.2 task are maintained only in Backlog.

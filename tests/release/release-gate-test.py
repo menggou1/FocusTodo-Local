@@ -34,7 +34,7 @@ class ReleaseGateTests(unittest.TestCase):
     def test_non_main_tag_can_publish_after_complete_ci(self):
         gate.verify(self.tag, self.directory)
         release = self.workflow.split('  release:\n', 1)[1]
-        self.assertIn('needs: [preflight, test]', release)
+        self.assertIn('needs: [preflight, validation]', release)
         self.assertIn("github.ref_type == 'tag'", release)
         self.assertNotIn('merge-base', release)
         self.assertNotIn('needs: deploy', release)
@@ -45,11 +45,17 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("node: ['22', '24']", self.workflow)
         self.assertNotIn("if: github.ref_type != 'tag'", self.workflow)
 
-    def test_failed_or_skipped_ci_cannot_publish(self):
+    def test_failed_or_unverified_skipped_ci_cannot_publish(self):
         release = self.workflow.split('  release:\n', 1)[1]
-        self.assertIn('needs: [preflight, test]', release)
+        self.assertIn('needs: [preflight, validation]', release)
+        self.assertIn("needs.preflight.result == 'success'", release)
+        self.assertIn("needs.validation.result == 'success'", release)
+        self.assertIn('!cancelled()', release)
         self.assertNotIn('always()', release)
-        self.assertIn("if: needs.preflight.outputs.full == 'true'", self.workflow)
+        self.assertIn("if: needs.preflight.outputs.full == 'true' && needs.preflight.outputs.reused != 'true'", self.workflow)
+        validation = self.workflow.split('  validation:\n', 1)[1].split('  pages-build:\n', 1)[0]
+        self.assertIn('needs: [preflight, test]', validation)
+        self.assertIn('python scripts/ci-validation.py gate', validation)
         self.assertIn('full=true', self.workflow)
 
     def test_modified_production_output_cannot_be_packaged(self):
@@ -83,7 +89,8 @@ class ReleaseGateTests(unittest.TestCase):
 
     def test_pages_only_deploys_from_main_and_release_cannot_override(self):
         pages = self.workflow.split('  pages-build:\n', 1)[1].split('  release:\n', 1)[0]
-        self.assertIn("if: github.ref == 'refs/heads/main'", pages)
+        self.assertIn("github.ref == 'refs/heads/main'", pages)
+        self.assertIn("needs.validation.result == 'success'", pages)
         self.assertIn('needs: pages-build', pages)
         self.assertIn('if [[ "$current" != "$GITHUB_SHA" ]]', pages)
         release = self.workflow.split('  release:\n', 1)[1]

@@ -54,7 +54,7 @@ FocusTodo 2.0.0 是 React / TypeScript / Vite standalone 应用。开发需要 N
 
 release.json 是版本、作者、日期、仓库与更新条目的人工来源。build:release 同步 standalone/app-version.json、package.json 和锁文件；关于页读取同一份元信息。日期为 Asia/Shanghai 的 YYYY-MM-DD，跨日修改同步当前版本条目。应用和 Tag 使用独立三段式版本；7.1.1 是来源版本。schema v3、备份 exportVersion 2 和兼容偏好 Version='6.5' 独立维护。
 
-Tag 一经推送不得移动、删除重建或复用，包括失败、取消及未公开候选；修复必须递增第三位并创建新 Tag。尚未创建 Tag 的版本准备修复可保留当前版本。不覆盖已公开附件；保留真实历史、归档、版权和许可证。
+用户明确废弃的失败候选也不再复用；下一次修改后发布必须递增第三位。Tag 一经推送不得移动、删除重建或复用，包括失败、取消及未公开候选；修复必须递增第三位并创建新 Tag。尚未创建 Tag 的版本准备修复可保留当前版本。不覆盖已公开附件；保留真实历史、归档、版权和许可证。
 
 ## 质量门禁
 
@@ -64,7 +64,15 @@ Tag 一经推送不得移动、删除重建或复用，包括失败、取消及�
 
 ## CI、发布与 Pages
 
-main 是默认稳定分支和 Pages 唯一部署来源。分支推送运行完整 CI；PR 不是开发或发布的强制步骤，AI 创建 PR 须遵守本指南的逐次授权规则。Windows/macOS/Linux × Node 22/24 验证单元与服务合同；Node 24 验证同一批 ZIP/tar.gz、Python 备用启动和 Chromium，Linux 另跑 Firefox/WebKit。预检检查生成差异、正式/隔离构建、Pages 白名单及发布门禁。历史回归补充独立 React 启动、业务、恢复、UI 和正式入口验证。
+main 是默认稳定分支和 Pages 唯一部署来源。dev、其他开发分支和代码 PR 运行完整 CI；release/main/Tag 可按下述规则复用同一提交的已验证结果；PR 不是开发或发布的强制步骤，AI 创建 PR 须遵守本指南的逐次授权规则。Windows/macOS/Linux × Node 22/24 验证单元与服务合同；Node 24 验证同一批 ZIP/tar.gz、Python 备用启动和 Chromium，Linux 另跑 Firefox/WebKit。预检检查生成差异、正式/隔离构建、Pages 白名单及发布门禁。历史回归补充独立 React 启动、业务、恢复、UI 和正式入口验证。
+
+### 同一提交的 CI 复用
+
+dev 始终执行完整矩阵。release/main/Tag 仅可复用同一仓库、同一工作流、同一 SHA 的 dev 成功记录；六个 Windows/macOS/Linux × Node 22/24 作业必须全部实际成功，便携包附件必须未过期、具有有效 SHA-256，且该批附件创建时间早于三个 Node 24 附件测试作业。不能用较早的成功记录掩盖同 SHA 更新的失败、取消或超时。
+
+每次仍执行生成差异、类型/构建、版本、Pages 来源与发布门禁。预检从成功记录下载原始附件，验证 Actions 附件摘要、正式校验和以及与当前新构建逐文件内容一致，恢复原批附件并执行解压启动检查。只有上述验证成功才跳过重复的六项矩阵；API、证据、附件或内容无法核实时自动全测，不触及尚未验证的产物。独立 Verify CI evidence 作业在末端再次核对来源；预检失败、测试失败/取消、未经核验的跳过或末端证据失效均阻止部署/发布。复用来源写入 Actions Step Summary。
+
+Pages 和 Release 依赖成功的独立验证作业，并按 [GitHub 作业依赖规则](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds) 显式处理已验证的跳过；保留 main 唯一 Pages 来源、Tag 不变性、正式附件核验和发布分支清理要求。
 
 ## 分支与正式发布流程
 
