@@ -65,3 +65,7 @@ README、维护、架构、测试、使用教程、工程入口与中英文版�
 [dev 实际 CI](https://github.com/menggou1/FocusTodo-Local/actions/workflows/ci.yml?query=branch%3Adev) 按最终交付 SHA 核对全部适用作业，交付记录给出确切 SHA 与运行链接。dev 不部署 Pages，不发布 Release。本轮不合并 main，不创建 Tag/Release。人工接受、长期数据库及实际系统/发布后边界只在 BACKLOG 维护，不以合成自动化替代。
 
 正式恢复入口另清除 Phase B 的无消费者服务、示例资源、类型和样式，以及“重新加载预览”等占位文案；保留实际 SnapshotSource 合同、错误恢复样式和隔离保护。语言合同测试现在直接验证生产语言服务，覆盖系统语言和显式选择；三引擎错误恢复继续验证重试，并断言不显示阶段预览文案。
+
+## 2.0.0 正式发布准备（2026-11-17）
+
+本次正式发布在从已同步 main 创建的 release/2.0.0 独立工作树执行。中英文维护指南正式规定 dev → release/x.x.x → main → 精确版本 Tag → GitHub Release，并同步 README 与仓库约定。沿用现有 CI、便携包和 Pages 流程，不修改业务代码或界面；保留 MIT、上游版权及第三方许可。此前“不合并、不发布”描述只对应上次整理任务。版本、作者及更新日期仍为 2.0.0、Lexible、2026-11-17；正式发布、附件和部署结果以实际工作流及交付记录为准。

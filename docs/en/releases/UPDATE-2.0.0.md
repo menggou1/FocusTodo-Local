@@ -65,3 +65,7 @@ Current local validation passed types, both builds, syntax and 78 Markdown file/
 [Actual dev CI](https://github.com/menggou1/FocusTodo-Local/actions/workflows/ci.yml?query=branch%3Adev) is checked for every applicable job on the final delivered SHA; the handoff supplies the exact SHA and run. dev does not deploy Pages or publish Releases. No main merge, tag or Release is performed. Human acceptance, long-term data and actual-system/post-release limits remain solely in Backlog.
 
 Production recovery also removes the unused Phase B service, sample assets, types, styles and preview-only copy. Active SnapshotSource contracts, recovery styles and isolation guards remain. Language contracts now exercise the production service with system and explicit preferences; three-engine recovery still verifies retry and rejects stage-preview wording.
+
+## Formal 2.0.0 release preparation (2026-11-17)
+
+This authorized release uses an independent release/2.0.0 worktree created from already synchronized main. Both maintenance guides now define dev → release/x.x.x → main → exact version tag → GitHub Release, with README and repository instructions aligned. Existing CI, portable packaging and Pages remain in use; business code/UI, MIT, upstream copyright and third-party notices are preserved. Earlier no-merge/no-publication statements describe only the previous preparation task. Metadata remains 2.0.0, Lexible, 2026-11-17. Actual workflow and handoff evidence establish final publication, asset and deployment outcomes.
