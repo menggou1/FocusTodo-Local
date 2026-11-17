@@ -95,6 +95,7 @@ export type WritablePreference = Exclude<keyof PreferenceState, 'groupEnabled' |
 export interface AudioService {
     update(): void; setTimerState(state: string): void; effect(file: string, volume?: number): void;
     audition(file: string, volume?: number): void; auditionVolume(value: number): void; volumeTip(value: number): void; stopAudition(): void;
+    previewWhiteNoiseVolume(value: number | null): void;
     suspend(): void; resume(): void; dispose(): void;
 }
 export interface CoreServices {
