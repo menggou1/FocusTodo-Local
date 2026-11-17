@@ -2,7 +2,7 @@
 
 [Home](../../README_en.md) · [中文](../GUIDE.md) · [Changelog](CHANGELOG.md)
 
-This guide follows the main screen, tasks, timer, reports and settings, with calendar, forest and backup instructions for the local edition. Its organization is inspired by [Lexible's Windows guide](https://zhuanlan.zhihu.com/p/31498089). Screenshots contain isolated test data; dates and counts are examples.
+This guide follows the main screen, tasks, timer, reports and settings, with calendar, forest and backup instructions for the local edition. Its organization is inspired by [Lexible's Windows guide](https://zhuanlan.zhihu.com/p/31498089). Screenshots show the 2.0.0 React application with isolated generated data; dates and counts are examples.
 
 ## Installation and upgrade
 

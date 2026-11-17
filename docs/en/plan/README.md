@@ -1,3 +1,3 @@
-# Engineering plans
+# Engineering references
 
-Stable architecture and contracts are in [Architecture](../ARCHITECTURE.md), execution/release order in [Maintenance](../MAINTENANCE.md), and validation methods in [Testing](../TESTING.md). Only [Backlog](../../BACKLOG.md) maintains unfinished task status.
+Production specifications are in [Architecture](../ARCHITECTURE.md), [Maintenance](../MAINTENANCE.md) and [Testing](../TESTING.md). See [Changelog](../CHANGELOG.md) for version history. Only [Backlog](../../BACKLOG.md) maintains unfinished work and acceptance.

@@ -1,3 +1,3 @@
-# 工程计划入口
+# 工程参考入口
 
-当前架构与约束见[架构说明](../ARCHITECTURE.md)，实施与发布顺序见[维护指南](../MAINTENANCE.md)，验证方法见[测试说明](../TESTING.md)。阶段性 2.0.0 计划已并入这些正式文档；未完成工作仅在[统一待办](../BACKLOG.md)维护。
+正式规范见[架构](../ARCHITECTURE.md)、[维护](../MAINTENANCE.md)与[测试](../TESTING.md)。版本变化见[更新记录](../CHANGELOG.md)，未完成工程与验收只维护在[统一待办](../BACKLOG.md)。

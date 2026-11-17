@@ -40,8 +40,14 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   const guideText=await page.locator('[class*=Guide-guideSection]').innerText();for(const term of ['329900g','没有每日上限','100 颗','48 小时','手动新增','暂停时间'])assert(guideText.includes(term),term);
   await page.waitForTimeout(500);const lastGuide=page.locator('[class*=Guide-guideSection]').getByText(/森林最多同时显示 100 颗/);await lastGuide.scrollIntoViewIfNeeded();assert(await lastGuide.isVisible());fs.mkdirSync('dist',{recursive:true});await page.screenshot({path:path.resolve('dist/forest-guide.png')});
   await page.keyboard.press('Escape').catch(()=>{});
+  // This is the archived data roundtrip oracle. Leave the old polling view
+  // before replacing its storage; the React UI replacement path is exercised
+  // by domain-pages.cjs and production-browser.cjs with page-error assertions.
+  await page.route('**/forest-storage-fixture.html',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><script>window.FocusI18n={text:value=>value};</script><script src="/js/local-release.js"></script><script src="/js/local-timer-core.js"></script><script src="/js/local-backup.js"></script><script src="/js/local-data.js"></script>'}));
+  await page.goto(base+'/forest-storage-fixture.html');await page.evaluate(()=>FocusLocalReady);
   const snapshot=await page.evaluate(()=>FocusLocalData.snapshot());assert(snapshot.localStorage['FocusTodo.forestState']);
   await page.evaluate(async snapshot=>{await FocusLocalData.replace(snapshot,{backup:false});await FocusLocalData.replace(snapshot,{backup:false})},snapshot);
+  await ready(page);
   assert.equal(await page.evaluate(()=>FocusLocalData.forestGet('Sunlight')),150);
   await page.evaluate(()=>{window.__denyForest=true});
   const failed=await page.evaluate(async date=>{try{await FocusLocalData.collectForest({itemType:1,id:'failure-task',date,powerValue:5});return false}catch(e){return true}},old);assert.equal(failed,true);await page.evaluate(()=>{window.__denyForest=false});assert.equal(await page.evaluate(()=>FocusLocalData.forestGet('Sunlight')),150);assert(!JSON.parse(await page.evaluate(()=>FocusLocalData.forestGet('TaskReward'))).some(x=>x.id==='failure-task'));
@@ -152,3 +158,4 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);console.log('PASS forest switch, animation, live closed-drawer badges, maturity/expiry, bulk over 100, immature exclusion, keyboard, write failure/retry, concurrent deduplication, backup, reduced motion and offline');
  }finally{await context.close();await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e.stack);process.exitCode=1});
+

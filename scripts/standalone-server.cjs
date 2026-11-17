@@ -49,7 +49,7 @@ function createStandaloneServer(options = {}) {
             if (!range[1]) start = Math.max(0, stat.size - Number(range[2]));
             else { start = Number(range[1]); if (range[2]) end = Math.min(end, Number(range[2])); }
           }
-          if (!range || (!range[1] && (!range[2] || Number(range[2]) <= 0)) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) {
+          if (!range || (!range[1] && (!Number.isSafeInteger(Number(range[2])) || Number(range[2]) <= 0)) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= stat.size) {
             res.writeHead(416, { ...headers, 'Content-Range': 'bytes */' + stat.size }); res.end(); return;
           }
           status = 206;

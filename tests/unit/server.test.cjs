@@ -101,7 +101,7 @@ test('closed, open and suffix audio ranges return the exact requested bytes', as
     }
 });
 test('invalid or unsatisfiable audio ranges reject without sending the file', async () => {
-    for (const range of ['bytes=999999-', 'bytes=16-4', 'bytes=-0', 'bytes=-', 'bytes=0-1,5-9', 'bytes=999999999999999999999-']) {
+    for (const range of ['bytes=999999-', 'bytes=16-4', 'bytes=-0', 'bytes=-', 'bytes=0-1,5-9', 'bytes=999999999999999999999-', 'bytes=-999999999999999999999']) {
         const res = await request('/' + audio, { Range: range });
         assert.equal(res.status, 416); assert.equal(res.body.length, 0); assert.match(res.headers['content-range'], /^bytes \*\//);
     }
