@@ -10,6 +10,7 @@ Current application: **2.1.0**, author Lexible.
 - Startup shows readiness progress for required assets and local initialization. The portable browser icon loads offline through a relative URL. The Vite development preview loads the startup icon correctly.
 - Refresh the profile avatar after import, share scrollbars across import and notifications, fix notifications over the calendar, center the update confirmation, and use the standard interruption dialog.
 - Restore the task sidebar’s 24×24 footer icons, weekday labels and red overdue dates, and clarify the setting for adding new tasks above other tasks.
+- Added clearer icons.
 
 [English report](releases/UPDATE-2.1.0.md).
 

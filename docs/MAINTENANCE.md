@@ -12,6 +12,7 @@ FocusTodo 2.0.0 是 React / TypeScript / Vite standalone 应用。开发需要 N
 | `npm run build` | 类型检查并生成 dist/app/site，私有 sourcemap 放在 dist/app/debug |
 | `npm start -- --no-browser --port 5512` | 验证正式构建；日常启动默认端口为 5500 |
 | `npm run dev` | 5511 上的隔离 Vite/HMR 开发预览 |
+| `./scripts/preview-standalone.ps1` | Windows 隔离预览，默认端口 5511，`-Port` 指定空闲端口，`-Open` 打开浏览器 |
 | `npm run build:standalone` | 同一应用源码的隔离测试构建，输出 dist/standalone/site |
 | `npm run start:standalone -- --port 5512` | 服务隔离构建，拒绝 5500 |
 | `npm run package:standalone` | 打包隔离测试产物，供三平台复验 |

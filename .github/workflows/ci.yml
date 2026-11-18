@@ -126,12 +126,19 @@ jobs:
     if: needs.preflight.outputs.full == 'true' && needs.preflight.outputs.reused != 'true'
     name: ${{ matrix.os }} / Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
+    container:
+      image: ${{ matrix.playwright_image }}
+      options: --ipc=host
+    timeout-minutes: ${{ matrix.playwright_image && 30 || 25 }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         node: ['22', '24']
+        include:
+          - os: ubuntu-latest
+            node: '24'
+            playwright_image: mcr.microsoft.com/playwright:v1.62.1-resolute
     steps:
       - uses: actions/checkout@v6
         with:
@@ -148,8 +155,8 @@ jobs:
           path: .legacy-oracle
           persist-credentials: false
       - name: Locate immutable historical test oracle
-        shell: pwsh
-        run: Add-Content $env:GITHUB_ENV "FOCUS_LEGACY_ROOT=$env:GITHUB_WORKSPACE/.legacy-oracle"
+        shell: bash
+        run: printf 'FOCUS_LEGACY_ROOT=%s/.legacy-oracle\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
       - run: npm test
       - name: Standalone contracts and isolated server
         run: node --test tests/standalone/*.test.cjs
@@ -170,9 +177,20 @@ jobs:
       - name: Test extracted ZIP and tar.gz without dependencies
         if: matrix.node == '24'
         run: python tests/release/package-smoke.py
-      - name: Install browser
-        if: matrix.node == '24'
-        run: npx playwright install --with-deps chromium
+      - name: Verify preinstalled Linux browser version
+        if: matrix.playwright_image
+        env:
+          PLAYWRIGHT_IMAGE: ${{ matrix.playwright_image }}
+        run: |
+          version=$(node -p 'require("playwright/package.json").version')
+          if [ "$PLAYWRIGHT_IMAGE" != "mcr.microsoft.com/playwright:v$version-resolute" ]; then
+            echo "Update the CI browser image to match Playwright $version."
+            exit 1
+          fi
+      - name: Install Chromium headless shell on Windows and macOS
+        if: matrix.node == '24' && runner.os != 'Linux'
+        timeout-minutes: 6
+        run: node node_modules/playwright/cli.js install --only-shell chromium
       - name: Prepare Windows TCP resources
         if: runner.os == 'Windows' && matrix.node == '24'
         shell: pwsh
@@ -203,9 +221,6 @@ jobs:
           FOCUS_TEST_BUNDLED_BROWSER: '1'
           FOCUS_STANDALONE_ENGINES: chromium
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance/standalone-chromium
-      - name: Install Firefox and WebKit compatibility engines
-        if: runner.os == 'Linux' && matrix.node == '24'
-        run: npx playwright install --with-deps firefox webkit
       - name: Capability fallback in Firefox and WebKit
         if: runner.os == 'Linux' && matrix.node == '24'
         run: npm run test:compat

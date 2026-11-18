@@ -12,6 +12,7 @@ FocusTodo 2.0.0 is the React / TypeScript / Vite standalone application. Develop
 | `npm run build` | Typecheck and build dist/app/site; private maps go to dist/app/debug |
 | `npm start -- --no-browser --port 5512` | Verify production; the daily launcher defaults to 5500 |
 | `npm run dev` | Isolated Vite development preview on 5511 |
+| `./scripts/preview-standalone.ps1` | Isolated Windows preview on port 5511. Use `-Port` to choose a free port and `-Open` to open a browser. |
 | `npm run build:standalone` | Build the same app with isolated storage into dist/standalone/site |
 | `npm run start:standalone -- --port 5512` | Serve the isolated build, refusing 5500 |
 | `npm run package:standalone` | Package isolated artifacts for cross-platform tests |

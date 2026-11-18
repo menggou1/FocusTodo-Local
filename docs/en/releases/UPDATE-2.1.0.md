@@ -16,13 +16,17 @@ The task sidebar footer restores the archived 24×24 icons. Due dates retain the
 
 Seven milestones reflect the actual state of scripts, styles, local data, fonts, icons, sounds, and the first workspace render. A missing resource or timeout leaves the retry screen visible. The workspace entry respects reduced motion. The portable app loads from its local server, and browsers with Web Audio play the original WAV embedded in the app, avoiding a separate HTTP request that IDM can intercept. Media-only ports such as Windows WebKit play the same bytes from a packaged URL.
 
-The archived 30×30 icon now serves the browser tab, startup screen, and desktop notifications as `focus-app.ico`. Read-only inspection of the official Windows 7.2.2 package found 256×256 ICO and transparent PNG versions and a 300×300 tile. Redistribution permission has been obtained. The repository continues to use the archived icon.
+The archived 30×30 icon now serves the browser tab, startup screen, and desktop notifications as `focus-app.ico`.
 
-The Vite development preview serves the startup and browser tab icons at a readable development URL. Builds use a relative asset URL for both icons.
+Added clearer icons.
+
+The Vite development preview serves the startup and browser tab icons at a readable development URL. Builds use a relative asset URL for both icons. On Windows, run `./scripts/preview-standalone.ps1` to start the isolated preview on port 5511. Use `-Port` to select a free port if 5511 is occupied.
 
 ## Development verification
 
 The macOS Node 24 browser test assumed that a specific tab would win when two tabs raced for the audio lock. The test now establishes the owner and waits for the peer to enter the native Web Locks queue before verifying exclusive playback and handoff. [Failed job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44247634654/job/134610681204)
+
+The Ubuntu Node 24 job in CI #150 timed out while fetching Firefox and WebKit system dependencies. It now uses an image matching the locked Playwright version, with all three test engines and system dependencies preinstalled. The job allows 30 minutes to accommodate a cold image pull. [Timed-out job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44270097521/job/134684709745)
 
 ## Version history
 
