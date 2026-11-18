@@ -102,13 +102,46 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
   const track=p.locator('.legacy-settings-menu-surface>.legacy-scroll-track');assert.equal(await track.count(),1);await menu.hover();const scrollBefore=await menu.evaluate(e=>e.scrollTop);await p.mouse.wheel(0,300);await p.waitForFunction(before=>document.querySelector('.legacy-settings-menu').scrollTop>before,scrollBefore);await track.dispatchEvent('mouseenter');const thumb=track.locator('.legacy-scroll-thumb'),thumbRect=await thumb.boundingBox();await p.mouse.move(thumbRect.x+3,thumbRect.y+5);await p.mouse.down();await p.mouse.move(thumbRect.x+3,thumbRect.y+40,{steps:8});await p.mouse.up();assert(await menu.evaluate(e=>e.scrollTop)>scrollBefore);await menu.locator('[role=option]').last().click();await menu.waitFor({state:'hidden'});
   await p.locator('.legacy-noise-choice:has(img[src*=wn-rain])').click();await p.waitForFunction(prefix=>localStorage.getItem(prefix+'BgMusic')==='bgm_Rain',prefix);await close();await p.getByTestId('timer-floating').locator('button.primary').click();await p.waitForFunction(()=>window.settingsProbe.background&&!window.settingsProbe.background.paused);await open('pomodoro');
   for(let i=0;i<2;i++){
-   const range=p.locator('.legacy-sound-row input[type=range]').nth(i);await range.scrollIntoViewIfNeeded();assert.equal(await range.evaluate(e=>getComputedStyle(e).borderWidth),'0px');assert.equal(await range.getAttribute('step'),'any');
-   await p.evaluate(()=>{window.settingsProbe.writes=[];window.settingsProbe.plays=[]});const rect=await range.boundingBox();await p.mouse.move(rect.x+rect.width-5,rect.y+rect.height/2);await p.mouse.down();for(let x=rect.width-8;x>65;x-=1.3)await p.mouse.move(rect.x+x,rect.y+rect.height/2);if(i===1){const live=Number(await range.inputValue());const playing=await p.evaluate(()=>window.settingsProbe.background.volume);
-   // Motion is delivered synchronously. Windows WebKit can withhold RAF polling while a mouse button is held.
-   assert(Math.abs(playing-live/100)<.000001,'Active white noise follows the live drag');assert.equal(await p.evaluate(()=>window.settingsProbe.writes.filter(([key])=>key.endsWith('WNVol')).length),0,'drag preview has no persistence writes');await p.waitForTimeout(1100);assert(Math.abs(await p.evaluate(()=>window.settingsProbe.background.volume)-live/100)<.000001,'timer publication preserves the live preview')}await p.waitForTimeout(200);
+   const range=p.locator('.legacy-sound-row input[type=range]').nth(i);
+   await range.scrollIntoViewIfNeeded();
+   assert.equal(await range.evaluate(e=>getComputedStyle(e).borderWidth),'0px');
+   assert.equal(await range.getAttribute('step'),'any');
+   await p.evaluate(()=>{window.settingsProbe.writes=[];window.settingsProbe.plays=[]});
+   const rect=await range.boundingBox();
+   const center=rect.y+rect.height/2, target=rect.x+65;
+   await p.mouse.move(rect.x+rect.width-5,center);
+   await p.mouse.down();
+   await p.mouse.move(target,center,{steps:60});
+   if(i===1){
+    // Read both values in the same task after the final pointer move. Windows
+    // WebKit can hold off animation frames while a native mouse button is down.
+    const matched=await p.waitForFunction(target=>{
+     const slider=document.querySelectorAll('.legacy-sound-row input[type=range]')[1];
+     const {left,width}=slider.getBoundingClientRect();
+     const live=slider.valueAsNumber;
+     const expected=(target-left-5)/(width-10)*100;
+     return Math.abs(live-expected)<=100/(width-10)&&
+      Math.abs(window.settingsProbe.background.volume-live/100)<.000001&&live;
+    },target,{polling:50});
+    const live=await matched.jsonValue();
+    assert.equal(await p.evaluate(()=>window.settingsProbe.writes.filter(([key])=>key.endsWith('WNVol')).length),0,'drag preview has no persistence writes');
+    await p.waitForTimeout(1100);
+    assert(Math.abs(await p.evaluate(()=>window.settingsProbe.background.volume)-live/100)<.000001,'timer publication preserves the live preview');
+   }
+   await p.waitForTimeout(200);
    assert.equal(await p.evaluate(()=>window.settingsProbe.plays.filter(a=>a.src.includes('VolumeTip')).length),0,'Holding a paused drag never plays feedback');
    await p.mouse.up();
-   const value=Number(await range.inputValue());assert(!Number.isInteger(value),'fractional volume follows actual pointer pixels');const key=i?'WNVol':'RtnVol';await p.waitForFunction(({key,value,prefix})=>Number(localStorage.getItem(prefix+key))===value,{key,value,prefix});const writes=await p.evaluate(({key,prefix})=>window.settingsProbe.writes.filter(([k])=>k===prefix+key),{key,prefix});assert.equal(writes.length,1,'one final pointer transaction');await p.waitForFunction(value=>window.settingsProbe.plays.some(a=>a.src.includes('VolumeTip')&&Math.abs(a.volume-value/100)<.000001&&a.decoded),value).catch(async error=>{console.error(await p.evaluate(()=>window.settingsProbe.plays));throw error});const tip=await p.evaluate(()=>window.settingsProbe.plays.filter(a=>a.src.includes('VolumeTip')));assert.equal(tip.length,1);assert(tip.every(a=>a.overlap===0),'feedback samples never play over an earlier sample');assert(Math.abs(tip.at(-1).volume-value/100)<.000001);
+   const value=Number(await range.inputValue());
+   assert(!Number.isInteger(value),'fractional volume follows actual pointer pixels');
+   const key=i?'WNVol':'RtnVol';
+   await p.waitForFunction(({key,value,prefix})=>Number(localStorage.getItem(prefix+key))===value,{key,value,prefix});
+   const writes=await p.evaluate(({key,prefix})=>window.settingsProbe.writes.filter(([k])=>k===prefix+key),{key,prefix});
+   assert.equal(writes.length,1,'one final pointer transaction');
+   await p.waitForFunction(value=>window.settingsProbe.plays.some(a=>a.src.includes('VolumeTip')&&Math.abs(a.volume-value/100)<.000001&&a.decoded),value).catch(async error=>{console.error(await p.evaluate(()=>window.settingsProbe.plays));throw error});
+   const tips=await p.evaluate(()=>window.settingsProbe.plays.filter(a=>a.src.includes('VolumeTip')));
+   assert.equal(tips.length,1);
+   assert(tips.every(a=>a.overlap===0),'feedback samples never play over an earlier sample');
+   assert(Math.abs(tips.at(-1).volume-value/100)<.000001);
   }
   const slider=p.locator('.legacy-sound-row input[type=range]').first();
   await slider.scrollIntoViewIfNeeded();
@@ -129,7 +162,16 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
   await slider.evaluate(el=>el.releasePointerCapture(Number(el.dataset.testPointerId)));
   await p.mouse.move(bounds.x+bounds.width*.7,bounds.y-30);
   await p.mouse.up();
-  assert.equal(await slider.inputValue(),stored,'Unexpected loss of capture cancels the gesture');
+  // Native capture loss precedes React's rollback render in Windows WebKit.
+  await p.waitForFunction(value=>document.querySelector('.legacy-sound-row input[type=range]').value===value,stored,{polling:50});
+  assert.equal(await p.evaluate(()=>window.settingsProbe.plays.length),0);
+  assert.equal(await p.evaluate(()=>window.settingsProbe.writes.filter(([key])=>key.endsWith('RtnVol')).length),0,'Unexpected loss of capture never saves the volume');
+  await p.mouse.move(bounds.x+bounds.width*.8,bounds.y+bounds.height/2);
+  await p.mouse.down();
+  await p.keyboard.press('Escape');
+  await p.mouse.up();
+  await p.waitForFunction(value=>document.querySelector('.legacy-sound-row input[type=range]').value===value,stored,{polling:50});
+  assert(await p.getByTestId('settings-page').isVisible(),'Escape cancels the gesture without closing settings');
   assert.equal(await p.evaluate(()=>window.settingsProbe.plays.length),0);
   await slider.focus();
   await p.keyboard.down('ArrowLeft');

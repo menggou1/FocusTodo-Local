@@ -88,10 +88,24 @@ function VolumeControl({field,value,save,disabled}:{field:'ringtoneVolume'|'whit
     }
   };
   useEffect(()=>{
-    const blur=()=>{if(active())finish(false)};
-    window.addEventListener('blur',blur);
-    if(disabled)blur();
-    return()=>window.removeEventListener('blur',blur);
+    const cancel=()=>{if(active())finish(false)};
+    const cancelPointer=(event:PointerEvent)=>{if(pointer.current===event.pointerId)cancel()};
+    // A release may target another element after capture has been lost. Some
+    // engines deliver the loss notification only after that release.
+    const release=(event:PointerEvent)=>{
+      if(pointer.current===event.pointerId)finish(input.current?.hasPointerCapture(event.pointerId)===true);
+    };
+    window.addEventListener('blur',cancel);
+    window.addEventListener('pointerup',release,true);
+    window.addEventListener('pointercancel',cancelPointer,true);
+    window.addEventListener('lostpointercapture',cancelPointer,true);
+    if(disabled)cancel();
+    return()=>{
+      window.removeEventListener('blur',cancel);
+      window.removeEventListener('pointerup',release,true);
+      window.removeEventListener('pointercancel',cancelPointer,true);
+      window.removeEventListener('lostpointercapture',cancelPointer,true);
+    };
   },[disabled,value,audio]);
   const move=(event:ReactPointerEvent<HTMLInputElement>)=>{
     // The native thumb is 10px wide. Its center travels inside the track ends.
@@ -113,11 +127,8 @@ function VolumeControl({field,value,save,disabled}:{field:'ringtoneVolume'|'whit
       if(Math.abs(event.clientX-(left+5+(width-10)*latest.current/100))>5)move(event);
     }}
     onPointerMove={event=>{if(pointer.current===event.pointerId){if(event.buttons===0)finish(false);else move(event)}}}
-    onPointerUp={event=>{if(pointer.current===event.pointerId)finish(true)}}
-    onPointerCancel={event=>{if(pointer.current===event.pointerId)finish(false)}}
-    onLostPointerCapture={event=>{if(pointer.current===event.pointerId)finish(false)}}
     onKeyDown={event=>{
-      if(event.key==='Escape'&&active()){event.stopPropagation();finish(false);return}
+      if(event.key==='Escape'&&active()){event.preventDefault();event.stopPropagation();finish(false);return}
       if(pointer.current!==null){if(volumeKeys.has(event.key))event.preventDefault();return}
       if(volumeKeys.has(event.key))keys.current.add(event.key);
     }}
