@@ -28,6 +28,8 @@ macOS Node 24 的浏览器合同曾在两个标签页竞争音频锁时假定固
 
 CI #150 的 Ubuntu／Node 24 作业在获取 Firefox 和 WebKit 的系统依赖时超时。该作业使用与锁定 Playwright 版本匹配的镜像，预装三个受测引擎和系统依赖。作业时限为 30 分钟，给冷拉取镜像预留余量。[超时作业](https://github.com/menggou1/FocusTodo-Local/actions/runs/44270097521/job/134684709745)
 
+CI #151 的容器作业在构建时遇到 Git 工作区所有权检查。作业先核对工作区路径和检出的提交，再为本作业内的 Git 命令设置该路径的 `safe.directory`。[失败作业](https://github.com/menggou1/FocusTodo-Local/actions/runs/44290847746/job/134755704275)
+
 ## 版本记录
 
 2.0.1 废弃候选从正式列表撤下，其有效修改归入 2.0.2 的更新记录。[2.0.1 候选报告](UPDATE-2.0.1.md)与既有发布证据继续保留。E09、V04 的人工验收已完成，独立调查见[待办](../BACKLOG.md)。

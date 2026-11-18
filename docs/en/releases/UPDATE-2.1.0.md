@@ -28,6 +28,8 @@ The macOS Node 24 browser test assumed that a specific tab would win when two ta
 
 The Ubuntu Node 24 job in CI #150 timed out while fetching Firefox and WebKit system dependencies. It now uses an image matching the locked Playwright version, with all three test engines and system dependencies preinstalled. The job allows 30 minutes to accommodate a cold image pull. [Timed-out job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44270097521/job/134684709745)
 
+The container build in CI #151 hit Git’s workspace ownership check. The job verifies the workspace path and checked-out commit before setting that path as `safe.directory` for its Git commands. [Failed job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44290847746/job/134755704275)
+
 ## Version history
 
 2.0.2 already includes the valid changes from the abandoned 2.0.1 candidate. The formal update lists consolidate those changes under 2.0.2 and retain the [candidate report and evidence](UPDATE-2.0.1.md). The owner confirmed the E09 and V04 manual acceptance items. Remaining technical investigations are tracked in the [backlog](../BACKLOG.md).
