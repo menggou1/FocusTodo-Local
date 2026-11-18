@@ -213,13 +213,23 @@ async function main() {
                     assert.equal(target,false);
                 },{expectedPageError:message=>engine==='webkit'&&/\/redirect due to access control checks\.$/.test(message)});
                 await run(browser, engine, 'native Web Locks transfer automatic audio ownership when a page suspends', async ({page,context}) => {
+                    await page.evaluate(async()=>{
+                        await startServices();
+                        await coreServices.settings.set('bgMusic','bgm_Rain');
+                        await coreServices.timer.command({type:'start',mode:'countup',sessionId:'audio'});
+                    });
+                    // Establish the first owner before starting the contender.
+                    // Both tabs otherwise race to acquire the native lock after the timer broadcast.
+                    await page.waitForFunction(()=>audioTrace.some(row=>row.kind==='play'&&row.audio.loop&&!row.audio.paused));
                     const peer=await context.newPage();
                     try{
-                        await page.evaluate(async()=>{await startServices();await coreServices.settings.set('bgMusic','bgm_Rain')});
-                        await peer.goto(origin);await peer.evaluate(()=>startServices());
-                        await page.evaluate(()=>coreServices.timer.command({type:'start',mode:'countup',sessionId:'audio'}));
-                        await page.waitForFunction(()=>audioTrace.some(row=>row.kind==='play'&&row.audio.loop&&!row.audio.paused));
-                        await peer.evaluate(()=>coreServices.timer.refresh());
+                        await peer.goto(origin);
+                        await peer.evaluate(()=>startServices());
+                        const audioLock='FocusTodoStandalone.background-audio';
+                        await peer.waitForFunction(async name=>{
+                            const {held,pending}=await navigator.locks.query();
+                            return held.some(lock=>lock.name===name)&&pending.some(lock=>lock.name===name);
+                        },audioLock);
                         const playing=async tab=>tab.evaluate(()=>audioTrace.filter(row=>row.kind==='play'&&row.audio.loop&&!row.audio.paused).length);
                         assert.equal(await playing(page)+await playing(peer),1);
                         await page.evaluate(()=>coreServices.suspend());
