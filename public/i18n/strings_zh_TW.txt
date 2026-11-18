@@ -338,7 +338,7 @@ apr_sys = 跟隨系統
 apr_theme = 主題
 
 gen_play_complete_sound = 播放完成任務提示音
-gen_new_task_on_top = 在頂部新增任務
+gen_new_task_on_top = 新任務新增至其他任務上方
 gen_feature = 功能開關
 
 set = 設置

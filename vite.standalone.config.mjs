@@ -1,6 +1,8 @@
-import { defineConfig } from 'vite';
+import { defineConfig, normalizePath } from 'vite';
+import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
+const devIconURL = '/@fs/' + encodeURI(normalizePath(fileURLToPath(new URL('./public/focus-app.ico', import.meta.url))));
 const release = JSON.parse(readFileSync(new URL('./standalone/app-version.json', import.meta.url), 'utf8'));
 export default defineConfig(({ mode }) => ({
   root: 'standalone',
@@ -21,7 +23,11 @@ export default defineConfig(({ mode }) => ({
     transformIndexHtml(html, context) {
       html = html.replace('__FOCUS_APP_TITLE__', release.localVersion + (mode === 'release' ? '' : ' — Preview'))
         .replace('__FOCUS_PREF_PREFIX__', mode === 'release' ? '' : 'FocusTodoStandalone.data.');
-      return context.server ? html.replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*") : html;
+      if (!context.server) return html;
+      // Vite hashes this HTML asset at build time. The dev root is standalone/,
+      // so the initial HTML needs an explicit Vite URL for its sibling asset.
+      return html.replaceAll('../public/focus-app.ico', devIconURL)
+        .replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*");
     },
   }],
   server: { host: '127.0.0.1', port: 5511, strictPort: true },

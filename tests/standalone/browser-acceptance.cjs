@@ -29,6 +29,38 @@ async function run(browser, origin, url, name, body, options = {}) {
     } finally { await harness.context.close(); }
 }
 
+async function testDevelopmentPreview(browser) {
+    const { createServer } = await import('vite');
+    const vite = await createServer({
+        configFile: path.join(root, 'vite.standalone.config.mjs'),
+        server: { host: '127.0.0.1', port: 0, strictPort: true },
+    });
+    try {
+        await vite.listen();
+        const origin = 'http://127.0.0.1:' + vite.httpServer.address().port;
+        await run(browser, origin, origin + '/', 'chromium: Vite development preview loads the startup icon and enters the workspace', async ({ page }) => {
+            await page.goto(origin, { waitUntil: 'domcontentloaded' });
+            await ready(page);
+            assert.equal(await page.locator('#prototype-startup').getAttribute('data-state'), 'ready');
+            const icon = await page.locator('#prototype-brand').evaluate(image => ({ url: image.src, width: image.naturalWidth }));
+            assert.equal(icon.width, 30);
+            assert.equal(await page.locator('link[rel=icon]').evaluate(link => link.href), icon.url);
+            assert(new URL(icon.url).pathname.startsWith('/@fs/'));
+            const response = await page.request.get(icon.url);
+            assert.equal(response.status(), 200);
+            assert((await response.body()).equals(fs.readFileSync(path.join(root, 'public/focus-app.ico'))));
+            await page.locator('[data-view=settings]').click();
+            await page.getByRole('button', { name: '通用', exact: true }).click();
+            const addOnTop = page.getByRole('checkbox', { name: '新任务添加至其他任务上方', exact: true });
+            assert(await addOnTop.isChecked());
+            await addOnTop.uncheck();
+            await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.NewTskOnTop') === 'false');
+        });
+    } finally {
+        await vite.close();
+    }
+}
+
 async function main() {
     fs.mkdirSync(evidence, { recursive: true });
     const files = collectFiles(site);
@@ -49,6 +81,7 @@ async function main() {
             const browser = await launch(engine);
             versions[engine] = browser.version();
             try {
+                if (engine === 'chromium') await testDevelopmentPreview(browser);
                 for (const basePath of ['/', '/FocusTodo-Local/']) {
                     const server = createStandaloneServer({ root: site, basePath });
                     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

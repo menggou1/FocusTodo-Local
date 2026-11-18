@@ -24,7 +24,7 @@
 .workspace-subtask{position:relative;gap:4px}.workspace-subtask>.workspace-handle{position:absolute;left:-18px;opacity:0}.workspace-subtask:hover>.workspace-handle,.workspace-subtask>.workspace-handle:focus-visible{opacity:1}
 .workspace-details .legacy-detail-note{display:block;resize:none;margin:6px 14px 0 16px;padding:8px 0 0;width:calc(100% - 30px);height:171px;border:0;background:transparent;line-height:20px;font-size:14px;outline:0;flex:none}
 .legacy-detail-note::placeholder{color:var(--workspace-muted)}.workspace-details .legacy-detail-bottom{position:relative;flex:none;margin:0;padding:0 12px;display:flex;align-items:center;gap:0;height:42px;border-top:1px solid var(--workspace-line);background:var(--workspace-panel)}
-.legacy-detail-bottom>span{flex:1;text-align:center;color:var(--workspace-muted);font-size:14px}.workspace-details .legacy-detail-bottom button{width:24px;height:30px;padding:0}.legacy-detail-bottom .legacy-icon{width:20px;height:20px}
+.legacy-detail-bottom>span{flex:1;text-align:center;color:var(--workspace-muted);font-size:14px}.workspace-details .legacy-detail-bottom button{width:24px;height:30px;padding:0}.workspace-details .legacy-detail-bottom .legacy-icon{width:24px;height:24px;transform:translateY(1px)}
 @media(max-width:1050px){.workspace-details{flex-basis:324px;width:324px}}@media(max-width:760px){.workspace-details{flex:0 0 324px;width:324px}}@media(max-width:540px){.workspace-details{width:324px;border:0;margin:16px 16px 16px 0}}
 
 /* W6: legacy detail field metrics */
