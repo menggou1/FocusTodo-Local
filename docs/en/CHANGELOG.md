@@ -2,7 +2,15 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.0.2**, author Lexible.
+Current application: **2.1.0**, author Lexible.
+
+## 2.1.0 · 2026-11-18
+
+- Toggle task completion sounds under Alert sounds and keep the shared volume. Volume feedback plays after adjustment, and both alarm lists put None first.
+- Startup shows readiness progress for required assets and local initialization. The portable browser icon loads offline through a relative URL.
+- Refresh the profile avatar after import, share scrollbars across import and notifications, fix notifications over the calendar, center the update confirmation, and use the standard interruption dialog.
+
+[English report](releases/UPDATE-2.1.0.md).
 
 ## 2.0.2 · 2026-11-17
 
@@ -14,14 +22,7 @@ Current application: **2.0.2**, author Lexible.
 
 [English report](releases/UPDATE-2.0.2.md).
 
-## 2.0.1 · 2026-11-17
-
-- Share default avatars and invalid-image fallbacks; use the standard update dialog with an OK button.
-- Fix settings and theme feedback, dropdown toggling and selected marks, and preload theme images.
-- Restore ringtone option previews and volume feedback, improve slider precision and share custom scrollbars.
-- Use the current version in the Simplified Chinese title and preserve settings when uploads or imports are cancelled.
-
-[English report](releases/UPDATE-2.0.1.md).
+The abandoned 2.0.1 candidate had no tag or GitHub Release. Its valid changes are included in 2.0.2. See the [candidate report and evidence](releases/UPDATE-2.0.1.md).
 
 ## 2.0.0 · 2026-11-17
 

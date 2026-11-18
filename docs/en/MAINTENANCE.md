@@ -54,12 +54,12 @@ Keep every pushed tag permanently, including tags for failed, cancelled or unpub
 
 ### Failed release candidates
 
-This policy takes effect when preparing 2.0.3 and applies to 2.0.3 and later versions.
+This policy takes effect when preparing 2.1.0 and applies to 2.1.0 and later versions.
 
 - Once the owner explicitly abandons a failed candidate, retire its version number permanently and increment the patch component for subsequent fixes. Preserve any pushed tag under the rule above. If a tag was never created, do not create it retroactively. An untagged candidate may keep its version during preparation as long as it has not been explicitly abandoned.
 - Give abandoned candidates no separate entry in the app's official update list (the `updates` array in `release.json`). Carry their valid changes and corresponding update notes into the next stable release so the same changes appear on a single update card. Preserve necessary failure records, verification evidence and references to historical reports.
 - [1.4.2 → 1.4.3](releases/UPDATE-7.1.1-local.1.4.3.md) and [1.5.1 → 1.5.2](releases/UPDATE-7.1.1-local.1.5.2.md) both retained the original failed candidate tag, carried the valid changes into the next stable release and documented the failure and verification evidence in that release's report.
-- The owner explicitly abandoned [2.0.1](releases/UPDATE-2.0.1.md). No tag or GitHub Release was created. [2.0.2](releases/UPDATE-2.0.2.md) inherited its valid changes. When preparing 2.0.3, remove the 2.0.1 entry from `release.json.updates` and consolidate its valid changes under 2.0.2 in both the Chinese and English changelogs. Retain the 2.0.1 candidate reports and verification evidence. Check that the relevant links in both changelogs and historical reports still resolve. Keep the published 2.0.2 content intact.
+- The owner explicitly abandoned [2.0.1](releases/UPDATE-2.0.1.md). No tag or GitHub Release was created. [2.0.2](releases/UPDATE-2.0.2.md) inherited its valid changes. When preparing 2.1.0, remove the 2.0.1 entry from `release.json.updates` and consolidate its valid changes under 2.0.2 in both the Chinese and English changelogs. Retain the 2.0.1 candidate reports and verification evidence. Check that the relevant links in both changelogs and historical reports still resolve. Keep the published 2.0.2 content intact.
 
 ## Validation and publishing
 
