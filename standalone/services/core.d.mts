@@ -113,6 +113,7 @@ export interface CoreServices {
         setWidgetLayout(order: readonly number[], visible: readonly number[]): Promise<Readonly<PreferenceState>>;
         goals(): readonly {time: number; type: string; value: number; [key: string]: unknown}[]; setGoal(minutes: number): Promise<void>;
         timerConfig(task?: CompatibleRecord): TimerConfig; profile(): {name: string; avatar: string; account: string};
+        subscribeProfile(listener: () => void): () => void;
         initializeIdentity(localName: string): Promise<void>; saveProfile(field: 'name' | 'avatar', value: string): Promise<{name: string; avatar: string; account: string}>;
         dispose(): void;
     };

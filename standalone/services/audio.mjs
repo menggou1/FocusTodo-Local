@@ -1,11 +1,11 @@
 import { invariant } from './errors.mjs';
 /** A browser lock owns automatic background playback. No timeout steals it. */
-export function createAudioService({ createAudio, locks, settings, visible, onError = () => {}, notice = () => {}, setTimeout: schedule = globalThis.setTimeout, clearTimeout: cancel = globalThis.clearTimeout }) {
+export function createAudioService({ createAudio, locks, settings, visible, onError = () => {}, notice = () => {} }) {
     let background = null, audition = null, timerState = 'initial', suspended = false, disposed = false;
     let requesting = false, controller = null, release = null, failed = false, explained = false;
     const effects = new Set();
-    let tipTimer = null, tip = null, whiteNoisePreview = null;
-    const stopTip = () => { cancel(tipTimer); tipTimer = null; stop(tip); tip = null; };
+    let tip = null, whiteNoisePreview = null;
+    const stopTip = () => { stop(tip); tip = null; };
     const stop = audio => { if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); } };
     const report = error => { try { onError(error); } catch (_) { /* Observer. */ } };
     const play = (file, volume, loop) => {
@@ -51,7 +51,9 @@ export function createAudioService({ createAudio, locks, settings, visible, onEr
         volumeTip(volume) {
             invariant(!disposed, 'Audio service disposed', 'disposed');
             stopTip();
-            if (volume > 0) tipTimer = schedule(() => { tipTimer = null; tip = play('VolumeTip.wav', volume, false); if (tip) tip.onended = tip.onerror = stopTip; }, 100);
+            tip = volume > 0 ? play('VolumeTip.wav', volume, false) : null;
+            const current = tip;
+            if (current) current.onended = current.onerror = () => { if (tip === current) stopTip(); };
         },
         auditionVolume(value) { if (audition) audition.volume = Math.max(0, Math.min(1, value)); },
         previewWhiteNoiseVolume(value) { if (disposed) return; whiteNoisePreview = value === null ? null : Math.max(0, Math.min(1, value)); update(); },

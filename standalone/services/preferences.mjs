@@ -20,7 +20,7 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
             else if (typeof fallback === 'boolean') value = !raw ? fallback : raw === 'true';
             else if (typeof fallback === 'number') {
                 value = Number(raw) || fallback;
-                if (['ringtoneVolume','whiteNoiseVolume'].includes(field)) value = raw === null ? 100 : Math.max(0, Math.min(100, Number(raw)));
+                if (['ringtoneVolume','whiteNoiseVolume'].includes(field)) value = raw === null || !Number.isFinite(Number(raw)) ? fallback : Math.max(0, Math.min(100, Number(raw)));
                 if (field === 'projectRegionWidth') value = Math.round(Math.max(180, Math.min(380, Number(raw) || 280)));
             } else {
                 value = raw || fallback;
@@ -36,7 +36,7 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
         return result;
     };
     const state = snapshotSource(read(), onError);
-    const refresh = () => { state.publish(read()); return state.getSnapshot(); };
+    const refresh = () => { profileState.publish(readProfile()); state.publish(read()); return state.getSnapshot(); };
     const set = async (field, value) => {
         const definition = preferenceDefinitions[field]; invariant(definition || field === 'defaultDeadline', 'Unknown preference');
         if (field === 'language') invariant(['auto','en','zh-CN'].includes(value), 'Unsupported language');
@@ -54,13 +54,15 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
         await data.themeStorageOperation(() => value === null ? storage.removeItem(definition[0]) : storage.setItem(definition?.[0] || 'DefaultDeadline', Array.isArray(value)?value.join(','):String(value)));
         const result = refresh(); data.changed('settings'); return result;
     };
-    const profile = () => {
+    const readProfile = () => {
         let name = '';
         try { name = decodeBase64(storage.getItem('cookie.NAME') || ''); } catch (_) { /* Initialization repairs malformed local names. */ }
         return { name, avatar: storage.getItem('Portrait') || '', account: storage.getItem('cookie.ACCT') || '' };
     };
+    const profileState = snapshotSource(readProfile(), onError);
     return Object.freeze({
-        getSnapshot: state.getSnapshot, subscribe: state.subscribe, refresh, set, profile,
+        getSnapshot: state.getSnapshot, subscribe: state.subscribe, refresh, set,
+        profile: profileState.getSnapshot, subscribeProfile: profileState.subscribe,
         async setWidgetLayout(order, visible) {
             for (const values of [order,visible]) invariant(Array.isArray(values)&&values.every(value=>[0,1,2].includes(value))&&new Set(values).size===values.length,'Invalid timer widgets');
             invariant(visible.every(value=>order.includes(value)),'Visible timer widgets must belong to the ordered list');
@@ -78,16 +80,19 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
                 const values = { ExpiredDate: '0', Version: '6.5', 'cookie.ACCT': encodeBase64('local@local'), 'cookie.NAME': encodeBase64(localName),
                     'cookie.PID': 'local-' + randomUUID(), 'cookie.UID': 'local-' + randomUUID(), 'cookie.JSESSIONID': randomUUID() };
                 for (const [key, value] of Object.entries(values)) if (!storage.getItem(key) || key === 'ExpiredDate') storage.setItem(key, value);
-                if (!profile().name) storage.setItem('cookie.NAME', encodeBase64(localName));
+                if (!readProfile().name) storage.setItem('cookie.NAME', encodeBase64(localName));
             });
+            profileState.publish(readProfile());
         },
         async saveProfile(field, value) {
             invariant(['name','avatar'].includes(field), 'Unknown profile field');
             if (field === 'name') invariant(typeof value === 'string' && value.trim() && value.trim().length <= 50, 'Name must contain 1–50 characters');
             else invariant(typeof value === 'string' && value.length <= 512 * 1024 && /^data:image\/(?:png|jpeg|gif);base64,[A-Za-z0-9+/]+=*$/.test(value), 'Invalid avatar');
             await data.themeStorageOperation(() => storage.setItem(field === 'name' ? 'cookie.NAME' : 'Portrait', field === 'name' ? encodeBase64(value.trim()) : value));
-            return profile();
+            profileState.publish(readProfile());
+            data.changed('settings');
+            return profileState.getSnapshot();
         },
-        dispose: state.dispose,
+        dispose() { profileState.dispose(); state.dispose(); },
     });
 }

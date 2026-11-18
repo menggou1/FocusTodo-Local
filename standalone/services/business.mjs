@@ -15,7 +15,7 @@ function collect(tx, done, fail, apply, beforeCommit = () => {}) {
         };
     }
 }
-export function createBusinessService({ data, core, now, randomUUID, settings, onError, fault = () => {} }) {
+export function createBusinessService({ data, core, now, randomUUID, settings, onError, fault = () => {}, onTaskCompleted = () => {} }) {
     const state = snapshotSource({ projects: [], tasks: [], subtasks: [], schedules: [], records: [], sessions: [] }, onError);
     let disposed = false, revision = 0;
     const reportCache = new Map();
@@ -174,6 +174,9 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
             default: invariant(false, 'Unknown business command');
             }}; return batch ? batch.map(apply) : apply(input);
         }, tx => fault('business-commit', { transaction: tx })));
+        if (request.type === 'completeTask') {
+            try { onTaskCompleted(); } catch (error) { onError?.(error); }
+        }
         await refresh(); data.changed('timer'); return result;
     };
     return Object.freeze({

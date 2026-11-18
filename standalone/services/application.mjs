@@ -52,12 +52,15 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
         onIntent(field, value) { if (field === 'externalNetwork' && !value) { network.cancel();wallpaper.cancel(); } } });
     const language = createLanguageService({ settings, catalog, languages, encodeBase64 });
     const notifications = createNotificationService({ api: notification, focus, onError: report, icon: notificationIcon });
-    business = createBusinessService({ data, core, now, randomUUID, settings, onError: report, fault });
-    if (createAudio) audio = createAudioService({ createAudio, locks, settings, visible, onError: report, notice: message => onEvent('notice', message), setTimeout: schedule, clearTimeout: cancel });
+    business = createBusinessService({ data, core, now, randomUUID, settings, onError: report, fault, onTaskCompleted() {
+        if (settings.getSnapshot().completeSoundEnabled) audio?.effect('Complete.m4a');
+    } });
+    if (createAudio) audio = createAudioService({ createAudio, locks, settings, visible, onError: report, notice: message => onEvent('notice', message) });
     timer = createTimerService({ data, core, now, randomUUID, onError: report, onCommit(result) {
         for (const event of result.events) {
             const preferences = settings.getSnapshot(), alarm = event.type === 'work' ? preferences.workAlarm : preferences.breakAlarm;
-            audio?.effect(alarm + '.mp3'); notifications.show(language.text(event.type === 'work' ? '专注完成' : '休息结束'), 'FocusTodo');
+            if (alarm !== 'alm_None') { try { audio?.effect(alarm + '.mp3'); } catch (error) { report(error); } }
+            notifications.show(language.text(event.type === 'work' ? '专注完成' : '休息结束'), 'FocusTodo');
         }
     } });
     const unsubscribeTimer = timer.subscribe(() => audio?.setTimerState(timer.getSnapshot()?.state || 'initial'));

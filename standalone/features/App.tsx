@@ -32,7 +32,11 @@ type View = SidebarView;
 export function App({ services }: { services: ApplicationServices }) {
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
   const text = workspaceText(services.language.locale);
-  useEffect(()=>{preloadThemes()},[]);
+  useEffect(()=>{
+    if(document.readyState==='complete')preloadThemes();
+    else window.addEventListener('load',preloadThemes,{once:true});
+    return()=>window.removeEventListener('load',preloadThemes);
+  },[]);
   useEffect(() => {
     document.documentElement.lang = services.language.locale;
     document.title = (services.language.locale==='zh-CN'?'专注清单':'FocusTodo ')+services.release.metadata.version;
@@ -47,6 +51,7 @@ export function App({ services }: { services: ApplicationServices }) {
 
 function Workspace() {
   const { services, text, run, report, busy, blocked } = useWorkspace();
+  const profile = useSyncExternalStore(services.settings.subscribeProfile, services.settings.profile);
   const snapshot = useSyncExternalStore(services.business.subscribe, services.business.getSnapshot);
   const session = useSyncExternalStore(services.timer.subscribe, services.timer.getSnapshot);
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
@@ -206,10 +211,7 @@ function Workspace() {
         if (target) void reorder(target, { row: task, rows });
       }}>⠿</button>
     <input type="checkbox" data-repeat={number(task.rCycle)>0&&!task.isFinished||undefined} aria-label={(task.isFinished ? text.undo : text.complete) + ': ' + task.name} checked={!!task.isFinished} disabled={busy || blocked}
-      onChange={() => { void run(async () => {
-        await services.business.command({ type: task.isFinished ? 'uncompleteTask' : 'completeTask', id: task.id, expected: task });
-        if (!task.isFinished && preferences.completeSoundEnabled) { try { services.audio?.effect('Complete.m4a', preferences.ringtoneVolume / 100); } catch { /* Media failure cannot undo a committed task. */ } }
-      }); }} />
+      onChange={() => { void run(() => services.business.command({ type: task.isFinished ? 'uncompleteTask' : 'completeTask', id: task.id, expected: task })); }} />
     <button type="button" className="workspace-task-start" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked || !!task.isFinished} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}><LegacyIcon name={task.isFinished?'task-start-disabled':session?.taskId===task.id&&session.state==='work'?'task-pomo-running':'task-start'}/></button>
     <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} selected={selected===task.id} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
     {!!number(task.reminderDate)&&<span className="workspace-task-status workspace-task-reminder" data-expired={number(task.reminderDate)<Date.now()||undefined} role="img" aria-label={text.reminder}/>}
@@ -222,7 +224,7 @@ function Workspace() {
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
     <header className="workspace-header">
       <button className="workspace-mobile-toggle" aria-label={text.navigation} aria-expanded={mobileNav} onClick={() => setMobileNav(value => !value)}>☰</button>
-      <div className="workspace-profile-container"><button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} aria-expanded={profileMenu} onContextMenu={event=>{event.preventDefault();setProfileMenu(!profileMenu)}} onClick={()=>setProfileMenu(!profileMenu)}><Avatar className="workspace-avatar" src={services.settings.profile().avatar} alt=""/><span>{services.settings.profile().name}</span><LegacyIcon className="workspace-profile-arrow" name="user-dropdown"/></button>{profileMenu&&<ProfileMenu close={()=>setProfileMenu(false)} account={()=>{setProfileMenu(false);setSettingsTab('account');setOverlay('settings')}}/>}</div>
+      <div className="workspace-profile-container"><button className="workspace-profile" aria-label={services.language.locale.startsWith('zh')?'本地资料':'Local profile'} aria-expanded={profileMenu} onContextMenu={event=>{event.preventDefault();setProfileMenu(!profileMenu)}} onClick={()=>setProfileMenu(!profileMenu)}><Avatar className="workspace-avatar" src={profile.avatar} alt=""/><span>{profile.name}</span><LegacyIcon className="workspace-profile-arrow" name="user-dropdown"/></button>{profileMenu&&<ProfileMenu close={()=>setProfileMenu(false)} account={()=>{setProfileMenu(false);setSettingsTab('account');setOverlay('settings')}}/>}</div>
       <nav aria-label={text.navigation}>{(['forest','reports'] as const).filter(item=>item!=='forest'||preferences.forestEnabled).map(item=><button key={item} title={text[item]} aria-label={text[item]} data-view={item} aria-current={overlay===item?'page':undefined} onClick={()=>navigate({kind:item})}><LegacyIcon name={item==='forest'?'header-forest':'header-report'}/>{item==='forest'&&forestReward>0&&<small className="legacy-forest-header-count">{forestReward}</small>}</button>)}<Updates openTask={openTask}/><button title={text.settings} aria-label={text.settings} data-view="settings" aria-current={overlay==='settings'?'page':undefined} onClick={()=>navigate({kind:'settings'})}><LegacyIcon name="header-setting"/></button></nav>
     </header>
     <div className={'workspace-layout' + (selectedTask && isTasks ? ' has-details' : '')}>

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import interactionCSS from '../../styles/interactions.css?inline';
 import { observeApplicationImages } from './AppInteractions';
 import type { TimerAction } from '../../services/core.mjs';
-import { Dialog, useWindowClose } from './Dialog';
+import { useWindowClose } from './Dialog';
 import { TimerProgress } from './TimerProgress';
 import { TimerWidgetCards, TimerTaskPomodoros } from './TimerWidgets';
 import { useWorkspace } from './Context';
@@ -196,13 +196,14 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
     {modePicker&&<TimerModeSelector mode={mode} interval={interval} close={()=>setModePicker(false)} confirm={async value=>{return run(async()=>{await services.timer.command({type:'mode',mode:value,expectedSession:session?.sessionId});await services.settings.set('isCountdown',value==='countdown')})}}/>}
     {widgetEditor&&<WidgetEditor close={()=>setWidgetEditor(false)}/>}
     {sound && <WhiteNoiseSelector close={() => setSound(false)} />}
-    {pending && !recoveryCollapsed && <Dialog title={text.recovery} close={() => setRecoveryCollapsed(true)}>
-      <p>{text.recoveryHelp}</p><p>{new Date(pending.from).toLocaleString(services.language.locale)} — {new Date(pending.to).toLocaleString(services.language.locale)}</p>
-      <form onSubmit={async event => { event.preventDefault(); await command({ type: 'resolve', cutoff, continue: keepRunning }); }}>
+    {pending && !recoveryCollapsed && <ConfirmDialog title={text.recovery} message={text.recoveryHelp} canClose={!busy} close={() => setRecoveryCollapsed(true)} extra={<>
+      <p>{new Date(pending.from).toLocaleString(services.language.locale)} — {new Date(pending.to).toLocaleString(services.language.locale)}</p>
+      <form id="resolve-interrupted-time" className="workspace-recovery-form" onSubmit={async event => { event.preventDefault(); await command({ type: 'resolve', cutoff, continue: keepRunning }); }}>
         <label>{text.cutoff}<input type="datetime-local" step="0.001" required min={localTime(pending.from)} max={localTime(pending.to)} value={localTime(cutoff || pending.to)} onChange={event => setCutoff(new Date(event.target.value).getTime())} /></label>
         <label className="workspace-check"><input type="checkbox" checked={keepRunning} onChange={event => setKeepRunning(event.target.checked)} />{text.keepRunning}</label>
-        <footer><button type="button" disabled={busy || blocked} onClick={() => { void command({ type: 'resolve', cutoff: pending.from, continue: false }); }}>{text.discardGap}</button><button className="primary" disabled={busy || blocked}>{text.confirm}</button></footer>
-      </form>
-    </Dialog>}
+      </form></>}>
+      <button type="button" disabled={busy || blocked} onClick={() => { void command({ type: 'resolve', cutoff: pending.from, continue: false }); }}>{text.discardGap}</button>
+      <button type="submit" form="resolve-interrupted-time" className="primary" disabled={busy || blocked}>{text.confirm}</button>
+    </ConfirmDialog>}
   </>;
 }

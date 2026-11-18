@@ -34,8 +34,8 @@
 .legacy-sound-settings>label.workspace-check{display:none}.legacy-inline-dialog .workspace-project-manager{padding:0}.legacy-inline-dialog>.domain-toolbar{margin:0 0 16px}.legacy-inline-dialog>footer{display:none}
 .domain-overlay.full:has(.domain-reports){width:100vw;height:100dvh;min-width:1200px;max-width:none;margin:0;border-radius:0}.domain-overlay.full:has(.domain-reports) .domain-overlay-body{overflow:auto;background:var(--workspace-bg)}
 .domain-overlay:has([data-testid=forest-page]){width:708px;height:529px}.domain-overlay:has([data-testid=forest-page])>header{font-size:16px}.domain-overlay:has([data-testid=forest-page])>header h1{font-size:16px}
-.legacy-notification-popover{position:fixed;top:47px;right:4px;width:240px;height:620px;max-height:calc(100dvh - 60px);background:var(--workspace-panel);border-radius:8px;box-shadow:0 0 24px #0002;z-index:11;color:var(--workspace-text);overflow:visible}
-.legacy-notification-popover:before{content:'';position:absolute;right:50px;top:-8px;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:10px solid var(--workspace-panel)}
+.legacy-notification-popover{position:fixed;top:47px;right:4px;width:240px;height:620px;max-height:calc(100dvh - 60px);background:var(--notification-surface,var(--workspace-panel));border-radius:8px;box-shadow:0 0 24px #0002;z-index:11;color:var(--workspace-text);overflow:visible}
+.legacy-notification-popover:before{content:'';position:absolute;right:50px;top:-8px;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:10px solid var(--notification-surface,var(--workspace-panel))}
 .legacy-notification-popover>header{height:36px;line-height:35px;border-bottom:1px solid #e5e5e5;font-size:16px;text-align:center}
 .legacy-notification-scroll{height:calc(100% - 36px);overflow:auto;padding:0 12px}.legacy-notification-scroll h3{font-size:14px;margin:8px 0;font-weight:700}
 .workspace-shell .legacy-notification-entry{display:block;position:relative;width:100%;padding:10px;margin:8px 0;border:1px solid #e5e5e5;background:#f5f5f7;border-radius:8px;text-align:left;font-size:14px;line-height:22px}
@@ -81,7 +81,8 @@
 .legacy-local-info .legacy-local-links{gap:0;display:block;margin-top:0}.legacy-local-links a:first-child{display:inline-flex;vertical-align:middle;padding:4px;border-radius:5px}.legacy-local-links a:last-child{font-size:14px!important}
 .legacy-settings .legacy-sound-settings{display:block;width:calc(100% + 28px)}
 .legacy-settings .legacy-sound-settings .legacy-sound-row{width:100%;height:48px;min-height:48px;margin:0;display:flex;justify-content:flex-start;align-items:center;gap:0;font:14px/20px var(--workspace-font)}
-.legacy-sound-row>span:first-child{width:198px;flex:none}.legacy-settings .legacy-sound-row select{margin:0}.legacy-settings .legacy-sound-row input[type=range]{appearance:none;flex:none;width:200px;height:10px;margin:0;padding:0;background:transparent;accent-color:#fd5553}
+.legacy-sound-row>span:first-child{width:198px;flex:none}.legacy-settings .legacy-sound-row select{margin:0}.legacy-settings .legacy-sound-completion>span:first-child{width:198px;flex:none}
+.legacy-sound-row input[type=range]{touch-action:none;appearance:none;flex:none;width:200px;height:10px;margin:0;padding:0;background:transparent;accent-color:#fd5553}
 .legacy-sound-row input[type=range]::-webkit-slider-runnable-track{height:3px;background:#fd5553;border-radius:2px}.legacy-sound-row input[type=range]::-webkit-slider-thumb{appearance:none;width:10px;height:10px;border-radius:50%;background:#fd5553;margin-top:-3.5px}
 .legacy-settings .legacy-sound-alarm{display:block;position:relative}.legacy-settings .legacy-sound-alarm>.legacy-alarm-preview{position:absolute;width:14px;height:14px;top:17px;left:368px;border:0;padding:0;background:transparent;display:none}.legacy-sound-alarm:hover>.legacy-alarm-preview,.legacy-sound-alarm:focus-within>.legacy-alarm-preview{display:block!important}.legacy-alarm-preview img{width:14px;height:14px;display:block}
 .legacy-settings .legacy-sound-settings>hr{margin:30px 28px 30px 0}
@@ -91,6 +92,9 @@
 .legacy-settings .legacy-noise-preview{display:none;position:absolute;right:38px;top:19px;width:14px;height:14px;border:0;background:transparent;padding:0}.legacy-noise-preview>img{width:14px;height:14px}.legacy-noise-option:hover .legacy-noise-preview,.legacy-noise-option:focus-within .legacy-noise-preview{display:block}.legacy-noise-option:hover .legacy-noise-choice>span{padding-right:20px}
 .legacy-backup-dialog{width:600px;max-width:calc(100vw - 48px);max-height:90vh;padding:26px;border-radius:14px;font:15px/1.75 var(--workspace-font);box-shadow:0 20px 80px #0004}
 .legacy-backup-dialog::backdrop{background:#17202b99}.legacy-backup-dialog>header{height:auto;min-height:38.5px;padding:0;margin:0 0 12px;display:block;box-shadow:none;text-align:left}.legacy-backup-dialog>header>h2{font-size:22px;font-weight:700;line-height:1.75;margin:0}.legacy-backup-dialog>header>button{display:none}
+.legacy-backup-restore[open]{display:flex;flex-direction:column;overflow:hidden}
+.legacy-backup-restore>header{flex:none}
+.legacy-backup-restore>form{min-height:0;overflow:auto}
 .legacy-backup-dialog>form{padding:0!important;margin:0}.legacy-backup-dialog>form>footer{display:flex;justify-content:flex-end;gap:10px;margin:22px 0 0;padding:0;border:0}.legacy-backup-dialog>form>footer button{font:14px/1.5 var(--workspace-font);border:1px solid #e5e5e5;border-radius:7px;padding:9px 16px;background:transparent}.legacy-backup-dialog>form>footer button.primary{border-color:#ff5155;background:#ff5155;color:#fff}
 .legacy-backup-dialog form p{margin:10px 0;font:15px/1.75 var(--workspace-font)}.legacy-backup-dialog form p.legacy-meta{font:13px/1.75 var(--workspace-font);margin:10px 0;color:var(--workspace-muted)}
 .legacy-backup-dialog label.workspace-check{height:auto;min-height:0;display:flex;align-items:flex-start;justify-content:flex-start;gap:9px;margin:10px 0;font-weight:700;font-size:15px;line-height:1.75;border:0}.legacy-backup-dialog label.workspace-check input{flex:none;width:13px;height:13px;margin:7px 0 0;appearance:auto;accent-color:#ff5155}
@@ -105,7 +109,8 @@
 .legacy-settings-menu-surface{position:fixed;z-index:100000}.legacy-settings-menu{position:relative;background:var(--workspace-panel);color:var(--workspace-text);border-radius:4px;box-shadow:0 0 0 1px #0000001a,0 4px 11px #0000001a;padding:4px 0;max-height:300px;overflow:auto;scrollbar-width:none;font:14px/20px var(--workspace-font)}
 .legacy-settings-menu>[role=option]{display:block;box-sizing:border-box;width:100%;min-height:37px;line-height:21px;text-align:left;border:0;border-radius:0;background:transparent;padding:8px 12px;color:inherit;font:inherit}.legacy-settings-menu>[role=option][data-active=true],.legacy-settings-menu>[role=option]:hover{background:var(--workspace-selected)}.legacy-settings-menu>[role=option]:disabled{opacity:.5}
 
-.legacy-notification-popover{color:#333}.legacy-notification-popover .legacy-notification-entry{color:var(--workspace-text);line-height:20px}.legacy-notification-entry>span{line-height:18px}:root[data-theme=dark] .legacy-notification-popover{background:#2d2d37}
+.legacy-notification-popover .legacy-notification-entry{color:var(--workspace-text);line-height:20px}.legacy-notification-entry>span{line-height:18px}:root[data-theme=dark] .legacy-notification-popover{--notification-surface:#2d2d37}
+:root[data-theme=dark] .legacy-notification-popover>header{border-color:#ffffff1f}
 .legacy-settings,.legacy-backup-dialog{--legacy-setting-border:#e5e5e5;--legacy-setting-split:#f4f4f4;--legacy-setting-muted:#aeaeae}
 :root[data-theme=dark] .legacy-settings,:root[data-theme=dark] .legacy-backup-dialog{--legacy-setting-border:rgba(255,255,255,.18);--legacy-setting-split:rgba(255,255,255,.08);--legacy-setting-muted:#8f8f91}
 .legacy-settings select,.legacy-settings .legacy-language,.legacy-account-row button,.legacy-settings .legacy-noise-choice,.legacy-backup-dialog .legacy-backup-formats,.legacy-backup-dialog .legacy-backup-analysis td,.legacy-backup-dialog .legacy-backup-analysis th,.legacy-backup-dialog>form>footer button{border-color:var(--legacy-setting-border)!important}
@@ -198,7 +203,7 @@
 .legacy-alarm-option-preview{position:absolute;right:34px;top:50%;transform:translateY(-50%);width:20px;height:20px;padding:3px;border:0;background:transparent;cursor:pointer}
 .legacy-alarm-option-preview img{display:block;width:14px;height:14px}
 .legacy-release-dialog article>footer{display:flex;justify-content:flex-end;gap:8px;margin:20px 0 0}
-.legacy-release-dialog article>footer button{height:30px;min-width:75px;border-radius:6px;font:12px/28px var(--workspace-font);padding:0 16px;background:var(--workspace-accent);color:#fff}
+.legacy-release-dialog article>footer button{display:grid;place-items:center;height:30px;min-width:75px;border-radius:6px;font:12px/1 var(--workspace-font);padding:0 16px;background:var(--workspace-accent);color:#fff}
 
 /* A transaction locks actions without flashing the entire settings control set. */
 .legacy-settings button:disabled,.legacy-settings input:disabled,.legacy-settings select:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}

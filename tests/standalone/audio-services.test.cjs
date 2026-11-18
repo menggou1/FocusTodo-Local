@@ -72,3 +72,26 @@ test('audio effects, audition volumes and background lifecycle match the old ada
     }
     assert.deepEqual(await trace(false),await trace(true));
 });
+
+test('task completion uses the shared alert volume only after commit and follows the saved compatibility switch',async t=>{
+    const media=[];
+    const h=await createApplication({application:{createAudio:mediaFactory(media)}});
+    t.after(h.dispose);
+    const {settings,business}=h.app;
+    assert.equal(settings.getSnapshot().completeSoundEnabled,true);
+    await settings.set('ringtoneVolume',37.5);
+    for(const id of ['enabled','disabled'])await business.command({type:'addTask',values:{id,name:id}});
+    await business.command({type:'completeTask',id:'enabled'});
+    await assert.rejects(business.command({type:'completeTask',id:'enabled'}));
+    await settings.set('completeSoundEnabled',false);
+    assert.equal(h.storage.getItem('TskCmpSnd'),'false');
+    await business.command({type:'completeTask',id:'disabled'});
+    await settings.set('workInterval',60);
+    await h.app.timer.command({type:'start',mode:'countdown',config:settings.timerConfig()});
+    h.clock.value+=60000;
+    await h.app.timer.command({type:'tick',expectedSession:h.app.timer.getSnapshot().sessionId});
+    h.app.audio.audition('alm_Timer.mp3',0.375);
+    assert.deepEqual(media.filter(row=>row.type==='play').map(({audio})=>[audio.file,audio.volume]),[
+        ['Complete.m4a',0.375],['alm_Timer.mp3',0.375],['alm_Timer.mp3',0.375],
+    ]);
+});

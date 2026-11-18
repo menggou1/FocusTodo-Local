@@ -5,6 +5,7 @@
 html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width:100%;min-width:1000px;height:100dvh;min-height:0;overflow:hidden}
 .legacy-icon{width:24px;height:24px;object-fit:contain;flex:none;vertical-align:middle}
 .workspace-header{padding:0 13px 0 16px;gap:0;height:50px;border-bottom:0;box-shadow:0 0 3px 1px rgba(224,224,224,.5);position:relative;z-index:5}
+.workspace-header:has([data-view=notifications][aria-expanded=true]){z-index:12}
 .workspace-header .workspace-profile{display:flex;align-items:center;gap:8px;padding:0;height:50px;line-height:50px}
 .workspace-header .workspace-profile>span{line-height:21px;height:21px;display:block;margin-bottom:1px}
 .workspace-header .workspace-profile:hover{background:transparent}.workspace-header .workspace-avatar{display:block;flex:none;width:30px;height:30px;max-width:none;aspect-ratio:1;border-radius:50%;object-fit:fill;background:transparent;margin-top:3.4px}

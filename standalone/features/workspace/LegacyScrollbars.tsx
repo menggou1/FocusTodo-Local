@@ -6,7 +6,7 @@ import { useLayoutEffect } from 'react';
 export function LegacyScrollbars() {
   useLayoutEffect(() => {
     const bound = new Map<HTMLElement, { dispose(): void; refresh(): void }>();
-    const selectors = '.legacy-settings-menu,.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-settings-project-rows,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll],.legacy-record-duration-picker,.legacy-record-task-scroll,.legacy-record-project-scroll,.legacy-tags-options,.legacy-record-inspector-content>form,.workspace-picker-surface .legacy-project-options,.legacy-calendar-project-menu,.legacy-folder-lists,.legacy-review-scroll,.legacy-focus-items,.legacy-doughnut-legend';
+    const selectors = '.legacy-settings-menu,.legacy-notification-scroll,.legacy-backup-restore>form,.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-settings-project-rows,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll],.legacy-record-duration-picker,.legacy-record-task-scroll,.legacy-record-project-scroll,.legacy-tags-options,.legacy-record-inspector-content>form,.workspace-picker-surface .legacy-project-options,.legacy-calendar-project-menu,.legacy-folder-lists,.legacy-review-scroll,.legacy-focus-items,.legacy-doughnut-legend';
     function bind(view: HTMLElement) {
       const track = document.createElement('div'), thumb = document.createElement('div');
       track.className = 'legacy-scroll-track'; thumb.className = 'legacy-scroll-thumb';

@@ -1,4 +1,4 @@
-import { Children, isValidElement, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { Children, isValidElement, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type SelectHTMLAttributes } from 'react';
 import { createPortal } from 'react-dom';
 import { Dialog } from './Dialog';
 import { useWorkspace } from './Context';
@@ -32,7 +32,7 @@ export function SettingsSelect({children,value,onChange,disabled,searchable=true
 const assets=import.meta.glob<string>('../../../public/img/{wn-*,setting-play}.*',{query:'?url',import:'default',eager:true});
 export const noiseOptions=[['Mute','mute'],['Ticking','tic-tac'],['FastTicking','countdown'],['WindWithCrickets','wind-with-crickets'],['Classroom','class-room'],['Wilderness','wilderness'],['Stream','stream'],['OceanShore','oceam-shore'],['Rain','rain'],['CofficeShop','cofe'],['FireBurning','bonfire'],['Library','library'],['WindThroughTrees','wind'],['Frogs','frogs-at-night'],['BrownNoise','brown-noise'],['Metronome','metronome']];
 export const soundImage=(name:string)=>assets['../../../public/img/'+name+'.png'];
-const alarms=['Timer','None','AlarmBeep','Beeps','Bell1','Bell2','BicycleBell','Birdcall','CarHorn','ClownHorn','CockCrow','Cuckoo','DrumCymbalCrash','Fanfare','Music1','Music2','Music3','PartyHorn','Percussion','PianoMusic','RingTone','Satellite','SchoolBell','ToyNoisemakerHonk','Victory','Whistle','WindChimes','WindUp'];
+const alarms=['None','Timer','AlarmBeep','Beeps','Bell1','Bell2','BicycleBell','Birdcall','CarHorn','ClownHorn','CockCrow','Cuckoo','DrumCymbalCrash','Fanfare','Music1','Music2','Music3','PartyHorn','Percussion','PianoMusic','RingTone','Satellite','SchoolBell','ToyNoisemakerHonk','Victory','Whistle','WindChimes','WindUp'];
 export function SoundSettings({ close=()=>{},inline=false }: {close?(): void;inline?:boolean}) {
   const { services, text, report, busy, blocked } = useWorkspace(),legacy=services.language.legacyText;
   const {prefs:preferences,change} = usePreferenceChanges();
@@ -41,7 +41,8 @@ export function SoundSettings({ close=()=>{},inline=false }: {close?(): void;inl
   const volume=(field:'ringtoneVolume'|'whiteNoiseVolume')=><VolumeControl field={field} value={preferences[field]} save={value=>change(field,value)} disabled={busy||blocked}/>;
   return <Dialog title={text.audio} close={close} inline={inline} className="legacy-sound-settings">
     {!navigator.locks&&<p>{services.language.text('当前浏览器不支持多标签页背景音协调，已暂停自动背景音。计时、完成铃声和手动试听仍可使用。') as string}</p>}
-    <h3 className="legacy-settings-category">{legacy('alm')}</h3>{volume('ringtoneVolume')}
+    <h3 className="legacy-settings-category">{services.language.text('提示音')}</h3>{volume('ringtoneVolume')}
+    <label className="domain-setting legacy-sound-completion"><span>{services.language.text('任务完成提示音')}</span><input className="legacy-switch" type="checkbox" checked={preferences.completeSoundEnabled} disabled={busy||blocked} onChange={event=>change('completeSoundEnabled',event.target.checked)}/></label>
     {(['workAlarm','breakAlarm']as const).map(field=><div className="legacy-sound-alarm" key={field}><label className="legacy-sound-row"><span>{legacy(field==='workAlarm'?'alm_work':'alm_break')}</span><SettingsSelect aria-label={legacy(field==='workAlarm'?'alm_work':'alm_break')} disabled={busy||blocked} value={preferences[field]} onChange={e=>{change(field,e.target.value)}} optionAction={(value,label)=>value==='alm_None'?null:<button type="button" className="legacy-alarm-option-preview" title={text.previewSound} aria-label={text.previewSound+': '+label} disabled={!services.audio} onClick={event=>{event.stopPropagation();audition(field,value)}}><img src={assets['../../../public/img/setting-play.png']} alt=""/></button>}>{alarms.map(name=><option key={name} value={'alm_'+name}>{legacy('alm_'+name)}</option>)}</SettingsSelect></label></div>)}
     <hr/><h3 className="legacy-settings-category">{legacy('bgm')}</h3>{volume('whiteNoiseVolume')}
     <div className="legacy-noise-grid" role="radiogroup" aria-label={legacy('bgm')}>{noiseOptions.map(([name,image])=>{const value='bgm_'+name;return <div className="legacy-noise-option" key={name}><button className="legacy-noise-choice" type="button" role="radio" aria-checked={preferences.bgMusic===value} disabled={busy||blocked} onClick={()=>{change('bgMusic',value)}}><img src={assets['../../../public/img/wn-'+image+'.png']} alt=""/><span>{legacy(value)}</span><i aria-hidden="true"/></button>{name!=='Mute'&&<button type="button" className="legacy-noise-preview" aria-label={text.previewSound+': '+legacy(value)} disabled={!services.audio||busy} onClick={()=>audition('bgMusic',value)}><img src={assets['../../../public/img/setting-play.png']} alt=""/></button>}</div>})}</div>
@@ -49,12 +50,79 @@ export function SoundSettings({ close=()=>{},inline=false }: {close?(): void;inl
   </Dialog>;
 }
 
-/** Pointer motion stays local; one final transaction saves the exact position. */
+const volumeKeys = new Set(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Home','End','PageUp','PageDown']);
+
 function VolumeControl({field,value,save,disabled}:{field:'ringtoneVolume'|'whiteNoiseVolume';value:number;save(value:number):void;disabled:boolean}) {
-  const {services}=useWorkspace(),legacy=services.language.legacyText;
-  const [draft,setDraft]=useState(value),dragging=useRef(false),latest=useRef(value);
-  useEffect(()=>{if(!dragging.current){latest.current=value;setDraft(value);if(field==='whiteNoiseVolume'&&services.settings.getSnapshot().whiteNoiseVolume===value)services.audio?.previewWhiteNoiseVolume(null)}},[value,field,services]);
-  useEffect(()=>()=>{if(field==='whiteNoiseVolume')services.audio?.previewWhiteNoiseVolume(null)},[field,services]);
-  const commit=()=>{dragging.current=false;save(latest.current);if(field==='whiteNoiseVolume'&&services.settings.getSnapshot().whiteNoiseVolume===latest.current)services.audio?.previewWhiteNoiseVolume(null)};
-  return <label className="legacy-sound-row"><span>{legacy('alm_volume')}</span><input aria-label={legacy(field==='ringtoneVolume'?'alm':'bgm')+' '+legacy('alm_volume')} type="range" min={0} max={100} step="any" style={{'--volume':draft+'%'} as CSSProperties} value={draft} disabled={disabled} onChange={event=>{dragging.current=true;latest.current=event.target.valueAsNumber;setDraft(latest.current);services.audio?.auditionVolume(latest.current/100);if(field==='whiteNoiseVolume')services.audio?.previewWhiteNoiseVolume(latest.current/100);services.audio?.volumeTip(latest.current/100)}} onPointerUp={commit} onPointerCancel={commit} onKeyUp={commit} onBlur={commit}/></label>;
+  const {services}=useWorkspace(),legacy=services.language.legacyText,audio=services.audio;
+  const [draft,setDraft]=useState(value);
+  const input=useRef<HTMLInputElement>(null),latest=useRef(value),pointer=useRef<number|null>(null),keys=useRef(new Set<string>());
+  const whiteNoise=field==='whiteNoiseVolume';
+  const active=()=>pointer.current!==null||keys.current.size>0;
+  useEffect(()=>{
+    if(active())return;
+    latest.current=value;
+    setDraft(value);
+    if(whiteNoise&&services.settings.getSnapshot().whiteNoiseVolume===value)audio?.previewWhiteNoiseVolume(null);
+  },[value,whiteNoise,services,audio]);
+  useEffect(()=>()=>{if(whiteNoise)audio?.previewWhiteNoiseVolume(null)},[whiteNoise,audio]);
+
+  const update=(position:number)=>{
+    latest.current=position;
+    setDraft(position);
+    audio?.auditionVolume(position/100);
+    if(whiteNoise)audio?.previewWhiteNoiseVolume(position/100);
+  };
+  const finish=(commit:boolean)=>{
+    const pointerId=pointer.current;
+    pointer.current=null;
+    if(!commit&&pointerId!==null&&input.current?.hasPointerCapture(pointerId))input.current.releasePointerCapture(pointerId);
+    keys.current.clear();
+    if(commit&&latest.current!==value){
+      save(latest.current);
+      audio?.volumeTip(latest.current/100);
+    }else{
+      audio?.auditionVolume(value/100);
+      if(whiteNoise)audio?.previewWhiteNoiseVolume(null);
+      latest.current=value;
+      setDraft(value);
+    }
+  };
+  useEffect(()=>{
+    const blur=()=>{if(active())finish(false)};
+    window.addEventListener('blur',blur);
+    if(disabled)blur();
+    return()=>window.removeEventListener('blur',blur);
+  },[disabled,value,audio]);
+  const move=(event:ReactPointerEvent<HTMLInputElement>)=>{
+    // The native thumb is 10px wide. Its center travels inside the track ends.
+    const {left,width}=event.currentTarget.getBoundingClientRect();
+    const percent=Math.min(100,Math.max(0,(event.clientX-left-5)/Math.max(1,width-10)*100));
+    update(Number(percent.toFixed(6)));
+  };
+  return <label className="legacy-sound-row"><span>{legacy('alm_volume')}</span><input
+    aria-label={(whiteNoise?legacy('bgm'):services.language.text('提示音'))+' '+legacy('alm_volume')}
+    ref={input} type="range" min={0} max={100} step="any" style={{'--volume':draft+'%'} as CSSProperties} value={draft} disabled={disabled}
+    onPointerDown={event=>{
+      if(disabled||!event.isPrimary||event.button!==0||pointer.current!==null)return;
+      event.preventDefault();
+      event.currentTarget.focus();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      pointer.current=event.pointerId;
+      keys.current.clear();
+      const {left,width}=event.currentTarget.getBoundingClientRect();
+      if(Math.abs(event.clientX-(left+5+(width-10)*latest.current/100))>5)move(event);
+    }}
+    onPointerMove={event=>{if(pointer.current===event.pointerId){if(event.buttons===0)finish(false);else move(event)}}}
+    onPointerUp={event=>{if(pointer.current===event.pointerId)finish(true)}}
+    onPointerCancel={event=>{if(pointer.current===event.pointerId)finish(false)}}
+    onLostPointerCapture={event=>{if(pointer.current===event.pointerId)finish(false)}}
+    onKeyDown={event=>{
+      if(event.key==='Escape'&&active()){event.stopPropagation();finish(false);return}
+      if(pointer.current!==null){if(volumeKeys.has(event.key))event.preventDefault();return}
+      if(volumeKeys.has(event.key))keys.current.add(event.key);
+    }}
+    onChange={event=>{update(event.target.valueAsNumber);if(!active())finish(true)}}
+    onKeyUp={event=>{if(keys.current.delete(event.key)&&!keys.current.size)finish(true)}}
+    onBlur={()=>{if(keys.current.size)finish(true)}}
+  /></label>;
 }
