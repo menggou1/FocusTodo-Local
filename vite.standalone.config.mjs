@@ -19,7 +19,8 @@ export default defineConfig(({ mode }) => ({
       });
     },
     transformIndexHtml(html, context) {
-      html = html.replace('__FOCUS_APP_TITLE__', release.localVersion + (mode === 'release' ? '' : ' — Preview'));
+      html = html.replace('__FOCUS_APP_TITLE__', release.localVersion + (mode === 'release' ? '' : ' — Preview'))
+        .replace('__FOCUS_PREF_PREFIX__', mode === 'release' ? '' : 'FocusTodoStandalone.data.');
       return context.server ? html.replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*") : html;
     },
   }],

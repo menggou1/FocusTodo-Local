@@ -30,9 +30,9 @@ await build({ mode: production ? 'release' : 'isolated', configFile: path.join(r
 const htmlPath = path.join(site, 'index.html');
 let html = await readFile(htmlPath, 'utf8');
 html = html.replace(/<link\b(?=[^>]*rel="stylesheet")[^>]*>/g, tag => tag.slice(0, -1)
-  + ` onload="window.__prototypeBoot.styles[this.href]='loaded'" onerror="window.__prototypeBoot.failed=true;window.__prototypeBoot.fail?.()">`);
+  + ` onload="window.__prototypeBoot.styles[this.href]='loaded'" onerror="window.__prototypeBoot.failed=true;window.__prototypeBoot.fail?.('styles')">`);
 html = html.replace(/<script\b(?=[^>]*type="module")(?=[^>]*src=)[^>]*>/g, tag => tag.slice(0, -1)
-  + ` onerror="window.__prototypeBoot.failed=true;window.__prototypeBoot.fail?.()">`);
+  + ` onerror="window.__prototypeBoot.failed=true;window.__prototypeBoot.fail?.('entry')">`);
 await writeFile(htmlPath, html);
 await mkdir(debug, { recursive: true });
 await rename(path.join(site, '.vite'), path.join(debug, '.vite'));

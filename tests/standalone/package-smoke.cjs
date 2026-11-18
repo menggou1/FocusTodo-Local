@@ -55,6 +55,13 @@ async function stop(child) {
                     await harness.page.goto(url, { waitUntil: 'domcontentloaded' });
                     await harness.page.getByTestId('app-shell').waitFor();
                     assert(await harness.page.locator('.workspace-empty').isVisible());
+                    const icon = await harness.page.locator('link[rel=icon]').getAttribute('href');
+                    assert.match(icon, /^\.\/assets\/focus-app-.*\.ico$/);
+                    const iconURL = new URL(icon, url);
+                    assert(iconURL.pathname.startsWith(basePath));
+                    const response = await harness.page.request.get(iconURL.href);
+                    assert.equal(response.status(), 200);
+                    assert((await response.body()).equals(fs.readFileSync(path.join(root, 'public/focus-app.ico'))));
                     const input = harness.page.locator('.workspace-add-task input');
                     await input.fill('Extracted candidate task'); await input.press('Enter');
                     await harness.page.getByTestId('task-row').getByText('Extracted candidate task', { exact: true }).waitFor();

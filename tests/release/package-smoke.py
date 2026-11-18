@@ -84,7 +84,10 @@ for suffix in ('.zip', '.tar.gz'):
                 assert 'assets/index-' in html and 'Preview' not in html
                 for name in manifest:
                     assert (site / name).is_file() and not name.endswith('.map'), name
-                resources = ['index.html', 'build-info.json', 'runtime-manifest.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt']
+                favicon = re.search(r'<link rel="icon" href="\./(assets/focus-app-[^"/]+\.ico)"', html)
+                assert favicon and favicon[1] in manifest, 'The portable icon must be relative and included in the manifest'
+                assert (site / favicon[1]).read_bytes() == (ROOT / 'public/focus-app.ico').read_bytes()
+                resources = ['index.html', 'build-info.json', 'runtime-manifest.json', 'LICENSE', 'THIRD-PARTY-NOTICES.txt', favicon[1]]
                 for extension in ('.js', '.css', '.png', '.mp3', '.m4a', '.ttf', '.otf'):
                     resources.append(next(name for name in manifest if name.endswith(extension)))
             else:

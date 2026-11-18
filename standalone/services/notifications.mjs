@@ -1,5 +1,5 @@
 import { invariant, snapshotSource } from './errors.mjs';
-export function createNotificationService({ api, focus, onError, icon = './favicon.ico' }) {
+export function createNotificationService({ api, focus, onError, icon }) {
     let disposed = false; const active = new Set(), state = snapshotSource(api?.permission || 'unavailable', onError);
     const refresh = () => { state.publish(api?.permission || 'unavailable'); return state.getSnapshot(); };
     return Object.freeze({

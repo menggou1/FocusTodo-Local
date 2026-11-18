@@ -56,13 +56,30 @@ async function main() {
                     const url = origin + basePath;
                     try {
                         for (const locale of ['zh-CN', 'en']) {
+                            const motion = locale === 'en' ? 'reduce' : 'no-preference';
                             await run(browser, origin, url, `${engine} ${basePath} ${locale}: cold start without external network`, async ({ page, requests }) => {
+                                await page.addInitScript(() => {
+                                    window.workspaceEntrances = 0;
+                                    const animate = Element.prototype.animate;
+                                    Element.prototype.animate = function(...args) {
+                                        if (this.id === 'prototype-root') window.workspaceEntrances++;
+                                        return animate.apply(this, args);
+                                    };
+                                });
                                 await page.goto(url, { waitUntil: 'domcontentloaded' });
                                 await ready(page);
                                 await page.waitForFunction(locale => document.documentElement.lang === locale, locale);
                                 assert(await page.locator('.workspace-add-task input').isVisible()); assert.equal(await page.getByTestId('task-row').count(),0);
                                 assert.equal(await page.locator('html').getAttribute('lang'), locale);
                                 assert.equal(await page.locator('#prototype-startup').isVisible(), false);
+                                assert.equal(await page.evaluate(() => window.workspaceEntrances), motion === 'reduce' ? 0 : 1);
+                                assert.equal(await page.locator('#prototype-progress').evaluate(e => e.value), 7);
+                                const icon = await page.locator('link[rel=icon]').getAttribute('href');
+                                assert.match(icon, /^\.\/assets\/focus-app-.*\.ico$/);
+                                assert.equal(await page.locator('#prototype-brand').evaluate(e => e.naturalWidth), 30);
+                                if (await page.evaluate(() => typeof OfflineAudioContext === 'function')) {
+                                    assert(!requests.some(request => request.includes('VolumeTip')), 'Embedded WAV must never request a media URL');
+                                }
                                 assert(!requests.some(request => !new URL(request).pathname.startsWith(basePath)), 'Relative resources remain within the mounted project path');
                                 const databases = await page.evaluate(() => indexedDB.databases());
                                 assert.deepEqual(databases.map(database => [database.name, database.version]).sort(), [
@@ -70,7 +87,7 @@ async function main() {
                                 ], 'Core services open only their isolated schema and ownership databases');
                                 assert.equal(await page.evaluate(() => Object.keys(localStorage).some(key => !key.startsWith('FocusTodoStandalone.'))), false);
                                 await page.screenshot({ path: path.join(evidence, `standalone-${engine}-${locale}-${basePath === '/' ? 'root' : 'subpath'}.png`) });
-                            }, { context: { locale } });
+                            }, { context: { locale, reducedMotion: motion } });
                         }
 
                         if (basePath !== '/') continue;
@@ -122,12 +139,59 @@ async function main() {
                             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth === 1280), true);
                             await page.screenshot({ path: path.join(evidence, 'standalone-' + engine + '-narrow.png') });
                         }, { context: { viewport: { width: 375, height: 812 } } });
-                        await run(browser, origin, url, engine + ': unavailable fonts never block usable navigation', async ({ page }) => {
-                            await page.route(/\.ttf(?:[?#]|$)/, route => route.abort());
-                            await page.goto(url, { waitUntil: 'domcontentloaded' });
-                            await ready(page);
-                            await page.locator('[data-view="settings"]').click(); await page.locator('.legacy-settings>nav>button').filter({hasText:/^(通用|General)$/}).click();
-                            assert(await page.getByTestId('prototype-language').isVisible());
+                        for (const [step, resource] of [
+                            ['fonts', /NotoSansSC-Regular[^/]*\.ttf/],
+                            ['icons', /header-setting-[^/]*\.png/],
+                            ['sounds', /alm_Timer-[^/]*\.mp3/],
+                        ]) {
+                            await run(browser, origin, url, engine + ': required ' + step + ' wait, fail and retry', async ({ page }) => {
+                                let release;
+                                const hold = new Promise(resolve => release = resolve);
+                                let seen;
+                                const requested = new Promise(resolve => seen = resolve);
+                                let fail = true;
+                                await page.route(resource, async route => {
+                                    if (!fail) return route.continue();
+                                    seen();
+                                    await hold;
+                                    await route.abort();
+                                });
+                                try {
+                                    await page.goto(url, { waitUntil: 'domcontentloaded' });
+                                    await requested;
+                                    await page.waitForFunction(() => document.querySelector('#prototype-progress').value >= 3, null, { polling: 50 });
+                                    assert.equal(await page.locator('#prototype-startup').getAttribute('data-state'), 'loading');
+                                    assert.equal(await page.getByTestId('app-shell').count(), 0);
+                                    assert(await page.locator('#prototype-progress').evaluate(e => e.value < e.max));
+                                    if (step === 'sounds') await page.screenshot({ path: path.join(evidence, 'startup-loading-' + engine + '.png') });
+                                    release();
+                                    await startupError(page);
+                                    assert.equal(await page.locator('#prototype-startup').getAttribute('data-failed-step'), step);
+                                    assert(await page.locator('#prototype-retry').isVisible());
+                                    fail = false;
+                                    await page.locator('#prototype-retry').click();
+                                    await ready(page);
+                                } finally { release(); }
+                            });
+                        }
+                        await run(browser, origin, url, engine + ': a hung startup expires and cannot reveal a late workspace', async ({ page }) => {
+                            let release;
+                            const hold = new Promise(resolve => release = resolve);
+                            await page.clock.install();
+                            await page.route('**/__prototype/session.json', async route => {
+                                await hold;
+                                await route.continue().catch(() => {});
+                            });
+                            try {
+                                await page.goto(url, { waitUntil: 'domcontentloaded' });
+                                await page.clock.fastForward(20001);
+                                await startupError(page);
+                                assert.equal(await page.locator('#prototype-startup').getAttribute('data-failed-step'), 'timeout');
+                                assert.equal(await page.getByTestId('app-shell').count(), 0);
+                                release();
+                                await page.locator('#prototype-retry').click();
+                                await ready(page);
+                            } finally { release(); }
                         });
                         await run(browser, origin, url, engine + ': existing legacy settings are preserved and blocked', async ({ page }) => {
                             await page.addInitScript(() => localStorage.setItem('WorkInterval', '1500'));

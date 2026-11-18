@@ -1,12 +1,57 @@
 import { confirmInApp } from './confirmation';
+import type { PreferenceState } from './core.mjs';
 import { createCoreServices } from './core.mjs';
 import { createImageConverter } from './images.mjs';
 import publishedHistory from '../../release.json';
 import candidateVersion from '../app-version.json';
-import notificationIcon from '../../public/favicon.ico?url';
+import notificationIcon from '../../public/focus-app.ico?url';
+import volumeTip from '../../public/audio/VolumeTip.wav?inline';
+import volumeTipFile from '../../public/audio/VolumeTip.wav?url';
 
 declare const __APP_ISOLATED__: boolean;
-const sounds = import.meta.glob<string>('../../public/audio/*', { query: '?url', import: 'default', eager: true });
+const embeddedVolumeTip = typeof OfflineAudioContext === 'function';
+const sounds = import.meta.glob<string>(['../../public/audio/*', '!../../public/audio/VolumeTip.wav'], { query: '?url', import: 'default', eager: true });
+function soundURL(file: string) {
+    // Keep the short WAV out of HTTP on full engines. Media-only ports such
+    // as Windows WebKit lack Web Audio and require a real URL for playback.
+    if (file === 'VolumeTip.wav') return embeddedVolumeTip ? volumeTip : volumeTipFile;
+    const url = sounds['../../public/audio/' + file];
+    if (!url) throw new Error('Unknown local audio asset');
+    return url;
+}
+
+/** Fetch the complete built-in sounds needed by the current settings, without playing them. */
+export async function loadStartupSounds(prefs: PreferenceState, signal: AbortSignal) {
+    const files = new Set(['VolumeTip.wav', 'Complete.m4a']);
+    for (const alarm of [prefs.workAlarm, prefs.breakAlarm]) {
+        if (alarm !== 'alm_None' && sounds['../../public/audio/' + alarm + '.mp3']) files.add(alarm + '.mp3');
+    }
+    if (prefs.bgMusic !== 'bgm_Mute' && sounds['../../public/audio/' + prefs.bgMusic + '.m4a']) files.add(prefs.bgMusic + '.m4a');
+    const decoder = embeddedVolumeTip ? new OfflineAudioContext(1, 1, 44100) : null;
+    await Promise.all([...files].map(async file => {
+        let bytes: Uint8Array<ArrayBuffer>;
+        if (file === 'VolumeTip.wav' && embeddedVolumeTip) {
+            bytes = Uint8Array.from(atob(volumeTip.slice(volumeTip.indexOf(',') + 1)), char => char.charCodeAt(0));
+        } else {
+            const response = await fetch(soundURL(file), { signal });
+            if (!response.ok) throw new Error('Required audio asset unavailable');
+            bytes = new Uint8Array(await response.arrayBuffer());
+        }
+        signal.throwIfAborted();
+        if (decoder) {
+            const audio = await decoder.decodeAudioData(bytes.buffer);
+            if (!audio.length) throw new Error('Empty audio asset');
+        } else {
+            // Some engines support HTML media but do not expose Web Audio.
+            const tag = (start: number, length: number) => String.fromCharCode(...bytes.subarray(start, start + length));
+            const valid = file.endsWith('.wav') ? tag(0, 4) === 'RIFF' && tag(8, 4) === 'WAVE'
+                : file.endsWith('.m4a') ? tag(4, 4) === 'ftyp'
+                : tag(0, 3) === 'ID3' || bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0;
+            if (!valid) throw new Error('Invalid audio asset');
+        }
+    }));
+}
+
 export function createBrowserServices(appVersion: string) {
     return createCoreServices({
         storage: localStorage, indexedDB, now: () => Date.now(), randomUUID: () => crypto.randomUUID(), random: () => Math.random(),
@@ -14,7 +59,7 @@ export function createBrowserServices(appVersion: string) {
         decodeBase64: value => decodeURIComponent(escape(atob(value))), compression: window,
         locks: navigator.locks, channel: typeof BroadcastChannel === 'function' ? new BroadcastChannel((__APP_ISOLATED__?'FocusTodoStandalone.PomodoroDB6':'PomodoroDB6')+':services') : null,
         languages: navigator.languages, origin: location.origin, fetch: (...args) => fetch(...args),
-        createAudio(file) { const url = sounds['../../public/audio/' + file]; if (!url) throw new Error('Unknown local audio asset'); return new Audio(url); },
+        createAudio: file => new Audio(soundURL(file)),
         notification: typeof Notification === 'function' ? Notification : undefined,
         notificationIcon,
         visible: () => !document.hidden, focus: () => window.focus(),

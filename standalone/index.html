@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://www.bing.com https://bing.com https://th.bing.com https://bing.biturl.top; object-src 'none'; base-uri 'self'; frame-src 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' data:; connect-src 'self' https://www.bing.com https://bing.com https://th.bing.com https://bing.biturl.top; object-src 'none'; base-uri 'self'; frame-src 'none'" />
   <title>FocusTodo __FOCUS_APP_TITLE__</title>
+  <link rel="icon" href="../public/focus-app.ico" type="image/x-icon" />
   <script>
-    // Install before Vite's stylesheet links: resource errors can precede body parsing.
+    // Observe required styles before Vite's generated stylesheet links.
     window.__prototypeBoot = { styles: Object.create(null), failed: false };
     document.addEventListener('load', event => {
       if (event.target instanceof HTMLLinkElement && event.target.rel === 'stylesheet') {
@@ -15,51 +16,110 @@
       }
     }, true);
     document.addEventListener('error', event => {
-      if (event.target instanceof HTMLLinkElement && event.target.rel === 'stylesheet') {
-        window.__prototypeBoot.styles[event.target.href] = 'error';
+      const target = event.target;
+      if (target instanceof HTMLLinkElement && target.rel === 'stylesheet' ||
+          target instanceof HTMLScriptElement && target.type === 'module') {
         window.__prototypeBoot.failed = true;
+        window.__prototypeBoot.fail?.(target instanceof HTMLLinkElement ? 'styles' : 'entry');
       }
-      if (event.target instanceof HTMLScriptElement || event.error) window.__prototypeBoot.failed = true;
     }, true);
   </script>
   <style>
-    html,body{margin:0;min-height:100%;font:15px/1.6 system-ui,sans-serif;color:#303846;background:#fff}*{box-sizing:border-box}
-    #prototype-startup{position:fixed;inset:0;z-index:100;display:grid;place-content:center;gap:16px;padding:32px;background:#fff}
-    #prototype-startup[hidden],[hidden]{display:none!important}#prototype-startup h1{margin:0;color:#e65350;font-size:22px}#prototype-status{max-width:540px;margin:0}
-    #prototype-retry{justify-self:start;padding:8px 18px;border:0;border-radius:8px;background:#e65350;color:white;font:inherit;cursor:pointer}
-    #prototype-retry:focus-visible{outline:3px solid #e6535080;outline-offset:3px}
-    @media(prefers-color-scheme:dark){html,body,#prototype-startup{background:#20242b;color:#e8ebf0}}
+    html,body{margin:0;min-height:100%}*{box-sizing:border-box}
+    #prototype-startup{--boot-bg:#f6f6f8;--boot-panel:#fff;--boot-text:#303036;--boot-muted:#65656f;--boot-track:#e8e8ed;--boot-accent:#fd5553;
+      position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;background:var(--boot-bg);color:var(--boot-text);font:14px/1.5 system-ui,sans-serif}
+    #prototype-startup[hidden],[hidden]{display:none!important}
+    #prototype-root[aria-busy=true]{visibility:hidden}
+    .startup-card{width:min(100%,340px);min-width:0;padding:24px;border-radius:12px;background:var(--boot-panel);box-shadow:0 8px 32px #0001}
+    .startup-heading{display:flex;align-items:center;gap:10px}
+    .startup-heading img{width:30px;height:30px;border-radius:6px}
+    .startup-heading h1{margin:0;font-size:18px;font-weight:650}
+    #prototype-status{margin:16px 0 10px;color:var(--boot-muted);min-height:3em}
+    #prototype-progress{appearance:none;display:block;width:100%;height:4px;border:0;border-radius:4px;overflow:hidden;background:var(--boot-track);color:var(--boot-accent)}
+    #prototype-progress::-webkit-progress-bar{background:var(--boot-track)}
+    #prototype-progress::-webkit-progress-value{background:var(--boot-accent);border-radius:4px}
+    #prototype-progress::-moz-progress-bar{background:var(--boot-accent);border-radius:4px}
+    #prototype-retry{margin-top:16px;padding:5px 16px;min-height:30px;border:0;border-radius:6px;background:#d7393d;color:#fff;font:inherit;cursor:pointer}
+    #prototype-retry:focus-visible{outline:2px solid var(--boot-accent);outline-offset:3px}
+    #prototype-startup[data-theme=dark]{--boot-bg:#0c0c10;--boot-panel:#1a1a20;--boot-text:#e8e8eb;--boot-muted:#b5b5bd;--boot-track:#34343e}
   </style>
 </head>
 <body>
-  <section id="prototype-startup" data-state="loading" role="status" aria-live="polite">
-    <h1>FocusTodo</h1>
-    <p id="prototype-status">Starting FocusTodo… / 正在启动专注清单…</p>
-    <button id="prototype-retry" type="button" hidden>Retry / 重试</button>
-    <noscript>Enable JavaScript to run FocusTodo. / 请启用 JavaScript。</noscript>
+  <section id="prototype-startup" data-state="loading" aria-labelledby="prototype-title">
+    <div class="startup-card">
+      <div class="startup-heading"><img id="prototype-brand" src="../public/focus-app.ico" width="30" height="30" alt="" /><h1 id="prototype-title">FocusTodo</h1></div>
+      <p id="prototype-status" role="status">Starting FocusTodo… / 正在启动专注清单…</p>
+      <progress id="prototype-progress" max="7" value="0" aria-label="Startup progress"></progress>
+      <button id="prototype-retry" type="button" hidden>Retry / 重试</button>
+      <noscript>Enable JavaScript to run FocusTodo. / 请启用 JavaScript。</noscript>
+    </div>
   </section>
-  <div id="prototype-root"></div>
+  <div id="prototype-root" aria-busy="true" inert></div>
   <script>
     (() => {
-      let timer;
-      const fail = () => {
-        const screen = document.getElementById('prototype-startup');
-        if (screen.hidden) return;
-        screen.dataset.state = 'error';
-        document.getElementById('prototype-status').textContent = navigator.language.startsWith('zh')
-          ? '启动资源加载失败。请检查本地服务器并重试。'
-          : 'Startup resources could not load. Check the local server and retry.';
-        document.getElementById('prototype-retry').hidden = false;
+      const boot = window.__prototypeBoot;
+      const screen = document.getElementById('prototype-startup');
+      const root = document.getElementById('prototype-root');
+      const status = document.getElementById('prototype-status');
+      const progress = document.getElementById('prototype-progress');
+      const retry = document.getElementById('prototype-retry');
+      const controller = new AbortController();
+      let language = 'auto';
+      let dark = matchMedia('(prefers-color-scheme: dark)').matches;
+      try {
+        const prefix = '__FOCUS_PREF_PREFIX__';
+        language = localStorage.getItem(prefix + 'FocusTodo.language') || 'auto';
+        const theme = localStorage.getItem(prefix + 'DarkMode');
+        if (theme) dark = theme === 'true';
+      } catch (_) { /* The loading screen works without access to storage. */ }
+      const zh = language === 'zh-CN' || language !== 'en' && /^zh\b/i.test(navigator.language);
+      screen.lang = zh ? 'zh-CN' : 'en';
+      screen.dataset.theme = dark ? 'dark' : 'light';
+      if (zh) document.getElementById('prototype-title').textContent = '专注清单';
+      const labels = zh
+        ? {entry:'应用脚本',styles:'界面样式',data:'本地数据',fonts:'界面字体',icons:'图标',sounds:'提示音',render:'主界面'}
+        : {entry:'App scripts',styles:'Styles',data:'Local data',fonts:'Fonts',icons:'Icons',sounds:'Alert sounds',render:'Workspace'};
+      const completed = new Set();
+      status.textContent = zh ? '正在准备工作区…' : 'Preparing your workspace…';
+      retry.textContent = zh ? '重试' : 'Retry';
+      progress.setAttribute('aria-label', zh ? '启动进度' : 'Startup progress');
+      retry.addEventListener('click', () => location.reload());
+      boot.signal = controller.signal;
+      boot.mark = step => {
+        if (screen.dataset.state !== 'loading') return;
+        completed.add(step);
+        progress.value = completed.size;
+        status.textContent = zh ? `${labels[step]}已就绪（${completed.size}/${progress.max}）` : `${labels[step]} ready (${completed.size}/${progress.max})`;
       };
-      addEventListener('error', event => {
-        if (event.target instanceof HTMLScriptElement || event.target instanceof HTMLLinkElement || event.error) fail();
-      }, true);
-      addEventListener('unhandledrejection', fail);
-      document.getElementById('prototype-retry').addEventListener('click', () => location.reload());
-      window.__prototypeBoot.fail = fail;
-      if (window.__prototypeBoot.failed) fail();
-      timer = setTimeout(fail, 15000);
-      addEventListener('pagehide', () => clearTimeout(timer), {once:true});
+      boot.fail = step => {
+        if (screen.dataset.state !== 'loading') return;
+        screen.dataset.state = 'error';
+        screen.dataset.failedStep = step;
+        screen.dataset.pendingSteps = Object.keys(labels).filter(name => !completed.has(name)).join(' ');
+        const label = labels[step];
+        status.textContent = step === 'timeout'
+          ? (zh ? '启动超时。请重试。' : 'Startup timed out. Please retry.')
+          : navigator.onLine === false
+            ? (zh ? '当前处于离线状态，无法读取启动资源。请重试。' : 'Startup resources are unavailable offline. Please retry.')
+            : (zh ? `${label}加载失败。请重试。` : `${label} could not load. Please retry.`);
+        retry.hidden = false;
+        clearTimeout(timer);
+        controller.abort();
+      };
+      boot.finish = () => {
+        if (screen.dataset.state !== 'loading' || completed.size !== progress.max) return;
+        screen.dataset.state = 'ready';
+        clearTimeout(timer);
+        root.removeAttribute('aria-busy');
+        root.inert = false;
+        screen.hidden = true;
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          root.animate([{opacity:.9},{opacity:1}], {duration:160,easing:'ease-out'});
+        }
+      };
+      const timer = setTimeout(() => boot.fail('timeout'), 20000);
+      addEventListener('pagehide', event => { if (!event.persisted) { clearTimeout(timer); controller.abort(); } });
+      if (boot.failed) boot.fail('entry');
     })();
   </script>
   <script type="module" src="./app/main.tsx"></script>
