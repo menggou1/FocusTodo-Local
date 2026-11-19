@@ -44,6 +44,8 @@ Windows／Node 24 的历史归档验收在进入壁纸备份步骤前停在 `0 /
 
 CI #153 的 Windows 归档浏览器验收通过。随后隔离包冒烟用例在以 CP1252 输出含中文的解压路径时失败。解压助手移除了调用方未使用的路径输出，仍校验并启动含空格和中文路径中的 ZIP 和 tar.gz。[Windows 作业](https://github.com/menggou1/FocusTodo-Local/actions/runs/44471231079/job/135381374191)
 
+CI #154 的 Windows 跟踪记录了同类启动失败。Chromium 访问回环地址上的 `main.css` 时返回 `ERR_NO_BUFFER_SPACE`，未收到 HTTP 响应。升级到内置 Windows TCP 端口随机化修复的 Playwright 1.65.0，同步 Linux 镜像。Windows 作业继续记录 TCP 状态，使用系统默认端口范围。[Windows 作业](https://github.com/menggou1/FocusTodo-Local/actions/runs/44472773957/job/135386351139) · [Playwright 修复](https://github.com/microsoft/playwright/pull/43605)
+
 ## 版本记录
 
 2.0.1 废弃候选从正式列表撤下，其有效修改归入 2.0.2 的更新记录。[2.0.1 候选报告](UPDATE-2.0.1.md)与既有发布证据继续保留。E09、V04 的人工验收已完成，独立调查见[待办](../BACKLOG.md)。

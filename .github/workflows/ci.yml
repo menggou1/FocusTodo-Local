@@ -138,7 +138,7 @@ jobs:
         include:
           - os: ubuntu-latest
             node: '24'
-            playwright_image: mcr.microsoft.com/playwright:v1.62.1-resolute
+            playwright_image: mcr.microsoft.com/playwright:v1.65.0-resolute
     steps:
       - uses: actions/checkout@v6
         with:
@@ -205,12 +205,12 @@ jobs:
         if: matrix.node == '24' && runner.os != 'Linux'
         timeout-minutes: 6
         run: node node_modules/playwright/cli.js install --only-shell chromium
-      - name: Prepare Windows TCP resources
+      - name: Record Windows TCP resources before browser tests
         if: runner.os == 'Windows' && matrix.node == '24'
         shell: pwsh
         env:
           FOCUS_ACCEPTANCE_DIR: ${{ runner.temp }}/acceptance
-        run: ./scripts/windows-ci-network.ps1 -Configure -Phase before
+        run: ./scripts/windows-ci-network.ps1 -Phase before
       - name: Browser acceptance
         if: matrix.node == '24'
         run: npm run test:browser

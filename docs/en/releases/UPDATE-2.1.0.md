@@ -44,6 +44,8 @@ The cross-platform Chromium step uses a shell that propagates intermediate comma
 
 The Windows archived-browser acceptance suite passed in CI #153. The isolated package smoke test then failed when the extraction helper tried to print a Chinese directory name to CP1252 stdout. The helper no longer prints the unused path, and both ZIP and tar.gz tests still verify and launch the extracted app in a path containing spaces and Chinese characters. [Windows job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44471231079/job/135381374191)
 
+Windows diagnostics in CI #154 captured a related boot failure. Chromium received `ERR_NO_BUFFER_SPACE` while fetching `main.css` over loopback, before an HTTP response arrived. Playwright 1.65.0 provides the fix for Windows TCP port randomization, and the Linux browser image matches the new version. Windows CI keeps collecting TCP snapshots with the system’s default port range. [Windows job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44472773957/job/135386351139) · [Playwright fix](https://github.com/microsoft/playwright/pull/43605)
+
 ## Version history
 
 2.0.2 already includes the valid changes from the abandoned 2.0.1 candidate. The formal update lists consolidate those changes under 2.0.2 and retain the [candidate report and evidence](UPDATE-2.0.1.md). The owner confirmed the E09 and V04 manual acceptance items. Remaining technical investigations are tracked in the [backlog](../BACKLOG.md).
