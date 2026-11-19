@@ -171,13 +171,15 @@ jobs:
       - name: Locate immutable historical test oracle
         shell: bash
         run: printf 'FOCUS_LEGACY_ROOT=%s/.legacy-oracle\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
-      - run: npm test
-      - name: Standalone contracts and isolated server
-        run: node --test tests/standalone/*.test.cjs
       - uses: actions/setup-python@v6
-        if: matrix.node == '24'
+        id: python
         with:
           python-version: '3.12'
+      - run: npm test
+        env:
+          PYTHON: ${{ steps.python.outputs.python-path }}
+      - name: Standalone contracts and isolated server
+        run: node --test tests/standalone/*.test.cjs
       - uses: actions/download-artifact@v7
         if: matrix.node == '24'
         with:

@@ -250,10 +250,19 @@ async function main() {
                 if(engine==='chromium')await run(browser, engine, 'renderer crash releases ownership and a new page recovers the committed import journal', async({page,context})=>{
                     const owner=await context.newPage();
                     try{
-                        await owner.goto(origin);await owner.evaluate(async()=>{await startServices({noLocks:true,noChannel:true});const input=(await coreServices.backup.export({format:'json'})).data;
-                            input.indexedDB.Task=[{id:'crash-sentinel',name:'Recovered'}];failAt='replacement-committed';try{await coreServices.backup.restore(JSON.stringify(input))}catch(_){} });
-                        const session=await context.newCDPSession(owner), crashed=owner.waitForEvent('crash',{timeout:5000});
-                        session.send('Page.crash').catch(()=>{});await crashed;
+                        await owner.goto(origin);
+                        await assert.rejects(owner.evaluate(async()=>{
+                            await startServices({noLocks:true,noChannel:true});
+                            const input=(await coreServices.backup.export({format:'json'})).data;
+                            input.indexedDB.Task=[{id:'crash-sentinel',name:'Recovered'}];
+                            failAt='replacement-committed';
+                            await coreServices.backup.restore(JSON.stringify(input));
+                        }), /Synthetic fault: replacement-committed/);
+                        // Terminate the renderer without invoking the platform's crash dump handler.
+                        await Promise.all([
+                            owner.waitForEvent('crash',{timeout:5000}),
+                            assert.rejects(owner.goto('chrome://kill',{timeout:5000}), /Page crashed|net::ERR_ABORTED/),
+                        ]);
                         await page.evaluate(()=>startServices({noLocks:true,noChannel:true}));
                         assert.equal(await page.evaluate(()=>coreServices.business.getSnapshot().tasks[0].id),'crash-sentinel');
                     }finally{await owner.close()}
