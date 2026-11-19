@@ -32,6 +32,16 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
     const core = createTimerCore({ translate }), codec = createBackupCodec({ compression, translate });
     const themeFactory = createThemeJournal({ now, random, translate });
     let timer, data, settings, business, audio, reminders, ready = false, disposed = false, halted = false, poll;
+    let lastWallpaperCheck = null;
+    const refreshWallpaper = () => {
+        if (disposed || halted || !ready || data.maintenance || !settings.getSnapshot().externalNetwork) return;
+        const time = now();
+        if (lastWallpaperCheck !== null && time >= lastWallpaperCheck && time - lastWallpaperCheck < 5 * 60 * 1000) return;
+        lastWallpaperCheck = time;
+        void wallpaper.refreshActive().catch(error => {
+            if (error.code !== 'cancelled') report(error);
+        });
+    };
     const journal = themeFactory.create({ get: key => storage.getItem(key), set: (key, value) => storage.setItem(key, value), remove: key => storage.removeItem(key),
         assertWritable() { invariant(!data.maintenance, 'Recover data maintenance before changing themes', 'conflict'); } });
     const refresh = async () => {
@@ -91,11 +101,13 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
         await data.initialize(); await data.themeStorageOperation(() => journal.recover());
         settings.refresh(); await settings.initializeIdentity(language.text('本地用户'));
         await timer.recover(); await business.refresh(); reminders.refresh(); ready = true;
+        refreshWallpaper();
         const polling = async () => {
             if (disposed || halted) return;
             try {
                 if (!data.maintenance) {
                     if (!channel && visible()) await refresh();
+                    refreshWallpaper();
                     const session = timer.getSnapshot();
                     if (session && core.running(session)) await timer.command({type:'tick',expectedSession:session.sessionId});
                 }

@@ -13,17 +13,41 @@ const evidence = path.resolve(process.env.FOCUS_ACCEPTANCE_DIR || path.join(root
 const release = require(require('../helpers/legacy-runtime.cjs').file('release.json'));
 const releaseVersion = Number(release.localVersion.split('.')[0]) >= 2 ? release.localVersion : release.officialVersion + '-local.' + release.localVersion;
 const server = createServer();
+async function waitForStartup(page) {
+    const state = await page.waitForFunction(() => {
+        const startup = document.querySelector('#focus-startup');
+        if (startup?.dataset.state === 'error') return 'error';
+        if (window.__acceptanceTimer && document.querySelector('#root')?.firstElementChild && !document.documentElement.classList.contains('focus-starting')) return 'ready';
+    });
+    const result = await state.jsonValue();
+    await state.dispose();
+    if (result === 'error') throw Error('Application startup failed: ' + await page.locator('#focus-startup').innerText());
+    await page.evaluate(() => window.FocusLocalReady);
+}
 (async () => {
     await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
     const url = `http://127.0.0.1:${server.address().port}`;
     const executablePath = process.env.FOCUS_TEST_BROWSER || (!process.env.FOCUS_TEST_BUNDLED_BROWSER && ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', 'C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
-    const browser = await playwright().chromium.launch({ headless: true, ...(executablePath ? { executablePath } : {}) });
+    const browser = await playwright().chromium.launch({ headless: true, args: ['--mute-audio'], ...(executablePath ? { executablePath } : {}) });
     const failures = [], results = [];
     fs.mkdirSync(evidence, { recursive: true });
     async function app(testBody, beforeLoad, baseUrl = url, locale = 'zh-CN') {
         const context = await browser.newContext({ locale, timezoneId: 'Asia/Shanghai', viewport: { width: 1280, height: 900 } });
-        const errors = [], external = [];
+        const errors = [], external = [], resources = [], consoleErrors = [];
         await context.addInitScript(() => {
+            const startupErrors = [];
+            window.__acceptanceStartupErrors = startupErrors;
+            window.addEventListener('error', event => {
+                startupErrors.push({
+                    message: event.error?.stack || event.message,
+                    file: event.filename, line: event.lineno,
+                    asset: event.target?.getAttribute?.('data-focus-asset'),
+                    url: event.target?.src || event.target?.href,
+                });
+            }, true);
+            window.addEventListener('unhandledrejection', event => {
+                startupErrors.push({ rejection: event.reason?.stack || String(event.reason) });
+            });
             // Legacy floating-timer checks exercise the no-API fallback; native
             // Document PiP is covered separately in release-1.9-acceptance.cjs.
             Object.defineProperty(window,'documentPictureInPicture',{configurable:true,value:undefined});
@@ -41,7 +65,13 @@ const server = createServer();
         });
         const page = await context.newPage();
         page.on('pageerror', error => errors.push(error.stack || error.message));
+        page.on('console', message => {
+            if (message.type() === 'error') consoleErrors.push({ text: message.text(), ...message.location() });
+        });
+        page.on('response', response => resources.push({ url: response.url(), status: response.status(), type: response.request().resourceType() }));
+        page.on('requestfailed', request => resources.push({ url: request.url(), error: request.failure()?.errorText, type: request.resourceType() }));
         page.on('dialog', dialog => dialog.accept());
+        let started = false;
         try {
             if (beforeLoad) {
                 await page.route('**/storage-fixture.html', route => route.fulfill({ path: path.join(__dirname, '../fixtures/storage-fixture.html') }));
@@ -49,14 +79,24 @@ const server = createServer();
                 await beforeLoad(page);
             }
             await page.goto(baseUrl);
-            await page.waitForFunction(() => {
-                const startup = document.querySelector('#focus-startup');
-                if (startup?.dataset.state === 'error') throw Error('Application startup failed: ' + startup.innerText);
-                return window.__acceptanceTimer && document.querySelector('#root').children.length > 0 && !document.documentElement.classList.contains('focus-starting');
-            });
-            await page.evaluate(() => window.FocusLocalReady);
+            await waitForStartup(page);
+            started = true;
             await testBody(page, context, errors, external);
             assert.deepEqual(errors, [], 'No unhandled browser errors');
+        } catch (error) {
+            const documentState = await page.evaluate(() => ({
+                state: document.querySelector('#focus-startup')?.dataset.state,
+                progress: document.querySelector('#focus-startup-count')?.textContent,
+                errors: window.__acceptanceStartupErrors,
+            })).catch(error => ({ inspectionError: error.message }));
+            if (!started || documentState.progress !== undefined) {
+                const diagnostic = { url: page.url(), documentState, errors, consoleErrors, resources };
+                fs.writeFileSync(path.join(evidence, 'legacy-startup-failure-' + results.length + '.json'), JSON.stringify(diagnostic, null, 2));
+                console.error('Legacy startup evidence: ' + JSON.stringify({
+                    ...diagnostic, resources: resources.filter(row => row.error || row.status >= 400),
+                }));
+            }
+            throw error;
         } finally { await context.close(); }
     }
     async function check(name, fn) {
@@ -493,7 +533,7 @@ const server = createServer();
             await page.getByRole('button', { name: '确认覆盖并导入', exact: true }).click();
             const safety = JSON.parse(fs.readFileSync(await (await safetyDownload).path(), 'utf8'));
             assert.equal(safety.localStorage['lexible-custom-themes'], before.localStorage['lexible-custom-themes']);
-            await reloaded; await page.waitForFunction(() => window.__acceptanceTimer);
+            await reloaded; await waitForStartup(page);
             const after = await snapshot(page);
             assert.equal(after.localStorage.Theme, 'Leaf');
             assert.equal(after.localStorage['lexible-active-custom-theme'], undefined);

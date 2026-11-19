@@ -1,5 +1,5 @@
 const test = require('node:test'), assert = require('node:assert/strict'), vm = require('node:vm'), fs = require('node:fs');
-const { createApplication } = require('./core-helpers.cjs');
+const { createApplication, MemoryStorage } = require('./core-helpers.cjs');
 const picture = () => new Response(new Blob(['synthetic'], { type:'image/jpeg' }), { headers:{'Content-Type':'image/jpeg'} });
 const metadata = () => new Response(JSON.stringify({url:'https://www.bing.com/synthetic.jpg',copyright:'synthetic'}),{headers:{'Content-Type':'application/json'}});
 const image = async () => ({dataUrl:'data:image/jpeg;base64,AA==',thumbnail:'data:image/jpeg;base64,AQ=='});
@@ -40,6 +40,67 @@ test('wallpaper cache expires across a local day and TTL; offline failure retain
     h.clock.value+=120000;await h.app.wallpaper.bing();assert.equal(calls,before+2);
     h.clock.value+=86400000;offline=true;await assert.rejects(h.app.wallpaper.bing());
     assert.equal(h.app.themes.read().active,'__bing_daily__');assert(h.app.wallpaper.read().__bing_daily__.dataUrl);
+});
+test('active Bing refreshes at startup and across midnight without opening settings', { timeout: 5000 }, async t => {
+    const clock = { value: +new Date(2026, 10, 8, 23, 57) }, storage = new MemoryStorage();
+    const { dataStoragePrefix: prefix } = await import('../../standalone/services/scoped-storage.mjs');
+    const id = '__bing_daily__', key = prefix + 'lexible-custom-themes';
+    storage.setItem(prefix + 'FocusTodo.externalNetwork', 'true');
+    storage.setItem(prefix + 'Theme', id);
+    storage.setItem(prefix + 'lexible-active-custom-theme', id);
+    storage.setItem(key, JSON.stringify({ [id]: { dataUrl:'data:image/jpeg;base64,Ag==', updatedAt:clock.value - 86400000 } }));
+    let poll, calls = 0, pendingImage = Promise.withResolvers();
+    const h = await createApplication({ clock, storage, application: {
+        fetch: async url => { calls++; return url.includes('synthetic.jpg') ? picture() : metadata(); },
+        image: () => new Promise(resolve => { pendingImage.resolve(() => resolve(image())); }),
+        setTimeout(callback, delay) { if (delay === 1000) poll = callback; },
+        clearTimeout() {},
+    } });
+    t.after(h.dispose);
+    const waitForRefresh = async () => {
+        const finishImage = await pendingImage.promise;
+        pendingImage = Promise.withResolvers();
+        const finished = new Promise(resolve => {
+            const unsubscribe = h.app.wallpaper.subscribe(() => {
+                if (!h.app.wallpaper.getSnapshot().loading) { unsubscribe(); resolve(); }
+            });
+        });
+        finishImage();
+        await finished;
+    };
+    await waitForRefresh();
+    assert.equal(h.app.wallpaper.read()[id].updatedAt, clock.value);
+    assert.equal(calls, 2);
+    clock.value += 6 * 60 * 1000;
+    await poll();
+    await waitForRefresh();
+    assert.equal(h.app.wallpaper.read()[id].updatedAt, clock.value);
+    assert.equal(calls, 4);
+    await h.app.wallpaper.classic('Ocean');
+    clock.value += 86400000;
+    await poll();
+    assert.equal(h.app.themes.read().theme, 'Ocean');
+    assert.equal(calls, 4);
+});
+
+test('automatic Bing refresh cannot overwrite the theme chosen by another window', async t => {
+    let entered, release, hold = false;
+    const started = new Promise(resolve => { entered = resolve; });
+    const h = await app(t, async url => {
+        if (!url.includes('synthetic.jpg')) return metadata();
+        if (hold) { entered(); await new Promise(resolve => { release = resolve; }); }
+        return picture();
+    });
+    const initial = await h.app.wallpaper.bing();
+    h.clock.value += 86400000;
+    hold = true;
+    const refresh = assert.rejects(h.app.wallpaper.refreshActive(), { code:'cancelled' });
+    await started;
+    await h.app.themes.commit({ active:null, theme:'Ocean' });
+    release();
+    await refresh;
+    assert.equal(h.app.themes.read().theme, 'Ocean');
+    assert.deepEqual(h.app.wallpaper.read().__bing_daily__, initial);
 });
 test('new theme selection and opt-out cancel in-flight/queued Bing work before persistence',async t=>{
     let release,entered;const wait=new Promise(resolve=>{release=resolve}),started=new Promise(resolve=>{entered=resolve});

@@ -2,7 +2,7 @@
 
 [Changelog](../CHANGELOG.md) · [Chinese report](../../releases/UPDATE-2.1.0.md)
 
-The development baseline was remote dev commit `bf480ed81bf12bb5c35184135ab1b35c2982f22c` on 2026-11-18. The latest stable version was 2.0.2.
+The cumulative 2.1.0 update is dated 2026-11-19. The work on CI #152 started from remote dev commit `25c537f41380da583dea6524a824d265e7fa0eb5`. The latest stable version was 2.0.2.
 
 ## Settings and data
 
@@ -11,6 +11,10 @@ The task completion switch uses the compatibility key `TskCmpSnd`, defaults to o
 Profile avatars restore through the existing JSON/Gzip backup transaction and refresh throughout the workspace. Import and notifications share the application scrollbar. The notification panel appears above the calendar controls, the update button centers its label, and interrupted time uses the shared confirmation dialog.
 
 The task sidebar footer restores the archived 24×24 icons. Due dates retain the archived relative labels and weekdays, with dates before the current local day shown in red. The new wording for creating tasks above other tasks keeps the existing sort behavior.
+
+General settings start with the language menu and new-task order switch. Notifications and feature switches use the same section style, and the desktop notification control is a button on its settings row. Task completion sound is configured under Pomodoro alert sounds. The existing preference and backup compatibility key still apply.
+
+Collect all reflects claimed rewards as soon as collection finishes, keeping the button from flashing during the animation. With external networking enabled and Bing daily wallpaper selected, the app checks the cache at startup and periodically. Stale wallpapers refresh after the local date changes or the cache expires. A failed download keeps the cached image, and an in-flight automatic refresh cannot overwrite a later theme choice.
 
 ## Startup and icons
 
@@ -29,6 +33,14 @@ The macOS Node 24 browser test assumed that a specific tab would win when two ta
 The Ubuntu Node 24 job in CI #150 timed out while fetching Firefox and WebKit system dependencies. It now uses an image matching the locked Playwright version, with all three test engines and system dependencies preinstalled. The job allows 30 minutes to accommodate a cold image pull. [Timed-out job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44270097521/job/134684709745)
 
 The container build in CI #151 hit Git’s workspace ownership check. The job verifies the workspace path and checked-out commit before setting that path as `safe.directory` for its Git commands. [Failed job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44290847746/job/134755704275)
+
+In CI #152 the Ubuntu Node 24 job launched Firefox as root with a home directory owned by another user. Both Firefox and WebKit test steps now use the container’s `/root`. [Ubuntu job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44294563193/job/134768486798)
+
+The macOS Node 24 inspector comparison waits for the selected task to appear in both panes before reading the due date and color. It also verifies that both pages use the fixture day and time zone after reload. [macOS job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44294563193/job/134768486830)
+
+The archived Windows Node 24 app stopped at `0 / 19` before the wallpaper backup steps began. Startup failures now capture browser exceptions, console errors, resource status codes, and request failures in the CI log and acceptance artifact. [Windows job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44294563193/job/134768486864)
+
+The cross-platform Chromium step uses a shell that propagates intermediate command failures, so any failed script fails the CI gate.
 
 ## Version history
 

@@ -47,9 +47,24 @@ async function detailsSave(page){await page.evaluate(()=>document.activeElement?
   });
   await run(browser,engine,'forest daily/streak/task rewards, one-click collection and achievements remain idempotent',async({page})=>{
    await add(page,'Forest sample');await page.getByRole('checkbox',{name:'Complete task: Forest sample'}).click();await page.waitForFunction(()=>!document.querySelector('.workspace-add-task input').disabled);await page.clock.setFixedTime(new Date('2026-11-09T12:00:00.001+08:00'));
-   await page.locator('[data-view="forest"]').click();await page.getByRole('button',{name:/Collect all \(41 g\)/}).waitFor();await page.getByRole('button',{name:/Collect all \(41 g\)/}).click();await page.getByRole('button',{name:/Collect all \(0 g\)/}).waitFor();assert.equal(await page.evaluate(()=>Number(JSON.parse(localStorage.getItem('FocusTodoStandalone.data.FocusTodo.forestState')).fields.Sunlight)),61);
+   await page.locator('[data-view="forest"]').click();
+   const collect = page.getByRole('button',{name:/Collect all \(41 g\)/});
+   await collect.evaluate(button => {
+    window.collectAllDisabled = [];
+    const observer = new MutationObserver(() => window.collectAllDisabled.push(button.disabled));
+    observer.observe(button, { attributes:true, attributeFilter:['disabled','aria-label'] });
+   });
+   await collect.click();
+   await page.locator('.legacy-forest-sun[aria-busy=true]').first().waitFor();
+   const finished = page.getByRole('button',{name:/Collect all \(0 g\)/});
+   await finished.waitFor();
+   await page.locator('.legacy-forest-sun[aria-busy=true]').first().waitFor({state:'detached'});
+   assert(await finished.isDisabled());
+   const states = await page.evaluate(() => window.collectAllDisabled);
+   assert(states.length > 0 && states.every(Boolean), 'Collect all stays disabled after the first reward is committed');
+   assert.equal(await page.evaluate(()=>Number(JSON.parse(localStorage.getItem('FocusTodoStandalone.data.FocusTodo.forestState')).fields.Sunlight)),61);
    await page.getByRole('button',{name:'Achievements',exact:true}).click();await page.locator('.legacy-forest-activity.expanded').getByText('First step',{exact:true}).waitFor();await page.locator('.legacy-forest-drawer-close').click();await page.reload();await ready(page);await page.locator('[data-view="forest"]').click();assert.equal(await page.evaluate(()=>Number(JSON.parse(localStorage.getItem('FocusTodoStandalone.data.FocusTodo.forestState')).fields.Sunlight)),61);
-  });
+  },{reducedMotion:'no-preference'});
   await run(browser,engine,'all settings/profile/theme/export/import/cancel paths operate and backup confirmation protects current data',async({page})=>{
    await add(page,'Backup original');await page.locator('[data-view="settings"]').click();const minutes=page.getByLabel('Pomodoro length (minutes)',{exact:true});await minutes.selectOption('30');await page.waitForFunction(()=>localStorage.getItem('FocusTodoStandalone.data.WorkInterval')==='1800');
    await page.getByRole('button',{name:'Appearance',exact:true}).click();await page.getByRole('button',{name:'Ocean',exact:true}).click();await page.waitForFunction(()=>localStorage.getItem('FocusTodoStandalone.data.Theme')==='Ocean');

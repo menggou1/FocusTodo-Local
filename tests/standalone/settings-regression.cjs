@@ -85,6 +85,22 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
     const trigger=selects.nth(i);await trigger.scrollIntoViewIfNeeded();await trigger.click();const menu=p.locator('.legacy-settings-menu');await menu.waitFor();assert.equal(await menu.locator('[aria-selected=true]').count(),1);assert.equal(await menu.locator('[aria-selected=true]').evaluate(e=>getComputedStyle(e).backgroundImage.includes('new-task-project-selected')),true);await trigger.click({position:{x:190,y:15}});await menu.waitFor({state:'hidden'});await trigger.click();await p.locator('.domain-overlay>header h1').click();await menu.waitFor({state:'hidden'});
    }
   }
+  const general = await p.locator('.legacy-settings-content').evaluate(content =>
+   Array.from(content.children).filter(el=>!el.classList.contains('workspace-sr')).map(el=>({
+    tag:el.tagName,title:el.querySelector('span')?.textContent || el.textContent,
+    category:el.classList.contains('legacy-settings-category'),
+   })));
+  assert.deepEqual(general.slice(0,7), [
+   {tag:'LABEL',title:'语言',category:false},
+   {tag:'LABEL',title:'新任务添加至其他任务上方',category:false},
+   {tag:'HR',title:'',category:false},
+   {tag:'H3',title:'通知',category:true},
+   {tag:'DIV',title:'桌面通知',category:false},
+   {tag:'HR',title:'',category:false},
+   {tag:'H3',title:'功能开关',category:true},
+  ]);
+  await p.getByRole('button',{name:'允许通知',exact:true}).waitFor();
+  assert.equal(await p.getByText(/^(播放完成任务提示音|任务完成提示音)$/).count(),0);
   await open('appearance');await p.getByRole('button',{name:'Ocean',exact:true}).click();await p.waitForFunction(()=>document.querySelector('[aria-label=Ocean]').getAttribute('aria-pressed')==='true');
   await p.evaluate(()=>{window.settingsProbe.writes=[];window.settingsProbe.themeMutations=0;window.settingsOpens=window.settingsProbe.opens});await p.getByRole('button',{name:'Ocean',exact:true}).click();await p.waitForTimeout(150);assert.deepEqual(await p.evaluate(()=>window.settingsProbe.writes),[],'current theme produces no writes');assert.equal(await p.evaluate(()=>window.settingsProbe.themeMutations),0);
   for(const theme of ['Leaf','Ocean','Trees','Ocean']){await p.getByRole('button',{name:theme,exact:true}).click();await p.waitForFunction(theme=>document.querySelector('[aria-label='+theme+']').getAttribute('aria-pressed')==='true',theme);const bg=await p.getByTestId('timer-floating').evaluate(e=>e.style.backgroundImage);assert(bg.toLowerCase().includes(theme.toLowerCase()));}

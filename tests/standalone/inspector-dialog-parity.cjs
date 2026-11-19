@@ -14,6 +14,10 @@ async function checkDetails(o,n,locale,dark) {
  for (const [name,,,,overdue] of deadlines) {
   await o.getByText(name,{exact:true}).click();
   await n.getByRole('button',{name,exact:true}).click();
+  // The legacy details pane is reused and can still show the previous task
+  // after the list click has completed.
+  await o.locator('[class*=TitleItem-name] [contenteditable]').getByText(name,{exact:true}).waitFor();
+  await n.waitForFunction(name => document.querySelector('.workspace-details input[data-field=name]')?.value === name, name);
   const oldValue=o.locator('[class*=DeadlineItem-value] span'), value=n.locator('.legacy-detail-deadline .legacy-detail-value');
   assert.equal(await value.innerText(),await oldValue.innerText(),name);
   assert.equal(await value.evaluate(el=>getComputedStyle(el).color),await oldValue.evaluate(el=>getComputedStyle(el).color),name);
@@ -44,6 +48,10 @@ async function check(locale,dark){
     tx.objectStore('Task').put({...task,id:'inspector-deadline-'+index,name,deadline});
    }tx.objectStore('Subtask').put({id:'inspector-child',taskId:task.id,name:'Inspector child',objType:'SUBTASK',state:0,isFinished:false,order:0});tx.objectStore('Pomodoro').put({id:'inspector-record',objType:'POMODORO',taskId:task.id,subtaskId:'',state:0,endDate:Date.now(),interval:1500,pomodoroInterval:1500});
   })},deadlines);await o.reload();await o.waitForFunction(()=>window.FocusLocalReady&&!document.documentElement.classList.contains('focus-starting'));await copyFixture(pair);
+  for (const page of [o,n]) {
+   const clock = await page.evaluate(() => ({ day: [new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate()], offset: new Date().getTimezoneOffset() }));
+   assert.deepEqual(clock, { day: [2026,11,8], offset: -480 }, 'Both inspectors use the fixture calendar day after reload');
+  }
   await checkDetails(o,n,locale,dark);
   await o.locator('[class*=TaskItem-name-]').filter({hasText:'Inspector sample'}).click();await n.getByRole('button',{name:'Inspector sample',exact:true}).click();
   await o.locator('[class*=SubtaskItem-delete]').click();await n.getByLabel((zh?'删除子任务':'Delete subtask')+': Inspector child',{exact:true}).click();
