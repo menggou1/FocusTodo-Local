@@ -4,11 +4,13 @@ const http = require('node:http'), path = require('node:path');
 const root = path.resolve(__dirname, '../..');
 const python = process.env.PYTHON || ['python3', 'python']
     .find(command => spawnSync(command, ['--version']).status === 0);
-test('Python fallback rejects untrusted Hosts and serves uncached GET/HEAD assets', { skip: !python, timeout: 10000 }, async t => {
-    const child = spawn(python, ['scripts/serve-static.py', '--port', '0'], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+const serverArgs = ['scripts/serve-static.py', '--port', '0'];
+
+async function startServer(t, args) {
+    const child = spawn(python, args, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
     const closed = new Promise(resolve => child.once('close', resolve));
     t.after(async () => { child.kill(); await closed; });
-    const ready = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         let stdout = '', stderr = '';
         child.stderr.setEncoding('utf8').on('data', chunk => { stderr += chunk; });
         child.once('error', reject);
@@ -19,7 +21,23 @@ test('Python fallback rejects untrusted Hosts and serves uncached GET/HEAD asset
             if (match) resolve(Number(match[1]));
         });
     });
-    const port = await ready;
+}
+
+test('Python fallback binds loopback without reverse DNS', { skip: !python, timeout: 10000 }, async t => {
+    const rejectReverseLookup = [
+        'import runpy, sys',
+        'def audit(event, args):',
+        '    if event == "socket.gethostbyaddr":',
+        '        raise AssertionError("Loopback startup attempted reverse DNS")',
+        'sys.addaudithook(audit)',
+        'runpy.run_path(sys.argv.pop(1), run_name="__main__")',
+    ].join('\n');
+    const port = await startServer(t, ['-c', rejectReverseLookup, ...serverArgs]);
+    assert(port >= 1 && port <= 65535);
+});
+
+test('Python fallback rejects untrusted Hosts and serves uncached GET/HEAD assets', { skip: !python, timeout: 10000 }, async t => {
+    const port = await startServer(t, serverArgs);
     function request(host, method = 'GET', headers = {}) {
         return new Promise((resolve, reject) => {
             const req = http.request({ host: '127.0.0.1', port, path: '/index.html', method, headers: { ...headers, Host: host } }, res => {

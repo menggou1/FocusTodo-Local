@@ -94,7 +94,10 @@ async function run(locale,dark,width){
   const chart=await contextFor(pair.browser,new URL(n.url()).origin,{storageState:state,locale,viewport:{width,height:800},colorScheme:dark?'dark':'light',reducedMotion:'no-preference'});
   let frames;
   try{
-   const time=new Date('2026-11-08T12:00:00+08:00');await chart.page.clock.install({time});await chart.page.clock.pauseAt(time);
+   // Start the clock earlier so it can advance to the fixture time before navigation.
+   const time=new Date('2026-11-08T12:00:00+08:00');
+   await chart.page.clock.install({time:new Date('2026-11-08T00:00:00+08:00')});
+   await chart.page.clock.pauseAt(time);
    await chart.page.goto(n.url());await chart.page.getByTestId('app-shell').waitFor();await chart.page.evaluate(()=>document.fonts.ready);
    await chart.page.evaluate(()=>{window.chartFrames=[];let end=0;const sample=()=>{const c=document.querySelector('.legacy-review-scroll canvas');if(c){if(!end)end=performance.now()+600;window.chartFrames.push({height:c.clientHeight,pixels:c.height,dpr:devicePixelRatio,reveal:Number(c.dataset.reveal),left:Number(c.dataset.chartLeft)})}if(!end||performance.now()<end)requestAnimationFrame(sample);else window.chartSamplingDone=true};requestAnimationFrame(sample)});
    await chart.page.locator('[data-view=reports]').click();await chart.page.clock.runFor(650);await chart.page.waitForFunction(()=>window.chartSamplingDone);frames=await chart.page.evaluate(()=>window.chartFrames);

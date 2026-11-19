@@ -3,6 +3,7 @@ import json
 import argparse
 import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 from urllib.parse import unquote, urlsplit
 
 from pathlib import Path
@@ -13,6 +14,15 @@ ROOT = Path(__file__).resolve().parent.parent
 # Portable React builds use the same explicit manifest as the Node server.
 APP_ROOT = ROOT if (ROOT / 'build-info.json').is_file() else ROOT / 'dist/app/site'
 APP_FILES = set(json.loads((APP_ROOT / 'runtime-manifest.json').read_text(encoding='utf-8'))['files'])
+
+
+class LoopbackHTTPServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # HTTPServer resolves a host name before listening. The numeric loopback
+        # address is already sufficient for this local-only server.
+        TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address
+
 
 class Handler(SimpleHTTPRequestHandler):
     def end_headers(self):
@@ -58,6 +68,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=5500)
     args = parser.parse_args()
-    with ThreadingHTTPServer(('127.0.0.1', args.port), Handler) as server:
+    with LoopbackHTTPServer(('127.0.0.1', args.port), Handler) as server:
         print('Open http://127.0.0.1:{}/index.html (Ctrl+C to stop).'.format(server.server_port), flush=True)
         server.serve_forever()
