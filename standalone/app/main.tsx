@@ -17,7 +17,7 @@ declare global {
       styles: Record<string, 'loaded'>;
       signal: AbortSignal;
       mark(step: BootStep): void;
-      fail(step: BootStep): void;
+      fail(step: BootStep, error?: unknown): void;
       finish(): void;
     };
   }
@@ -31,7 +31,7 @@ async function complete<T>(step: BootStep, load: () => Promise<T>) {
     boot.mark(step);
     return result;
   } catch (error) {
-    boot.fail(step);
+    boot.fail(step, error);
     throw error;
   }
 }
@@ -90,8 +90,7 @@ try {
   const mount = document.getElementById('prototype-root')!;
   const root = createRoot(mount);
   const observer = new MutationObserver(() => {
-    if (mount.querySelector('[data-testid="error-boundary"]')) boot.fail('render');
-    else if (mount.querySelector('[data-testid="app-shell"]')) {
+    if (mount.querySelector('[data-testid="app-shell"]')) {
       boot.mark('render');
       boot.finish();
       observer.disconnect();
@@ -99,8 +98,10 @@ try {
   });
   observer.observe(mount, { childList: true, subtree: true });
   boot.signal.addEventListener('abort', () => { observer.disconnect(); root.unmount(); }, { once: true });
-  root.render(<ErrorBoundary onRetry={() => location.reload()}><App services={services} /></ErrorBoundary>);
+  root.render(<ErrorBoundary onError={error => queueMicrotask(() => boot.fail('render', error))}
+    onRetry={() => location.reload()}><App services={services} /></ErrorBoundary>);
 } catch (error) {
   dispose?.();
+  boot.fail('render', error);
   console.error(error instanceof Error ? error.name : 'Startup failed');
 }

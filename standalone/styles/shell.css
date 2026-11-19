@@ -16,4 +16,6 @@ button:disabled { cursor:default; }
 .prototype-error { width:min(520px,calc(100% - 40px)); margin:12vh auto; padding:32px; border:1px solid var(--prototype-line); border-radius:12px; }
 .prototype-error h1 { font-size:21px; font-weight:600; }
 .prototype-error p { color:var(--prototype-muted); }
+.prototype-error textarea { display:block; width:100%; margin:4px 0 8px; padding:6px; color:inherit; background:transparent; border:1px solid var(--prototype-line); border-radius:4px; resize:vertical; }
+.prototype-error button + span { margin-inline:8px; }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }

@@ -12,7 +12,8 @@ FocusTodo 2.0.0 是 React / TypeScript / Vite standalone 应用。开发需要 N
 | `npm run build` | 类型检查并生成 dist/app/site，私有 sourcemap 放在 dist/app/debug |
 | `npm start -- --no-browser --port 5512` | 验证正式构建；日常启动默认端口为 5500 |
 | `npm run dev` | 5511 上的隔离 Vite/HMR 开发预览 |
-| `./scripts/preview-standalone.ps1` | Windows 隔离预览，默认端口 5511，`-Port` 指定空闲端口，`-Open` 打开浏览器 |
+| `./scripts/preview-standalone.ps1 -Open` | Windows 隔离 HMR 预览，默认 `http://127.0.0.1:5511/`，用临时 Edge 会话打开 |
+| `./scripts/preview-standalone.ps1 -Static -Port 5512 -Open` | HMR 不可用时，在隔离服务上构建并预览静态产物 |
 | `npm run build:standalone` | 同一应用源码的隔离测试构建，输出 dist/standalone/site |
 | `npm run start:standalone -- --port 5512` | 服务隔离构建，拒绝 5500 |
 | `npm run package:standalone` | 打包隔离测试产物，供三平台复验 |
@@ -20,6 +21,8 @@ FocusTodo 2.0.0 是 React / TypeScript / Vite standalone 应用。开发需要 N
 | `python scripts/deploy-pages.py --ref HEAD --output dist/pages-preview` | 从已提交来源和相符构建生成 Pages；输出目录必须不存在 |
 
 浏览器入口为 standalone/app/main.tsx，本地启动器为 scripts/start.cjs。正式构建、便携包与 Pages 共用 React 资源 manifest。仓库不再包含旧 src 主包、补丁、登录/购买页和 revise/upgrade 工具。归档版不参与生产构建或分发。
+
+预览端口被占用时用 `-Port` 选择其他空闲端口。`-Open` 的临时 Edge 会话不使用日常浏览器数据，关闭后不保留预览数据；未安装 Edge 时，请在新的浏览器配置文件中手动打开脚本打印的 IPv4 地址，不要清除原配置文件的数据。
 
 ## 工作区与数据保护
 
@@ -112,3 +115,5 @@ main 完整检查成功后，Pages 仅发布 dist/app/site 的 manifest 资源�
 作者 Lexible；源自 [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1，上游提交 fe15a1d9201c6298f1c28c16dcb0b58c481f9999 保存在 upstream/7.1.1。archive/1.9.4 保留最后的 1.x 本地版，不继续开发、不部署 Pages。保留 MIT、上游与本地版权；React、ReactDOM、scheduler 和 Noto 完整许可随运行包交付。
 
 中文正式文档在 docs，英文在 docs/en，版本报告使用 releases。历史报告保留当时事实；未完成工程、人工验收与发布后检查只维护在 docs/BACKLOG.md。文档移动同步更新链接、元信息和打包清单。
+
+已验证、尚未归档的改动累计在[下一版更新记录](NEXT-UPDATE.md)，发布前归纳到对应的中英文版本报告。

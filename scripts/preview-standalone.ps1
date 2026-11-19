@@ -4,7 +4,9 @@ param(
     [ValidateRange(1, 65535)]
     [int]$Port = 5511,
 
-    [switch]$Open
+    [switch]$Open,
+
+    [switch]$Static
 )
 
 $ErrorActionPreference = 'Stop'
@@ -19,14 +21,18 @@ if (-not (Test-Path -LiteralPath $vite -PathType Leaf)) {
 $projectRoot = Split-Path -Parent $PSScriptRoot
 Push-Location -LiteralPath $projectRoot
 try {
-    $viteArgs = @('--config', 'vite.standalone.config.mjs', '--host', '127.0.0.1', '--port', "$Port", '--strictPort')
-    if ($Open) {
-        $viteArgs += '--open'
+    if ($Static) {
+        & npm.cmd run build:standalone
+        if ($LASTEXITCODE -ne 0) { throw "Preview build failed (exit $LASTEXITCODE)." }
     }
-    Write-Host 'Starting the isolated preview with HMR. Ctrl+C to stop.'
-    & node $vite @viteArgs
+    $previewArgs = @("$Port")
+    if ($Static) { $previewArgs += '--static' }
+    if ($Open) {
+        $previewArgs += '--open'
+    }
+    & node (Join-Path $PSScriptRoot 'preview-standalone.mjs') @previewArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "Preview failed (exit $LASTEXITCODE). If port $Port is in use, rerun with -Port and a free port."
+        throw "Preview failed (exit $LASTEXITCODE). If port $Port is in use, use -Port with a free port. If HMR fails, try -Static -Port 5512 -Open."
     }
 } finally {
     Pop-Location

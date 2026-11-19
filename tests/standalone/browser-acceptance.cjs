@@ -56,6 +56,24 @@ async function testDevelopmentPreview(browser) {
             await addOnTop.uncheck();
             await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.NewTskOnTop') === 'false');
         });
+        await run(browser, origin, origin + '/', 'chromium: preview reports an unsafe profile without clearing it', async ({ page }) => {
+            await page.addInitScript(() => localStorage.setItem('synthetic-non-preview-setting', 'preserve'));
+            await page.goto(origin, { waitUntil: 'domcontentloaded' });
+            await startupError(page);
+            const details = page.locator('#prototype-details');
+            const report = await details.inputValue();
+            assert.match(report, /IsolationError: Non-preview browser settings exist/);
+            assert(!report.includes('synthetic-non-preview-setting'));
+            assert.equal(await page.evaluate(() => localStorage.getItem('synthetic-non-preview-setting')), 'preserve');
+            await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+                writeText: async text => { window.testCopiedDetails = text; }
+            } }));
+            await page.locator('#prototype-copy').click();
+            assert.equal(await page.evaluate(() => window.testCopiedDetails), report);
+            await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { value: undefined }));
+            await page.locator('#prototype-copy').click();
+            assert.equal(await details.evaluate(field => field.value.slice(field.selectionStart, field.selectionEnd)), report);
+        });
     } finally {
         await vite.close();
     }
@@ -277,6 +295,7 @@ async function main() {
                                 await page.goto(url, { waitUntil: 'domcontentloaded' });
                                 await startupError(page);
                                 assert(await page.locator('#prototype-retry').isVisible());
+                                assert((await page.locator('#prototype-details').inputValue()).includes(new URL(resource, url).pathname));
                                 assert.equal(await page.getByTestId('app-shell').count(), 0);
                                 fail = false;
                                 await page.locator('#prototype-retry').click();
@@ -289,8 +308,9 @@ async function main() {
                     await page.goto(renderOrigin + '/', { waitUntil: 'domcontentloaded' });
                     await page.getByTestId('error-boundary').waitFor();
                     assert(!/preview|预览/i.test(await page.getByTestId('error-boundary').innerText()), 'Production recovery wording must not describe an unfinished preview');
-                    assert(await page.getByTestId('error-boundary').getByRole('button').isVisible());
-                    await page.getByTestId('error-boundary').getByRole('button').click();
+                    assert.match(await page.getByLabel('Error details').inputValue(), /Synthetic component render failure/);
+                    assert(await page.getByRole('button', { name: 'Copy details' }).isVisible());
+                    await page.getByRole('button', { name: 'Reload FocusTodo' }).click();
                     await page.getByTestId('boundary-recovered').waitFor();
                     assert.equal(await page.getByTestId('error-boundary').count(), 0);
                 }, { expectedErrors: true });

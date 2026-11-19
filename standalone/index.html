@@ -9,7 +9,7 @@
   <link rel="icon" href="../public/focus-app.ico" type="image/x-icon" />
   <script>
     // Observe required styles before Vite's generated stylesheet links.
-    window.__prototypeBoot = { styles: Object.create(null), failed: false };
+    window.__prototypeBoot = { styles: Object.create(null) };
     document.addEventListener('load', event => {
       if (event.target instanceof HTMLLinkElement && event.target.rel === 'stylesheet') {
         window.__prototypeBoot.styles[event.target.href] = 'loaded';
@@ -19,8 +19,11 @@
       const target = event.target;
       if (target instanceof HTMLLinkElement && target.rel === 'stylesheet' ||
           target instanceof HTMLScriptElement && target.type === 'module') {
-        window.__prototypeBoot.failed = true;
-        window.__prototypeBoot.fail?.(target instanceof HTMLLinkElement ? 'styles' : 'entry');
+        const boot = window.__prototypeBoot;
+        const step = target instanceof HTMLLinkElement ? 'styles' : 'entry';
+        const asset = new URL(target.href || target.src, document.baseURI).pathname;
+        if (boot.fail) boot.fail(step, { asset });
+        else boot.failure ??= { step, asset };
       }
     }, true);
   </script>
@@ -41,6 +44,10 @@
     #prototype-progress::-moz-progress-bar{background:var(--boot-accent);border-radius:4px}
     #prototype-retry{margin-top:16px;padding:5px 16px;min-height:30px;border:0;border-radius:6px;background:#d7393d;color:#fff;font:inherit;cursor:pointer}
     #prototype-retry:focus-visible{outline:2px solid var(--boot-accent);outline-offset:3px}
+    .startup-card{max-height:100%;overflow:auto}
+    #prototype-detail-label{display:block;margin-top:12px}
+    #prototype-details{display:block;width:100%;margin:4px 0 8px;padding:6px;color:inherit;background:transparent;border:1px solid var(--boot-muted);border-radius:4px;resize:vertical}
+    #prototype-copy{font:inherit;cursor:pointer}
     #prototype-startup[data-theme=dark]{--boot-bg:#0c0c10;--boot-panel:#1a1a20;--boot-text:#e8e8eb;--boot-muted:#b5b5bd;--boot-track:#34343e}
   </style>
 </head>
@@ -50,6 +57,12 @@
       <div class="startup-heading"><img id="prototype-brand" src="../public/focus-app.ico" width="30" height="30" alt="" /><h1 id="prototype-title">FocusTodo</h1></div>
       <p id="prototype-status" role="status">Starting FocusTodo… / 正在启动专注清单…</p>
       <progress id="prototype-progress" max="7" value="0" aria-label="Startup progress"></progress>
+      <div id="prototype-diagnostics" hidden>
+        <label id="prototype-detail-label" for="prototype-details">Error details</label>
+        <textarea id="prototype-details" rows="4" readonly></textarea>
+        <button id="prototype-copy" type="button">Copy details</button>
+        <span id="prototype-copy-status" role="status"></span>
+      </div>
       <button id="prototype-retry" type="button" hidden>Retry / 重试</button>
       <noscript>Enable JavaScript to run FocusTodo. / 请启用 JavaScript。</noscript>
     </div>
@@ -63,6 +76,10 @@
       const status = document.getElementById('prototype-status');
       const progress = document.getElementById('prototype-progress');
       const retry = document.getElementById('prototype-retry');
+      const diagnostics = document.getElementById('prototype-diagnostics');
+      const details = document.getElementById('prototype-details');
+      const copy = document.getElementById('prototype-copy');
+      const copyStatus = document.getElementById('prototype-copy-status');
       const controller = new AbortController();
       let language = 'auto';
       let dark = matchMedia('(prefers-color-scheme: dark)').matches;
@@ -82,6 +99,18 @@
       const completed = new Set();
       status.textContent = zh ? '正在准备工作区…' : 'Preparing your workspace…';
       retry.textContent = zh ? '重试' : 'Retry';
+      document.getElementById('prototype-detail-label').textContent = zh ? '错误详情' : 'Error details';
+      copy.textContent = zh ? '复制详情' : 'Copy details';
+      copy.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(details.value);
+          copyStatus.textContent = zh ? '已复制' : 'Copied';
+        } catch {
+          details.focus();
+          details.select();
+          copyStatus.textContent = zh ? '无法自动复制，请手动复制已选内容。' : 'Copy failed. Copy the selected text manually.';
+        }
+      });
       progress.setAttribute('aria-label', zh ? '启动进度' : 'Startup progress');
       retry.addEventListener('click', () => location.reload());
       boot.signal = controller.signal;
@@ -91,7 +120,7 @@
         progress.value = completed.size;
         status.textContent = zh ? `${labels[step]}已就绪（${completed.size}/${progress.max}）` : `${labels[step]} ready (${completed.size}/${progress.max})`;
       };
-      boot.fail = step => {
+      boot.fail = (step, error) => {
         if (screen.dataset.state !== 'loading') return;
         screen.dataset.state = 'error';
         screen.dataset.failedStep = step;
@@ -102,6 +131,12 @@
           : navigator.onLine === false
             ? (zh ? '当前处于离线状态，无法读取启动资源。请重试。' : 'Startup resources are unavailable offline. Please retry.')
             : (zh ? `${label}加载失败。请重试。` : `${label} could not load. Please retry.`);
+        const reason = error?.asset ? `${zh ? '资源加载失败' : 'Resource failed to load'}: ${error.asset}`
+          : error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 1200)
+          : typeof error === 'string' ? error.slice(0, 1200) : status.textContent;
+        details.value = [document.title, `${zh ? '阶段' : 'Stage'}: ${step}`,
+          `${zh ? '未完成' : 'Pending'}: ${screen.dataset.pendingSteps}`, reason].join('\n');
+        diagnostics.hidden = false;
         retry.hidden = false;
         clearTimeout(timer);
         controller.abort();
@@ -119,7 +154,7 @@
       };
       const timer = setTimeout(() => boot.fail('timeout'), 20000);
       addEventListener('pagehide', event => { if (!event.persisted) { clearTimeout(timer); controller.abort(); } });
-      if (boot.failed) boot.fail('entry');
+      if (boot.failure) boot.fail(boot.failure.step, boot.failure);
     })();
   </script>
   <script type="module" src="./app/main.tsx"></script>
