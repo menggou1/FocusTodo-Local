@@ -22,6 +22,8 @@ FocusTodo 2.0.0 is the React / TypeScript / Vite standalone application. Develop
 
 The browser entry is standalone/app/main.tsx; the local launcher is scripts/start.cjs. Production, portable archives and Pages share the React manifest. Legacy src bundles, login/purchase pages and revise/upgrade tools are removed. Historical code is never a production build input.
 
+In an interactive HMR preview, type a key and press Enter: `h` shows help, `f` reloads connected preview tabs, `r` restarts the server, `o` opens the default browser, and `q` quits. Static mode does not provide HMR shortcuts.
+
 ## Workspace and data
 
 Reuse the regular dev checkout. Inspect git worktree list, branch and status. Preserve existing changes; never force-switch, modify another worktree or force-push. Use Conventional Commits; release preparation may use `chore(release): prepare 2.0.0`. Do not rewrite published history.

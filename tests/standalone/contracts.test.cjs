@@ -26,12 +26,12 @@ function loadTypeScript(relative, environment = {}) {
     return exports;
 }
 
+const previewScope = { storagePrefix: 'FocusTodoStandalone.data.', databaseName: 'FocusTodoStandalone.PomodoroDB6' };
+
 function isolated(overrides = {}) {
-    let reads = 0;
     const environment = {
         location: { hostname: '127.0.0.1', protocol: 'http:', origin: 'http://127.0.0.1:49152' },
         document: { baseURI: 'http://127.0.0.1:49152/FocusTodo-Local/' },
-        localStorage: { length: 0, key() { reads++; return null; }, setItem() { throw new Error('Unexpected storage write'); } },
         indexedDB: { databases: async () => [] },
         fetch: async (url, options) => {
             assert.equal(url.href, 'http://127.0.0.1:49152/FocusTodo-Local/__prototype/session.json');
@@ -41,7 +41,8 @@ function isolated(overrides = {}) {
         },
         ...overrides
     };
-    return { ...loadTypeScript('services/isolation.ts', environment), reads: () => reads };
+    const { verifyIsolation } = loadTypeScript('services/isolation.ts', environment);
+    return { verifyIsolation: (signal, scope = previewScope) => verifyIsolation(signal, scope) };
 }
 
 test('candidate origin requires a loopback server attestation before inspecting storage', async () => {
@@ -49,11 +50,11 @@ test('candidate origin requires a loopback server attestation before inspecting 
     for (const location of [
         { hostname: 'menggou1.github.io', protocol: 'https:', origin: 'https://menggou1.github.io' },
         { hostname: '127.0.0.1', protocol: 'https:', origin: 'https://127.0.0.1' },
-        { hostname: '', protocol: 'file:', origin: 'null' }
+        { hostname: '', protocol: 'file:', origin: 'null' },
+        { hostname: '127.0.0.1', protocol: 'http:', origin: 'http://127.0.0.1:5500', port: '5500' }
     ]) {
         const guard = isolated({ location, fetch: () => { fetches++; throw new Error('Unexpected request'); } });
         await assert.rejects(guard.verifyIsolation(new AbortController().signal), /fresh browser context/);
-        assert.equal(guard.reads(), 0);
     }
     assert.equal(fetches, 0);
     await isolated().verifyIsolation(new AbortController().signal);
@@ -68,14 +69,28 @@ test('candidate rejects absent or mismatching attestation and opaque databases',
         await assert.rejects(isolated({ fetch }).verifyIsolation(new AbortController().signal), /fresh browser context/);
     }
     await assert.rejects(isolated({ indexedDB: {} }).verifyIsolation(new AbortController().signal), /fresh browser context/);
-    await assert.rejects(isolated({ indexedDB: { databases: async () => [{ name: 'PomodoroDB6', version: 3 }] } }).verifyIsolation(new AbortController().signal), /fresh browser context/);
 });
 
-test('candidate permits its preference namespace and rejects every legacy or unknown key', async () => {
-    const storage = key => ({ length: 1, key: () => key, setItem() { throw new Error('Unexpected write'); } });
-    await isolated({ localStorage: storage('FocusTodoStandalone.language') }).verifyIsolation(new AbortController().signal);
-    for (const key of ['WorkInterval', 'cookie.user', 'FocusTodo.language', 'OtherApplication', null]) {
-        await assert.rejects(isolated({ localStorage: storage(key) }).verifyIsolation(new AbortController().signal), /fresh browser context/);
+test('candidate ignores unrelated databases but rejects incompatible versions of its own databases', async () => {
+    const name = previewScope.databaseName;
+    const lock = name + '-maintenance-lock';
+    const signal = new AbortController().signal;
+    const indexedDB = databases => ({ databases: async () => databases });
+    await isolated({ indexedDB: indexedDB([
+        { name: 'PomodoroDB6', version: 3 }, { name: 'AnotherApplication', version: 4 },
+        { name, version: 3 }, { name: lock, version: 1 },
+    ]) }).verifyIsolation(signal);
+    for (const database of [{ name, version: 4 }, { name: lock, version: 2 }]) {
+        await assert.rejects(isolated({ indexedDB: indexedDB([database]) }).verifyIsolation(signal), /incompatible schema version/);
+    }
+});
+
+test('candidate checks the configured settings and database namespaces without accessing physical settings', async () => {
+    const guard = isolated({ localStorage: new Proxy({}, { get() { throw new Error('Unexpected storage access'); } }) });
+    const signal = new AbortController().signal;
+    await guard.verifyIsolation(signal);
+    for (const scope of [{ ...previewScope, storagePrefix: '' }, { ...previewScope, storagePrefix: 'FocusTodoStandalone.' }, { ...previewScope, databaseName: 'PomodoroDB6' }]) {
+        await assert.rejects(guard.verifyIsolation(signal, scope), /namespace is not reserved/);
     }
 });
 

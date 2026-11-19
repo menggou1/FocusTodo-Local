@@ -15,15 +15,18 @@
         window.__prototypeBoot.styles[event.target.href] = 'loaded';
       }
     }, true);
+    window.__prototypeBoot.assetFailed = (step, url) => {
+      const boot = window.__prototypeBoot;
+      const asset = new URL(url, document.baseURI).pathname;
+      if (boot.fail) boot.fail(step, { asset });
+      else boot.failure ??= { step, asset };
+    };
     document.addEventListener('error', event => {
       const target = event.target;
       if (target instanceof HTMLLinkElement && target.rel === 'stylesheet' ||
           target instanceof HTMLScriptElement && target.type === 'module') {
-        const boot = window.__prototypeBoot;
-        const step = target instanceof HTMLLinkElement ? 'styles' : 'entry';
-        const asset = new URL(target.href || target.src, document.baseURI).pathname;
-        if (boot.fail) boot.fail(step, { asset });
-        else boot.failure ??= { step, asset };
+        if (target instanceof HTMLLinkElement) window.__prototypeBoot.assetFailed('styles', target.href);
+        else window.__prototypeBoot.assetFailed('entry', target.src);
       }
     }, true);
   </script>
@@ -42,12 +45,11 @@
     #prototype-progress::-webkit-progress-bar{background:var(--boot-track)}
     #prototype-progress::-webkit-progress-value{background:var(--boot-accent);border-radius:4px}
     #prototype-progress::-moz-progress-bar{background:var(--boot-accent);border-radius:4px}
-    #prototype-retry{margin-top:16px;padding:5px 16px;min-height:30px;border:0;border-radius:6px;background:#d7393d;color:#fff;font:inherit;cursor:pointer}
-    #prototype-retry:focus-visible{outline:2px solid var(--boot-accent);outline-offset:3px}
-    .startup-card{max-height:100%;overflow:auto}
-    #prototype-detail-label{display:block;margin-top:12px}
-    #prototype-details{display:block;width:100%;margin:4px 0 8px;padding:6px;color:inherit;background:transparent;border:1px solid var(--boot-muted);border-radius:4px;resize:vertical}
-    #prototype-copy{font:inherit;cursor:pointer}
+    :where(#prototype-diagnostics){width:min(420px,100%);max-height:100%;overflow:auto;padding:16px 20px;border-radius:10px;background:var(--boot-panel);color:var(--boot-text);font:inherit}
+    :where(.recovery-details){white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;max-height:8em;overflow:auto}
+    :where(#prototype-diagnostics footer){display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+    :where(#prototype-diagnostics button){height:30px;padding:0 8px;border:1px solid var(--boot-track);border-radius:6px;background:transparent;color:inherit;font:inherit;cursor:pointer}
+    :where(#prototype-retry){background:#fd5553;color:#fff}
     #prototype-startup[data-theme=dark]{--boot-bg:#0c0c10;--boot-panel:#1a1a20;--boot-text:#e8e8eb;--boot-muted:#b5b5bd;--boot-track:#34343e}
   </style>
 </head>
@@ -57,15 +59,23 @@
       <div class="startup-heading"><img id="prototype-brand" src="../public/focus-app.ico" width="30" height="30" alt="" /><h1 id="prototype-title">FocusTodo</h1></div>
       <p id="prototype-status" role="status">Starting FocusTodo… / 正在启动专注清单…</p>
       <progress id="prototype-progress" max="7" value="0" aria-label="Startup progress"></progress>
-      <div id="prototype-diagnostics" hidden>
-        <label id="prototype-detail-label" for="prototype-details">Error details</label>
-        <textarea id="prototype-details" rows="4" readonly></textarea>
-        <button id="prototype-copy" type="button">Copy details</button>
-        <span id="prototype-copy-status" role="status"></span>
-      </div>
-      <button id="prototype-retry" type="button" hidden>Retry / 重试</button>
       <noscript>Enable JavaScript to run FocusTodo. / 请启用 JavaScript。</noscript>
     </div>
+    <section id="prototype-diagnostics" class="recovery-dialog" aria-labelledby="prototype-error-title" hidden>
+      <header class="startup-heading recovery-heading">
+        <img src="../public/focus-app.ico" width="30" height="30" alt="" />
+        <strong id="prototype-error-title">FocusTodo</strong>
+      </header>
+      <div class="legacy-delete-content"><div>
+        <p id="prototype-error-summary" role="alert"></p>
+        <pre id="prototype-details" class="recovery-details" tabindex="0" data-selectable></pre>
+        <p id="prototype-copy-status" class="recovery-copy-status" role="status" hidden></p>
+      </div></div>
+      <footer>
+        <button id="prototype-copy" type="button">Copy details</button>
+        <button id="prototype-retry" class="primary" type="button">Retry</button>
+      </footer>
+    </section>
   </section>
   <div id="prototype-root" aria-busy="true" inert></div>
   <script>
@@ -77,6 +87,7 @@
       const progress = document.getElementById('prototype-progress');
       const retry = document.getElementById('prototype-retry');
       const diagnostics = document.getElementById('prototype-diagnostics');
+      const summary = document.getElementById('prototype-error-summary');
       const details = document.getElementById('prototype-details');
       const copy = document.getElementById('prototype-copy');
       const copyStatus = document.getElementById('prototype-copy-status');
@@ -92,6 +103,8 @@
       const zh = language === 'zh-CN' || language !== 'en' && /^zh\b/i.test(navigator.language);
       screen.lang = zh ? 'zh-CN' : 'en';
       screen.dataset.theme = dark ? 'dark' : 'light';
+      document.documentElement.lang = screen.lang;
+      document.documentElement.dataset.theme = screen.dataset.theme;
       if (zh) document.getElementById('prototype-title').textContent = '专注清单';
       const labels = zh
         ? {entry:'应用脚本',styles:'界面样式',data:'本地数据',fonts:'界面字体',icons:'图标',sounds:'提示音',render:'主界面'}
@@ -99,17 +112,24 @@
       const completed = new Set();
       status.textContent = zh ? '正在准备工作区…' : 'Preparing your workspace…';
       retry.textContent = zh ? '重试' : 'Retry';
-      document.getElementById('prototype-detail-label').textContent = zh ? '错误详情' : 'Error details';
+      const detailLabel = zh ? '错误详情' : 'Error details';
+      details.setAttribute('aria-label', detailLabel);
+      document.getElementById('prototype-error-title').textContent = zh ? '专注清单无法启动' : 'FocusTodo could not start';
       copy.textContent = zh ? '复制详情' : 'Copy details';
       copy.addEventListener('click', async () => {
         try {
-          await navigator.clipboard.writeText(details.value);
+          await navigator.clipboard.writeText(details.textContent);
           copyStatus.textContent = zh ? '已复制' : 'Copied';
         } catch {
           details.focus();
-          details.select();
+          const range = document.createRange();
+          range.selectNodeContents(details);
+          const selection = getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
           copyStatus.textContent = zh ? '无法自动复制，请手动复制已选内容。' : 'Copy failed. Copy the selected text manually.';
         }
+        copyStatus.hidden = false;
       });
       progress.setAttribute('aria-label', zh ? '启动进度' : 'Startup progress');
       retry.addEventListener('click', () => location.reload());
@@ -126,18 +146,19 @@
         screen.dataset.failedStep = step;
         screen.dataset.pendingSteps = Object.keys(labels).filter(name => !completed.has(name)).join(' ');
         const label = labels[step];
-        status.textContent = step === 'timeout'
+        summary.textContent = step === 'timeout'
           ? (zh ? '启动超时。请重试。' : 'Startup timed out. Please retry.')
           : navigator.onLine === false
             ? (zh ? '当前处于离线状态，无法读取启动资源。请重试。' : 'Startup resources are unavailable offline. Please retry.')
             : (zh ? `${label}加载失败。请重试。` : `${label} could not load. Please retry.`);
         const reason = error?.asset ? `${zh ? '资源加载失败' : 'Resource failed to load'}: ${error.asset}`
           : error instanceof Error ? `${error.name}: ${error.message}`.slice(0, 1200)
-          : typeof error === 'string' ? error.slice(0, 1200) : status.textContent;
-        details.value = [document.title, `${zh ? '阶段' : 'Stage'}: ${step}`,
+          : typeof error === 'string' ? error.slice(0, 1200) : summary.textContent;
+        details.textContent = [document.title, `${zh ? '阶段' : 'Stage'}: ${step}`,
           `${zh ? '未完成' : 'Pending'}: ${screen.dataset.pendingSteps}`, reason].join('\n');
         diagnostics.hidden = false;
-        retry.hidden = false;
+        status.closest('.startup-card').hidden = true;
+        retry.focus();
         clearTimeout(timer);
         controller.abort();
       };

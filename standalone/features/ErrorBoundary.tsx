@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { messages } from '../shared/i18n';
+import { ConfirmDialog } from './workspace/ConfirmDialog';
 
 interface Props {
   children: ReactNode;
@@ -31,26 +32,29 @@ export class ErrorBoundary extends Component<Props, { details: string | null; co
     if (this.state.details === null) return this.props.children;
     const text = messages(document.documentElement.lang.startsWith('zh') ? 'zh-CN' : 'en');
     return (
-      <main className="prototype-error" data-testid="error-boundary" role="alert">
-        <h1>{text.errorTitle}</h1>
-        <p data-selectable>{text.errorHelp}</p>
-        <label htmlFor="prototype-render-details">{text.errorDetails}</label>
-        <textarea id="prototype-render-details" rows={4} readOnly value={this.state.details} />
-        <button className="prototype-button" onClick={async event => {
-          const field = event.currentTarget.parentElement?.querySelector('textarea');
+      <ConfirmDialog title={text.errorTitle} message={text.errorHelp} close={this.retry} canClose={false} className="recovery-dialog"
+        extra={<div data-testid="error-boundary">
+          <pre className="recovery-details" aria-label={text.errorDetails} tabIndex={0} data-selectable>{this.state.details}</pre>
+          {this.state.copyStatus && <p className="recovery-copy-status" role="status">{this.state.copyStatus}</p>}
+        </div>}>
+        <button type="button" onClick={async event => {
+          const field = event.currentTarget.closest('dialog')?.querySelector('pre');
           if (!field) return;
           try {
-            await navigator.clipboard.writeText(field.value);
+            await navigator.clipboard.writeText(field.textContent ?? '');
             this.setState({ copyStatus: text.copied });
           } catch {
             field.focus();
-            field.select();
+            const range = document.createRange();
+            range.selectNodeContents(field);
+            const selection = getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(range);
             this.setState({ copyStatus: text.copyFailed });
           }
         }}>{text.copyDetails}</button>
-        <span role="status">{this.state.copyStatus}</span>
-        <button className="prototype-button prototype-button-primary" onClick={this.retry}>{text.reload}</button>
-      </main>
+        <button type="button" className="primary" onClick={this.retry}>{text.reload}</button>
+      </ConfirmDialog>
     );
   }
 }

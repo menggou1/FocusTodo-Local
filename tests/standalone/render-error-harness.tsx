@@ -2,6 +2,7 @@
 import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from '../../standalone/features/ErrorBoundary';
 import '../../standalone/styles/shell.css';
+import '../../standalone/styles/legacy-dialogs.css';
 
 let fail = true;
 function Subject() {

@@ -1,4 +1,5 @@
-export const preferencePrefix = 'FocusTodoStandalone.';
+export type PersistenceScope = Readonly<{ storagePrefix: string; databaseName: string }>;
+
 export class IsolationError extends Error {
   constructor(reason: string) {
     super(`${reason} Use a fresh browser context and the isolated preview server. Existing data was not changed.`);
@@ -7,8 +8,8 @@ export class IsolationError extends Error {
 }
 
 /** Fail closed before constructing adapters. Never opens a legacy database. */
-export async function verifyIsolation(signal: AbortSignal, allowServiceData = false): Promise<void> {
-  if (!['127.0.0.1', 'localhost'].includes(location.hostname) || location.protocol !== 'http:') {
+export async function verifyIsolation(signal: AbortSignal, scope: PersistenceScope): Promise<void> {
+  if (!['127.0.0.1', 'localhost'].includes(location.hostname) || location.protocol !== 'http:' || location.port === '5500') {
     throw new IsolationError('Open the HTTP loopback URL printed by the preview script.');
   }
   const response = await fetch(new URL('__prototype/session.json', document.baseURI), {
@@ -18,13 +19,15 @@ export async function verifyIsolation(signal: AbortSignal, allowServiceData = fa
   const session: unknown = await response.json();
   if (!session || typeof session !== 'object' || !('kind' in session) || session.kind !== 'isolated-prototype'
     || !('origin' in session) || session.origin !== location.origin) throw new IsolationError('The server did not prove that this origin is isolated.');
-  for (let index = 0; index < localStorage.length; index++) {
-    if (!localStorage.key(index)?.startsWith(preferencePrefix)) throw new IsolationError('Non-preview browser settings exist on this origin.');
+  if (scope.storagePrefix !== 'FocusTodoStandalone.data.' || scope.databaseName !== 'FocusTodoStandalone.PomodoroDB6') {
+    throw new IsolationError('The configured persistence namespace is not reserved for preview data.');
   }
   // If storage cannot be inspected, we cannot establish the isolation contract.
   if (!indexedDB.databases) throw new IsolationError('This browser cannot verify the database namespace.');
   const databases = await indexedDB.databases();
-  if (databases.some(database => !allowServiceData ||
-    !(database.name === 'FocusTodoStandalone.PomodoroDB6' && database.version === 3 ||
-      database.name === 'FocusTodoStandalone.PomodoroDB6-maintenance-lock' && database.version === 1))) throw new IsolationError('A database on this origin is outside the preview namespace.');
+  if (databases.some(database =>
+    (database.name === scope.databaseName && database.version !== 3) ||
+    (database.name === scope.databaseName + '-maintenance-lock' && database.version !== 1))) {
+    throw new IsolationError('An existing preview database or maintenance database has an incompatible schema version.');
+  }
 }

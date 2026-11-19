@@ -1,21 +1,25 @@
 import { confirmInApp } from './confirmation';
+import type { PersistenceScope } from './isolation';
 import type { PreferenceState } from './core.mjs';
 import { createCoreServices } from './core.mjs';
 import { createImageConverter } from './images.mjs';
 import publishedHistory from '../../release.json';
 import candidateVersion from '../app-version.json';
 import notificationIcon from '../../public/focus-app.ico?url';
+import completeSound from '../../public/audio/Complete.m4a?inline';
 import volumeTip from '../../public/audio/VolumeTip.wav?inline';
 import volumeTipFile from '../../public/audio/VolumeTip.wav?url';
 
-declare const __APP_ISOLATED__: boolean;
 const embeddedVolumeTip = typeof OfflineAudioContext === 'function';
-const sounds = import.meta.glob<string>(['../../public/audio/*', '!../../public/audio/VolumeTip.wav'], { query: '?url', import: 'default', eager: true });
+const sounds = import.meta.glob<string>(['../../public/audio/*', '!../../public/audio/VolumeTip.wav', '!../../public/audio/Complete.m4a'], { query: '?url', import: 'default', eager: true });
+function inlineSound(file: string) {
+    if (file === 'Complete.m4a') return completeSound;
+    if (file === 'VolumeTip.wav' && embeddedVolumeTip) return volumeTip;
+}
 function soundURL(file: string) {
     // Keep the short WAV out of HTTP on full engines. Media-only ports such
     // as Windows WebKit lack Web Audio and require a real URL for playback.
-    if (file === 'VolumeTip.wav') return embeddedVolumeTip ? volumeTip : volumeTipFile;
-    const url = sounds['../../public/audio/' + file];
+    const url = inlineSound(file) ?? (file === 'VolumeTip.wav' ? volumeTipFile : sounds['../../public/audio/' + file]);
     if (!url) throw new Error('Unknown local audio asset');
     return url;
 }
@@ -30,8 +34,9 @@ export async function loadStartupSounds(prefs: PreferenceState, signal: AbortSig
     const decoder = embeddedVolumeTip ? new OfflineAudioContext(1, 1, 44100) : null;
     await Promise.all([...files].map(async file => {
         let bytes: Uint8Array<ArrayBuffer>;
-        if (file === 'VolumeTip.wav' && embeddedVolumeTip) {
-            bytes = Uint8Array.from(atob(volumeTip.slice(volumeTip.indexOf(',') + 1)), char => char.charCodeAt(0));
+        const embedded = inlineSound(file);
+        if (embedded) {
+            bytes = Uint8Array.from(atob(embedded.slice(embedded.indexOf(',') + 1)), char => char.charCodeAt(0));
         } else {
             const response = await fetch(soundURL(file), { signal });
             if (!response.ok) throw new Error('Required audio asset unavailable');
@@ -52,12 +57,12 @@ export async function loadStartupSounds(prefs: PreferenceState, signal: AbortSig
     }));
 }
 
-export function createBrowserServices(appVersion: string) {
+export function createBrowserServices(appVersion: string, scope: PersistenceScope) {
     return createCoreServices({
         storage: localStorage, indexedDB, now: () => Date.now(), randomUUID: () => crypto.randomUUID(), random: () => Math.random(),
-        appVersion, ...(__APP_ISOLATED__ ? {} : {databaseName: 'PomodoroDB6', storagePrefix: ''}), releaseConfig: { ...publishedHistory, ...candidateVersion }, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
+        appVersion, ...scope, releaseConfig: { ...publishedHistory, ...candidateVersion }, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
         decodeBase64: value => decodeURIComponent(escape(atob(value))), compression: window,
-        locks: navigator.locks, channel: typeof BroadcastChannel === 'function' ? new BroadcastChannel((__APP_ISOLATED__?'FocusTodoStandalone.PomodoroDB6':'PomodoroDB6')+':services') : null,
+        locks: navigator.locks, channel: typeof BroadcastChannel === 'function' ? new BroadcastChannel(scope.databaseName + ':services') : null,
         languages: navigator.languages, origin: location.origin, fetch: (...args) => fetch(...args),
         createAudio: file => new Audio(soundURL(file)),
         notification: typeof Notification === 'function' ? Notification : undefined,

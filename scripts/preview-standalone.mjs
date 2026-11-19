@@ -24,8 +24,17 @@ if (useStatic) {
     server: { host, port, strictPort: true, open: false },
   });
   await server.listen();
+  server.bindCLIShortcuts({
+    print: true,
+    customShortcuts: [{
+      key: 'f',
+      description: 'refresh connected browser tabs',
+      action: server => server.environments.client.hot.send({ type: 'full-reload', path: '*' }),
+    }],
+  });
 }
-console.log(`FocusTodo ${useStatic ? 'static' : 'HMR'} preview: ${url} (Ctrl+C to stop)`);
+console.log(`FocusTodo ${useStatic ? 'static' : 'HMR'} preview: ${url}`);
+console.log('This terminal is serving the preview. Press Ctrl+C to stop it, or use another terminal for commands.');
 
 if (options.includes('--open')) {
   let browser;

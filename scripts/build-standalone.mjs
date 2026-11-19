@@ -30,9 +30,9 @@ await build({ mode: production ? 'release' : 'isolated', configFile: path.join(r
 const htmlPath = path.join(site, 'index.html');
 let html = await readFile(htmlPath, 'utf8');
 html = html.replace(/<link\b(?=[^>]*rel="stylesheet")[^>]*>/g, tag => tag.slice(0, -1)
-  + ` onload="window.__prototypeBoot.styles[this.href]='loaded'" onerror="window.__prototypeBoot.failed=true;window.__prototypeBoot.fail?.('styles')">`);
+  + ` onload="window.__prototypeBoot.styles[this.href]='loaded'" onerror="window.__prototypeBoot.assetFailed('styles',this.href)">`);
 html = html.replace(/<script\b(?=[^>]*type="module")(?=[^>]*src=)[^>]*>/g, tag => tag.slice(0, -1)
-  + ` onerror="window.__prototypeBoot.failed=true;window.__prototypeBoot.fail?.('entry')">`);
+  + ` onerror="window.__prototypeBoot.assetFailed('entry',this.src)">`);
 await writeFile(htmlPath, html);
 await mkdir(debug, { recursive: true });
 await rename(path.join(site, '.vite'), path.join(debug, '.vite'));
@@ -63,7 +63,7 @@ await writeFile(path.join(site, production ? 'build-info.json' : 'prototype-buil
   kind: production ? 'standalone-app' : 'isolated-prototype', ...(production ? { sourceDigest: (await import('./app-inputs.cjs')).default.inputDigest() } : {}), localVersion: release.localVersion, sourceVersion: release.officialVersion,
   schemaVersion: 3, backupExportVersion: 2, persistence: production ? 'legacy-compatible-v3' : 'isolated-namespaced-v3', serviceProtocol: 1, base: './',
   syntaxTargets: ['Chrome 111', 'Edge 111', 'Firefox 114', 'Safari 16.4'],
-  ...(production ? {} : {isolationCapabilities: ['localStorage key enumeration', 'indexedDB.databases (Firefox 126+)', 'loopback server attestation']}),
+  ...(production ? {} : {isolationCapabilities: ['scoped localStorage adapter', 'indexedDB.databases (Firefox 126+)', 'loopback server attestation']}),
 }, null, 2) + '\n');
 const names = (await files(site)).map(file => path.relative(site, file).split(path.sep).join('/')).sort();
 for (const name of names) {

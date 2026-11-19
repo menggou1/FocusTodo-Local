@@ -1,7 +1,7 @@
 import {useEffect,useRef,type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {useWindowClose} from './Dialog';
-const warning=new URL('../../../public/img/WarningTip.png',import.meta.url).href;
+import warning from '../../../public/img/WarningTip.png?url';
 
 /** Shared 1.9.x ConfirmDialog shell, isolated from navigation/inspector CSS. */
 export function ConfirmDialog({title,message,close,children,className='',canClose=true,motion:controlledMotion,extra}:{title:string;message:string;close():void;children:ReactNode|((dismiss:()=>void)=>ReactNode);className?:string;canClose?:boolean;motion?:string;extra?:ReactNode}) {

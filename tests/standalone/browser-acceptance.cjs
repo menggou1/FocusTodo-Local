@@ -56,15 +56,24 @@ async function testDevelopmentPreview(browser) {
             await addOnTop.uncheck();
             await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.NewTskOnTop') === 'false');
         });
-        await run(browser, origin, origin + '/', 'chromium: preview reports an unsafe profile without clearing it', async ({ page }) => {
-            await page.addInitScript(() => localStorage.setItem('synthetic-non-preview-setting', 'preserve'));
+        await run(browser, origin, origin + '/', 'chromium: preview errors use the shared style and copy diagnostics', async ({ page }) => {
+            await page.route('**/__prototype/session.json', route => route.fulfill({ status: 404, body: '' }));
             await page.goto(origin, { waitUntil: 'domcontentloaded' });
             await startupError(page);
             const details = page.locator('#prototype-details');
-            const report = await details.inputValue();
-            assert.match(report, /IsolationError: Non-preview browser settings exist/);
-            assert(!report.includes('synthetic-non-preview-setting'));
-            assert.equal(await page.evaluate(() => localStorage.getItem('synthetic-non-preview-setting')), 'preserve');
+            const report = await details.textContent();
+            assert.match(report, /IsolationError: The preview session endpoint returned HTTP 404/);
+            const style = await details.evaluate(field => ({
+                font: getComputedStyle(field).fontFamily,
+                scrollbar: getComputedStyle(field).scrollbarWidth,
+                wrapping: getComputedStyle(field).whiteSpace,
+            }));
+            assert.match(style.font, /Noto Sans SC/);
+            assert.equal(style.scrollbar, 'thin');
+            assert.equal(style.wrapping, 'pre-wrap');
+            const tile = page.locator('#prototype-diagnostics .recovery-heading img');
+            assert(await tile.isVisible());
+            assert.equal(await tile.evaluate(img => img.src), await page.locator('#prototype-brand').evaluate(img => img.src));
             await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
                 writeText: async text => { window.testCopiedDetails = text; }
             } }));
@@ -72,7 +81,7 @@ async function testDevelopmentPreview(browser) {
             assert.equal(await page.evaluate(() => window.testCopiedDetails), report);
             await page.evaluate(() => Object.defineProperty(navigator, 'clipboard', { value: undefined }));
             await page.locator('#prototype-copy').click();
-            assert.equal(await details.evaluate(field => field.value.slice(field.selectionStart, field.selectionEnd)), report);
+            assert.equal(await page.evaluate(() => getSelection().toString()), report);
         });
     } finally {
         await vite.close();
@@ -244,15 +253,26 @@ async function main() {
                                 await ready(page);
                             } finally { release(); }
                         });
-                        await run(browser, origin, url, engine + ': existing legacy settings are preserved and blocked', async ({ page }) => {
-                            await page.addInitScript(() => localStorage.setItem('WorkInterval', '1500'));
+                        await run(browser, origin, url, engine + ': starts on the same origin without importing or changing legacy settings', async ({ page, requests }) => {
+                            await page.addInitScript(() => {
+                                localStorage.setItem('FocusTodo.language', 'en');
+                                localStorage.setItem('NewTskOnTop', 'false');
+                            });
                             await page.goto(url, { waitUntil: 'domcontentloaded' });
-                            await startupError(page);
-                            assert.equal(await page.getByTestId('app-shell').count(), 0);
-                            assert.equal(await page.evaluate(() => localStorage.getItem('WorkInterval')), '1500');
-                            assert(await page.locator('#prototype-retry').isVisible());
+                            await ready(page);
+                            assert.equal(new URL(page.url()).origin, origin);
+                            assert(!requests.some(request => /\/Complete(?:-[^/]+)?\.m4a(?:[?#]|$)/.test(request)));
+                            await page.locator('[data-view=settings]').click();
+                            await page.getByRole('button', { name: '通用', exact: true }).click();
+                            const addOnTop = page.getByRole('checkbox', { name: '新任务添加至其他任务上方', exact: true });
+                            assert(await addOnTop.isChecked());
+                            await addOnTop.uncheck();
+                            await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.NewTskOnTop') === 'false');
+                            await addOnTop.check();
+                            await page.waitForFunction(() => localStorage.getItem('FocusTodoStandalone.data.NewTskOnTop') === 'true');
+                            assert.equal(await page.evaluate(() => localStorage.getItem('NewTskOnTop')), 'false');
                         });
-                        await run(browser, origin, url, engine + ': existing IndexedDB remains unchanged and blocked', async ({ page }) => {
+                        await run(browser, origin, url, engine + ': legacy IndexedDB stays unopened and unchanged while preview starts', async ({ page }) => {
                             // Seed from the same temporary origin before loading any candidate scripts.
                             await page.goto(origin + '/__prototype/session.json');
                             await page.evaluate(() => new Promise((resolve, reject) => {
@@ -267,9 +287,19 @@ async function main() {
                                     transaction.onerror = () => reject(transaction.error);
                                 };
                             }));
+                            await page.addInitScript(() => {
+                                const open = indexedDB.open.bind(indexedDB);
+                                window.openedDatabases = [];
+                                indexedDB.open = (name, version) => {
+                                    window.openedDatabases.push(name);
+                                    return open(name, version);
+                                };
+                            });
                             await page.goto(url, { waitUntil: 'domcontentloaded' });
-                            await startupError(page);
-                            assert.equal(await page.getByTestId('app-shell').count(), 0);
+                            await ready(page);
+                            const opened = await page.evaluate(() => window.openedDatabases);
+                            assert(opened.includes('FocusTodoStandalone.PomodoroDB6'));
+                            assert(opened.every(name => ['FocusTodoStandalone.PomodoroDB6', 'FocusTodoStandalone.PomodoroDB6-maintenance-lock'].includes(name)));
                             assert.equal(await page.evaluate(() => new Promise((resolve, reject) => {
                                 const request = indexedDB.open('PomodoroDB6', 3);
                                 request.onerror = () => reject(request.error);
@@ -281,6 +311,18 @@ async function main() {
                                     transaction.oncomplete = () => db.close();
                                 };
                             })), 'preserve');
+                        });
+                        await run(browser, origin, url, engine + ': incompatible preview IndexedDB is protected', async ({ page }) => {
+                            await page.goto(origin + '/__prototype/session.json');
+                            await page.evaluate(() => new Promise((resolve, reject) => {
+                                const request = indexedDB.open('FocusTodoStandalone.PomodoroDB6', 4);
+                                request.onsuccess = () => { request.result.close(); resolve(); };
+                                request.onerror = () => reject(request.error);
+                            }));
+                            await page.goto(url, { waitUntil: 'domcontentloaded' });
+                            await startupError(page);
+                            assert.match(await page.locator('#prototype-details').textContent(), /incompatible schema version/);
+                            assert.equal(await page.getByTestId('app-shell').count(), 0);
                         });
                         await run(browser, origin, url, engine + ': missing session attestation blocks an ordinary static origin', async ({ page }) => {
                             await page.route('**/__prototype/session.json', route => route.fulfill({ status: 404, body: 'not a prototype origin' }));
@@ -295,7 +337,7 @@ async function main() {
                                 await page.goto(url, { waitUntil: 'domcontentloaded' });
                                 await startupError(page);
                                 assert(await page.locator('#prototype-retry').isVisible());
-                                assert((await page.locator('#prototype-details').inputValue()).includes(new URL(resource, url).pathname));
+                                assert((await page.locator('#prototype-details').textContent()).includes(new URL(resource, url).pathname));
                                 assert.equal(await page.getByTestId('app-shell').count(), 0);
                                 fail = false;
                                 await page.locator('#prototype-retry').click();
@@ -308,7 +350,7 @@ async function main() {
                     await page.goto(renderOrigin + '/', { waitUntil: 'domcontentloaded' });
                     await page.getByTestId('error-boundary').waitFor();
                     assert(!/preview|预览/i.test(await page.getByTestId('error-boundary').innerText()), 'Production recovery wording must not describe an unfinished preview');
-                    assert.match(await page.getByLabel('Error details').inputValue(), /Synthetic component render failure/);
+                    assert.match(await page.getByLabel('Error details').textContent(), /Synthetic component render failure/);
                     assert(await page.getByRole('button', { name: 'Copy details' }).isVisible());
                     await page.getByRole('button', { name: 'Reload FocusTodo' }).click();
                     await page.getByTestId('boundary-recovered').waitFor();
