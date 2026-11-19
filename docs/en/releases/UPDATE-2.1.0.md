@@ -42,6 +42,8 @@ The archived Windows Node 24 app stopped at `0 / 19` before the wallpaper backup
 
 The cross-platform Chromium step uses a shell that propagates intermediate command failures, so any failed script fails the CI gate.
 
+The Windows archived-browser acceptance suite passed in CI #153. The isolated package smoke test then failed when the extraction helper tried to print a Chinese directory name to CP1252 stdout. The helper no longer prints the unused path, and both ZIP and tar.gz tests still verify and launch the extracted app in a path containing spaces and Chinese characters. [Windows job](https://github.com/menggou1/FocusTodo-Local/actions/runs/44471231079/job/135381374191)
+
 ## Version history
 
 2.0.2 already includes the valid changes from the abandoned 2.0.1 candidate. The formal update lists consolidate those changes under 2.0.2 and retain the [candidate report and evidence](UPDATE-2.0.1.md). The owner confirmed the E09 and V04 manual acceptance items. Remaining technical investigations are tracked in the [backlog](../BACKLOG.md).

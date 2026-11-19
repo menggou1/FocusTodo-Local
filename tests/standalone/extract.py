@@ -37,4 +37,3 @@ else:
 site = target / stem
 for name in ('site/index.html', 'start.cjs', 'scripts/standalone-server.cjs', 'README.txt'):
     assert (site / name).is_file(), name
-print(site)
