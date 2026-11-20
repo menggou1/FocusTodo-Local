@@ -5,13 +5,10 @@ import { legacyAsset } from '../features/workspace/LegacyIcon';
 import { verifyIsolation } from '../services/isolation';
 import { createBrowserServices, loadStartupSounds } from '../services/browser';
 import { dataDatabaseName, dataStoragePrefix } from '../services/scoped-storage.mjs';
-import { versionMetadata } from '../domain/version';
 import '../styles/app.css';
 
 type BootStep = 'entry' | 'styles' | 'data' | 'fonts' | 'icons' | 'sounds' | 'render';
 declare const __APP_ISOLATED__: boolean;
-declare const __LOCAL_VERSION__: string;
-declare const __SOURCE_VERSION__: string;
 declare global {
   interface Window {
     __prototypeBoot: {
@@ -74,7 +71,7 @@ try {
       : { databaseName: 'PomodoroDB6', storagePrefix: '' };
     if (__APP_ISOLATED__) await verifyIsolation(boot.signal, scope);
     else if (!['http:', 'https:'].includes(location.protocol)) throw new Error('Use an HTTP server');
-    const core = await createBrowserServices(versionMetadata(__LOCAL_VERSION__, __SOURCE_VERSION__).appVersion, scope);
+    const core = await createBrowserServices(scope);
     if (boot.signal.aborted) core.dispose();
     else {
       dispose = () => { dispose = undefined; core.dispose(); };

@@ -3,8 +3,6 @@ import type { PersistenceScope } from './isolation';
 import type { PreferenceState } from './core.mjs';
 import { createCoreServices } from './core.mjs';
 import { createImageConverter } from './images.mjs';
-import publishedHistory from '../../release.json';
-import candidateVersion from '../app-version.json';
 import notificationIcon from '../../public/focus-app.ico?url';
 import completeSound from '../../public/audio/Complete.m4a?inline';
 import volumeTip from '../../public/audio/VolumeTip.wav?inline';
@@ -57,10 +55,10 @@ export async function loadStartupSounds(prefs: PreferenceState, signal: AbortSig
     }));
 }
 
-export function createBrowserServices(appVersion: string, scope: PersistenceScope) {
+export function createBrowserServices(scope: PersistenceScope) {
     return createCoreServices({
         storage: localStorage, indexedDB, now: () => Date.now(), randomUUID: () => crypto.randomUUID(), random: () => Math.random(),
-        appVersion, ...scope, releaseConfig: { ...publishedHistory, ...candidateVersion }, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
+        ...scope, encodeBase64: value => btoa(unescape(encodeURIComponent(value))),
         decodeBase64: value => decodeURIComponent(escape(atob(value))), compression: window,
         locks: navigator.locks, channel: typeof BroadcastChannel === 'function' ? new BroadcastChannel(scope.databaseName + ':services') : null,
         languages: navigator.languages, origin: location.origin, fetch: (...args) => fetch(...args),

@@ -7,6 +7,11 @@ import { createHash } from 'node:crypto';
 const root = await realpath(path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..'));
 process.chdir(root);
 const production = process.argv.includes('--production');
+const release = JSON.parse(await readFile('release.json', 'utf8'));
+const generated = JSON.parse(await readFile('standalone/app-version.json', 'utf8'));
+if (generated.localVersion !== release.localVersion || generated.officialVersion !== release.officialVersion) {
+  throw new Error('Release metadata is out of sync. Run npm run build:release.');
+}
 const layout = JSON.parse(await readFile(production ? 'scripts/app-layout.json' : 'scripts/standalone-layout.json', 'utf8'));
 const outputRoot = production ? 'app' : 'standalone';
 const site = path.join(root, layout.siteDirectory), debug = path.join(root, layout.debugDirectory);
@@ -58,7 +63,6 @@ for (const name of ['react', 'react-dom', 'scheduler']) {
 await copyFile('public/font/OFL-NotoSans.txt', path.join(site, 'licenses', 'NotoSans-OFL.txt'));
 await copyFile('LICENSE', path.join(site, 'LICENSE'));
 await copyFile('THIRD-PARTY-NOTICES.txt', path.join(site, 'THIRD-PARTY-NOTICES.txt'));
-const release = JSON.parse(await readFile('standalone/app-version.json', 'utf8'));
 await writeFile(path.join(site, production ? 'build-info.json' : 'prototype-build.json'), JSON.stringify({
   kind: production ? 'standalone-app' : 'isolated-prototype', ...(production ? { sourceDigest: (await import('./app-inputs.cjs')).default.inputDigest() } : {}), localVersion: release.localVersion, sourceVersion: release.officialVersion,
   schemaVersion: 3, backupExportVersion: 2, persistence: production ? 'legacy-compatible-v3' : 'isolated-namespaced-v3', serviceProtocol: 1, base: './',
