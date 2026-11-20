@@ -24,11 +24,14 @@ test('production entry loads React resources with no legacy scripts or preview l
 });
 test('historical reports and licenses remain available with correct destinations', () => {
  assert(!fs.existsSync(path.join(root,'CNAME')));
- const expected=config.updates.map(update=>path.basename(update.report)).concat('UPDATE-2.0.1.md').sort();
- assert(!config.updates.some(update => update.version === '2.0.1'));
+ const abandoned=['2.0.1','2.1.1'];
+ const expected=config.updates.map(update=>path.basename(update.report)).concat(abandoned.map(version=>'UPDATE-'+version+'.md')).sort();
+ assert(!config.updates.some(update => abandoned.includes(update.version)));
  for(const file of ['docs/CHANGELOG.md','docs/en/CHANGELOG.md']) {
   assert(!/^## 2\.0\.1\b/m.test(read(file)));
   assert.match(read(file), /\]\(releases\/UPDATE-2\.0\.1\.md\)/);
+  assert(!/^## 2\.1\.1\b/m.test(read(file)));
+  assert.match(read(file), /\]\(releases\/UPDATE-2\.1\.1\.md\)/);
  }
  for(const update of config.updates){assert.match(update.report,/^docs\/releases\/[A-Za-z0-9._-]+\.md$/);assert(fs.statSync(path.join(root,update.report)).isFile())}
  for(const directory of ['docs/releases','docs/en/releases'])assert.deepEqual(fs.readdirSync(path.join(root,directory)).filter(name=>name.endsWith('.md')).sort(),expected);

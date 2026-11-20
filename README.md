@@ -2,6 +2,8 @@
 
 浏览器本地专注清单 · **2.1.0** · 作者 **Lexible** · [English](README_en.md)
 
+开发分支正在准备 2.1.2。[2.1.2 更新报告](docs/releases/UPDATE-2.1.2.md)
+
 FocusTodo 使用 React、TypeScript 和 Vite 从完整应用源码构建。任务、专注记录和设置保存在浏览器中，无需账号服务器。项目源自 [Lâm Ngọc Khương 的 FocusTodo 7.1.1](https://github.com/lamngockhuong/focustodo)，原版及完整历史保留在 `upstream/7.1.1`。
 
 分支与发布：`dev` 用于日常集成，`release/x.x.x` 用于发布冻结，`main` 用于稳定发布与 Pages；正式版本 Tag 指向通过检查的 main 提交。完整流程见[维护指南](docs/MAINTENANCE.md)。

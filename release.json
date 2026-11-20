@@ -1,10 +1,33 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "2.1.0",
+  "localVersion": "2.1.2",
   "author": "Lexible",
-  "date": "2026-11-19",
+  "date": "2026-11-20",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "2.1.2",
+      "date": "2026-11-20",
+      "title": "清单夹任务、弹窗与迷你计时器修复",
+      "titleEn": "Folder tasks, dialogs, and mini timer fixes",
+      "items": [
+        "清单夹按直属可见清单显示任务。创建任务时按所在页面显示清单选择和到期日控件，恢复下拉菜单图标尺寸与外部点击关闭。",
+        "替换应用标识并为高 DPI 提供原始图像。删除数据与更新详情显示左上角应用磁贴。导入预览在圆角内使用统一的可拖动滚动条。",
+        "点击通知面板外部可收起，同时执行被点击的操作。独立迷你计时器保持紧凑排版，并与主窗口共用计时会话。",
+        "Windows 隔离预览增加临时 Edge 会话和静态备用模式，启动与渲染错误可复制诊断信息。预览保留独立存储并恢复 HMR 刷新快捷键。",
+        "导入后恢复有效内嵌头像，任务完成音内嵌以避免下载管理器拦截。修复 Python 备用服务启动延迟和报表动画测试的时钟竞态。",
+        "统一 HMR 启动页和应用的版本来源，保留已有预览数据。CI 提前核验 Tag 与版本，仅在证实较新的失败由错误 Tag 版本引起时继续复用同一提交的 dev 验证证据。"
+      ],
+      "itemsEn": [
+        "Show folder tasks grouped by visible direct lists. Restore list and due-date controls by view, the list picker icon dimensions, and outside-click dismissal.",
+        "Use original application icon assets for high-DPI displays. Add a tile to data deletion and update details. Keep the shared draggable scrollbar inside the rounded import preview.",
+        "Dismiss notifications on outside clicks while allowing the clicked action to proceed. Keep the mini timer compact and on the same timing session as the main window.",
+        "Open Windows previews in a disposable Edge session and offer a static fallback. Copy startup and rendering diagnostics, retain isolated storage, and restore the HMR refresh shortcut.",
+        "Restore valid embedded avatars after import and bundle the completion sound to avoid download interception. Fix Python fallback startup latency and a clock race in report animation tests.",
+        "Use one release metadata source for HMR startup and keep preview data. Check the tag early in CI and preserve exact-commit dev evidence when a newer failure is proven to be a tag version mismatch."
+      ],
+      "report": "docs/releases/UPDATE-2.1.2.md"
+    },
     {
       "version": "2.1.0",
       "date": "2026-11-19",

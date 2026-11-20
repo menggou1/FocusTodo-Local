@@ -1,7 +1,6 @@
 import { ConfirmDialog } from './ConfirmDialog';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
-import interactionCSS from '../../styles/interactions.css?inline';
 import { observeApplicationImages } from './AppInteractions';
 import type { TimerAction } from '../../services/core.mjs';
 import { useWindowClose } from './Dialog';
@@ -14,8 +13,10 @@ import { themeURL } from './Settings';
 import { LegacyIcon } from './LegacyIcon';
 const timerArtwork=import.meta.glob<string>('../../../public/img/{timer-*,tmr_*,fullscreen-*,float-timer-*,widget_empty,widget_show,widget_hide,task-start,task_no_priority,new-task-project-selected,setting-play,folder_project_checked,folder_project_unchecked,drag_flag,add_widget}.png',{eager:true,query:'?url',import:'default'});
 const timerImage=(name:string)=>timerArtwork['../../../public/img/'+name+'.png'];
+const miniArtwork=import.meta.glob<string>('../../../public/img/{timer-start,timer-pause,timer-stop,timer-complete,float-timer-close}.png',{eager:true,query:'?inline',import:'default'});
+const miniImage=(name:string)=>miniArtwork['../../../public/img/'+name+'.png'];
 
-type MiniAPI = { requestWindow(options: {width: number; height: number}): Promise<Window> };
+type MiniAPI = { requestWindow(options: {width: number; height: number; preferInitialWindowPlacement: boolean}): Promise<Window> };
 export function formatClock(seconds: number) {
   const total = Math.max(0, Math.floor(seconds));
   const parts = [Math.floor(total / 3600), Math.floor(total / 60) % 60, total % 60];
@@ -99,6 +100,7 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
   const business = useSyncExternalStore(services.business.subscribe, services.business.getSnapshot);
   const [confirmation, setConfirmation] = useState(false);
   const [mini, setMini] = useState<Window | null>(null), [miniError, setMiniError] = useState('');
+  const [miniBackdrop, setMiniBackdrop] = useState<{ source:string; data:string } | null>(null);
   const opening = useRef(false), mounted = useRef(true);
   const fullscreen=useRef<HTMLDialogElement>(null);
   const previousExpanded=useRef(expanded),[exitMotion,setExitMotion]=useState(false),collapsing=exitMotion||!expanded&&previousExpanded.current;
@@ -144,31 +146,58 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
     const api = (window as Window & {documentPictureInPicture?: MiniAPI}).documentPictureInPicture;
     if (!api) { setMiniError(text.miniUnavailable); return; }
     opening.current = true;
+    let target: Window | undefined;
     try {
-      const target = await api.requestWindow({ width: task || subtask ? 232 : 147, height: 58 });
-      if (!mounted.current) { target.close(); return; }
+      target = await api.requestWindow({ width: task || subtask ? 232 : 147, height: 58, preferInitialWindowPlacement: true });
+      if (!mounted.current || target.closed) { target.close(); return; }
       const doc = target.document;
-      doc.title = text.mini; doc.documentElement.lang = services.language.locale;doc.documentElement.classList.add('legacy-mini-document');
-      for (const sheet of document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]')) { const link = doc.createElement('link'); link.rel = 'stylesheet'; link.href = sheet.href; doc.head.appendChild(link); }
-      const style = doc.createElement('style');
-      style.textContent = interactionCSS+'html,body{margin:0!important;min-width:0!important;min-height:0!important;width:100%;height:100%;overflow:hidden}.workspace-mini-native.workspace-floating-timer{position:relative;inset:0;transform:none;margin:0!important;width:100%;height:100%;min-height:58px;border-radius:0;padding:8px 12px}.workspace-mini-native .workspace-timer-controls button{border:0;background:transparent;padding:0;width:26px;height:26px;cursor:pointer}.workspace-mini-native .legacy-mini-close{position:absolute;right:3px;top:2px;width:12px;height:12px;padding:0;border:0;background:transparent;color:white;cursor:pointer;opacity:0}.workspace-mini-native:hover .legacy-mini-close,.workspace-mini-native:focus-within .legacy-mini-close{opacity:1}.legacy-mini-close img{width:12px;height:12px}';
+      doc.title = text.mini;
+      doc.documentElement.lang = services.language.locale;
+      doc.documentElement.dataset.theme = document.documentElement.dataset.theme;
+      doc.documentElement.classList.add('legacy-mini-document');
+      // The auxiliary document can delay separate stylesheet requests. Reuse
+      // the app's loaded rules and resolve their assets from the same origin.
+      for (const sheet of document.styleSheets) {
+        if (!(sheet.ownerNode instanceof Element) || !sheet.ownerNode.matches('link[rel="stylesheet"], style[data-vite-dev-id]')) continue;
+        const style = doc.createElement('style');
+        style.textContent = Array.from(sheet.cssRules, rule => rule.cssText).join('\n')
+          .replace(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^)\s]+))\s*\)/g,
+            (_match, double, single, unquoted) => 'url("' + new URL(double ?? single ?? unquoted, sheet.href || document.baseURI).href + '")');
+        doc.head.appendChild(style);
+      }
       const disposeImages=observeApplicationImages(doc.body);
-      doc.head.appendChild(style); target.addEventListener('pagehide', () => { disposeImages();if (mounted.current) setMini(null); }, { once: true });
+      target.addEventListener('pagehide', () => { disposeImages();if (mounted.current) setMini(current=>current===target?null:current); }, { once: true });
       setMini(target); setMiniError('');
-    } catch { setMiniError(text.miniFailed); }
+    } catch { target?.close(); setMiniError(text.miniFailed); }
     finally { opening.current = false; }
   }
-  const controls = (compact = false) => <div className="workspace-timer-controls">
-    {state === 'rest' ? <button aria-label={text.finish} disabled={busy || blocked} onClick={() => { void command({ type: 'stop' }); }}>{compact?<img src={timerImage('timer-complete')} alt=""/>:text.finish}</button>
-      : state === 'waitingForRest' ? <button className="primary" aria-label={text.rest} disabled={busy || blocked} onClick={() => { void command({ type: 'rest' }); }}>{compact?<img src={timerImage('timer-start')} alt=""/>:text.rest}</button>
-      : state === 'work' ? <button aria-label={text.pause} disabled={busy || blocked} onClick={() => { void command({ type: 'pause' }); }}>{compact?<img src={timerImage('timer-pause')} alt=""/>:text.pause}</button>
+  const controls = (compact = false, auxiliary = false) => {
+    const image = auxiliary ? miniImage : timerImage;
+    return <div className="workspace-timer-controls">
+    {state === 'rest' ? <button aria-label={text.finish} disabled={busy || blocked} onClick={() => { void command({ type: 'stop' }); }}>{compact?<img src={image('timer-complete')} alt=""/>:text.finish}</button>
+      : state === 'waitingForRest' ? <button className="primary" aria-label={text.rest} disabled={busy || blocked} onClick={() => { void command({ type: 'rest' }); }}>{compact?<img src={image('timer-start')} alt=""/>:text.rest}</button>
+      : state === 'work' ? <button aria-label={text.pause} disabled={busy || blocked} onClick={() => { void command({ type: 'pause' }); }}>{compact?<img src={image('timer-pause')} alt=""/>:text.pause}</button>
       : state === 'recovery' ? <button onClick={() => setRecoveryCollapsed(false)}>{text.recovery}</button>
-      : <button className="primary" aria-label={state==='pause'?text.resume:text.start} disabled={busy || blocked} onClick={() => { void start(); }}>{compact?<img src={timerImage('timer-start')} alt=""/>:<><img src={timerImage('timer-start-big')} alt=""/>{state==='pause'?text.resume:(services.language.locale.startsWith('zh')?'开始专注':'Start Focus')}</>}</button>}
-    {state === 'pause' && <button aria-label={text.stop} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setConfirmation(true); }}>{compact?<img src={timerImage('timer-stop')} alt=""/>:text.stop}</button>}
-  </div>;
+      : <button className="primary" aria-label={state==='pause'?text.resume:text.start} disabled={busy || blocked} onClick={() => { void start(); }}>{compact?<img src={image('timer-start')} alt=""/>:<><img src={timerImage('timer-start-big')} alt=""/>{state==='pause'?text.resume:(services.language.locale.startsWith('zh')?'开始专注':'Start Focus')}</>}</button>}
+    {state === 'pause' && <button aria-label={text.stop} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setConfirmation(true); }}>{compact?<img src={image('timer-stop')} alt=""/>:text.stop}</button>}
+    </div>;
+  };
   const theme=services.themes.read(),wallpaper=theme.active?services.wallpaper.read()[theme.active]:null;
   const t=(zh:string,en:string)=>services.language.locale.startsWith('zh')?zh:en;
   const backdrop=string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf');
+  useEffect(()=>{
+    if (!mini || backdrop.startsWith('data:')) return;
+    const controller = new AbortController();
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (!controller.signal.aborted) setMiniBackdrop({ source:backdrop, data:String(reader.result) });
+    };
+    // Native PiP can defer its own image requests, even for same-origin URLs.
+    void services.network.request(new URL(backdrop,document.baseURI).href,'blob',{signal:controller.signal}).then(file=>{
+      if (!controller.signal.aborted && file instanceof Blob) reader.readAsDataURL(file);
+    }).catch(()=>{}); // Leave the regular wallpaper URL as a fallback.
+    return () => { controller.abort(); if (reader.readyState===FileReader.LOADING) reader.abort(); };
+  },[mini, backdrop, services]);
   const showFlipControls=()=>{setFlipControls(true);if(flipHide.current)clearTimeout(flipHide.current);if(!['initial','pause','waitingForRest'].includes(state))flipHide.current=setTimeout(()=>setFlipControls(false),5000)};
   useEffect(()=>{if(flip)showFlipControls()},[flip,state]);
   const flipParts=time.split(':');if(mode==='countdown'&&interval>=3600&&flipParts.length===2)flipParts.unshift('00');
@@ -186,7 +215,12 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
   </section>;
   return <>
     {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`,'--float-size':task?'232px':'147px','--float-offset':task?'-108px':'-60px'} as React.CSSProperties}>{surface}</dialog>:surface}
-    {mini && !mini.closed && createPortal(<section data-app-interaction-root className={'workspace-mini-native workspace-floating-timer'+(task?' has-task':'')} aria-label={text.mini} data-state={state} style={{backgroundImage:`url("${backdrop}")`}}>{floatingClock()}{task&&<p className="legacy-floating-task">{subtask?.name||task.name}</p>}{controls(true)}<button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={timerImage('float-timer-close')} alt=""/></button></section>, mini.document.body)}
+    {mini && !mini.closed && createPortal(<div className="legacy-mini-frame" style={{backgroundImage:"url(\""+(miniBackdrop?.source===backdrop?miniBackdrop.data:new URL(backdrop,document.baseURI).href)+"\")"}}>
+      <section data-app-interaction-root className={'workspace-mini-native workspace-floating-timer'+(task||subtask?' has-task':'')} aria-label={text.mini} data-state={state}>
+        {floatingClock()}{(task||subtask)&&<p className="legacy-floating-task">{subtask?.name||task?.name}</p>}{controls(true,true)}
+      </section>
+      <button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={miniImage('float-timer-close')} alt=""/></button>
+    </div>, mini.document.body)}
     {miniError&&<div className="legacy-timer-notice" role="status">{miniError}</div>}
     {confirmation && <ConfirmDialog title={services.language.legacyText('tmr_stop_title')} message={services.language.legacyText('tmr_stop_prompt')} canClose={!busy} close={() => setConfirmation(false)}>{dismiss=><><button disabled={busy} onClick={dismiss}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {
         if (await run(async () => {

@@ -36,6 +36,8 @@ paired 对照默认为归档和隔离 React 各启动随机端口，均使用临
 
 专项脚本保留在 tests/standalone：reports-parity、r2-r3-overlays-parity、visual-settings、r4-r5-settings-drag-parity、visual-timer-forest、calendar-overlay-equivalence 和 window-scroll-equivalence。这些检查覆盖实际 DOM、computed style、截图、输入和动画；已修复的旧版缺陷不回退。历史一次性 bundle 审计工具已删除，原结果保留在 Git 历史与 docs/acceptance。
 
+`node tests/standalone/folder-composer-parity.cjs` 使用同一批合成任务核对清单夹的实际分组、创建入口和下拉菜单的几何尺寸，并验证通知与相邻弹层的交互。
+
 ## 判定与证据
 
 时间轴用超过 70 天的合成记录，逐帧核对 CSS 高度、bitmap/DPR、坐标轴和从下往上的揭示。字体与 ResizeObserver 不能挤压行距。弹窗检查覆盖停止、普通/重复任务删除、子任务、清单/文件夹/标签、补记、日程、设置、备份/清空、安全确认、主题删除、计时组件、恢复、更新与各选择器，核对取消/确认、焦点返回、层级和动画，保留注入错误反例。

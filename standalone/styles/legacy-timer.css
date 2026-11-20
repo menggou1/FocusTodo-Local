@@ -72,6 +72,19 @@
 .workspace-floating-timer.has-task:not(.workspace-mini-native):not([data-state=pause])>.workspace-timer-controls{left:5px}
 .workspace-floating-timer:not(.workspace-mini-native)[data-state=pause]>.workspace-timer-controls{gap:6px}
 .workspace-floating-timer.has-task:not(.workspace-mini-native)[data-state=pause]>.legacy-floating-task{margin-right:11px}
+.legacy-mini-document,.legacy-mini-document body{width:100%;height:100%;min-width:0;min-height:0;margin:0;overflow:hidden}
+.legacy-mini-frame{position:relative;display:grid;place-items:center;width:100%;height:100%;background-color:#1a1a20;background-size:cover;background-position:center}
+:root[data-theme=dark] .legacy-mini-frame::before{content:'';position:absolute;inset:0;background:#000;opacity:.3;pointer-events:none}
+.legacy-mini-frame>.workspace-mini-native{position:relative;inset:auto;width:min(100%,147px);height:min(100%,58px);margin:0;padding:0 clamp(4px,8.2vw,12px);border-radius:0;background:none;box-shadow:none;animation:none}
+.legacy-mini-frame>.workspace-mini-native.has-task{width:min(100%,232px)}
+.legacy-mini-frame>.workspace-mini-native::before{content:none}
+.workspace-mini-native>.workspace-clock,.workspace-mini-native>.legacy-floating-task,.workspace-mini-native>.workspace-timer-controls{animation:none}
+.workspace-mini-native>.workspace-timer-controls{flex:none;flex-wrap:nowrap;gap:6px}
+.workspace-mini-native .workspace-timer-controls button{display:grid;place-items:center;flex:none;width:26px;height:26px;border:0;background:transparent;color:inherit;padding:0;cursor:pointer}
+.workspace-mini-native .workspace-timer-controls button:disabled{opacity:.5;cursor:default}
+.legacy-mini-close{position:absolute;z-index:801;top:0;left:0;width:20px;height:15px;padding:5px 0 0 5px;border:0;background:transparent;cursor:pointer;opacity:0}
+.legacy-mini-frame:hover>.legacy-mini-close,.legacy-mini-close:focus-visible{opacity:1}
+.legacy-mini-close img{display:block;width:8px;height:8px}
 .legacy-flip-clock{animation:legacy-flip-in 250ms ease-out}@keyframes legacy-flip-in{from{opacity:.01}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.domain-full-timer,.domain-full-timer>.workspace-timer-expanded,.workspace-floating-timer,.workspace-floating-timer.is-collapsing,.workspace-floating-timer>.workspace-clock,.workspace-floating-timer>.legacy-floating-task,.workspace-floating-timer>.workspace-timer-controls,.legacy-flip-clock{animation:none!important;transition:none!important}}
 .legacy-timer-main{transition:margin-right 150ms linear}@keyframes legacy-widget-reveal{from{width:0}to{width:330px}}

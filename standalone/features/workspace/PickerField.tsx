@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
  * A modal's overlays stay inside its top layer. All fields share root-close,
  * viewport clamping and the 150ms legacy popover fade.
  */
-export function PickerField({children, ...props}: ComponentProps<'details'>) {
+export function PickerField({children, restoreFocusOnEscape=false, gap=10, ...props}: ComponentProps<'details'> & {restoreFocusOnEscape?:boolean;gap?:number}) {
   const field = useRef<HTMLDetailsElement>(null), surface = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false), [mounted, setMounted] = useState(false), exit = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [position, setPosition] = useState({left:0, top:0, arrow:0});
@@ -17,24 +17,30 @@ export function PickerField({children, ...props}: ComponentProps<'details'>) {
     const place = () => {
       const summary = element.querySelector('summary')!;
       const anchor = summary.querySelector('.legacy-record-duration-text') || summary.querySelector('.legacy-tag-add-content,.legacy-detail-pomo-value,.legacy-detail-value,.legacy-record-value')
-        || (element.matches('.legacy-priority-picker') ? summary.querySelector('.legacy-icon') : null) || summary;
+        || (element.matches('.legacy-priority-picker') ? summary.querySelector('.legacy-icon') : null)
+        || (element.closest('.workspace-add-task') ? summary.querySelector('.workspace-nav-icon') : null) || summary;
       const rect = anchor.getBoundingClientRect(), width = popup.offsetWidth, height = popup.offsetHeight;
       const left = Math.max(4, Math.min(rect.x + rect.width / 2 - width / 2, innerWidth - width - 4));
-      const top = Math.max(4, Math.min(rect.bottom + 10, innerHeight - height - 4));
+      const top = Math.max(4, Math.min(rect.bottom + gap, innerHeight - height - 4));
       setPosition({left, top, arrow:rect.x + rect.width / 2 - left});
     };
     place();
     const dismiss = (event: Event) => {
-      if (event instanceof KeyboardEvent) { if (event.key !== 'Escape') return; event.preventDefault(); event.stopPropagation(); }
+      if (event instanceof KeyboardEvent) {
+        if (event.key !== 'Escape' || event.defaultPrevented) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (restoreFocusOnEscape) element.querySelector('summary')?.focus();
+      }
       else if (element.contains(event.target as Node) || popup.contains(event.target as Node)) return;
       element.open = false;
     };
     window.addEventListener('resize', place);
     document.addEventListener('scroll', place, true);
-    document.addEventListener('click', dismiss);
+    document.addEventListener('click', dismiss, true);
     document.addEventListener('keydown', dismiss, true);
-    return () => { window.removeEventListener('resize', place); document.removeEventListener('scroll', place, true); document.removeEventListener('click', dismiss); document.removeEventListener('keydown', dismiss, true); };
-  }, [open]);
+    return () => { window.removeEventListener('resize', place); document.removeEventListener('scroll', place, true); document.removeEventListener('click', dismiss, true); document.removeEventListener('keydown', dismiss, true); };
+  }, [open, gap, restoreFocusOnEscape]);
   return <details {...props} ref={field} onToggle={event => {
     const next = event.currentTarget.open;
     if (exit.current) clearTimeout(exit.current);

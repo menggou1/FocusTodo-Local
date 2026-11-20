@@ -36,6 +36,19 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+      - name: Check tag version identity
+        if: github.ref_type == 'tag'
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          tag = os.environ['GITHUB_REF_NAME']
+          version = json.loads(Path('release.json').read_text(encoding='utf-8'))['localVersion']
+          if tag != version:
+              raise SystemExit(f'Tag {tag!r} must match localVersion {version!r}')
+          PY
       - name: Select test scope
         id: scope
         env:
@@ -231,6 +244,7 @@ jobs:
           npm run test:release-app
           node tests/standalone/ui-font-readiness.cjs
           node tests/standalone/final-ui-parity.cjs
+          node tests/standalone/folder-composer-parity.cjs
           node tests/standalone/inspector-dialog-parity.cjs
           node tests/standalone/settings-legacy-reference.cjs
           node tests/standalone/settings-regression.cjs

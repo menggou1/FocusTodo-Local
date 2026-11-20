@@ -59,12 +59,41 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
   await exporter.locator('footer button').first().click();await exporter.waitFor({state:'hidden'});
   await p.setViewportSize({width:1280,height:550});
   await importInput.setInputFiles({name:'restore.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
-  const importTrack=restore.locator(':scope>.legacy-scroll-track');
+  const importTrack=restore.locator('.legacy-backup-scroll>.legacy-scroll-track');
   await importTrack.waitFor();
   const importBody=restore.locator('form');
+  assert.equal(await restore.locator('.legacy-dialog-tile').count(),0);
+  const scrollGeometry=await restore.evaluate(dialog=>{
+   const form=dialog.querySelector('form'),track=dialog.querySelector('.legacy-scroll-track'),outer=dialog.getBoundingClientRect();
+   const style=getComputedStyle(dialog),box=form.getBoundingClientRect(),rail=track.getBoundingClientRect();
+   return {radius:[style.borderTopLeftRadius,style.borderTopRightRadius,style.borderBottomLeftRadius,style.borderBottomRightRadius],
+    clip:style.overflow, scrollbar:getComputedStyle(form).scrollbarWidth, dialogScroll:dialog.scrollHeight-dialog.clientHeight,
+    overflow:form.scrollHeight-form.clientHeight, insets:[box.left-outer.left,outer.right-box.right],
+    rail:{width:rail.width,top:rail.top,right:rail.right,inside:rail.bottom<=box.bottom+1&&rail.right<=box.right}};
+  });
+  assert.deepEqual(scrollGeometry.radius,['14px','14px','14px','14px']);
+  assert.equal(scrollGeometry.clip,'hidden');
+  assert.equal(scrollGeometry.scrollbar,'none');
+  assert.equal(scrollGeometry.dialogScroll,0);
+  assert(scrollGeometry.overflow>0 && scrollGeometry.rail.inside);
+  assert.equal(scrollGeometry.rail.width,6);
+  assert.equal(scrollGeometry.insets[0],scrollGeometry.insets[1]);
+  await importBody.focus();
+  await p.keyboard.press('End');
+  await p.waitForFunction(()=>document.querySelector('.legacy-backup-scroll>form').scrollTop>0);
+  await p.keyboard.press('Home');
+  await p.waitForFunction(()=>document.querySelector('.legacy-backup-scroll>form').scrollTop===0);
+  await p.mouse.move(scrollGeometry.rail.right-2,scrollGeometry.rail.top+12);
+  const importThumb=await importTrack.locator('.legacy-scroll-thumb').boundingBox();
+  await p.mouse.move(importThumb.x+3,importThumb.y+10);
+  await p.mouse.down();
+  await p.mouse.move(importThumb.x+3,importThumb.y+45,{steps:6});
+  await p.mouse.up();
+  await p.waitForFunction(()=>document.querySelector('.legacy-backup-scroll>form').scrollTop>0);
+  await importBody.evaluate(form=>{form.scrollTop=0});
   await importBody.hover();
   await p.mouse.wheel(0,450);
-  await p.waitForFunction(()=>document.querySelector('.legacy-backup-restore>form').scrollTop>0);
+  await p.waitForFunction(()=>document.querySelector('.legacy-backup-scroll>form').scrollTop>0);
   await p.screenshot({path:path.join(evidence,'restore-'+engine+'.png')});
   await Promise.all([p.waitForEvent('download'),restore.locator('footer button.primary').click()]);
   const safety=p.locator('.legacy-task-delete');

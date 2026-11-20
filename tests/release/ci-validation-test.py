@@ -6,6 +6,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import Mock
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -105,6 +106,25 @@ class ValidationTests(unittest.TestCase):
         self.assertFalse(policy.newer_failure([{**failed, 'updated_at': '2026-11-17T09:00:00Z'}], self.run, SHA, '99'))
         self.assertFalse(policy.newer_failure([{**failed, 'head_sha': 'c' * 40}], self.run, SHA, '99'))
         self.assertFalse(policy.newer_failure([failed], self.run, SHA, '11'))
+
+    def test_only_proven_wrong_tag_identity_leaves_dev_evidence_valid(self):
+        failed = {**self.run, 'id': 11, 'head_branch': '2.1.1',
+                  'conclusion': 'failure', 'updated_at': '2026-11-17T11:00:00Z'}
+        api = Mock()
+        step = {'name': 'Check tag version identity', 'conclusion': 'failure'}
+        api.read.return_value = {'jobs': [{'name': 'preflight', 'conclusion': 'failure', 'steps': [step]}]}
+        def blocked(run):
+            return policy.newer_failure([run], self.run, SHA, '99',
+                                        lambda item: policy.failed_tag_identity(api, item, '2.1.2'))
+        self.assertFalse(blocked(failed))
+        self.assertTrue(blocked({**failed, 'head_branch': '2.1.2'}))
+        self.assertTrue(blocked({**failed, 'head_branch': 'main'}))
+        self.assertTrue(blocked({**failed, 'conclusion': 'cancelled'}))
+        step['conclusion'] = 'success'
+        self.assertTrue(blocked(failed))
+        step['name'] = 'Build archives and verify tag version'
+        step['conclusion'] = 'failure'
+        self.assertTrue(blocked(failed))
 
     def test_artifact_digest_and_exact_flat_file_list_are_required_before_unpacking(self):
         names = ['FocusTodo-1.2.3.zip', 'FocusTodo-1.2.3.tar.gz', 'SHA256SUMS.txt', 'release-notes.md']

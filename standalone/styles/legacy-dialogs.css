@@ -4,6 +4,9 @@
 :root[data-theme=dark] :is(.legacy-task-delete,.recovery-dialog){--confirm-border:rgba(255,255,255,.18)}
 :root[data-theme=dark] .legacy-task-delete::backdrop{background:rgba(0,0,0,.63)}
 .legacy-delete-content{display:flex}
+.workspace-dialog>header.legacy-dialog-tile-heading{display:flex;justify-content:flex-start;gap:16px}
+.legacy-dialog-tile{width:44px;height:44px;flex:none;object-fit:contain}
+.workspace-dialog>header.legacy-dialog-tile-heading>h2{margin:0}
 .legacy-delete-content>img{width:44px;height:44px;object-fit:contain;margin-right:16px;flex:none}
 .legacy-delete-content>div{flex:1;min-width:0}
 .legacy-delete-content strong{display:block;font-size:14px;line-height:20px;font-weight:700;margin:0 0 8px}

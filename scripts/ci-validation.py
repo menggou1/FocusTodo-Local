@@ -112,13 +112,28 @@ def proof_for(api, run, repository, sha, current_run):
     return evidence(run, jobs, artifacts, repository, sha, current_run)
 
 
-def newer_failure(runs, source, sha, current_run):
+def failed_tag_identity(api, run, version):
+    """Only the tag-only identity step can prove an unrelated version mismatch."""
+    name = run.get('head_branch', '')
+    if (run.get('conclusion') != 'failure' or name == version
+            or not re.fullmatch(r'\d+\.\d+\.\d+', name)
+            or run.get('event') not in ('push', 'workflow_dispatch')):
+        return False
+    jobs = api.read(f"actions/runs/{int(run['id'])}/jobs?filter=latest&per_page=100")['jobs']
+    return any(job.get('name') == 'preflight' and job.get('conclusion') == 'failure'
+               and any(step.get('name') == 'Check tag version identity' and step.get('conclusion') == 'failure'
+                       for step in job.get('steps', []))
+               for job in jobs)
+
+
+def newer_failure(runs, source, sha, current_run, tag_identity_failure=lambda run: False):
     """Never hide a later failed/cancelled run behind an older green result."""
     for run in runs:
         if (run.get('head_sha') == sha and str(run.get('id')) != str(current_run)
                 and run.get('status') == 'completed'
                 and run.get('conclusion') in ('failure', 'cancelled', 'timed_out', 'action_required', 'startup_failure')
-                and timestamp(run['updated_at']) > timestamp(source['updated_at'])):
+                and timestamp(run['updated_at']) > timestamp(source['updated_at'])
+                and not tag_identity_failure(run)):
             return True
     return False
 
@@ -157,20 +172,25 @@ def reuse():
     api = API(repository, env['GH_TOKEN'])
     selected = None
     try:
+        version = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))['localVersion']
         runs = api.read(f'actions/workflows/ci.yml/runs?head_sha={sha}&per_page=100')['workflow_runs']
+        reason = 'No complete dev test evidence with an unexpired archive batch'
         for run in runs:
             if run.get('head_branch') == 'dev' and run.get('head_sha') == sha:
                 selected = proof_for(api, run, repository, sha, current)
-                if selected and not newer_failure(runs, run, sha, current):
-                    break
+                if selected:
+                    if not newer_failure(runs, run, sha, current, lambda failed: failed_tag_identity(api, failed, version)):
+                        break
+                    reason = 'A newer failed or cancelled run invalidated the dev evidence'
                 selected = None
         if not selected:
-            raise ValueError('No complete dev test evidence with an unexpired archive batch')
+            output({'reused': 'false'})
+            summary(f'Full tests required: {reason}.')
+            return
         with tempfile.TemporaryDirectory(prefix='FocusTodo-CI-', dir=env.get('RUNNER_TEMP')) as temporary:
             stage = Path(temporary)
             archive = stage / 'artifact.zip'
             api.download(selected['artifact_id'], archive)
-            version = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))['localVersion']
             unpack(archive, selected['artifact_digest'], version, stage)
             # Validate every payload byte against a fresh build of this commit.
             subprocess.run(['python', 'scripts/verify-release-workflows.py', version, str(stage), '--reference', 'dist'], cwd=ROOT, check=True)
@@ -212,9 +232,11 @@ def gate():
         run = api.read('actions/runs/' + str(int(env['REUSED_RUN_ID'])))
         selected = proof_for(api, run, env['GITHUB_REPOSITORY'], env['GITHUB_SHA'], env['GITHUB_RUN_ID'])
         runs = api.read(f"actions/workflows/ci.yml/runs?head_sha={env['GITHUB_SHA']}&per_page=100")['workflow_runs']
+        version = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))['localVersion']
         if (not selected or str(selected['artifact_id']) != env['REUSED_ARTIFACT_ID']
                 or selected['artifact_digest'] != env['REUSED_ARTIFACT_DIGEST']
-                or newer_failure(runs, run, env['GITHUB_SHA'], env['GITHUB_RUN_ID'])):
+                or newer_failure(runs, run, env['GITHUB_SHA'], env['GITHUB_RUN_ID'],
+                                 lambda failed: failed_tag_identity(api, failed, version))):
             raise ValueError('Reused evidence is no longer valid')
         summary(f"CI gate passed: exact-commit tests and artifact batch verified again from {selected['run_url']}.")
     else:

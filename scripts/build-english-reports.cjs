@@ -42,6 +42,9 @@ for(const u of config.updates){
  body+='\n## Evidence\n\n'+(links.length?links.map((url,i)=>'- [Public evidence '+(i+1)+']('+url+')').join('\n')+'\n':'The release behavior and commands are recorded in the repository history.\n')+'\n[Original Chinese report](../../releases/'+name+'). This English account summarizes the historical implementation and evidence; current instructions are in Maintenance, and unfinished work is maintained only in Backlog.\n';
  if(!fs.existsSync('docs/en/releases/'+name))fs.writeFileSync('docs/en/releases/'+name,body);
  changelog+='\n## '+u.version+' · '+u.date+'\n\n'+u.itemsEn.map(s=>'- '+s).join('\n')+'\n\n[English report](releases/'+name+').\n';
+ if(local==='2.1.2'&&!config.updates.some(update=>update.version==='2.1.1')){
+  changelog+='\nThe abandoned 2.1.1 candidate had a mismatched tag. Its development changes are included in 2.1.2. See the [candidate record](releases/UPDATE-2.1.1.md).\n';
+ }
  if(local==='2.0.2'&&!config.updates.some(update=>update.version==='2.0.1')){
   changelog+='\nThe abandoned 2.0.1 candidate had no tag or GitHub Release. Its valid changes are included in 2.0.2. See the [candidate report and evidence](releases/UPDATE-2.0.1.md).\n';
  }

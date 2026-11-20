@@ -2,7 +2,20 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.1.0**, author Lexible.
+Current application: **2.1.2**, author Lexible.
+
+## 2.1.2 · 2026-11-20
+
+- Show folder tasks grouped by visible direct lists. Restore list and due-date controls by view, the list picker icon dimensions, and outside-click dismissal.
+- Use original application icon assets for high-DPI displays. Add a tile to data deletion and update details. Keep the shared draggable scrollbar inside the rounded import preview.
+- Dismiss notifications on outside clicks while allowing the clicked action to proceed. Keep the mini timer compact and on the same timing session as the main window.
+- Open Windows previews in a disposable Edge session and offer a static fallback. Copy startup and rendering diagnostics, retain isolated storage, and restore the HMR refresh shortcut.
+- Restore valid embedded avatars after import and bundle the completion sound to avoid download interception. Fix Python fallback startup latency and a clock race in report animation tests.
+- Use one release metadata source for HMR startup and keep preview data. Check the tag early in CI and preserve exact-commit dev evidence when a newer failure is proven to be a tag version mismatch.
+
+[English report](releases/UPDATE-2.1.2.md).
+
+The abandoned 2.1.1 candidate had a mismatched tag. Its development changes are included in 2.1.2. See the [candidate record](releases/UPDATE-2.1.1.md).
 
 ## 2.1.0 · 2026-11-19
 

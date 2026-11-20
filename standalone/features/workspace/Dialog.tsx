@@ -1,6 +1,8 @@
 import { createPortal } from 'react-dom';
 import { useEffect, useId, useRef, useState, useCallback, type ReactNode } from 'react';
 import { useWorkspace } from './Context';
+import icon48 from '../../../public/img/focus-app_48.png?url';
+import icon120 from '../../../public/img/focus-app_120.png?url';
 
 export function useWindowClose(close: () => void, immediate = false) {
   const [closing, setClosing] = useState(false), timer = useRef<ReturnType<typeof setTimeout> | null>(null), latest = useRef(close);
@@ -15,7 +17,7 @@ export function useWindowClose(close: () => void, immediate = false) {
   return { close: requestClose, motion: closing ? 'legacy-window-exit' : 'legacy-window-enter' };
 }
 
-export function Dialog({ title, close, children, className='',inline=false, motion, showClose=true }: { title: string; close(): void; children: ReactNode|((dismiss:()=>void)=>ReactNode);className?:string;inline?:boolean; motion?:string;showClose?:boolean }) {
+export function Dialog({ title, close, children, className='',inline=false, motion, showClose=true, appTile=false }: { title: string; close(): void; children: ReactNode|((dismiss:()=>void)=>ReactNode);className?:string;inline?:boolean; motion?:string;showClose?:boolean;appTile?:boolean }) {
   const ownMotion = useWindowClose(close), requestClose = motion ? close : ownMotion.close;
   const ref = useRef<HTMLDialogElement>(null), heading = useId();
   const { busy, text, error } = useWorkspace();
@@ -28,7 +30,10 @@ export function Dialog({ title, close, children, className='',inline=false, moti
   const content = typeof children==='function'?children(requestClose):children;
   if(inline)return <section className={'legacy-inline-dialog '+className} aria-label={title}>{content}</section>;
   return createPortal(<dialog data-app-interaction-root ref={ref} className={'workspace-dialog '+className+' '+(motion || ownMotion.motion)} aria-labelledby={heading} onCancel={event => { if(event.target!==event.currentTarget)return;event.preventDefault(); if (!busy) requestClose(); }}>
-    <header><h2 id={heading}>{title}</h2>{showClose&&<button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button>}</header>
+    <header className={appTile?'legacy-dialog-tile-heading':undefined}>
+      {appTile&&<img className="legacy-dialog-tile" src={icon48} srcSet={icon48+' 48w, '+icon120+' 120w'} sizes="44px" width={44} height={44} alt=""/>}
+      <h2 id={heading}>{title}</h2>{showClose&&<button type="button" aria-label={text.close} onClick={requestClose} disabled={busy}>×</button>}
+    </header>
     {error && <p className="danger" role="alert" data-selectable>{text[error as 'blocked' | 'conflict' | 'validation' | 'failed']}</p>}
     {content}
   </dialog>, document.body);

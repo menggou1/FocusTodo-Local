@@ -12,6 +12,8 @@ import { TaskDetails } from './workspace/TaskDetails';
 import { ProjectIcon } from './workspace/ProjectIcon';
 import { LegacyIcon } from './workspace/LegacyIcon';
 import { QuickEstimate } from './workspace/QuickEstimate';
+import { PickerField } from './workspace/PickerField';
+import { DatePicker } from './workspace/Pickers';
 import { TaskName } from './workspace/TaskName';
 import { TaskDeleteDialog } from './workspace/TaskDeleteDialog';
 import { TaskContextMenu } from './workspace/TaskContextMenu';
@@ -25,7 +27,7 @@ import { Updates } from './workspace/Updates';
 import { PageOverlay } from './workspace/Dialog';
 import { LegacyScrollbars } from './workspace/LegacyScrollbars';
 import { AppInteractions } from './workspace/AppInteractions';
-import { expected, number, ordered, projectName } from './workspace/model';
+import { dateInput, expected, number, ordered, projectName, timestamp } from './workspace/model';
 import '../styles/app.css';
 
 type View = SidebarView;
@@ -59,7 +61,7 @@ function Workspace() {
   const [timerOpen,setTimerOpen]=useState(false),[forestReward,setForestReward]=useState(0);
   const [overlay,setOverlay]=useState<'settings'|'reports'|'forest'|null>(null),[settingsTab,setSettingsTab]=useState('pomodoro');
   useEffect(()=>{let live=true;const update=()=>services.forest.rewards().then(items=>{if(live)setForestReward(items.reduce((sum,item)=>sum+item.powerValue,0))}).catch(report);void update();const timer=setInterval(update,30000);return()=>{live=false;clearInterval(timer)}},[services,snapshot,report,overlay]);
-  const [quickEstimate,setQuickEstimate]=useState(0),[quickProjectId,setQuickProjectId]=useState(''),[profileMenu,setProfileMenu]=useState(false);
+  const [quickEstimate,setQuickEstimate]=useState(0),[quickProjectId,setQuickProjectId]=useState(''),[quickDeadline,setQuickDeadline]=useState(''),[profileMenu,setProfileMenu]=useState(false);
   const [view, setView] = useState<View>({ kind: 'project', id: 'id-deadline-today' });
   const [query, setQuery] = useState(''), [name, setName] = useState(''), [selected, select] = useState('');
   const [showCompleted, setShowCompleted] = useState(preferences.showFinishedTasksInToday);
@@ -101,7 +103,7 @@ function Workspace() {
   const completedCount = completedView || view.kind === 'search' ? active.filter(row => row.isFinished).length : completedTasks.length;
   const actualPomodoros=(task:Entity)=>snapshot.records.filter(row=>row.state!==-1&&row.taskId===task.id).reduce((sum,row)=>sum+Math.min(number(row.interval)/(number(row.pomodoroInterval)||preferences.workInterval),1),0);
   const remaining=(task:Entity)=>Math.max(0,number(task.estimatePomoNum)-actualPomodoros(task))*(number(task.pomodoroInterval)||preferences.workInterval);
-  const navTasks=(row:Entity):readonly Entity[]=>row.type===3000?snapshot.tasks.filter(task=>task.state===0&&!task.isFinished&&String(task.tags||'').split(',').includes(row.id)):row.type===2000?snapshot.tasks.filter(task=>task.state===0&&!task.isFinished&&projects.some(child=>child.id===task.projectId&&child.parentId===row.id)):services.business.tasksInView({id:row.id,type:number(row.type)});
+  const navTasks=(row:Entity):readonly Entity[]=>row.type===3000?snapshot.tasks.filter(task=>task.state===0&&!task.isFinished&&String(task.tags||'').split(',').includes(row.id)):services.business.tasksInView({id:row.id,type:number(row.type)});
   const sidebarSummary=(row:Entity)=>{const tasks=navTasks(row);return {count:tasks.length,minutes:Math.round(tasks.reduce((total,task)=>total+remaining(task),0)/60)}};
   const canDropTask=(row:Entity)=>{const source=taskDrag.current?.row;return !!source&&!source.isFinished&&[1000,7005,3000,4000,4001,4003,5001,5002,5003].includes(number(row.type))};
   function dropTask(row:Entity){const source=taskDrag.current?.row;cancelDrag();if(!source||source.isFinished)return;const type=number(row.type),date=new Date(),changes:Record<string,unknown>={};if([1000,7005].includes(type))changes.projectId=row.id;else if(type===3000)changes.tags=[...new Set([...String(source.tags||'').split(',').filter(Boolean),row.id])].join(',');else if([4000,4001,4003].includes(type)){if(type===4001)date.setDate(date.getDate()+1);changes.deadline=type===4003?0:date.setHours(23,59,59,999)}else if([5001,5002,5003].includes(type))changes.priority=type-5000;else return;void run(()=>services.business.command({type:'updateTask',id:source.id,changes,expected:source}))}
@@ -109,9 +111,18 @@ function Workspace() {
   const taskIds = new Set([...active, ...completedTasks].map(row => row.id));
   let spentSeconds = snapshot.records.filter(row => row.state !== -1 && taskIds.has(String(row.taskId))).reduce((total, row) => total + number(row.interval), 0);
   if([4000,4007].includes(number(project?.type))){const lower=new Date();lower.setHours(0,0,0,0);const upper=new Date();if(project?.type===4007){lower.setDate(lower.getDate()-(lower.getDay()+6)%7);upper.setTime(+lower);upper.setDate(upper.getDate()+7)}spentSeconds=services.business.report(+lower,+upper).time}else if([4001,4002,4003,4004,4006].includes(number(project?.type)))spentSeconds=0;
-  const quickProject=projects.find(row=>row.id===quickProjectId)||([1000,7005].includes(number(project?.type))?project:fallback);
+  const composerType = number(project?.type);
+  const composerTargetsCurrentList = [1000,7005].includes(composerType);
+  const composerUsesPresetDeadline = [4000,4001,4002,4003,4004,4006,4007].includes(composerType);
+  const quickProject = composerTargetsCurrentList ? project : projects.find(row=>row.id===quickProjectId&&row.state===0)||fallback;
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  const quickDeadlineIcon = !quickDeadline ? 4003 : quickDeadline <= dateInput(Date.now()) ? 4000 : quickDeadline === dateInput(+tomorrow) ? 4001 : 4002;
+  function dismissQuickPicker() {
+    quickInput.current?.form?.querySelectorAll<HTMLDetailsElement>('details[open]').forEach(picker=>{picker.open=false});
+    quickInput.current?.focus();
+  }
   const customOrder = project?.orderingRule === 3 && !completedView;
-  function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; setView(next);setQuickProjectId(''); select(''); setMobileNav(false); }
+  function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; setView(next);if(next.kind!==view.kind||next.kind==='project'&&view.kind==='project'&&next.id!==view.id){setQuickProjectId('');setQuickDeadline('');setQuickEstimate(0)} select(''); setMobileNav(false); }
   function openTask(id:string) { navigate({kind:'project',id:'id-task-tasks'});select(id); }
   async function startTask(id:string,child?:string) { if(await run(()=>id?services.startForTask(id,child):services.timer.command({type:'switchTask',taskId:'',subtaskId:'',mode:preferences.isCountdown?'countdown':'countup',config:services.settings.timerConfig(),expectedSession:services.timer.getSnapshot()?.sessionId})))navigate({kind:'timer'}); }
   function cancelDrag() { taskDrag.current = null;dragOrderRef.current=null;setDragOrder(null);setDragId(''); }
@@ -245,17 +256,39 @@ function Workspace() {
             </>}
           </div>}</div>
           <div className="workspace-summary"><div className="workspace-summary-item"><div className="workspace-summary-value">{duration(estimatedSeconds)}</div><div className="workspace-summary-title">{text.estimatedTime}</div></div><div className="workspace-summary-item"><div className="workspace-summary-value"><span className="workspace-summary-number">{active.filter(row => !row.isFinished).length}</span></div><div className="workspace-summary-title">{services.language.locale.startsWith('zh')?'待完成任务':'Tasks to be Completed'}</div></div>{!summaryPresetOnly&&<><div className="workspace-summary-item"><div className="workspace-summary-value">{duration(spentSeconds)}</div><div className="workspace-summary-title">{text.elapsedTime}</div></div><div className="workspace-summary-item"><div className="workspace-summary-value"><span className="workspace-summary-number" data-testid="completed-total">{completedCount}</span></div><div className="workspace-summary-title">{services.language.locale.startsWith('zh')?'已完成任务':'Completed Tasks'}</div></div></>}</div>
-          {!completedView && view.kind !== 'search' && <form className="workspace-add-task" data-empty={!active.length&&!finished.length} onSubmit={async event => {
+          {!completedView && view.kind !== 'search' && <form key={project?.id} className="workspace-add-task" data-empty={!active.length&&!finished.length} onSubmit={async event => {
             event.preventDefault();
             const now = new Date(), type = number(project?.type);
             let deadline = preferences.defaultDeadline;
-            if (type === 4000 || type === 4001) { if (type === 4001) now.setDate(now.getDate() + 1); deadline = now.setHours(23, 59, 59, 999); }
+            if ([4000,4001,4002,4004,4006,4007].includes(type)) {
+              const offset = type===4001 ? 1 : type===4006 ? -1 : type===4007 ? (7-now.getDay())%7 : [4002,4004].includes(type) ? 7 : 0;
+              now.setDate(now.getDate() + offset);
+              deadline = now.setHours(23,59,59,999);
+            }
             if (type === 4003) deadline = 0;
             const peers = snapshot.tasks.filter(row => row.state === 0 && !row.isFinished);
             const order = preferences.newTaskOnTop ? Math.min(0, ...peers.map(row => number(row.order))) - 10000 : Math.max(0, ...peers.map(row => number(row.order))) + 10000;
             if (await run(() => services.business.command({ type: 'addTask', values: { name: name.trim(), projectId: quickProject?.id||fallback?.id||'',
               deadline, order, estimatePomoNum:quickEstimate, tags: type === 3000 ? project?.id : '', priority: [5001, 5002, 5003].includes(type) ? type - 5000 : 0 } }))) setName('');
-          }}><span className="workspace-plus" aria-hidden="true"/><input ref={quickInput} aria-label={text.addTask} placeholder={services.language.locale.startsWith('zh')?'在"'+(quickProject?projectName(quickProject,text):text.tasks)+'"中添加一个任务，按「回车」键保存':'Add a task to "'+(quickProject?projectName(quickProject,text):text.tasks)+'", press「Enter」to save'} value={name} maxLength={1000} required disabled={busy || blocked} onChange={event => setName(event.target.value)} /><div className="workspace-quick-pomos" aria-label={text.estimate+' shortcuts'}>{quickEstimate<=5?Array.from({length:5},(_,i)=><button type="button" key={i} className="workspace-quick-pomo" aria-label={text.estimate+': '+(i+1)} aria-pressed={quickEstimate>=i+1} onMouseDown={event=>event.preventDefault()} onClick={()=>setQuickEstimate(quickEstimate===i+1?0:i+1)}/>):<span className="workspace-quick-pomo-many" aria-live="polite"><i aria-hidden="true"/><em>{quickEstimate}</em></span>}<QuickEstimate value={quickEstimate} change={setQuickEstimate} label={text.estimate} focusInput={()=>quickInput.current?.focus()}/></div><span className="workspace-quick-separator" aria-hidden="true"/><details className="workspace-quick-project-picker"><summary className="workspace-quick-project" aria-label={text.project+'…'}><ProjectIcon type={number(quickProject?.type)||7005} color={String(quickProject?.color||'')}/></summary><div className="legacy-detail-popover legacy-project-options">{projects.filter(row=>[1000,7005].includes(number(row.type))&&row.state===0).map(row=><button key={row.id} type="button" role="option" aria-selected={quickProject?.id===row.id} onClick={event=>{setQuickProjectId(row.id);const pop=event.currentTarget.closest('details');if(pop)pop.open=false}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span>{quickProject?.id===row.id&&<i>✓</i>}</button>)}</div></details></form>}
+          }}>
+            <span className="workspace-plus" aria-hidden="true"/>
+            <input ref={quickInput} aria-label={text.addTask} placeholder={services.language.legacyText('tsk_new_placeholder',quickProject?projectName(quickProject,text):text.tasks)} value={name} maxLength={1000} required disabled={busy || blocked} onChange={event => setName(event.target.value)}/>
+            <div className="workspace-quick-pomos" aria-label={text.estimate+' shortcuts'}>{quickEstimate<=5?Array.from({length:5},(_,i)=><button type="button" key={i} className="workspace-quick-pomo" aria-label={text.estimate+': '+(i+1)} aria-pressed={quickEstimate>=i+1} onMouseDown={event=>event.preventDefault()} onClick={()=>setQuickEstimate(quickEstimate===i+1?0:i+1)}/>):<span className="workspace-quick-pomo-many" aria-live="polite"><i aria-hidden="true"/><em>{quickEstimate}</em></span>}<QuickEstimate value={quickEstimate} change={setQuickEstimate} label={text.estimate} focusInput={()=>quickInput.current?.focus()}/></div>
+            <span className="workspace-quick-separator" aria-hidden="true"/>
+            {!composerTargetsCurrentList&&<PickerField className="workspace-quick-project-picker" restoreFocusOnEscape gap={5}>
+              <summary className="workspace-quick-project" aria-label={text.project+'…'}><ProjectIcon type={number(quickProject?.type)||7005} color={String(quickProject?.color||'')}/></summary>
+              <div className="legacy-detail-popover legacy-project-options">
+                {projects.filter(row=>[1000,7005].includes(number(row.type))&&row.state===0).map(row=><button key={row.id} type="button" role="option" aria-selected={quickProject?.id===row.id} onClick={()=>{setQuickProjectId(row.id);dismissQuickPicker()}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span>{quickProject?.id===row.id&&<i aria-hidden="true"/>}</button>)}
+              </div>
+            </PickerField>}
+            {!composerUsesPresetDeadline&&<PickerField className="workspace-quick-deadline-picker" restoreFocusOnEscape gap={10}>
+              <summary aria-label={text.deadline+'…'} title={quickDeadline||text.deadline}><ProjectIcon type={quickDeadlineIcon}/></summary>
+              <div className="legacy-detail-popover legacy-date-popover"><DatePicker value={quickDeadline} quickCreate calendar cancel={dismissQuickPicker} confirm={async value=>{
+                if(await run(()=>services.settings.set('defaultDeadline',timestamp(value,true))))setQuickDeadline(value);
+                dismissQuickPicker();
+              }}/></div>
+            </PickerField>}
+          </form>}
           {!completedView&&taskGroups(active, project, projects, text, services.language.locale).map(group => <section key={group.id} className="workspace-task-group">{group.title && group.rows.length>0 && <h2>{group.title}<span>  •  {formatMinutesDuration(group.rows.reduce((n,t)=>n+remaining(t),0)/60, services.language.locale)}</span></h2>}<ul className="workspace-tasks" aria-label={group.title || title}>{(customOrder&&dragOrder&&group.rows.some(row=>row.id===dragId)?dragOrder:group.rows).map(task => taskRow(task, group.rows))}</ul></section>)}
           {!completedView&&!active.length&&!finished.length&&<div className="workspace-empty" data-search={view.kind==='search'||undefined}><div className="workspace-empty-art" aria-hidden="true"/><div className="workspace-empty-title">{services.language.legacyText(view.kind==='search'?'tsk_no_search_result':'pomo_no_task')}</div>{view.kind!=='search'&&<div className="workspace-empty-desc">{services.language.legacyText('tsk_empty_tip')}</div>}</div>}
           {completedSection && <div className="workspace-completed-section"><button className="workspace-completed-toggle" aria-expanded={showCompleted} onClick={() => setShowCompleted(value => !value)}>{showCompleted ? text.hideCompleted : text.showCompleted}</button>

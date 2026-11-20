@@ -31,7 +31,6 @@
 /* All forest lists use 1.9.3 ScrollView (achievements corrected by request). */
 .legacy-forest-scroll-container{position:relative;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;border-radius:8px}
 .legacy-forest-scroll-container>.legacy-forest-activity-list{overflow-x:hidden;overflow-y:auto;border-radius:0}
-.legacy-scroll-track.legacy-forest-scroll-track{position:absolute;left:auto;z-index:auto}
 /* These legacy text metrics determine the scroll extent and thumb ratio. */
 .legacy-forest-activity-row strong,.legacy-forest-activity-row small,.legacy-forest-activity-row>span{line-height:1.42857143}
 .legacy-forest-help p{line-height:1.42857143}.legacy-forest-help h3{line-height:1.1}

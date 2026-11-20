@@ -1,5 +1,4 @@
-/* D-V-Reports: fixed 5513/5511, isolated contexts, generated records only. */
-process.env.FOCUS_RESTORE_SHARED='1';
+/* Compare reports with isolated contexts and generated records only. */
 const {paired,copyFixture,metrics,assert,fs,path}=require('./ui-restore-helpers.cjs');
 const output=path.resolve(process.env.FOCUS_ACCEPTANCE_DIR||'.agent-temp/d-v-reports');
 const results=[];
@@ -16,7 +15,7 @@ async function run(locale,dark){
   // The sidebar and all flat list selectors consume the same stored order.
   const expected=[zh?'任务':'Tasks','Blue list','Red list','Green list'];
   await p.locator('.workspace-quick-project').click();
-  assert.deepEqual(await p.locator('.workspace-quick-project-picker [role=option]>span:nth-child(2)').allTextContents(),expected);
+  assert.deepEqual(await p.locator('.workspace-picker-surface.workspace-quick-project-picker [role=option]>span:nth-child(2)').allTextContents(),expected);
   await p.keyboard.press('Escape');
   await p.getByRole('button',{name:'Blue list',exact:true}).first().click();
   await p.locator('.workspace-task-name').filter({hasText:'Reports task 4'}).click();

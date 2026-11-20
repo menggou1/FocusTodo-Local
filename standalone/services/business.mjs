@@ -200,11 +200,17 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
             return reportCache.get(key);
         },
         tasksInView(view, finished = false) {
+            const snapshot = state.getSnapshot();
+            // Folders aggregate their visible direct lists in the legacy workspace.
+            const folderLists = view.type === 2000 ? new Set(snapshot.projects
+                .filter(project => project.type === 1000 && project.state === 0 && project.parentId === view.id)
+                .map(project => project.id)) : undefined;
             const {start,end} = calendarRange(now()), tomorrow = calendarRange(end), week = calendarRange(now(),'week');
             const seven = new Date(start); seven.setDate(seven.getDate()+7);
             const match = row => {
                 switch (view.type) {
                 case 1000: case 7005: return row.projectId === view.id;
+                case 2000: return folderLists.has(row.projectId);
                 case 7000: return true;
                 case 4000: {
                     // Legacy folds overdue tasks into Today only while the Overdue preset is hidden.
@@ -221,7 +227,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 default: return false;
                 }
             };
-            return state.getSnapshot().tasks.filter(row=>row.state===0&&row.isFinished===finished&&match(row)).slice().sort((a,b)=>
+            return snapshot.tasks.filter(row=>row.state===0&&row.isFinished===finished&&match(row)).slice().sort((a,b)=>
                 view.type>=4000&&view.type<5000?(a.deadline-b.deadline||a.id.localeCompare(b.id)):a.id.localeCompare(b.id));
         },
         history({start = 0, end = Infinity, taskId, subtaskId} = {}) {

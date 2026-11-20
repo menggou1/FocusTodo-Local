@@ -60,8 +60,10 @@ html,body,#root{height:100%;width:100%}body{overflow:auto}.workspace-shell{width
 :root[data-theme=dark] .workspace-shell .workspace-quick-pomo-popover .legacy-pomodoro-plus{background-image:url('../../public/img/pomo-plus-icon-dark.png')}
 .workspace-quick-separator{flex:none;display:flex;align-items:center;width:8px;height:24px}
 .workspace-quick-separator:before{content:'';width:1px;height:16px;margin-left:2px;background:#e5e5e5}
-.workspace-quick-project-picker{position:relative;flex:none;display:flex;align-items:center;justify-content:center;width:32px;height:24px;padding:0;border:0}
-.workspace-shell .workspace-quick-project{width:24px;height:24px;padding:0;border:0}.workspace-quick-project .workspace-nav-icon{width:24px;height:24px}
+.workspace-add-task>details{position:relative;flex:0 0 32px;height:46px}
+.workspace-add-task>details>summary{display:grid;place-items:center;width:100%;height:100%;padding:0;border:0;list-style:none;cursor:pointer}
+.workspace-add-task>details>summary::-webkit-details-marker{display:none}
+.workspace-add-task>details .workspace-nav-icon{width:24px;height:24px}
 .workspace-task-group h2{font-size:14px;font-weight:500;line-height:20px;margin:0 0 9px 4px}.workspace-task-group+.workspace-task-group{margin-top:24px}
 .workspace-task{position:relative;min-height:44px;gap:0;border:0;padding:7px 12px 6px;border-radius:8px;margin:0 0 4px;background:var(--workspace-panel);flex-wrap:wrap}
 .workspace-task[data-selected]{box-shadow:none;background:#fcfcfc}:root[data-theme=dark] .workspace-task[data-selected]{background:#131317}

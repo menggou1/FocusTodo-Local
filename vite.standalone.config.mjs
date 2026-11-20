@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { readFileSync } from 'node:fs';
 import { dataStoragePrefix } from './standalone/services/scoped-storage.mjs';
-const devIconURL = '/@fs/' + encodeURI(normalizePath(fileURLToPath(new URL('./public/focus-app.ico', import.meta.url))));
+const devAssetURL = path => '/@fs/' + encodeURI(normalizePath(fileURLToPath(new URL(path, import.meta.url))));
 const releaseFile = fileURLToPath(new URL('./release.json', import.meta.url));
 export default defineConfig(({ mode }) => ({
   root: 'standalone',
@@ -30,7 +30,7 @@ export default defineConfig(({ mode }) => ({
       if (!context.server) return html;
       // Vite hashes this HTML asset at build time. The dev root is standalone/,
       // so the initial HTML needs an explicit Vite URL for its sibling asset.
-      return html.replaceAll('../public/focus-app.ico', devIconURL)
+      return html.replace(/\.\.\/public\/(?:focus-app\.ico|img\/focus-app_\d+\.png)/g, path => devAssetURL(path.slice(1)))
         .replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*");
     },
   }],

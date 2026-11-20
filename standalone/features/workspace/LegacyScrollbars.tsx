@@ -6,16 +6,14 @@ import { useLayoutEffect } from 'react';
 export function LegacyScrollbars() {
   useLayoutEffect(() => {
     const bound = new Map<HTMLElement, { dispose(): void; refresh(): void }>();
-    const selectors = '.legacy-settings-menu,.legacy-notification-scroll,.legacy-backup-restore>form,.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-settings-project-rows,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll],.legacy-record-duration-picker,.legacy-record-task-scroll,.legacy-record-project-scroll,.legacy-tags-options,.legacy-record-inspector-content>form,.workspace-picker-surface .legacy-project-options,.legacy-calendar-project-menu,.legacy-folder-lists,.legacy-review-scroll,.legacy-focus-items,.legacy-doughnut-legend';
+    const selectors = '.legacy-settings-menu,.legacy-notification-scroll,[data-local-scroll],.workspace-task-scroll,.workspace-details-info,.workspace-projects,.legacy-settings-content,.legacy-settings-project-rows,.legacy-report-overlay>.domain-overlay-body,[data-timer-scroll],[data-forest-scroll],.legacy-record-duration-picker,.legacy-record-task-scroll,.legacy-record-project-scroll,.legacy-tags-options,.legacy-record-inspector-content>form,.workspace-picker-surface .legacy-project-options,.legacy-calendar-project-menu,.legacy-folder-lists,.legacy-review-scroll,.legacy-focus-items,.legacy-doughnut-legend';
     function bind(view: HTMLElement) {
       const track = document.createElement('div'), thumb = document.createElement('div');
       track.className = 'legacy-scroll-track'; thumb.className = 'legacy-scroll-thumb';
       track.append(thumb); view.parentElement!.append(track); view.classList.add('legacy-scroll-view');
-      // Forest has the original relative ScrollView wrapper. Its track must
-      // travel with the drawer, rather than use viewport coordinates while the
-      // transformed ancestor establishes a different fixed containing block.
-      const forest = view.hasAttribute('data-forest-scroll');
-      if (forest) track.classList.add('legacy-forest-scroll-track');
+      // Wrapped tracks share their scroll region's coordinates in moving drawers and dialogs.
+      const local = view.matches('[data-local-scroll],[data-forest-scroll]');
+      if (local) track.classList.add('legacy-local-scroll-track');
       let timer: ReturnType<typeof setTimeout> | undefined, dragging = false, startY = 0, startScroll = 0, travel = 0, maxScroll = 0;
       function clear() { clearTimeout(timer); }
       function hide() { clear(); if (!dragging) { track.dataset.visible = 'false'; track.dataset.highlight = 'false'; } }
@@ -31,7 +29,7 @@ export function LegacyScrollbars() {
         const r = view.getBoundingClientRect(), height = Math.max(view.clientHeight / view.scrollHeight * view.clientHeight, 30);
         maxScroll = view.scrollHeight - view.clientHeight; travel = Math.max(view.clientHeight - height, 0);
         track.hidden = maxScroll <= 1;
-        Object.assign(track.style, forest ? { right: '2px', top: '0px', height: view.clientHeight + 'px' } : { left: r.right - 8 + 'px', top: r.top + 'px', height: view.clientHeight + 'px' });
+        Object.assign(track.style, local ? { right: '2px', top: '0px', height: view.clientHeight + 'px' } : { left: r.right - 8 + 'px', top: r.top + 'px', height: view.clientHeight + 'px' });
         thumb.style.height = height + 'px'; thumb.style.transform = `translateY(${maxScroll > 0 ? travel * view.scrollTop / maxScroll : 0}px)`;
       }
       const move = (e: MouseEvent) => { if(view.dataset.timerScrollbar==='hidden')return;if (Math.abs(view.getBoundingClientRect().right - e.clientX) < 10) show(true); else if (track.dataset.highlight === 'true') show(false); };

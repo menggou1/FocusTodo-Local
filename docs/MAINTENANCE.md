@@ -85,6 +85,8 @@ main 是默认稳定分支和 Pages 唯一部署来源。dev、其他开发分�
 
 dev 始终执行完整矩阵。release/main/Tag 仅可复用同一仓库、同一工作流、同一 SHA 的 dev 成功记录；六个 Windows/macOS/Linux × Node 22/24 作业必须全部实际成功，便携包附件必须未过期、具有有效 SHA-256，且该批附件创建时间早于三个 Node 24 附件测试作业。不能用较早的成功记录掩盖同 SHA 更新的失败、取消或超时。
 
+Tag 预检先对照 `release.json` 的 `localVersion`。只有 Tag 名称与提交版本不同、且独立版本检查明确失败时，该次失败才不影响同 SHA 的既有测试证据。其余失败仍按原规则阻止复用。发布记录见 [2.1.1 失败候选](releases/UPDATE-2.1.1.md)。
+
 每次仍执行生成差异、类型/构建、版本、Pages 来源与发布门禁。预检从成功记录下载原始附件，验证 Actions 附件摘要、正式校验和以及与当前新构建逐文件内容一致，恢复原批附件并执行解压启动检查。只有上述验证成功才跳过重复的六项矩阵；API、证据、附件或内容无法核实时自动全测，不触及尚未验证的产物。独立 Verify CI evidence 作业在末端再次核对来源；预检失败、测试失败/取消、未经核验的跳过或末端证据失效均阻止部署/发布。复用来源写入 Actions Step Summary。
 
 Pages 和 Release 依赖成功的独立验证作业，并按 [GitHub 作业依赖规则](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idneeds) 显式处理已验证的跳过；保留 main 唯一 Pages 来源、Tag 不变性、正式附件核验和发布分支清理要求。
