@@ -94,6 +94,8 @@ Never force-push or rewrite history to remove differences. After a failure, chec
 
 After successful main checks, Pages publishes only the production manifest plus .nojekyll and deployment.json. It excludes source, scripts, tests, docs, maps, databases and CNAME. Deployment verifies the current main SHA to reject stale deployment. Pages generation on dev does not deploy. Verify live deployment, downloads, checksums and delivered startup after publication.
 
+Main preflight and the Pages deployment job both check remote version tags. Every version tag on the deployment commit must match localVersion, and a tag with that name must resolve to the same commit. An untagged release commit must advance beyond all occupied version tags. The Pages build verifies that the production build metadata and browser title match the committed version.
+
 ## Provenance and documents
 
 Lexible maintains the local app, based on [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1. Upstream commit fe15a1d9201c6298f1c28c16dcb0b58c481f9999 remains on upstream/7.1.1. archive/1.9.4 preserves the last 1.x local version and never deploys Pages. Preserve MIT and copyright, with complete React/ReactDOM/scheduler/Noto notices in distributions.

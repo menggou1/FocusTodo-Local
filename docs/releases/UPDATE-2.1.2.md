@@ -34,4 +34,7 @@
 - HMR 的启动标题与应用共读 `release.json`。正式或隔离静态构建会拒绝未同步的生成版本文件。已有数据库和设置沿用原兼容规则。
 - `5d076b7` 上的 dev #162 通过六项矩阵。之后的 Tag #163 因 2.1.1 与 2.1.0 版本错配失败，main #164 因此重新运行矩阵。新预检先核对 Tag 版本。只有错配的 Tag 在独立版本检查中明确失败时，该失败才不会使同 SHA 的 dev 证据失效。构建、附件摘要、六项矩阵、附件字节核对及发布门禁继续检查。[dev #162](https://github.com/menggou1/FocusTodo-Local/actions/runs/44536915837) · [Tag #163](https://github.com/menggou1/FocusTodo-Local/actions/runs/44731267752) · [main #164](https://github.com/menggou1/FocusTodo-Local/actions/runs/44731361287)
 
+- `main` 在 CI 预检和 Pages 部署前都用远端版本 Tag 核对生产提交。若提交上的 Tag 与 `localVersion` 冲突、该版本已分配给其他提交，或无 Tag 的版本没有超过已占用版本，流程会失败。Pages 打包还核对构建元信息和网页标题。2.1.0 曾由 main #164 部署到线上，来源为 `5d076b7`。[线上部署清单](https://menggou1.github.io/FocusTodo-Local/deployment.json)
+- CI #165 暴露了 Windows 临时目录的短路径别名和 Linux 导入表单键盘滚动两个问题。HMR 回归先解析临时目录的真实路径，保留 Vite 的目录访问限制。聚焦导入预览滚动区域时，Home 和 End 分别滚到顶部和底部。[dev CI #165](https://github.com/menggou1/FocusTodo-Local/actions/runs/44733052745)
+
 持久化继续使用数据库 schema v3、备份格式 2 和兼容设置标识 6.5。未完成的验收范围统一记录在 [BACKLOG](../BACKLOG.md)。

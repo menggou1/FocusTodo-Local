@@ -114,6 +114,8 @@ Pages 和 Release 依赖成功的独立验证作业，并按 [GitHub 作业依�
 
 main 完整检查成功后，Pages 仅发布 dist/app/site 的 manifest 资源及 .nojekyll、deployment.json。不发布源码、脚本、测试、私有 sourcemap、数据库、文档或 CNAME。部署前再次核对 main 当前 SHA，防止旧提交覆盖新部署。dev 的 Pages 生成测试不触发部署。正式发布后检查线上来源、项目子路径、下载校验和及附件启动。
 
+main 预检和 Pages 部署前均核对远端版本 Tag。当前提交上所有版本 Tag 必须与 `localVersion` 一致；同名 Tag 必须指向当前提交。尚未打 Tag 的新发布提交必须使用高于所有已占用 Tag 的版本号。Pages 产物的构建元信息与浏览器标题必须与提交中的版本一致。
+
 ## 来源与文档
 
 作者 Lexible；源自 [lamngockhuong/focustodo](https://github.com/lamngockhuong/focustodo) 7.1.1，上游提交 fe15a1d9201c6298f1c28c16dcb0b58c481f9999 保存在 upstream/7.1.1。archive/1.9.4 保留最后的 1.x 本地版，不继续开发、不部署 Pages。保留 MIT、上游与本地版权；React、ReactDOM、scheduler 和 Noto 完整许可随运行包交付。

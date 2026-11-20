@@ -80,7 +80,10 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
   assert.equal(scrollGeometry.insets[0],scrollGeometry.insets[1]);
   await importBody.focus();
   await p.keyboard.press('End');
-  await p.waitForFunction(()=>document.querySelector('.legacy-backup-scroll>form').scrollTop>0);
+  await p.waitForFunction(()=>{
+   const form=document.querySelector('.legacy-backup-scroll>form');
+   return form.scrollTop>0&&Math.abs(form.scrollHeight-form.clientHeight-form.scrollTop)<=1;
+  });
   await p.keyboard.press('Home');
   await p.waitForFunction(()=>document.querySelector('.legacy-backup-scroll>form').scrollTop===0);
   await p.mouse.move(scrollGeometry.rail.right-2,scrollGeometry.rail.top+12);

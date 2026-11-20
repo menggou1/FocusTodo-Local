@@ -88,6 +88,11 @@ class ReleaseGateTests(unittest.TestCase):
                 gate.verify(self.tag, broken)
 
     def test_pages_only_deploys_from_main_and_release_cannot_override(self):
+        preflight = self.workflow.split('  preflight:\n', 1)[1].split('  test:\n', 1)[0]
+        guard = preflight.split('- name: Check main production version', 1)[1].split('- run: npm ci', 1)[0]
+        main_check = 'python scripts/deploy-pages.py --ref "$GITHUB_SHA" --check-main-version'
+        self.assertIn("if: github.ref == 'refs/heads/main'", guard)
+        self.assertIn(main_check, guard)
         pages = self.workflow.split('  pages-build:\n', 1)[1].split('  release:\n', 1)[0]
         self.assertIn("github.ref == 'refs/heads/main'", pages)
         self.assertIn("needs.validation.result == 'success'", pages)
@@ -97,6 +102,8 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn('!cancelled()', deploy)
         self.assertIn("github.ref == 'refs/heads/main'", deploy)
         self.assertIn('if [[ "$current" != "$GITHUB_SHA" ]]', pages)
+        self.assertIn(main_check, deploy)
+        self.assertLess(deploy.index(main_check), deploy.index('uses: actions/deploy-pages'))
         release = self.workflow.split('  release:\n', 1)[1]
         self.assertNotIn('pages: write', release)
         self.assertNotIn('actions/deploy-pages', release)

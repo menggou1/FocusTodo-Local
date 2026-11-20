@@ -8,7 +8,8 @@ const { spawnSync } = require('node:child_process');
 const root = path.resolve(__dirname, '../..');
 
 test('long-running HMR reads current release metadata while builds reject stale generated metadata', async t => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'focus-preview-version-'));
+    // GitHub's Windows runner can expose TEMP through an 8.3 path alias.
+    const directory = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), 'focus-preview-version-'));
     let server;
     t.after(async () => {
         try { await server?.close(); }

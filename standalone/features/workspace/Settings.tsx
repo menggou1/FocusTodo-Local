@@ -88,7 +88,14 @@ export function Settings({initialTab='pomodoro'}:{initialTab?:string}) {
   {notice&&<div className="legacy-settings-notice" role="status">{notice}</div>}
   <input ref={importInput} type="file" hidden accept=".json,.gz,.gzip,application/json,application/gzip" aria-label={lt('导入数据')} onChange={e=>{const picked=e.target.files?.[0];if(picked){setFile(picked);setInspection(null);setModal('restore')}e.target.value=''}}/>
   {modal&&<Dialog appTile={modal==='reset'} className={'legacy-backup-dialog legacy-backup-'+modal} title={lt(modal==='export'?'导出数据备份':modal==='restore'?'导入数据备份':'删除本地数据')} close={()=>setModal(null)}>{dismiss=>{
-  const form=<form tabIndex={modal==='restore'?0:undefined} data-local-scroll={modal==='restore'||undefined} onSubmit={async e=>{e.preventDefault();setBackupError('');if(await run(async()=>{
+  const form=<form tabIndex={modal==='restore'?0:undefined} data-local-scroll={modal==='restore'||undefined}
+    onKeyDown={modal==='restore'?event=>{
+      if(event.target!==event.currentTarget||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
+      if(event.key!=='Home'&&event.key!=='End')return;
+      event.preventDefault();
+      const form=event.currentTarget;
+      form.scrollTo({top:event.key==='Home'?0:form.scrollHeight-form.clientHeight,behavior:'instant'});
+    }:undefined} onSubmit={async e=>{e.preventDefault();setBackupError('');if(await run(async()=>{
     if(modal==='export'){const result=await services.backup.export({format,includeWallpapers:scope}),filename='FocusTodo-backup-'+(result.scope==='without-wallpapers'?'without-wallpapers':'full')+'-'+new Date().toISOString().replace(/[:.]/g,'-')+result.extension;download(result.bytes,result.mime,filename);setBackupStatus(lt('已发起')+(result.format==='gzip'?lt(' Gzip 压缩'):lt('普通 JSON'))+lt('下载：')+filename+lt('，实际文件 ')+formatBytes(result.size)+lt('。请在浏览器下载列表确认文件已保存。'))}
     else if(modal==='restore'&&file)await services.backup.restore(file);
     else if(modal==='reset')await services.backup.reset();

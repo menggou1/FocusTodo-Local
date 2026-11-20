@@ -73,6 +73,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Check main production version
+        if: github.ref == 'refs/heads/main'
+        run: python scripts/deploy-pages.py --ref "$GITHUB_SHA" --check-main-version
       - run: npm ci
       - run: npm run build:release
       - name: Verify generated files are committed
@@ -353,6 +356,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Recheck main production version immediately before deployment
+        run: python scripts/deploy-pages.py --ref "$GITHUB_SHA" --check-main-version
       - name: Refuse to overwrite Pages with a superseded main commit
         env:
           GH_TOKEN: ${{ github.token }}

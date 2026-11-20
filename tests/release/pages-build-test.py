@@ -20,6 +20,46 @@ spec.loader.exec_module(pages)
 
 
 class PagesBuildTests(unittest.TestCase):
+    def test_main_version_rejects_conflicting_or_previously_occupied_tags(self):
+        prior, mistaken, candidate = 'a' * 40, 'b' * 40, 'c' * 40
+        tags = pages.remote_version_tags(
+            f'{prior}\trefs/tags/2.1.0\n'
+            f'{"d" * 40}\trefs/tags/2.1.1\n'
+            f'{mistaken}\trefs/tags/2.1.1^{{}}\n'
+            f'{prior}\trefs/tags/archive/1.9.4\n'
+        )
+        self.assertEqual(tags, {'2.1.0': prior, '2.1.1': mistaken})
+        pages.verify_main_version('2.1.0', prior, tags)
+        pages.verify_main_version('2.1.2', candidate, tags)
+        with self.assertRaisesRegex(ValueError, 'conflicts with tags'):
+            pages.verify_main_version('2.1.0', mistaken, tags)
+        with self.assertRaisesRegex(ValueError, 'already assigned'):
+            pages.verify_main_version('2.1.0', candidate, tags)
+        with self.assertRaisesRegex(ValueError, 'already assigned'):
+            pages.verify_main_version('2.1.1', candidate, tags)
+        with self.assertRaisesRegex(ValueError, 'newer than.*2.1.1'):
+            pages.verify_main_version('2.0.9', candidate, tags)
+        pages.verify_main_version('2.1.2', candidate, {**tags, '2.1.2': candidate})
+        with self.assertRaisesRegex(ValueError, 'invalid'):
+            pages.verify_main_version('2.1.02', candidate, tags)
+
+    def test_pages_rejects_wrong_build_metadata_and_browser_title(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            info, index = folder / 'build-info.json', folder / 'index.html'
+            release = {'localVersion': '2.1.2', 'officialVersion': '7.1.1'}
+            files = {'build-info.json': info, 'index.html': index}
+            info.write_text('{"localVersion":"2.1.0","sourceVersion":"7.1.1"}', encoding='utf-8')
+            index.write_text('<title>FocusTodo 2.1.2</title>', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'build metadata'):
+                pages.verify_build_version(files, release)
+            info.write_text('{"localVersion":"2.1.2","sourceVersion":"7.1.1"}', encoding='utf-8')
+            index.write_text('<title>FocusTodo 2.1.0</title>', encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'HTML title'):
+                pages.verify_build_version(files, release)
+            index.write_text('<title>FocusTodo 2.1.2</title>', encoding='utf-8')
+            pages.verify_build_version(files, release)
+
     def test_artifact_matches_committed_runtime_and_does_not_mutate_repository(self):
         before = pages.git('status', '--porcelain')
         self.assertFalse(pages.git('ls-tree', '--name-only', 'HEAD', '--', 'CNAME').strip(), 'Checkout must not contain CNAME')
