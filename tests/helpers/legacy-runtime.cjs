@@ -17,4 +17,16 @@ function file(name) {
   if (!target.startsWith(legacyRoot + path.sep)) throw new Error('Invalid historical fixture path');
   return target;
 }
-module.exports = { root: legacyRoot, commit, file, ...require(file('scripts/server.cjs')) };
+/** Open the archive's real storage services on the same origin, without its polling UI. */
+async function openDataFixture(page, origin) {
+  const url = origin + '/forest-storage-fixture.html';
+  await page.route(url, route => route.fulfill({
+    contentType: 'text/html',
+    body: '<!doctype html><script>window.FocusI18n={text:value=>value};</script>' +
+      ['local-release', 'local-timer-core', 'local-backup', 'local-data']
+        .map(name => '<script src="/js/' + name + '.js"></script>').join(''),
+  }));
+  await page.goto(url);
+  await page.evaluate(() => FocusLocalReady);
+}
+module.exports = { root: legacyRoot, commit, file, openDataFixture, ...require(file('scripts/server.cjs')) };

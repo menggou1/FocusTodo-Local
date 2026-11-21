@@ -1,5 +1,5 @@
 /* Isolated local achievements: real UI, committed data and repeat-safe rewards. */
-const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),{createServer}=require('../helpers/legacy-runtime.cjs');
+const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),{createServer,openDataFixture}=require('../helpers/legacy-runtime.cjs');
 (async()=>{
  const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const executablePath=process.env.FOCUS_TEST_BROWSER||(!process.env.FOCUS_TEST_BUNDLED_BROWSER&&['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
@@ -15,8 +15,12 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   assert(!await panel.locator('[data-achievement="days-3"] img').getAttribute('class').then(s=>s.includes('is-locked')));
   const peer=await context.newPage();await ready(peer);await Promise.all([p.evaluate(()=>FocusLocalData.syncAchievements()),peer.evaluate(()=>FocusLocalData.syncAchievements())]);assert.equal(await p.evaluate(()=>FocusLocalData.forestGet('Sunlight')),60);
   const snapshot=await p.evaluate(()=>FocusLocalData.snapshot());assert.equal(Object.keys(JSON.parse(snapshot.localStorage['FocusTodo.forestState']).achievements).length,3);
-  await peer.close();await p.evaluate(async x=>{await FocusLocalData.replace(x,{backup:false});await FocusLocalData.replace(x,{backup:false});await FocusLocalData.syncAchievements()},snapshot);assert.equal(await p.evaluate(()=>FocusLocalData.forestGet('Sunlight')),60);
-  await ready(p);await p.waitForTimeout(500);assert.equal(await p.evaluate(()=>FocusLocalData.forestGet('Sunlight')),60);
+  await peer.close();
+  // The repeated data roundtrip owns the archive's maintenance lock. Leave
+  // the polling view before restoring, then reopen it to verify the result.
+  await openDataFixture(p,base);
+  await p.evaluate(async x=>{await FocusLocalData.replace(x,{backup:false});await FocusLocalData.replace(x,{backup:false})},snapshot);assert.equal(await p.evaluate(()=>FocusLocalData.forestGet('Sunlight')),60);
+  await ready(p);await p.evaluate(()=>FocusLocalData.syncAchievements());await p.waitForTimeout(500);assert.equal(await p.evaluate(()=>FocusLocalData.forestGet('Sunlight')),60);
   await p.locator('[class*=HomeHeader-forest]').click();await p.locator('[class*=ForestSection-buttonGroup] img[src*=forest-badge]').click();await p.locator('[data-achievement="focus-1"]').waitFor();await p.waitForTimeout(500);fs.mkdirSync('dist',{recursive:true});await p.screenshot({path:path.resolve('dist/forest-achievements.png')});
   const live=await browser.newContext({locale:'zh-CN',timezoneId:'Asia/Shanghai',viewport:{width:1280,height:900}});await live.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());const lp=await live.newPage();await ready(lp);const input=lp.getByPlaceholder(/添加一个任务/);await input.fill('成就实时任务');await input.press('Enter');await lp.locator('[class*=TaskItem-complete-]').first().click();await lp.waitForFunction(()=>FocusLocalData.forestGet('Sunlight')===20);assert(JSON.parse(await lp.evaluate(()=>localStorage.getItem('FocusTodo.forestState'))).achievements['task-1']);await live.close();
   const tiers=await browser.newContext({locale:'zh-CN',timezoneId:'Asia/Shanghai'});await tiers.addInitScript(()=>{const set=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(window.__denyAchievement&&k==='FocusTodo.forestState')throw new Error('Injected achievement write failure');return set.apply(this,arguments)}});await tiers.route('**/*',r=>/^https?:/.test(r.request().url())&&!r.request().url().startsWith(base)?r.abort():r.continue());const tp=await tiers.newPage();await ready(tp);

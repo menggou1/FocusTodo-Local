@@ -1,5 +1,5 @@
 /* Exercise the original forest UI with isolated local data and no external network. */
-const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),{createServer}=require('../helpers/legacy-runtime.cjs');
+const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('playwright'),{createServer,openDataFixture}=require('../helpers/legacy-runtime.cjs');
 (async()=>{
  const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const base='http://127.0.0.1:'+server.address().port;
  const executablePath=process.env.FOCUS_TEST_BROWSER||(!process.env.FOCUS_TEST_BUNDLED_BROWSER&&['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe'].find(fs.existsSync));
@@ -43,8 +43,7 @@ const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chr
   // This is the archived data roundtrip oracle. Leave the old polling view
   // before replacing its storage; the React UI replacement path is exercised
   // by domain-pages.cjs and production-browser.cjs with page-error assertions.
-  await page.route('**/forest-storage-fixture.html',route=>route.fulfill({contentType:'text/html',body:'<!doctype html><script>window.FocusI18n={text:value=>value};</script><script src="/js/local-release.js"></script><script src="/js/local-timer-core.js"></script><script src="/js/local-backup.js"></script><script src="/js/local-data.js"></script>'}));
-  await page.goto(base+'/forest-storage-fixture.html');await page.evaluate(()=>FocusLocalReady);
+  await openDataFixture(page,base);
   const snapshot=await page.evaluate(()=>FocusLocalData.snapshot());assert(snapshot.localStorage['FocusTodo.forestState']);
   await page.evaluate(async snapshot=>{await FocusLocalData.replace(snapshot,{backup:false});await FocusLocalData.replace(snapshot,{backup:false})},snapshot);
   await ready(page);
