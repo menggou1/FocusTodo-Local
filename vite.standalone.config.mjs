@@ -9,8 +9,14 @@ export default defineConfig(({ mode }) => ({
   root: 'standalone',
   base: './',
   publicDir: false,
-  plugins: [react(), {
+  cacheDir: '../node_modules/.vite/focus-preview',
+  plugins: [{
     name: 'isolated-prototype-development',
+    enforce: 'pre',
+    config(_, { command, isPreview }) {
+      // A preview server can be started after a production build in the same process.
+      if (command === 'serve' && !isPreview) process.env.NODE_ENV = 'development';
+    },
     configureServer(server) {
       server.watcher.add(releaseFile);
       server.middlewares.use((req, res, next) => {
@@ -33,7 +39,7 @@ export default defineConfig(({ mode }) => ({
       return html.replace(/\.\.\/public\/(?:focus-app\.ico|img\/focus-app_\d+\.png)/g, path => devAssetURL(path.slice(1)))
         .replace("connect-src 'self'", "connect-src 'self' ws://127.0.0.1:* ws://localhost:*");
     },
-  }],
+  }, react()],
   server: { host: '127.0.0.1', port: 5511, strictPort: true },
   define: {
     __APP_ISOLATED__: JSON.stringify(mode !== 'release'),

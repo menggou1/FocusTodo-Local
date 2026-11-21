@@ -213,6 +213,7 @@ jobs:
         run: python tests/release/package-smoke.py
       - name: Verify preinstalled Linux browser version
         if: matrix.playwright_image
+        shell: bash
         env:
           PLAYWRIGHT_IMAGE: ${{ matrix.playwright_image }}
         run: |

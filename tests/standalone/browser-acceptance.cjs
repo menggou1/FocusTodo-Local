@@ -1,4 +1,5 @@
 /* Independent origins, fresh browser contexts, and generated data only. */
+const os = require('node:os');
 const { assert, fs, path, root, evidence, launch, contextFor, collectFiles, assertNoLegacyRuntime } = require('./helpers.cjs');
 const { createStandaloneServer } = require('../../scripts/standalone-server.cjs');
 const { createRenderErrorServer } = require('./render-error-server.cjs');
@@ -31,14 +32,21 @@ async function run(browser, origin, url, name, body, options = {}) {
 
 async function testDevelopmentPreview(browser) {
     const { createServer } = await import('vite');
-    const vite = await createServer({
-        configFile: path.join(root, 'vite.standalone.config.mjs'),
-        server: { host: '127.0.0.1', port: 0, strictPort: true },
-    });
+    const cacheDir = fs.mkdtempSync(path.join(os.tmpdir(), 'FocusTodo preview deps '));
+    const originalNodeEnv = process.env.NODE_ENV;
+    let vite;
     try {
+        // A preceding Vite build leaves production mode in the process.
+        process.env.NODE_ENV = 'production';
+        vite = await createServer({
+            configFile: path.join(root, 'vite.standalone.config.mjs'),
+            cacheDir,
+            server: { host: '127.0.0.1', port: 0, strictPort: true },
+        });
         await vite.listen();
         const origin = 'http://127.0.0.1:' + vite.httpServer.address().port;
         await run(browser, origin, origin + '/', 'chromium: Vite development preview loads the startup icon and enters the workspace', async ({ page }) => {
+            assert.equal(vite.config.isProduction, false, 'HMR must use the development React runtime after a production build');
             await page.goto(origin, { waitUntil: 'domcontentloaded' });
             await ready(page);
             assert.equal(await page.locator('#prototype-startup').getAttribute('data-state'), 'ready');
@@ -88,7 +96,12 @@ async function testDevelopmentPreview(browser) {
             assert.equal(await page.evaluate(() => getSelection().toString()), report);
         });
     } finally {
-        await vite.close();
+        try { await vite?.close(); }
+        finally {
+            if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+            else process.env.NODE_ENV = originalNodeEnv;
+            fs.rmSync(cacheDir, { recursive: true, force: true });
+        }
     }
 }
 
