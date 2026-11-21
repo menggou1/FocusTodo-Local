@@ -2,17 +2,9 @@ import { useLayoutEffect, useRef, type RefObject } from 'react';
 
 export type DragHandoff = { rect: DOMRect; remove(): void };
 type Position = { x: number; y: number };
-type Motion = Position & { animation: Animation };
-
-function offset(motion?: Motion) {
-  const remaining = motion && motion.animation.playState !== 'finished'
-    ? 1 - (motion.animation.effect?.getComputedTiming().progress ?? 0) : 0;
-  return { x: (motion?.x || 0) * remaining, y: (motion?.y || 0) * remaining };
-}
-
 /** Retarget from the painted positions, including any interrupted animation. */
 export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: string, attribute: string) {
-  const running = useRef(new Map<HTMLElement, Motion>());
+  const running = useRef(new Map<HTMLElement, Animation>());
   const pending = useRef<{
     order: string;
     positions: Map<string, Position & { element?: HTMLElement }>;
@@ -29,9 +21,17 @@ export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: str
     x: rect.left + (scope.current?.scrollLeft || 0),
     y: rect.top + (scope.current?.scrollTop || 0),
   });
-  const stop = (element: HTMLElement, motion: Motion) => {
-    if (running.current.get(element) !== motion) return;
-    const { animation } = motion;
+  const offset = (element?: HTMLElement) => {
+    if (!element || !running.current.has(element)) return { x: 0, y: 0 };
+    // The animation timeline and the applied transform can sample different
+    // frames. Use the same rendered transform as getBoundingClientRect().
+    const transform = getComputedStyle(element).transform;
+    if (transform === 'none') return { x: 0, y: 0 };
+    const matrix = new DOMMatrixReadOnly(transform);
+    return { x: matrix.m41, y: matrix.m42 };
+  };
+  const stop = (element: HTMLElement, animation: Animation) => {
+    if (running.current.get(element) !== animation) return;
     animation.onfinish = animation.oncancel = null;
     animation.cancel();
     running.current.delete(element);
@@ -48,7 +48,7 @@ export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: str
     const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const positions = new Map<string, Position & { element?: HTMLElement }>(reduced ? [] : elements.map(element => {
       const current = point(element.getBoundingClientRect());
-      const translation = offset(running.current.get(element));
+      const translation = offset(element);
       return [id(element), { x: current.x - translation.x, y: current.y - translation.y, element }];
     }));
     if (handoff) positions.set(active, point(handoff.rect));
@@ -67,7 +67,7 @@ export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: str
     if (previous.waitForOrder && order(elements) === previous.order) return;
     pending.current = null;
     const firstPositions = new Map(Array.from(previous.positions, ([key, position]) => {
-      const translation = offset(position.element ? running.current.get(position.element) : undefined);
+      const translation = offset(position.element);
       return [key, { x: position.x + translation.x, y: position.y + translation.y }];
     }));
     previous.handoff?.remove();
@@ -84,9 +84,8 @@ export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: str
       if (id(element) === previous.active) element.dataset.reorderActive = 'true';
       const animation = element.animate([{ transform: `translate(${x}px,${y}px)` }, { transform: 'translate(0px,0px)' }],
         { duration: 180, easing: 'ease-out' });
-      const motion = { animation, x, y };
-      running.current.set(element, motion);
-      animation.onfinish = animation.oncancel = () => stop(element, motion);
+      running.current.set(element, animation);
+      animation.onfinish = animation.oncancel = () => stop(element, animation);
     }
   });
 

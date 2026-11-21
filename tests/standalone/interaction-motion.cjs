@@ -253,6 +253,17 @@ const cases = [
                 // exercise retargeting during the burst of subsequent keys.
                 animation.pause();
                 animation.currentTime = 60;
+                // Reproduce WebKit's timing/transform disagreement with a
+                // stale progress sample when the next movement retargets.
+                const effect = animation.effect;
+                const getTiming = effect.getComputedTiming.bind(effect);
+                let sampled = false;
+                effect.getComputedTiming = () => {
+                    const timing = getTiming();
+                    if (sampled) timing.progress = 0;
+                    sampled = true;
+                    return timing;
+                };
                 requestAnimationFrame(() => commands.slice(1).forEach(press));
             };
             press(commands[0]);
