@@ -657,7 +657,7 @@ export function createDataService({ indexedDB, storage: localStorage, timerCore,
                 // stale drag/delete must not undo another tab's committed edit.
                 const changed = expected && (!current || ['endDate', 'interval', 'state', 'taskId', 'subtaskId', 'projectId', 'isAllDay'].some(key => current[key] !== expected[key]));
                 if (changed || current && current.state === -1 && record.state !== -1) {
-                    fail(new Error(translate('数据已在另一个标签页更新，请刷新本页。'))); return;
+                    fail(new ServiceError('conflict', translate('数据已在另一个标签页更新，请刷新本页。'))); return;
                 }
                 store.put(record); done(record);
             };
