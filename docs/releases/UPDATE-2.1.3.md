@@ -29,6 +29,7 @@
 
 - 功能提交 `7a32c4a3f4853905eefab55911c45cf7fbb4cccf` 通过 `dev` CI #173。Windows、macOS、Ubuntu 上的 Node 22 和 24 六项矩阵、构建预检及独立的 Verify CI evidence 均成功。Node 24 验证 Chromium 和同批便携包，Ubuntu 另验证 Firefox 与 WebKit。[CI #173](https://github.com/menggou1/FocusTodo-Local/actions/runs/44891831289)
 - 本地日程专项在 Chromium、Firefox 和 WebKit 各通过 8 个场景。逐帧检查了面板收展与反向、同一图标的位移与旋转、拖动层级、等待提交期间的几何尺寸，以及写入失败和并发冲突的回滚。中英文、明暗主题、窄卡片、密集重叠、滚动、缩放和跨午夜均使用合成数据验证。旧版日程对照另通过 10 组。
-- 本地完成类型检查、构建、单元测试、服务合同、正式应用升级、便携包 ZIP 和 tar.gz 启动、Python 备用启动及已提交来源的 Pages 内容检查。2.1.3 的元信息和文档准备在 CI #173 之后提交，其远程 CI 尚未验证。
+- 本地完成类型检查、构建、单元测试、服务合同、正式应用升级、便携包 ZIP 和 tar.gz 启动、Python 备用启动及已提交来源的 Pages 内容检查。
+- 元信息提交 `634f99d03da7fd37c5960928a9c54b779dbec963` 的 CI #174 在 macOS Node 24 的清单夹对照中失败。清单夹刚打开时沿用了「今天」的完成区展开状态，独立证据门禁据此拒绝该次结果。导航现在同时更新视图和完成区状态。回归测试观察 DOM 插入，确认较早的已完成任务仅在主动展开后出现。修复提交的远程结果尚未验证。[CI #174](https://github.com/menggou1/FocusTodo-Local/actions/runs/44893639689)
 
 数据库 schema、备份格式和兼容设置标识分别为 v3、2 和 `Version='6.5'`。待验收工作见 [BACKLOG](../BACKLOG.md)。

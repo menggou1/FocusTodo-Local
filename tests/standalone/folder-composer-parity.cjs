@@ -38,6 +38,7 @@ async function seed(pair) {
             ['Alpha high', 'alpha', 20, 3, false],
             ['Beta medium', 'beta', 10, 2, false],
             ['Beta completed', 'beta', 0, 0, true],
+            ['Earlier beta completion', 'beta', 1, 0, true, 1],
             ['Nested task', 'nested-list', 1, 0, false],
             ['Outside task', 'other', 5, 0, false],
             ['Hidden task', 'hidden', 0, 0, false],
@@ -54,9 +55,9 @@ async function seed(pair) {
                 projectStore.put({ ...preset, state: 0 });
             }
             const taskStore = tx.objectStore('Task');
-            for (const [name, projectId, order, priority, isFinished] of tasks) {
+            for (const [name, projectId, order, priority, isFinished, daysAgo = 0] of tasks) {
                 taskStore.put({ ...baseTask, id: name, name, projectId, order, priority, isFinished,
-                    finishedDate: isFinished ? Date.now() : 0, deadline: 0, estimatePomoNum: 2 });
+                    finishedDate: isFinished ? Date.now() - daysAgo * 86400000 : 0, deadline: 0, estimatePomoNum: 2 });
             }
         });
     });
@@ -121,15 +122,37 @@ async function checkMatrix(pair, backup) {
 async function checkFolder(pair, key, locale) {
     const { old, new: page } = pair;
     await oldNav(old, 'Oracle Folder').click();
+    const completedToggle = page.locator('.workspace-completed-toggle');
+    const earlier = '[data-task-id="Earlier beta completion"]';
+    await projectButton(page, 'id-deadline-today').click();
+    await page.getByText('Beta completed', {exact:true}).waitFor();
+    assert.equal(await completedToggle.getAttribute('aria-expanded'), 'true');
+    assert.equal(await page.locator(earlier).count(), 0);
+    const observed = await page.evaluateHandle(earlier => {
+        let inserted = false;
+        const collect = records => {
+            inserted ||= records.some(record => Array.from(record.addedNodes).some(node =>
+                node instanceof Element && (node.matches(earlier) || node.querySelector(earlier))));
+        };
+        const observer = new MutationObserver(collect);
+        observer.observe(document.querySelector('#workspace-content'), {childList:true, subtree:true});
+        return () => {
+            collect(observer.takeRecords());
+            observer.disconnect();
+            return inserted;
+        };
+    }, earlier);
     await projectButton(page, 'folder').click();
+    assert.equal(await observed.evaluate(check => check()), false, 'folder navigation must never render the earlier completion from an inherited expanded state');
+    await observed.dispose();
     const expected = [['Oracle Alpha', ['Alpha high', 'Alpha later']], ['Oracle Beta', ['Beta medium']]];
     assert.deepEqual(await groups(old, true), expected);
     assert.deepEqual(await groups(page, false), expected);
-    const completedToggle = page.locator('.workspace-completed-toggle');
     const legacyToggle = old.getByText(locale==='en'?'Show Completed Tasks':'显示已完成任务', {exact:false});
     await legacyToggle.click();
     await completedToggle.click();
     for (const view of [old, page]) await view.getByText('Beta completed', {exact:true}).waitFor();
+    await page.locator(earlier).waitFor();
     await old.getByText(locale==='en'?'Hide Completed Tasks':'隐藏已完成任务', {exact:false}).click();
     await completedToggle.click();
     await page.locator('h1').first().blur();

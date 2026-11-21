@@ -87,7 +87,6 @@ function Workspace() {
   const taskDrag = useRef<{ row: Entity; rows: Entity[] } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusHeading = useRef(false);
-  useEffect(()=>{setSortOpen(false);setShowCompleted(view.kind==='project'&&view.id==='id-deadline-today'?preferences.showFinishedTasksInToday:false)},[view]);
   useEffect(()=>{if(!sortOpen)return;const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape'){event.preventDefault();setSortOpen(false)}};document.addEventListener('keydown',onKey);return()=>document.removeEventListener('keydown',onKey)},[sortOpen]);
   const timerReturn=useRef<{view:View;selected:string}>({view:{kind:'project',id:'id-deadline-today'},selected:''});
   const quickInput=useRef<HTMLInputElement>(null);
@@ -144,7 +143,12 @@ function Workspace() {
     quickInput.current?.focus();
   }
   const customOrder = project?.orderingRule === 3 && !completedView;
-  function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; setView(next);if(next.kind!==view.kind||next.kind==='project'&&view.kind==='project'&&next.id!==view.id){setQuickProjectId('');setQuickDeadline('');setQuickEstimate(0)} select(''); setMobileNav(false); }
+  function changeView(next: View) {
+    setView(next);
+    setSortOpen(false);
+    setShowCompleted(next.kind === 'project' && next.id === 'id-deadline-today' && preferences.showFinishedTasksInToday);
+  }
+  function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; changeView(next);if(next.kind!==view.kind||next.kind==='project'&&view.kind==='project'&&next.id!==view.id){setQuickProjectId('');setQuickDeadline('');setQuickEstimate(0)} select(''); setMobileNav(false); }
   function openTask(id:string) { navigate({kind:'project',id:'id-task-tasks'});select(id); }
   async function startTask(id:string,child?:string) { if(await run(()=>id?services.startForTask(id,child):services.timer.command({type:'switchTask',taskId:'',subtaskId:'',mode:preferences.isCountdown?'countdown':'countup',config:services.settings.timerConfig(),expectedSession:services.timer.getSnapshot()?.sessionId})))navigate({kind:'timer'}); }
   function projectTaskMove(rows: Entity[], move: TaskMove | null) {
@@ -366,7 +370,7 @@ function Workspace() {
       </main>
       
     </div>
-        <Timer expanded={timerOpen} openExpanded={() => navigate({ kind: 'timer' })} closeExpanded={()=>{setTimerOpen(false);focusHeading.current=true;setView({...timerReturn.current.view});select(timerReturn.current.selected)}} />
+        <Timer expanded={timerOpen} openExpanded={() => navigate({ kind: 'timer' })} closeExpanded={()=>{setTimerOpen(false);focusHeading.current=true;changeView({...timerReturn.current.view});select(timerReturn.current.selected)}} />
     {taskMenu && menuTask && <TaskContextMenu remove={setDeletingTask} key={menuTask.id} task={menuTask} x={taskMenu.x} y={taskMenu.y} close={closeTaskMenu} />}
   {deletingTask&&<TaskDeleteDialog task={deletingTask} close={()=>{setDeletingTask(null)}}/>}
   {overlay&&<PageOverlay title={overlay==='forest'?(services.language.locale.startsWith('zh')?'专注森林':'Focus forest'):text[overlay]} full={overlay==='reports'} close={()=>setOverlay(null)}>{overlay==='settings'?<Settings initialTab={settingsTab}/>:overlay==='reports'?<Reports openTask={openTask}/>:<Forest/>}</PageOverlay>}
