@@ -44,3 +44,35 @@ export function reminderState(tasks, read, now) {
     const seen = new Set(read);
     return { due, unread: due.filter(row => !seen.has(key(row))), next: active.reduce((next, row) => row.reminderDate > now ? Math.min(next, row.reminderDate) : next, Infinity) };
 }
+/** Stack segments in visual top-to-bottom order. Only custom-list segments
+ * participate in project ordering. Every segment keeps its original count and ID.
+ */
+export function completionStacks(tasks, projects, ranges) {
+    const index = value => Number.isFinite(value) ? value : 0;
+    const customLists = projects.filter(project => project.type === 1000);
+    const listIds = new Set(customLists.map(project => project.id));
+    const listOrder = customLists.slice().sort((a, b) => index(a.order) - index(b.order));
+    const rows = tasks.filter(task => task.state !== -1 && task.isFinished);
+    const taskOrder = rows.filter(task => !listIds.has(task.projectId)).sort((a, b) =>
+        index(b.priority) - index(a.priority) || index(a.order) - index(b.order) || a.id.localeCompare(b.id));
+    const listRows = rows.filter(task => listIds.has(task.projectId));
+    return ranges.map(({ start, end }) => {
+        const count = rows => {
+            const totals = new Map();
+            for (const task of rows) {
+                const finishedDate = index(task.finishedDate);
+                if (finishedDate >= start && finishedDate < end) {
+                    const id = String(task.projectId || 'null');
+                    totals.set(id, (totals.get(id) || 0) + 1);
+                }
+            }
+            return totals;
+        };
+        const taskCounts = count(taskOrder);
+        const listCounts = count(listRows);
+        return [
+            ...Array.from(taskCounts, ([id, value]) => ({ id, value, kind: 'tasks' })),
+            ...listOrder.filter(list => listCounts.has(list.id)).map(({ id }) => ({ id, value: listCounts.get(id), kind: 'project' }))
+        ];
+    });
+}

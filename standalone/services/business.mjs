@@ -1,7 +1,8 @@
 import { invariant, snapshotSource } from './errors.mjs';
 import { repetitionDeadline } from '../domain/recurrence.mjs';
 import { aggregateRecords, reportBuckets, reminderState, visibleRecord, calendarRange } from '../domain/reports.mjs';
-import { orderedProjects } from '../domain/project-order.mjs';
+import { folderProjects, orderedProjects } from '../domain/project-order.mjs';
+import { taskMoveOrders } from '../domain/task-order.mjs';
 
 const tables = ['Project', 'Task', 'Subtask', 'Schedule', 'Pomodoro', 'TimerSession'];
 const names = ['projects', 'tasks', 'subtasks', 'schedules', 'records', 'sessions'];
@@ -17,12 +18,20 @@ function collect(tx, done, fail, apply, beforeCommit = () => {}) {
 }
 export function createBusinessService({ data, core, now, randomUUID, settings, onError, fault = () => {}, onTaskCompleted = () => {} }) {
     const state = snapshotSource({ projects: [], tasks: [], subtasks: [], schedules: [], records: [], sessions: [] }, onError);
-    let disposed = false, revision = 0;
+    let disposed = false, revision = 0, latestRefresh;
     const reportCache = new Map();
     const refresh = async () => {
-        invariant(!disposed, 'Service disposed', 'disposed'); const request = ++revision;
-        const value = await data.read(tables, (tx, done, fail) => collect(tx, done, fail, value => value));
-        if (request === revision) { reportCache.clear(); state.publish({ ...value, projects: orderedProjects(value.projects) }); } return state.getSnapshot();
+        invariant(!disposed, 'Service disposed', 'disposed');
+        const request = ++revision;
+        latestRefresh = data.read(tables, (tx, done, fail) => collect(tx, done, fail, value => value)).then(value => {
+            // A command awaiting refresh must see the published commit even
+            // if a refresh triggered by another window superseded its read.
+            if (request !== revision) return latestRefresh;
+            reportCache.clear();
+            state.publish({ ...value, projects: orderedProjects(value.projects) });
+            return state.getSnapshot();
+        });
+        return latestRefresh;
     };
     const projectDefaults = () => ({ id: randomUUID(), objType: 'PROJECT', creationDate: now(), state: 0, name: '', order: 0,
         color: 'AEBDC3', isDefault: false, parentId: '', orderingRule: 3, type: 1000, imageName: '', expanded: true, sync: 0 });
@@ -33,7 +42,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
         reminders: '', remark: '', order: 0, hasSubtask: false, isExpanded: false, priority: 0, tags: '', sync: 0 });
     const subtaskDefaults = () => ({ id: randomUUID(), objType: 'SUBTASK', creationDate: now(), name: '', state: 0,
         estimatedPomoNum: 0, taskId: '', isFinished: false, finishedDate: 0, order: 0, sync: 0 });
-    const command = async request => {
+    const command = async (request, committed) => {
         invariant(!disposed, 'Service disposed', 'disposed'); let input = structuredClone(request);
         const batch = input.type === 'batch' ? input.commands : null;
         if (batch) invariant(Array.isArray(batch) && batch.length > 0 && batch.length <= 2000 && batch.every(item => ['updateTask','addSubtask','updateSubtask','removeSubtask','updateProject','removeProject'].includes(item.type)), 'Invalid atomic command batch');
@@ -81,6 +90,10 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
             }
             case 'updateProject': {
                 const row = find('projects', input.id); check(row);
+                if (input.orderContext) for (const previous of input.orderContext) {
+                    const peer = find('projects', previous.id);
+                    invariant(['order', 'parentId', 'state'].every(key => peer[key] === previous[key]), 'List order changed', 'conflict');
+                }
                 const changes = input.changes || {}; if ('name' in changes) title(changes);
                 if (changes.parentId) {
                     invariant(row.type !== 2000 && changes.parentId !== row.id && find('projects', changes.parentId).type === 2000, 'Invalid folder parent');
@@ -116,8 +129,24 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 const defaults = new Map(data.defaultProjects().map(row => [row.id, row]));
                 return values.projects.filter(row => defaults.get(row.id)?.type === row.type).map(row => put('Project', { ...row, order: defaults.get(row.id).order }));
             }
+            case 'reorderTasks': {
+                const rows = input.snapshot.map(previous => {
+                    const row = find('tasks', previous.id);
+                    invariant(row.state === 0 && !row.isFinished && ['order', 'projectId', 'deadline', 'priority', 'tags'].every(key => row[key] === previous[key]),
+                        'Task order changed', 'conflict');
+                    return row;
+                });
+                return taskMoveOrders(rows, input.from, input.to, input.after)
+                    .map(({ id, order }) => update('Task', find('tasks', id), { order }));
+            }
             case 'addTask': {
                 const row = { ...taskDefaults(), ...input.values }; title(row);
+                if (input.folderId !== undefined) {
+                    const folder = values.projects.find(project => project.id === input.folderId && project.state === 0 && project.type === 2000);
+                    if (!folder || !folderProjects(values.projects, folder.id).some(project => project.id === row.projectId)) {
+                        row.projectId = values.projects.find(project => project.type === 7005 && project.state === 0)?.id || '';
+                    }
+                }
                 invariant(!row.projectId || [1000, 7005].includes(find('projects', row.projectId).type), 'Invalid task project');
                 tx.objectStore('Task').add(row); return row;
             }
@@ -174,6 +203,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
             default: invariant(false, 'Unknown business command');
             }}; return batch ? batch.map(apply) : apply(input);
         }, tx => fault('business-commit', { transaction: tx })));
+        try { committed?.(result); } catch (error) { onError?.(error); }
         if (request.type === 'completeTask') {
             try { onTaskCompleted(); } catch (error) { onError?.(error); }
         }
@@ -202,9 +232,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
         tasksInView(view, finished = false) {
             const snapshot = state.getSnapshot();
             // Folders aggregate their visible direct lists in the legacy workspace.
-            const folderLists = view.type === 2000 ? new Set(snapshot.projects
-                .filter(project => project.type === 1000 && project.state === 0 && project.parentId === view.id)
-                .map(project => project.id)) : undefined;
+            const folderLists = view.type === 2000 ? new Set(folderProjects(snapshot.projects, view.id).map(project => project.id)) : undefined;
             const {start,end} = calendarRange(now()), tomorrow = calendarRange(end), week = calendarRange(now(),'week');
             const seven = new Date(start); seven.setDate(seven.getDate()+7);
             const match = row => {

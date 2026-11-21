@@ -88,8 +88,9 @@ export function Settings({initialTab='pomodoro'}:{initialTab?:string}) {
   {notice&&<div className="legacy-settings-notice" role="status">{notice}</div>}
   <input ref={importInput} type="file" hidden accept=".json,.gz,.gzip,application/json,application/gzip" aria-label={lt('导入数据')} onChange={e=>{const picked=e.target.files?.[0];if(picked){setFile(picked);setInspection(null);setModal('restore')}e.target.value=''}}/>
   {modal&&<Dialog appTile={modal==='reset'} className={'legacy-backup-dialog legacy-backup-'+modal} title={lt(modal==='export'?'导出数据备份':modal==='restore'?'导入数据备份':'删除本地数据')} close={()=>setModal(null)}>{dismiss=>{
-  const form=<form tabIndex={modal==='restore'?0:undefined} data-local-scroll={modal==='restore'||undefined}
-    onKeyDown={modal==='restore'?event=>{
+  const scrollable=modal==='restore'||modal==='export';
+  const form=<form tabIndex={scrollable?0:undefined} data-local-scroll={scrollable||undefined}
+    onKeyDown={scrollable?event=>{
       if(event.target!==event.currentTarget||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey)return;
       if(event.key!=='Home'&&event.key!=='End')return;
       event.preventDefault();
@@ -103,7 +104,7 @@ export function Settings({initialTab='pomodoro'}:{initialTab?:string}) {
     {modal==='export'?<><label className="workspace-check legacy-backup-scope"><input type="checkbox" checked={scope} disabled={busy} onChange={e=>setScope(e.target.checked)}/>{lt('包含壁纸图片（完整备份，默认）')}</label><p className="legacy-meta">{lt(scope?'保留全部任务、历史、设置和壁纸。':'不含壁纸：任务和专注明细保留；导入后使用默认 Leaf 主题。导入前和删除前自动备份始终包含全部壁纸。')}</p><fieldset className="legacy-backup-formats"><legend>{lt('文件格式')}</legend><label className="workspace-check"><input type="radio" name="format" value="gzip" checked={format==='gzip'} disabled={busy||typeof CompressionStream==='undefined'} onChange={()=>setFormat('gzip')}/>{lt('Gzip 压缩（.json.gz，推荐）')}</label><label className="workspace-check"><input type="radio" name="format" value="json" checked={format==='json'} disabled={busy} onChange={()=>setFormat('json')}/>{lt('普通紧凑 JSON（.json，兼容旧版）')}</label></fieldset><p className="legacy-meta">{lt(typeof CompressionStream==='undefined'?'当前浏览器不支持压缩 API，将导出普通 JSON。':'新版可读取旧 JSON；旧版需先解压 .json.gz，或使用普通 JSON。')}</p>{prepared&&<BackupAnalysis data={prepared.data} totalBytes={prepared.rawBytes}/>}<p className="legacy-meta" role="status">{backupStatus||(prepared?lt('数据快照已准备，可选择范围和格式后生成文件。'):lt('正在读取一致数据快照…'))}</p></>:modal==='restore'?<><p className="legacy-meta" role="status">{backupStatus||(inspection?(inspection.format==='gzip'?lt('Gzip 压缩文件'):lt('JSON 文件'))+lt('，解码后 ')+formatBytes(inspection.decodedBytes)+lt('。范围：')+lt(inspection.scope==='full'?'完整备份（含壁纸）':'不含壁纸（恢复后使用默认 Leaf 主题）')+'。':'')}</p>{inspection&&<><BackupAnalysis data={inspection.data} totalBytes={inspection.decodedBytes}/><p>{lt('将覆盖当前任务、专注记录和设置。导入前会发起完整安全备份下载，请确认下载文件已保存。计时快照不会自动运行。')}</p></>}</>:<><p>{lt('将删除所有任务、专注记录和设置，并重置为默认状态。')}</p><p>{lt('删除前会生成完整备份，请检查浏览器下载文件。此操作无需密码。')}</p></>}
     <p className="legacy-backup-error" role="alert" data-selectable>{backupError}</p><footer><button type="button" disabled={busy} onClick={dismiss}>{modal==='export'?text.close:text.cancel}</button><button className="primary" disabled={busy||blocked||(modal==='export'&&!prepared)||(modal==='restore'&&!inspection)||(modal==='reset'&&countdown>0)}>{modal==='reset'?countdown>0?lt('确认删除（')+countdown+lt(' 秒）'):lt('确认删除'):modal==='export'?lt('生成并下载'):lt('确认覆盖并导入')}</button></footer>
   </form>;
-  return modal==='restore'?<div className="legacy-backup-scroll">{form}</div>:form;
+  return scrollable?<div className="legacy-backup-scroll">{form}</div>:form;
   }}</Dialog>}
   </section>;
 }

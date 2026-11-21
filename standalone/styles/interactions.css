@@ -19,5 +19,11 @@
 .workspace-row-dragging,.workspace-row-dragging *{user-select:none!important;cursor:grabbing!important}
 .workspace-drag-preview{position:fixed!important;z-index:100000!important;pointer-events:none!important;min-height:0!important;margin:0!important;padding:0!important;display:block!important;overflow:visible!important;background:transparent!important;border:0!important;box-shadow:none!important}
 .workspace-drag-preview [data-dragging]{opacity:1}
-.workspace-task[data-dragging=true],.sidebar-item[data-dragging=true]{opacity:0}
+.workspace-task[data-dragging=true],.sidebar-item[data-dragging=true],.legacy-widget-editor li[data-dragging=true]{opacity:0}
+.workspace-task[data-reorder-active],.sidebar-item[data-reorder-active],.legacy-widget-editor li[data-reorder-active]{position:relative;z-index:10}
+.workspace-drag-preview, .workspace-drag-preview *{pointer-events:none!important}
+.legacy-widget-editor li[data-reorder-active],.legacy-widget-editor .workspace-drag-preview>li{background:var(--workspace-panel)}
+.workspace-task>input[data-completion-spin],.timer-widget-complete[data-completion-spin]{animation:task-completion-spin 250ms ease-out}
+@keyframes task-completion-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.workspace-task>input[data-completion-spin],.timer-widget-complete[data-completion-spin]{animation:none}}
 .sidebar-custom,.workspace-task{touch-action:pan-y}

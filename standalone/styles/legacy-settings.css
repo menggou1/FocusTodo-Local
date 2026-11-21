@@ -86,10 +86,11 @@
 .legacy-settings .legacy-noise-preview{display:none;position:absolute;right:38px;top:19px;width:14px;height:14px;border:0;background:transparent;padding:0}.legacy-noise-preview>img{width:14px;height:14px}.legacy-noise-option:hover .legacy-noise-preview,.legacy-noise-option:focus-within .legacy-noise-preview{display:block}.legacy-noise-option:hover .legacy-noise-choice>span{padding-right:20px}
 .legacy-backup-dialog{width:600px;max-width:calc(100vw - 48px);max-height:90vh;padding:26px;border-radius:14px;font:15px/1.75 var(--workspace-font);box-shadow:0 20px 80px #0004}
 .legacy-backup-dialog::backdrop{background:#17202b99}.legacy-backup-dialog>header{height:auto;min-height:38.5px;padding:0;margin:0 0 12px;display:block;box-shadow:none;text-align:left}.legacy-backup-dialog>header>h2{font-size:22px;font-weight:700;line-height:1.75;margin:0}.legacy-backup-dialog>header>button{display:none}
-.legacy-backup-restore[open]{display:flex;flex-direction:column;overflow:hidden}
-.legacy-backup-restore>header{flex:none}
+.legacy-backup-restore[open],.legacy-backup-export[open]{display:flex;flex-direction:column;overflow:hidden}
+.legacy-backup-restore>header,.legacy-backup-export>header{flex:none}
 .legacy-backup-scroll{position:relative;display:flex;flex-direction:column;min-height:0}
 .legacy-backup-scroll>form{min-height:0;overflow:auto;overscroll-behavior:contain}
+.legacy-backup-export .legacy-scroll-track:not([hidden]){opacity:1;pointer-events:auto}
 .legacy-backup-scroll>form:focus-visible{outline:1px solid var(--workspace-line);outline-offset:-1px}
 .legacy-backup-dialog form{padding:0!important;margin:0}.legacy-backup-dialog form>footer{display:flex;justify-content:flex-end;gap:10px;margin:22px 0 0;padding:0;border:0}.legacy-backup-dialog form>footer button{font:14px/1.5 var(--workspace-font);border:1px solid #e5e5e5;border-radius:7px;padding:9px 16px;background:transparent}.legacy-backup-dialog form>footer button.primary{border-color:#ff5155;background:#ff5155;color:#fff}
 .legacy-backup-dialog form p{margin:10px 0;font:15px/1.75 var(--workspace-font)}.legacy-backup-dialog form p.legacy-meta{font:13px/1.75 var(--workspace-font);margin:10px 0;color:var(--workspace-muted)}

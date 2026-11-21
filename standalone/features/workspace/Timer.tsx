@@ -1,3 +1,5 @@
+import { useRowDrag } from './useRowDrag';
+import { useRowMotion, type DragHandoff } from './useRowMotion';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
@@ -62,11 +64,52 @@ function TimeWheel({minutes,change,label,close}:{minutes:number;change(value:num
 function WidgetEditor({close:onClose}:{close():void}) {
  const {close,motion}=useWindowClose(onClose);
  const {services,text,run,busy,blocked}=useWorkspace(),preferences=services.settings.getSnapshot(),ref=useRef<HTMLDialogElement>(null);
- const [order,setOrder]=useState<number[]>([...preferences.widgetOrder]),[visible,setVisible]=useState<number[]>([...preferences.visibleWidgets]),source=useRef<number|null>(null);
+ const [order,setOrder]=useState<number[]>([...preferences.widgetOrder]),[visible,setVisible]=useState<number[]>([...preferences.visibleWidgets]);
+ const [dragging,setDragging]=useState<number|null>(null),[preview,setPreview]=useState<number[]|null>(null);
+ const projection=useRef<number[]|null>(null);
+ const captureMotion=useRowMotion(ref,'ul:not(.workspace-drag-preview)>li[data-widget-type]','data-widget-type');
  const titles=[services.language.legacyText('rpt_time_today'),services.language.legacyText('cmm_today'),services.language.legacyText('tmr_today_detail').replaceAll("''","'")];
  useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.showModal();return()=>{ref.current?.close();if(previous?.isConnected)previous.focus()}},[]);
- function move(id:number,target:number){const next=order.filter(value=>value!==id);next.splice(Math.max(0,Math.min(next.length,target)),0,id);setOrder(next)}
- return <dialog ref={ref} className={"legacy-widget-editor "+motion} aria-labelledby="legacy-widget-editor-title" onCancel={event=>{event.preventDefault();if(!busy)close()}}><h2 id="legacy-widget-editor-title">{services.language.legacyText('tmr_edit_widget')}</h2><ul>{order.map((type,index)=><li key={type} data-widget-type={type} draggable={!busy&&!blocked} onDragStart={event=>{source.current=type;event.dataTransfer.setData('text/plain',String(type))}} onDragEnd={()=>{source.current=null}} onDragOver={event=>event.preventDefault()} onDrop={event=>{event.preventDefault();if(source.current!==null)move(source.current,index);source.current=null}}><input type="checkbox" aria-label={titles[type]} checked={visible.includes(type)} disabled={busy||blocked} onChange={()=>setVisible(visible.includes(type)?visible.filter(value=>value!==type):[...visible,type])}/><span>{titles[type]}</span><button type="button" aria-label={text.reorder+': '+titles[type]} disabled={busy||blocked} onKeyDown={event=>{if(['ArrowUp','ArrowDown'].includes(event.key)){event.preventDefault();move(type,index+(event.key==='ArrowUp'?-1:1))}}}><img src={timerImage('drag_flag')} alt=""/></button></li>)}</ul><footer><button type="button" disabled={busy} onClick={close}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(()=>services.settings.setWidgetLayout(order,order.filter(type=>visible.includes(type)))))close()}}>{services.language.legacyText('cmm_ok')}</button></footer></dialog>;
+ function move(rows:number[],id:number,target:number) {
+  const next=rows.filter(value=>value!==id);
+  next.splice(Math.max(0,Math.min(next.length,target)),0,id);
+  return next;
+ }
+ function release(id:number,handoff:DragHandoff,accept:boolean) {
+  captureMotion(String(id),handoff);
+  if(accept&&projection.current)setOrder(projection.current);
+  projection.current=null;
+  setPreview(null);setDragging(null);
+ }
+ const dragWidget=useRowDrag<number>({
+  start(id){setDragging(id)},
+  move(id,x,y){
+   const row=document.elementFromPoint(x,y)?.closest<HTMLElement>('li[data-widget-type]');
+   if(!row||!ref.current?.contains(row))return;
+   const rows=projection.current||order,from=rows.indexOf(id),to=rows.indexOf(Number(row.dataset.widgetType)),rect=row.getBoundingClientRect();
+   if(to<0||from===to||(from<to?y<rect.top+rect.height/2:y>rect.top+rect.height/2))return;
+   captureMotion(String(id));
+   projection.current=move(rows,id,to);setPreview(projection.current);
+  },
+  end(id,x,y,handoff){release(id,handoff,!!document.elementFromPoint(x,y)?.closest('.legacy-widget-editor>ul'))},
+  cancel(id,handoff){release(id,handoff,false)},
+ });
+ return <dialog ref={ref} className={"legacy-widget-editor "+motion} aria-labelledby="legacy-widget-editor-title" onCancel={event=>{event.preventDefault();if(!busy)close()}}>
+  <h2 id="legacy-widget-editor-title">{services.language.legacyText('tmr_edit_widget')}</h2>
+  <ul>{(preview||order).map(type=><li key={type} data-widget-type={type} data-dragging={dragging===type||undefined}
+    onPointerDown={busy||blocked?undefined:event=>dragWidget(event,type,'widget')}>
+    <input type="checkbox" aria-label={titles[type]} checked={visible.includes(type)} disabled={busy||blocked} onChange={()=>setVisible(visible.includes(type)?visible.filter(value=>value!==type):[...visible,type])}/>
+    <span>{titles[type]}</span>
+    <button type="button" aria-label={text.reorder+': '+titles[type]} disabled={busy||blocked} onKeyDown={event=>{
+     if(!['ArrowUp','ArrowDown'].includes(event.key))return;
+     event.preventDefault();
+     if(dragging!==null)return;
+     captureMotion(String(type));const direction=event.key==='ArrowUp'?-1:1;
+     setOrder(rows=>move(rows,type,rows.indexOf(type)+direction));
+    }}><img src={timerImage('drag_flag')} alt=""/></button>
+   </li>)}</ul>
+  <footer><button type="button" disabled={busy} onClick={close}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(()=>services.settings.setWidgetLayout(order,order.filter(type=>visible.includes(type)))))close()}}>{services.language.legacyText('cmm_ok')}</button></footer>
+ </dialog>;
 }
 
 /** All timer projections and mutations use the C service. UI owns only windows/confirmation drafts. */

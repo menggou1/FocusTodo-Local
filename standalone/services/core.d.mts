@@ -74,12 +74,15 @@ export interface BusinessSnapshot {
     schedules: readonly Readonly<Entity>[]; records: readonly Readonly<Entity>[]; sessions: readonly Readonly<TimerSession>[];
 }
 export type BusinessCommand =
-    | { type: 'addProject' | 'addTask' | 'addSubtask' | 'addSchedule' | 'addRecord'; values: CompatibleRecord }
-    | { type: 'updateProject' | 'updateTask' | 'updateSubtask' | 'updateSchedule' | 'updateRecord'; id: string; changes: CompatibleRecord; expected?: CompatibleRecord }
+    | { type: 'addProject' | 'addSubtask' | 'addSchedule' | 'addRecord'; values: CompatibleRecord }
+    | { type: 'addTask'; values: CompatibleRecord; folderId?: string }
+    | { type: 'updateTask' | 'updateSubtask' | 'updateSchedule' | 'updateRecord'; id: string; changes: CompatibleRecord; expected?: CompatibleRecord }
+    | { type: 'updateProject'; id: string; changes: CompatibleRecord; expected?: CompatibleRecord; orderContext?: Entity[] }
     | { type: 'removeProject' | 'removeSubtask' | 'removeSchedule' | 'removeRecord' | 'completeTask' | 'uncompleteTask' | 'toggleSubtask'; id: string; expected?: CompatibleRecord }
     | { type: 'removeTask'; id: string; preserveHistory?: boolean; repeat?: 'current'; expected?: CompatibleRecord }
     | { type: 'setProjectHidden'; id: string; hidden: boolean; expected?: CompatibleRecord }
     | { type: 'reorderProjects'; snapshot: {id: string; order: number}[]; from: string; to: string }
+    | { type: 'reorderTasks'; snapshot: Entity[]; from: string; to: string; after: boolean }
     | { type: 'restoreProjectOrder' };
 export interface Report { time: number; count: number; byTask: Record<string, number>; byProject: Record<string, number> }
 export interface PreferenceState {
@@ -119,7 +122,8 @@ export interface CoreServices {
     };
     readonly business: SnapshotSource<Readonly<BusinessSnapshot>> & {
         batch(commands: BusinessCommand[]): Promise<CompatibleRecord[]>;
-        refresh(): Promise<Readonly<BusinessSnapshot>>; command(input: BusinessCommand): Promise<CompatibleRecord | CompatibleRecord[]>;
+        refresh(): Promise<Readonly<BusinessSnapshot>>;
+        command(input: BusinessCommand, committed?: (result: CompatibleRecord | CompatibleRecord[]) => void): Promise<CompatibleRecord | CompatibleRecord[]>;
         search(keyword: string): readonly Entity[]; report(start: number, end: number): Report;
         tasksInView(view: {id: string; type: number}, finished?: boolean): readonly Entity[];
         history(filter?: {start?: number; end?: number; taskId?: string; subtaskId?: string}): readonly Entity[];

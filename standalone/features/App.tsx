@@ -1,6 +1,10 @@
 import { Avatar } from './workspace/Avatar';
 import { durationParts } from '../domain/display.mjs';
+import { folderProjects } from '../domain/project-order.mjs';
+import { useTaskCompletion } from './workspace/useTaskCompletion';
 import { useRowDrag } from './workspace/useRowDrag';
+import { useRowMotion, type DragHandoff } from './workspace/useRowMotion';
+import { taskMoveOrders } from '../domain/task-order.mjs';
 import { ProfileMenu } from './workspace/ProfileMenu';
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import type { ApplicationServices } from '../app/contracts';
@@ -31,6 +35,7 @@ import { dateInput, expected, number, ordered, projectName, timestamp } from './
 import '../styles/app.css';
 
 type View = SidebarView;
+type TaskMove = { from: string; to: string; after: boolean; rows: Entity[]; orders: Map<string, number> };
 export function App({ services }: { services: ApplicationServices }) {
   const preferences = useSyncExternalStore(services.settings.subscribe, services.settings.getSnapshot);
   const text = workspaceText(services.language.locale);
@@ -52,7 +57,7 @@ export function App({ services }: { services: ApplicationServices }) {
 }
 
 function Workspace() {
-  const { services, text, run, report, busy, blocked } = useWorkspace();
+  const { services, text, run, queue, report, busy, blocked } = useWorkspace();
   const profile = useSyncExternalStore(services.settings.subscribeProfile, services.settings.profile);
   const snapshot = useSyncExternalStore(services.business.subscribe, services.business.getSnapshot);
   const session = useSyncExternalStore(services.timer.subscribe, services.timer.getSnapshot);
@@ -63,14 +68,22 @@ function Workspace() {
   useEffect(()=>{let live=true;const update=()=>services.forest.rewards().then(items=>{if(live)setForestReward(items.reduce((sum,item)=>sum+item.powerValue,0))}).catch(report);void update();const timer=setInterval(update,30000);return()=>{live=false;clearInterval(timer)}},[services,snapshot,report,overlay]);
   const [quickEstimate,setQuickEstimate]=useState(0),[quickProjectId,setQuickProjectId]=useState(''),[quickDeadline,setQuickDeadline]=useState(''),[profileMenu,setProfileMenu]=useState(false);
   const [view, setView] = useState<View>({ kind: 'project', id: 'id-deadline-today' });
+  const completionScope = view.kind === 'project' ? view.id : view.kind;
   const [query, setQuery] = useState(''), [name, setName] = useState(''), [selected, select] = useState('');
   const [showCompleted, setShowCompleted] = useState(preferences.showFinishedTasksInToday);
-  const [taskMenu, setTaskMenu] = useState<{ task: Entity; x: number; y: number } | null>(null);
+  const [taskMenu, setTaskMenu] = useState<{ id: string; x: number; y: number } | null>(null);
   const taskMenuReturn = useRef<HTMLElement | null>(null);
   const [resizeWidth, setResizeWidth] = useState<number | null>(null);
   const resizeStart = useRef<{x: number; width: number} | null>(null);
   const [mobileNav, setMobileNav] = useState(false), [dragId, setDragId] = useState(''), [sortOpen, setSortOpen] = useState(false);
-  const [dragOrder,setDragOrder]=useState<Entity[]|null>(null),dragOrderRef=useRef<Entity[]|null>(null);
+  const [taskMove, setTaskMove] = useState<TaskMove | null>(null);
+  const [committingMoves, setCommittingMoves] = useState<TaskMove[]>([]);
+  const taskMoveRef = useRef<TaskMove | null>(null);
+  const taskScroll = useRef<HTMLDivElement>(null);
+  const captureTaskMotion = useRowMotion(taskScroll, '.workspace-tasks > [data-task-id]', 'data-task-id');
+  const completion = useTaskCompletion(scope => {
+    if (scope === completionScope) captureTaskMotion('');
+  });
   const taskDrag = useRef<{ row: Entity; rows: Entity[] } | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusHeading = useRef(false);
@@ -88,6 +101,7 @@ function Workspace() {
   const fallback = projects.find(row => row.type === 7005);
   const project = view.kind === 'project' ? projects.find(row => row.id === view.id && row.state === 0) || fallback : undefined;
   const selectedTask = snapshot.tasks.find(row => row.id === selected && row.state === 0);
+  const menuTask = taskMenu && snapshot.tasks.find(row => row.id === taskMenu.id && row.state === 0);
   const isTasks = view.kind === 'search' || view.kind === 'project' && ![7001].includes(number(project?.type));
   const completedView = project?.type === 7003;
   const title = project ? projectName(project, text) : view.kind === 'search' ? services.language.legacyText('tsk_search_result') : text[view.kind];
@@ -99,14 +113,15 @@ function Workspace() {
   const summaryPresetOnly = [4001,4002,4003,4004,4006].includes(number(project?.type));
   const completedSection = !!project && view.kind==='project' && ![4001,4002,4003,4006,7001,7003].includes(number(project.type));
   const duration=(seconds:number)=>{const {hours,minutes}=durationParts(seconds/60),zh=services.language.locale.startsWith('zh');const parts=hours>0?(minutes>0?[[hours,zh?'小时':'h'],[minutes,zh?'分钟':'m']]:[[hours,zh?'小时':'h']]):[[minutes,zh?'分钟':'m']];return <>{parts.flatMap(([value,unit])=>[<span key={'n'+unit} className="workspace-summary-number">{value}</span>,<span key={'u'+unit} className="workspace-summary-unit">{unit}</span>])}</>};
-  const finished = showCompleted ? completedTasks : [];
+  const visibleActive = completion.retain(active, completionScope, 'active');
+  const finished = showCompleted ? completion.retain(completedTasks, completionScope, 'completed') : [];
   const completedCount = completedView || view.kind === 'search' ? active.filter(row => row.isFinished).length : completedTasks.length;
   const actualPomodoros=(task:Entity)=>snapshot.records.filter(row=>row.state!==-1&&row.taskId===task.id).reduce((sum,row)=>sum+Math.min(number(row.interval)/(number(row.pomodoroInterval)||preferences.workInterval),1),0);
   const remaining=(task:Entity)=>Math.max(0,number(task.estimatePomoNum)-actualPomodoros(task))*(number(task.pomodoroInterval)||preferences.workInterval);
   const navTasks=(row:Entity):readonly Entity[]=>row.type===3000?snapshot.tasks.filter(task=>task.state===0&&!task.isFinished&&String(task.tags||'').split(',').includes(row.id)):services.business.tasksInView({id:row.id,type:number(row.type)});
   const sidebarSummary=(row:Entity)=>{const tasks=navTasks(row);return {count:tasks.length,minutes:Math.round(tasks.reduce((total,task)=>total+remaining(task),0)/60)}};
   const canDropTask=(row:Entity)=>{const source=taskDrag.current?.row;return !!source&&!source.isFinished&&[1000,7005,3000,4000,4001,4003,5001,5002,5003].includes(number(row.type))};
-  function dropTask(row:Entity){const source=taskDrag.current?.row;cancelDrag();if(!source||source.isFinished)return;const type=number(row.type),date=new Date(),changes:Record<string,unknown>={};if([1000,7005].includes(type))changes.projectId=row.id;else if(type===3000)changes.tags=[...new Set([...String(source.tags||'').split(',').filter(Boolean),row.id])].join(',');else if([4000,4001,4003].includes(type)){if(type===4001)date.setDate(date.getDate()+1);changes.deadline=type===4003?0:date.setHours(23,59,59,999)}else if([5001,5002,5003].includes(type))changes.priority=type-5000;else return;void run(()=>services.business.command({type:'updateTask',id:source.id,changes,expected:source}))}
+  async function dropTask(row:Entity){const source=taskDrag.current?.row;if(!source||source.isFinished)return;const type=number(row.type),date=new Date(),changes:Record<string,unknown>={};if([1000,7005].includes(type))changes.projectId=row.id;else if(type===3000)changes.tags=[...new Set([...String(source.tags||'').split(',').filter(Boolean),row.id])].join(',');else if([4000,4001,4003].includes(type)){if(type===4001)date.setDate(date.getDate()+1);changes.deadline=type===4003?0:date.setHours(23,59,59,999)}else if([5001,5002,5003].includes(type))changes.priority=type-5000;else return;await queue(()=>services.business.command({type:'updateTask',id:source.id,changes,expected:source}))}
   const estimatedSeconds = active.filter(row => !row.isFinished).reduce((total, row) => total + remaining(row), 0);
   const taskIds = new Set([...active, ...completedTasks].map(row => row.id));
   let spentSeconds = snapshot.records.filter(row => row.state !== -1 && taskIds.has(String(row.taskId))).reduce((total, row) => total + number(row.interval), 0);
@@ -114,7 +129,14 @@ function Workspace() {
   const composerType = number(project?.type);
   const composerTargetsCurrentList = [1000,7005].includes(composerType);
   const composerUsesPresetDeadline = [4000,4001,4002,4003,4004,4006,4007].includes(composerType);
-  const quickProject = composerTargetsCurrentList ? project : projects.find(row=>row.id===quickProjectId&&row.state===0)||fallback;
+  const composerFolder = composerType === 2000 ? project : undefined;
+  const composerLists: readonly Entity[] = composerFolder
+    ? [...(fallback ? [fallback] : []), ...folderProjects(projects, composerFolder.id)]
+    : projects.filter(row => [1000, 7005].includes(number(row.type)) && row.state === 0);
+  const quickProject = composerTargetsCurrentList ? project : composerLists.find(row => row.id === quickProjectId) || fallback;
+  useLayoutEffect(() => {
+    if (composerFolder && quickProjectId && quickProject?.id !== quickProjectId) setQuickProjectId('');
+  }, [composerFolder, quickProject, quickProjectId]);
   const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
   const quickDeadlineIcon = !quickDeadline ? 4003 : quickDeadline <= dateInput(Date.now()) ? 4000 : quickDeadline === dateInput(+tomorrow) ? 4001 : 4002;
   function dismissQuickPicker() {
@@ -125,30 +147,61 @@ function Workspace() {
   function navigate(next: View, focus = true) { if(next.kind==='settings'||next.kind==='reports'||next.kind==='forest'){setSettingsTab('pomodoro');setOverlay(next.kind);return} setOverlay(null);if(next.kind==='timer'){timerReturn.current={view,selected};setTimerOpen(true);return} setTimerOpen(false);focusHeading.current = focus; setView(next);if(next.kind!==view.kind||next.kind==='project'&&view.kind==='project'&&next.id!==view.id){setQuickProjectId('');setQuickDeadline('');setQuickEstimate(0)} select(''); setMobileNav(false); }
   function openTask(id:string) { navigate({kind:'project',id:'id-task-tasks'});select(id); }
   async function startTask(id:string,child?:string) { if(await run(()=>id?services.startForTask(id,child):services.timer.command({type:'switchTask',taskId:'',subtaskId:'',mode:preferences.isCountdown?'countdown':'countup',config:services.settings.timerConfig(),expectedSession:services.timer.getSnapshot()?.sessionId})))navigate({kind:'timer'}); }
-  function cancelDrag() { taskDrag.current = null;dragOrderRef.current=null;setDragOrder(null);setDragId(''); }
-  async function reorder(to: Entity, source = taskDrag.current) {
-    cancelDrag(); if (!source || source.row.id === to.id) return;
-    const rows=source.rows,from=rows.findIndex(row=>row.id===source.row.id),target=rows.findIndex(row=>row.id===to.id);
-    if(from<0||target<0)return;
-    const order=target>from?(target===rows.length-1?number(to.order)+10000:(number(to.order)+number(rows[target+1].order))/2):(target===0?number(to.order)-10000:(number(to.order)+number(rows[target-1].order))/2);
-    await run(()=>services.business.command({type:'updateTask',id:source.row.id,changes:{order},expected:expected(source.row,['order'])}));
+  function projectTaskMove(rows: Entity[], move: TaskMove | null) {
+    if (!move || !rows.some(row => row.id === move.from)) return rows;
+    return ordered(rows.map(row => move.orders.has(row.id) ? { ...row, order: move.orders.get(row.id) } : row));
   }
-  const pointerTaskDrag=useRowDrag<{row:Entity;rows:Entity[]}>({
-    start(source){taskDrag.current=source;dragOrderRef.current=source.rows;setDragId(source.row.id)},
-    move(source,x,y){
-      if(!customOrder||source.row.isFinished)return;
-      const hit=document.elementFromPoint(x,y)?.closest<HTMLElement>('.workspace-task'),current=dragOrderRef.current;
-      if(!hit||!current)return;const from=current.findIndex(row=>row.id===source.row.id),to=current.findIndex(row=>row.id===hit.dataset.taskId);
-      if(from<0||to<0||from===to)return;
-      const rect=hit.getBoundingClientRect();if(from<to&&y<rect.top+rect.height/2||from>to&&y>rect.top+rect.height/2)return;
-      const next=[...current],moving=next.splice(from,1)[0];const order=to>from?(to>=current.length-1?number(current[to].order)+10000:(number(current[to].order)+number(current[to+1].order))/2):(to<=0?number(current[to].order)-10000:(number(current[to].order)+number(current[to-1].order))/2);next.splice(to,0,{...moving,order});dragOrderRef.current=next;setDragOrder(next);
+
+  function requestTaskMove(rows: Entity[], from: string, to: string, after: boolean): TaskMove {
+    const orders = new Map(taskMoveOrders(rows, from, to, after).map(({ id, order }) => [id, order]));
+    return { rows, from, to, after, orders };
+  }
+
+  async function commitTaskMove(move: TaskMove) {
+    setCommittingMoves(current => [...current, move]);
+    const saved = await queue(() => services.business.command({ type: 'reorderTasks', from: move.from, to: move.to, after: move.after, snapshot: move.rows }));
+    if (!saved) captureTaskMotion(move.from);
+    setCommittingMoves(current => current.filter(item => item !== move));
+  }
+
+  function releaseTask(row: Entity, handoff: DragHandoff) {
+    captureTaskMotion(row.id, handoff);
+    taskDrag.current = null;
+    taskMoveRef.current = null;
+    setDragId('');
+    setTaskMove(null);
+  }
+
+  const pointerTaskDrag = useRowDrag<{ row: Entity; rows: Entity[] }>({
+    start(source) { taskDrag.current = source; setDragId(source.row.id); },
+    move(source, x, y) {
+      if (!customOrder || source.row.isFinished) return;
+      const hit = document.elementFromPoint(x, y)?.closest<HTMLElement>('.workspace-tasks > [data-task-id]');
+      const current = projectTaskMove(source.rows, taskMoveRef.current);
+      const from = current.findIndex(row => row.id === source.row.id), to = current.findIndex(row => row.id === hit?.dataset.taskId);
+      if (!hit || from < 0 || to < 0 || from === to) return;
+      const rect = hit.getBoundingClientRect(), after = from < to;
+      // Pointer coordinates can be rounded while row geometry is fractional.
+      const middle = Math.round(rect.top + rect.height / 2), pointer = Math.round(y);
+      if (after ? pointer < middle : pointer > middle) return;
+      const next = requestTaskMove(source.rows, source.row.id, current[to].id, after);
+      captureTaskMotion(source.row.id);
+      taskMoveRef.current = next;
+      setTaskMove(next);
     },
-    end(source,x,y){
-      const hit=document.elementFromPoint(x,y),list=hit?.closest<HTMLElement>('.sidebar-item'),destination=projects.find(row=>row.id===list?.dataset.projectId);
-      if(destination&&canDropTask(destination)){dropTask(destination);return}
-      const next=dragOrderRef.current;cancelDrag();
-      if(customOrder&&!source.row.isFinished&&next&&hit?.closest('.workspace-tasks')&&next.some((row,index)=>row.id!==source.rows[index]?.id))void run(()=>services.business.command({type:'updateTask',id:source.row.id,changes:{order:next.find(row=>row.id===source.row.id)!.order},expected:expected(source.row,['order'])}));
-    },cancel:cancelDrag,
+    end(source, x, y, handoff) {
+      const hit = document.elementFromPoint(x, y), list = hit?.closest<HTMLElement>('.sidebar-item');
+      const destination = projects.find(row => row.id === list?.dataset.projectId);
+      if (destination && canDropTask(destination)) {
+        void dropTask(destination).finally(() => releaseTask(source.row, handoff));
+        return;
+      }
+      const next = taskMoveRef.current;
+      const commit = !!(next?.orders.size && hit?.closest('.workspace-tasks'));
+      releaseTask(source.row, handoff);
+      if (commit && next) void commitTaskMove(next);
+    },
+    cancel(source, handoff) { releaseTask(source.row, handoff); },
   });
   function closeTaskMenu() {
     setTaskMenu(null);
@@ -163,7 +216,7 @@ function Workspace() {
     const name = row.querySelector<HTMLElement>('.workspace-task-name');
     const active = document.activeElement;
     taskMenuReturn.current = active instanceof HTMLElement && row.contains(active) && active !== document.body ? active : name;
-    setTaskMenu({ task, x: event.clientX, y: event.clientY });
+    setTaskMenu({ id: task.id, x: event.clientX, y: event.clientY });
   }
   function openTaskMenuFromKeyboard(task: Entity, event: ReactKeyboardEvent<HTMLLIElement>) {
     if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return;
@@ -172,7 +225,7 @@ function Workspace() {
     event.preventDefault(); event.stopPropagation();
     const rect = name.getBoundingClientRect();
     taskMenuReturn.current = name;
-    setTaskMenu({ task, x: rect.left + 8, y: rect.bottom + 4 });
+    setTaskMenu({ id: task.id, x: rect.left + 8, y: rect.bottom + 4 });
   }
   const sortOptions=(row:Entity)=>{
     const type=number(row.type),zh=services.language.locale.startsWith('zh');
@@ -190,9 +243,11 @@ function Workspace() {
     if (target.closest('[data-app-interaction-root], .workspace-task, .workspace-add-task, .workspace-details, .workspace-sort, button, input, select, textarea, a, label, summary, details')) return;
     select('');
   }
-  const taskRow = (task: Entity, rows: Entity[]) => <li key={task.id} className="workspace-task" data-testid="task-row" data-task-id={task.id} data-priority={number(task.priority)} data-selected={selected === task.id || undefined} data-dragging={dragId === task.id || undefined}
-    onPointerDown={!busy&&!blocked?event=>pointerTaskDrag(event,{row:task,rows},'task'):undefined}
-    draggable={!busy&&!blocked} onDragStart={event=>{taskDrag.current={row:task,rows};setDragId(task.id);event.dataTransfer.setData('text/plain',task.id)}} onDragEnd={cancelDrag}
+  const canReorder = !blocked && (!busy || committingMoves.length > 0);
+  const taskRow = (task: Entity, rows: Entity[], section = 'active') => {
+    const { finished: checked, spinning, pending } = completion.visual(task, completionScope);
+    return <li key={task.id} className="workspace-task" data-testid="task-row" data-task-id={task.id} data-priority={number(task.priority)} data-selected={selected === task.id || undefined} data-dragging={dragId === task.id || undefined}
+    onPointerDown={canReorder&&!checked&&!pending?event=>pointerTaskDrag(event,{row:task,rows},'task'):undefined}
     onContextMenu={event => openTaskMenu(task, event)}
     onKeyDown={event => openTaskMenuFromKeyboard(task, event)}
     onClick={event => {
@@ -211,25 +266,30 @@ function Workspace() {
       event.stopPropagation();
       select(task.id);
     }}
-    onDragOver={event => { if (customOrder && taskDrag.current?.rows.some(row => row.id === task.id)) event.preventDefault(); }}
-    onDrop={event => { event.preventDefault(); if (customOrder) void reorder(task); }}>
-    <button type="button" className="workspace-handle" aria-label={text.reorder + ': ' + task.name} draggable={!busy && !blocked && !task.isFinished} aria-disabled={busy || blocked} disabled={blocked || !!task.isFinished}
-      onDragStart={event => { taskDrag.current = { row: task, rows }; setDragId(task.id); event.dataTransfer.setData('text/plain', task.id); }} onDragEnd={cancelDrag}
+    >
+    <button type="button" className="workspace-handle" aria-label={text.reorder + ': ' + task.name} aria-disabled={!canReorder} disabled={blocked || checked || pending}
       onKeyDown={event => {
-        if (event.key === 'Escape') { cancelDrag(); return; }
-        if (!customOrder || !['ArrowUp', 'ArrowDown'].includes(event.key)) return; event.preventDefault();
-        const target = rows[rows.findIndex(row => row.id === task.id) + (event.key === 'ArrowUp' ? -1 : 1)];
-        if (target) void reorder(target, { row: task, rows });
+        if (!customOrder || !canReorder || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        const down = event.key === 'ArrowDown';
+        const target = rows[rows.findIndex(row => row.id === task.id) + (down ? 1 : -1)];
+        if (target) {
+          const move = requestTaskMove(rows, task.id, target.id, down);
+          captureTaskMotion(task.id);
+          void commitTaskMove(move);
+        }
       }}>⠿</button>
-    <input type="checkbox" data-repeat={number(task.rCycle)>0&&!task.isFinished||undefined} aria-label={(task.isFinished ? text.undo : text.complete) + ': ' + task.name} checked={!!task.isFinished} disabled={busy || blocked}
-      onChange={() => { void run(() => services.business.command({ type: task.isFinished ? 'uncompleteTask' : 'completeTask', id: task.id, expected: task })); }} />
-    <button type="button" className="workspace-task-start" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked || !!task.isFinished} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}><LegacyIcon name={task.isFinished?'task-start-disabled':session?.taskId===task.id&&session.state==='work'?'task-pomo-running':'task-start'}/></button>
-    <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} selected={selected===task.id} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
+    <input type="checkbox" data-repeat={number(task.rCycle)>0&&!checked||undefined} data-completion-spin={spinning||undefined}
+      aria-label={(checked ? text.undo : text.complete) + ': ' + task.name} checked={checked} disabled={blocked || pending || spinning}
+      onChange={() => completion.toggle(task, completionScope, section, rows)} />
+    <button type="button" className="workspace-task-start" aria-label={text.focusTask + ': ' + task.name} disabled={busy || blocked || checked} onClick={async () => { if (await run(() => services.startForTask(task.id))) navigate({ kind: 'timer' }); }}><LegacyIcon name={checked?'task-start-disabled':session?.taskId===task.id&&session.state==='work'?'task-pomo-running':'task-start'}/></button>
+    <div className="legacy-task-name-pomodoros"><div className="legacy-task-name-line"><TaskName task={task} finished={checked} selected={selected===task.id} select={()=>select(task.id)}/><span className="legacy-task-tags">{projects.filter(tag=>tag.type===3000&&String(task.tags||'').split(',').includes(tag.id)).map(tag=><button key={tag.id} type="button" style={{color:'#'+String(tag.color||'fd5553').replace('#','')}} onClick={()=>select(task.id)}>#{tag.name}</button>)}</span></div>{(number(task.estimatePomoNum)>0||actualPomodoros(task)>0)&&<div className="workspace-task-pomos">{number(task.estimatePomoNum)<=5&&actualPomodoros(task)<=number(task.estimatePomoNum)?Array.from({length:Math.max(number(task.estimatePomoNum),Math.ceil(actualPomodoros(task)))},(_,i)=><LegacyIcon key={i} name={i<actualPomodoros(task)?'task-pomo-actual':'task-pomo-estimate'}/>):<><LegacyIcon name="task-pomo-actual"/><span>{Number(actualPomodoros(task).toFixed(1))}</span>{number(task.estimatePomoNum)>0&&<><i>/</i><LegacyIcon name="task-pomo-estimate"/><small>{number(task.estimatePomoNum)}</small></>}</>}</div>}</div>
     {!!number(task.reminderDate)&&<span className="workspace-task-status workspace-task-reminder" data-expired={number(task.reminderDate)<Date.now()||undefined} role="img" aria-label={text.reminder}/>}
     {snapshot.subtasks.some(child=>child.taskId===task.id&&child.state===0)&&<span className="workspace-task-status workspace-task-subtask" role="img" aria-label={text.subtasks}/>}
     {!!task.remark&&<span className="workspace-task-status workspace-task-subtask-remark" role="img" aria-label={text.remark}/>}
     {number(task.deadline)>0&&<span className="workspace-task-date" data-overdue={number(task.deadline)<new Date().setHours(0,0,0,0)||undefined}>{formatTaskDate(number(task.deadline), services.language.locale)}</span>}
   </li>;
+  };
   return <div className="workspace-shell" data-testid="app-shell">
     <LegacyScrollbars />
     <a className="prototype-skip" href="#workspace-content">{text.skip}</a>
@@ -240,7 +300,7 @@ function Workspace() {
     </header>
     <div className={'workspace-layout' + (selectedTask && isTasks ? ' has-details' : '')}>
       <Sidebar projects={projects} view={view} navigate={navigate} query={query} setQuery={setQuery} summary={sidebarSummary}
-        width={resizeWidth ?? preferences.projectRegionWidth} mobileNav={mobileNav} canDropTask={canDropTask} dropTask={dropTask} />
+        width={resizeWidth ?? preferences.projectRegionWidth} mobileNav={mobileNav} />
       <div className="workspace-resize" role="separator" aria-label={text.sidebarWidth} aria-orientation="vertical" aria-valuemin={180} aria-valuemax={380} aria-valuenow={resizeWidth ?? preferences.projectRegionWidth} tabIndex={0}
         onPointerDown={event => { if (busy || blocked) return; resizeStart.current = { x: event.clientX, width: preferences.projectRegionWidth }; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={event => { if (resizeStart.current) setResizeWidth(Math.min(380, Math.max(180, resizeStart.current.width + event.clientX - resizeStart.current.x))); }}
@@ -248,7 +308,7 @@ function Workspace() {
         onPointerCancel={() => { resizeStart.current = null; setResizeWidth(null); }}
         onKeyDown={event => { if (['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); void run(() => services.settings.set('projectRegionWidth', preferences.projectRegionWidth + (event.key === 'ArrowLeft' ? -10 : 10))); } }} />
       <main id="workspace-content" className={'workspace-content'+(project?.type===7001?' calendar-content':'')} tabIndex={-1} onClick={blankClick}>
-        {isTasks ? <div className="workspace-task-scroll">
+        {isTasks ? <div className="workspace-task-scroll" ref={taskScroll}>
         <div className="workspace-view-heading"><h1 ref={heading} tabIndex={-1}>{title}</h1>{project && !completedView && <div className="workspace-sort">
             <button type="button" className="workspace-sort-trigger" aria-label={text.sort} aria-haspopup="menu" aria-expanded={sortOpen} disabled={busy || blocked} onClick={()=>setSortOpen(!sortOpen)}><span className="workspace-sr">{text.sort}</span></button>
             {sortOpen&&<><button type="button" className="workspace-sort-mask" aria-label={text.close} tabIndex={-1} onClick={()=>setSortOpen(false)} />
@@ -256,7 +316,7 @@ function Workspace() {
             </>}
           </div>}</div>
           <div className="workspace-summary"><div className="workspace-summary-item"><div className="workspace-summary-value">{duration(estimatedSeconds)}</div><div className="workspace-summary-title">{text.estimatedTime}</div></div><div className="workspace-summary-item"><div className="workspace-summary-value"><span className="workspace-summary-number">{active.filter(row => !row.isFinished).length}</span></div><div className="workspace-summary-title">{services.language.locale.startsWith('zh')?'待完成任务':'Tasks to be Completed'}</div></div>{!summaryPresetOnly&&<><div className="workspace-summary-item"><div className="workspace-summary-value">{duration(spentSeconds)}</div><div className="workspace-summary-title">{text.elapsedTime}</div></div><div className="workspace-summary-item"><div className="workspace-summary-value"><span className="workspace-summary-number" data-testid="completed-total">{completedCount}</span></div><div className="workspace-summary-title">{services.language.locale.startsWith('zh')?'已完成任务':'Completed Tasks'}</div></div></>}</div>
-          {!completedView && view.kind !== 'search' && <form key={project?.id} className="workspace-add-task" data-empty={!active.length&&!finished.length} onSubmit={async event => {
+          {!completedView && view.kind !== 'search' && <form key={project?.id} className="workspace-add-task" data-empty={!visibleActive.length&&!finished.length} onSubmit={async event => {
             event.preventDefault();
             const now = new Date(), type = number(project?.type);
             let deadline = preferences.defaultDeadline;
@@ -268,7 +328,7 @@ function Workspace() {
             if (type === 4003) deadline = 0;
             const peers = snapshot.tasks.filter(row => row.state === 0 && !row.isFinished);
             const order = preferences.newTaskOnTop ? Math.min(0, ...peers.map(row => number(row.order))) - 10000 : Math.max(0, ...peers.map(row => number(row.order))) + 10000;
-            if (await run(() => services.business.command({ type: 'addTask', values: { name: name.trim(), projectId: quickProject?.id||fallback?.id||'',
+            if (await run(() => services.business.command({ type: 'addTask', folderId: composerFolder?.id, values: { name: name.trim(), projectId: quickProject?.id||fallback?.id||'',
               deadline, order, estimatePomoNum:quickEstimate, tags: type === 3000 ? project?.id : '', priority: [5001, 5002, 5003].includes(type) ? type - 5000 : 0 } }))) setName('');
           }}>
             <span className="workspace-plus" aria-hidden="true"/>
@@ -278,7 +338,7 @@ function Workspace() {
             {!composerTargetsCurrentList&&<PickerField className="workspace-quick-project-picker" restoreFocusOnEscape gap={5}>
               <summary className="workspace-quick-project" aria-label={text.project+'…'}><ProjectIcon type={number(quickProject?.type)||7005} color={String(quickProject?.color||'')}/></summary>
               <div className="legacy-detail-popover legacy-project-options">
-                {projects.filter(row=>[1000,7005].includes(number(row.type))&&row.state===0).map(row=><button key={row.id} type="button" role="option" aria-selected={quickProject?.id===row.id} onClick={()=>{setQuickProjectId(row.id);dismissQuickPicker()}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span>{quickProject?.id===row.id&&<i aria-hidden="true"/>}</button>)}
+                {composerLists.map(row=><button key={row.id} type="button" role="option" aria-selected={quickProject?.id===row.id} onClick={()=>{setQuickProjectId(row.id);dismissQuickPicker()}}><ProjectIcon type={number(row.type)} color={String(row.color||'')}/><span>{projectName(row,text)}</span>{quickProject?.id===row.id&&<i aria-hidden="true"/>}</button>)}
               </div>
             </PickerField>}
             {!composerUsesPresetDeadline&&<PickerField className="workspace-quick-deadline-picker" restoreFocusOnEscape gap={10}>
@@ -289,10 +349,17 @@ function Workspace() {
               }}/></div>
             </PickerField>}
           </form>}
-          {!completedView&&taskGroups(active, project, projects, text, services.language.locale).map(group => <section key={group.id} className="workspace-task-group">{group.title && group.rows.length>0 && <h2>{group.title}<span>  •  {formatMinutesDuration(group.rows.reduce((n,t)=>n+remaining(t),0)/60, services.language.locale)}</span></h2>}<ul className="workspace-tasks" aria-label={group.title || title}>{(customOrder&&dragOrder&&group.rows.some(row=>row.id===dragId)?dragOrder:group.rows).map(task => taskRow(task, group.rows))}</ul></section>)}
-          {!completedView&&!active.length&&!finished.length&&<div className="workspace-empty" data-search={view.kind==='search'||undefined}><div className="workspace-empty-art" aria-hidden="true"/><div className="workspace-empty-title">{services.language.legacyText(view.kind==='search'?'tsk_no_search_result':'pomo_no_task')}</div>{view.kind!=='search'&&<div className="workspace-empty-desc">{services.language.legacyText('tsk_empty_tip')}</div>}</div>}
+          {!completedView && taskGroups(visibleActive, project, projects, text, services.language.locale).map(group => {
+            const rows = customOrder ? committingMoves.reduce(projectTaskMove, group.rows) : group.rows;
+            const displayed = projectTaskMove(rows, customOrder ? taskMove : null);
+            return <section key={group.id} className="workspace-task-group">
+              {group.title && group.rows.length > 0 && <h2>{group.title}<span>  •  {formatMinutesDuration(group.rows.reduce((n,t)=>n+remaining(t),0)/60, services.language.locale)}</span></h2>}
+              <ul className="workspace-tasks" aria-label={group.title || title}>{displayed.map(task => taskRow(task, rows))}</ul>
+            </section>;
+          })}
+          {!completedView&&!visibleActive.length&&!finished.length&&<div className="workspace-empty" data-search={view.kind==='search'||undefined}><div className="workspace-empty-art" aria-hidden="true"/><div className="workspace-empty-title">{services.language.legacyText(view.kind==='search'?'tsk_no_search_result':'pomo_no_task')}</div>{view.kind!=='search'&&<div className="workspace-empty-desc">{services.language.legacyText('tsk_empty_tip')}</div>}</div>}
           {completedSection && <div className="workspace-completed-section"><button className="workspace-completed-toggle" aria-expanded={showCompleted} onClick={() => setShowCompleted(value => !value)}>{showCompleted ? text.hideCompleted : text.showCompleted}</button>
-            {completedTaskGroups(finished,services.language.locale).map(group=><section className="workspace-task-group" key={group.id}><h2>{group.title}</h2><ul className="workspace-tasks" aria-label={text.completed+': '+group.title}>{group.rows.map(task=>taskRow(task,group.rows))}</ul></section>)}</div>}
+            {completedTaskGroups(finished,services.language.locale).map(group=><section className="workspace-task-group" key={group.id}><h2>{group.title}</h2><ul className="workspace-tasks" aria-label={text.completed+': '+group.title}>{group.rows.map(task=>taskRow(task,group.rows,'completed'))}</ul></section>)}</div>}
           {completedView&&<History openTask={openTask}/>}
         </div> : view.kind === 'settings' ? <Settings/> : view.kind==='reports'?<Reports openTask={openTask}/>:view.kind==='forest'?<Forest/>:project?.type===7001?<Calendar startTask={(id,child)=>{void startTask(id,child)}} openTask={openTask}/>:null}
               {selectedTask && isTasks && <TaskDetails key={selectedTask.id} task={selectedTask} projects={projects} subtasks={snapshot.subtasks} close={() => select('')} onStart={() => navigate({ kind: 'timer' })} />}
@@ -300,7 +367,7 @@ function Workspace() {
       
     </div>
         <Timer expanded={timerOpen} openExpanded={() => navigate({ kind: 'timer' })} closeExpanded={()=>{setTimerOpen(false);focusHeading.current=true;setView({...timerReturn.current.view});select(timerReturn.current.selected)}} />
-    {taskMenu && <TaskContextMenu remove={setDeletingTask} key={taskMenu.task.id} task={taskMenu.task} x={taskMenu.x} y={taskMenu.y} close={closeTaskMenu} />}
+    {taskMenu && menuTask && <TaskContextMenu remove={setDeletingTask} key={menuTask.id} task={menuTask} x={taskMenu.x} y={taskMenu.y} close={closeTaskMenu} />}
   {deletingTask&&<TaskDeleteDialog task={deletingTask} close={()=>{setDeletingTask(null)}}/>}
   {overlay&&<PageOverlay title={overlay==='forest'?(services.language.locale.startsWith('zh')?'专注森林':'Focus forest'):text[overlay]} full={overlay==='reports'} close={()=>setOverlay(null)}>{overlay==='settings'?<Settings initialTab={settingsTab}/>:overlay==='reports'?<Reports openTask={openTask}/>:<Forest/>}</PageOverlay>}
   </div>;

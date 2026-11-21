@@ -15,7 +15,9 @@ async function run(locale,dark){
   // The sidebar and all flat list selectors consume the same stored order.
   const expected=[zh?'任务':'Tasks','Blue list','Red list','Green list'];
   await p.locator('.workspace-quick-project').click();
-  assert.deepEqual(await p.locator('.workspace-picker-surface.workspace-quick-project-picker [role=option]>span:nth-child(2)').allTextContents(),expected);
+  const quickOptions=p.locator('.workspace-picker-surface.workspace-quick-project-picker [role=option]>span:nth-child(2)');
+  await quickOptions.first().waitFor();
+  assert.deepEqual(await quickOptions.allTextContents(),expected);
   await p.keyboard.press('Escape');
   await p.getByRole('button',{name:'Blue list',exact:true}).first().click();
   await p.locator('.workspace-task-name').filter({hasText:'Reports task 4'}).click();

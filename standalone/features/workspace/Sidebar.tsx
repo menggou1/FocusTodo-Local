@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type DragEvent as ReactDragEvent, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { Entity } from '../../services/core.mjs';
 import { useWorkspace } from './Context';
@@ -7,6 +7,7 @@ import { LegacyIcon } from './LegacyIcon';
 import { ProjectEditor } from './Projects';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useRowDrag } from './useRowDrag';
+import { useRowMotion } from './useRowMotion';
 import { sidebarItems, sidebarMinutes, sidebarMove } from './SidebarModel.mjs';
 import { expected, number, projectName } from './model';
 
@@ -26,28 +27,33 @@ interface Props {
   summary(row: Entity): Summary;
   width: number;
   mobileNav: boolean;
-  canDropTask(row: Entity): boolean;
-  dropTask(row: Entity): void;
 }
 
 const customTypes = [1000, 2000, 3000];
 const isCustom = (row: Entity) => customTypes.includes(number(row.type));
 const menuLabel = (services: ReturnType<typeof useWorkspace>['services']) => services.language.locale.startsWith('zh') ? '清单菜单' : 'List menu';
 
-export function Sidebar({ projects, view, navigate, query, setQuery, summary, width, mobileNav, canDropTask, dropTask }: Props) {
-  const { services, text, run, busy, blocked } = useWorkspace();
-  const root=useRef<HTMLElement>(null),projection=useRef<DropPreview|null>(null);
+export function Sidebar({ projects, view, navigate, query, setQuery, summary, width, mobileNav }: Props) {
+  const { services, text, run, queue, busy, blocked } = useWorkspace();
+  const scroll = useRef<HTMLDivElement>(null);
+  const projection = useRef<DropPreview | null>(null);
+  const dragContext = useRef<Entity[]>([]);
+  const captureMotion = useRowMotion(scroll, '.sidebar-custom,.sidebar-empty-folder', 'data-motion-id');
   const input = useRef<HTMLInputElement>(null), searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const previousView = useRef<SidebarView | null>(null), lastViewKind = useRef(view.kind);
   const [menu, setMenu] = useState<MenuState | null>(null), [editor, setEditor] = useState<EditorState | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [dragging, setDragging] = useState(''), [overId, setOverId] = useState('');
   const [preview, setPreview] = useState<DropPreview | null>(null);
+  const [committingMoves, setCommittingMoves] = useState<DropPreview[]>([]);
   const folderExpand = useRef<{ id: string; timer: ReturnType<typeof setTimeout> } | null>(null);
   const presets = projects.filter(row => row.state === 0 && number(row.type) >= 4000 && number(row.type) !== 7002);
-  const baseItems = sidebarItems(projects);
-  const displayProjects = preview ? projects.map(row => row.id === preview.id ? { ...row, order: preview.order, parentId: preview.parentId } : row) : projects;
-  const items = preview ? sidebarItems(displayProjects) : baseItems;
+  const pendingProjects = committingMoves.reduce<readonly Entity[]>((rows, move) =>
+    rows.map(row => row.id === move.id ? { ...row, order: move.order, parentId: move.parentId } : row), projects);
+  const projectedItems = (move: DropPreview | null) => sidebarItems(move
+    ? pendingProjects.map(row => row.id === move.id ? { ...row, order: move.order, parentId: move.parentId } : row)
+    : pendingProjects);
+  const items = projectedItems(preview);
   const today = presets.find(row => number(row.type) === 4000) || projects.find(row => row.id === 'id-deadline-today');
 
   const clearSearchTimer = () => { if (searchTimer.current) { clearTimeout(searchTimer.current); searchTimer.current = null; } };
@@ -148,66 +154,71 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   function rowMenuLabel() { return menuLabel(services); }
   function projectSearchLabel() { return services.language.locale.startsWith('zh') ? '清除搜索' : 'Clear search'; }
 
-  function beginProjectDrag(event: ReactDragEvent<HTMLElement>, row: Entity) {
-    if (busy || blocked || !isCustom(row)) { event.preventDefault(); return; }
-    event.dataTransfer.effectAllowed = 'move'; event.dataTransfer.setData('text/plain', row.id);
-    setDragging(row.id); setOverId(''); setPreview(null);
+  function clearDrag() {
+    projection.current = null;
+    clearFolderExpand();
+    setDragging('');
+    setOverId('');
+    setPreview(null);
   }
-  function projectDragOver(event: ReactDragEvent<HTMLElement>, item: { project: Entity | null }) {
-    if (!dragging || !item.project || item.project.id === dragging) return;
-    event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setOverId(item.project.id);
-    const target = item.project;
-    if (target.type === 2000 && target.expanded === false) {
-      if (folderExpand.current?.id !== target.id) {
-        clearFolderExpand();
-        const id = target.id;
-        folderExpand.current = { id, timer: setTimeout(() => {
-          folderExpand.current = null;
-          const current = projects.find(row => row.id === id);
-          if (current?.type === 2000 && current.expanded === false) void run(() => services.business.command({ type: 'updateProject', id, changes: { expanded: true }, expected: expected(current, ['expanded', 'state']) }));
-        }, 1000) };
-      }
-    } else clearFolderExpand();
-    const move = sidebarMove(baseItems, dragging, target.id);
-    setPreview(move);
-  }
-  function finishProjectDrag() { projection.current=null;clearFolderExpand(); setDragging(''); setOverId(''); setPreview(null); }
-  function dropProject(event: ReactDragEvent<HTMLElement>) {
-    if (!dragging || !preview) return;
-    event.preventDefault();
-    const row = projects.find(item => item.id === dragging);
-    finishProjectDrag();
-    if (!row) return;
-    void run(() => services.business.command({ type: 'updateProject', id: row.id, changes: { order: preview.order, parentId: preview.parentId }, expected: expected(row, ['order', 'parentId']) }));
-  }
-  const pointerDrag=useRowDrag<Entity>({
-    start(row){setDragging(row.id);setOverId('');projection.current=null;setPreview(null)},
-    move(row,x,y){
-      const hit=document.elementFromPoint(x,y)?.closest<HTMLElement>('.sidebar-custom,.sidebar-empty-folder');
-      if(!hit||!root.current?.contains(hit))return;
-      const target=hit.dataset.projectId||hit.dataset.emptyId;if(!target||target===row.id)return;
-      const from=items.findIndex(item=>item.id===row.id),to=items.findIndex(item=>item.id===target),rect=hit.getBoundingClientRect();
-      if(from<to&&y<rect.top+rect.height/2||from>to&&y>rect.top+rect.height/2)return;
-      const next=sidebarMove(items,row.id,target);
-      if(next){projection.current=next;setPreview(next);setOverId(target)}
-      const folder=projects.find(item=>item.id===target);
-      if(folder?.type===2000&&folder.expanded===false){
-        if(folderExpand.current?.id!==folder.id){clearFolderExpand();folderExpand.current={id:folder.id,timer:setTimeout(()=>{clearFolderExpand();void run(()=>services.business.command({type:'updateProject',id:folder.id,changes:{expanded:true},expected:expected(folder,['expanded','state'])}))},1000)}}
-      }else clearFolderExpand();
+
+  const pointerDrag = useRowDrag<Entity>({
+    start(row) {
+      dragContext.current = pendingProjects.filter(item => item.state === 0 && isCustom(item));
+      setDragging(row.id);
     },
-    end(row,x,y){
-      const next=projection.current,inside=!!document.elementFromPoint(x,y)?.closest('.workspace-projects');finishProjectDrag();
-      if(next&&inside)void run(()=>services.business.command({type:'updateProject',id:row.id,changes:{order:next.order,parentId:next.parentId},expected:expected(row,['order','parentId'])}));
-    },cancel:finishProjectDrag,
+    move(row, x, y) {
+      const hit = document.elementFromPoint(x, y)?.closest<HTMLElement>('.sidebar-custom,.sidebar-empty-folder');
+      if (!hit || !scroll.current?.contains(hit)) { clearFolderExpand(); return; }
+      const target = hit.dataset.motionId;
+      if (!target || target === row.id) return;
+      const projected = projectedItems(projection.current);
+      const current = projected.some(item => item.id === row.id) ? projected : projectedItems(null);
+      const from = current.findIndex(item => item.id === row.id), to = current.findIndex(item => item.id === target);
+      const rect = hit.getBoundingClientRect();
+      if (from < to && y < rect.top + rect.height / 2 || from > to && y > rect.top + rect.height / 2) return;
+      const next = sidebarMove(current, row.id, target);
+      if (next && (next.order !== projection.current?.order || next.parentId !== projection.current?.parentId)) {
+        captureMotion(row.id);
+        projection.current = next;
+        setPreview(next);
+        setOverId(target);
+      }
+      const folder = projects.find(item => item.id === target);
+      if (folder?.type !== 2000 || folder.expanded !== false) { clearFolderExpand(); return; }
+      if (folderExpand.current?.id === folder.id) return;
+      clearFolderExpand();
+      folderExpand.current = { id: folder.id, timer: setTimeout(() => {
+        clearFolderExpand();
+        captureMotion(row.id);
+        void run(() => services.business.command({ type: 'updateProject', id: folder.id, changes: { expanded: true }, expected: expected(folder, ['expanded', 'state']) }));
+      }, 1000) };
+    },
+    end(row, x, y, handoff) {
+      const next = projection.current;
+      const hit = document.elementFromPoint(x, y);
+      const commit = !!(next && hit && scroll.current?.contains(hit) && !hit.closest('.sidebar-presets,.workspace-search'));
+      const remainsVisible = !commit || projectedItems(next).some(item => item.id === row.id);
+      if (remainsVisible) captureMotion(row.id, handoff);
+      clearDrag();
+      if (!next || !commit) return;
+      setCommittingMoves(current => [...current, next]);
+      const orderContext = dragContext.current;
+      void queue(() => services.business.command({
+        type: 'updateProject', id: row.id, changes: { order: next.order, parentId: next.parentId },
+        expected: expected(row, ['order', 'parentId']), orderContext,
+      })).then(saved => {
+        if (!saved) captureMotion(row.id, remainsVisible ? undefined : handoff);
+        else if (!remainsVisible) handoff.remove();
+        setCommittingMoves(current => current.filter(item => item !== next));
+      });
+    },
+    cancel(row, handoff) { captureMotion(row.id, handoff); clearDrag(); },
   });
-  function taskDrop(event: ReactDragEvent<HTMLElement>, row: Entity) {
-    if (!canDropTask(row)) return;
-    event.preventDefault(); dropTask(row);
-  }
 
   function row(item: { id: string; project: Entity | null; parent: Entity | null }) {
     if (!item.project) {
-      return <div className="sidebar-empty-folder" key={item.id} data-empty-id={item.id} style={{ '--sidebar-parent': '#' + String(item.parent?.color || 'aeaeae').replace('#', '') } as CSSProperties}>
+      return <div className="sidebar-empty-folder" key={item.id} data-empty-id={item.id} data-motion-id={item.id} style={{ '--sidebar-parent': '#' + String(item.parent?.color || 'aeaeae').replace('#', '') } as CSSProperties}>
         <span className="sidebar-child-line" />
         <button type="button" onClick={() => setEditor({ row: item.parent || undefined, type: 2000 })}>{services.language.legacyText('fld_click_add')}</button>
       </div>;
@@ -216,15 +227,12 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     const selected = view.kind === 'project' && view.id === project.id;
     const counts = summaryFor(project), hideStats = [7001, 7003].includes(number(project.type));
     return <div key={item.id} className={'sidebar-item' + (custom ? ' sidebar-custom' : '') + (item.parent ? ' sidebar-child' : '') + (menu?.row.id === project.id ? ' sidebar-menu-open' : '')}
-      onPointerDown={custom&&!busy&&!blocked?event=>pointerDrag(event,project,'project'):undefined}
-      data-project-id={project.id} data-dragging={dragging === project.id || undefined} data-over={overId === project.id || undefined}
-      onDragOver={event => projectDragOver(event, item)} onDrop={dropProject} onDragEnd={finishProjectDrag}
+      onPointerDown={custom&&(!busy||committingMoves.length>0)&&!blocked?event=>pointerDrag(event,project,'project'):undefined}
+      data-project-id={project.id} data-motion-id={item.id} data-dragging={dragging === project.id || undefined} data-over={overId === project.id || undefined}
       onContextMenu={event => openMenu(event, project)}>
       {item.parent && <span className="sidebar-child-line" style={{ '--sidebar-parent': '#' + String(item.parent.color || 'aeaeae').replace('#', '') } as CSSProperties} />}
       <button type="button" className="workspace-nav sidebar-nav-main" aria-label={projectName(project, text)} data-project-id={project.id}
         data-view={number(project.type) === 7005 ? 'tasks' : undefined} aria-current={selected ? 'page' : undefined}
-        draggable={custom && !busy && !blocked} onDragStart={event => beginProjectDrag(event, project)} onDragEnd={finishProjectDrag}
-        onDragOver={event => { if (canDropTask(project)) { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; } }} onDrop={event => taskDrop(event, project)}
         onClick={() => chooseRow(project)}>
         <span className="sidebar-nav-icon-slot"><ProjectIcon type={number(project.type)} color={String(project.color || '')} /></span>
         <span className="workspace-nav-name">{projectName(project, text)}</span>
@@ -240,8 +248,8 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   }
 
   const menuRow = menu?.row;
-  return <nav ref={root} className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': width + 'px' } as CSSProperties}>
-    <div className="workspace-projects">
+  return <nav className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': width + 'px' } as CSSProperties}>
+    <div className="workspace-projects" ref={scroll}>
       <div className="workspace-search">
         <div className="workspace-search-box">
           <LegacyIcon name="search-icon" />

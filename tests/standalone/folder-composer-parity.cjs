@@ -148,7 +148,12 @@ async function checkFolder(pair, key, locale) {
         old: await metrics(old, { menu: oldMenu, row: oldMenu+' [class*=ProjectSelection-option]', icon: oldMenu+' [class*=ProjectSelection-color]' }),
         new: await metrics(page, { menu: newMenu, row: newMenu+' [role=option]', icon: newMenu+' [role=option]>img' }),
     };
-    near(menuMetrics.old.menu, menuMetrics.new.menu, ['width','height']);
+    const oldOptions = old.locator(oldMenu+' [class*=ProjectSelection-option]');
+    const scopedOptions = page.locator(newMenu).getByRole('option');
+    assert.deepEqual(await scopedOptions.allTextContents(), [locale==='en' ? 'Tasks' : '任务', 'Oracle Alpha', 'Oracle Beta']);
+    const removedRows = await oldOptions.count() - await scopedOptions.count();
+    near({ ...menuMetrics.old.menu, height: menuMetrics.old.menu.height - removedRows * menuMetrics.old.row.height },
+        menuMetrics.new.menu, ['width','height']);
     near(menuMetrics.old.row, menuMetrics.new.row, ['width','height']);
     near(menuMetrics.old.icon, menuMetrics.new.icon, ['width','height']);
     assert.equal(menuMetrics.old.row.lineHeight, menuMetrics.new.row.lineHeight);
@@ -287,6 +292,28 @@ async function checkFolder(pair, key, locale) {
     await page.locator('.legacy-task-delete .primary').click();
     await renamed.waitFor({state:'hidden'});
     assert.equal((await stored(page,false,'Beta renamed'))[0].state,-1);
+
+    // The composer remains on the folder while a list loses membership.
+    await page.locator(newProject).click();
+    await page.locator(newMenu).getByRole('option', {name:'Oracle Beta',exact:true}).click();
+    await page.locator(newMenu).waitFor({state:'hidden'});
+    await projectButton(page,'folder').click({button:'right'});
+    await page.getByRole('menuitem', {name:locale==='en'?'Edit Folder':'编辑清单夹',exact:true}).click();
+    const folderEditor = page.getByRole('dialog').last();
+    await folderEditor.locator('.legacy-folder-lists label').filter({hasText:'Oracle Beta'}).getByRole('checkbox').uncheck();
+    await folderEditor.locator('footer .primary').click();
+    await folderEditor.waitFor({state:'hidden'});
+    await page.locator(newProject).click();
+    await page.locator(newMenu).waitFor();
+    const options = page.locator(newMenu).getByRole('option');
+    assert.deepEqual(await options.allTextContents(), [locale==='en'?'Tasks':'任务','Oracle Alpha']);
+    assert.equal(await options.first().getAttribute('aria-selected'), 'true');
+    await page.keyboard.press('Escape');
+    const input = page.locator(newComposer+' input').first();
+    await input.fill('Folder default fallback');
+    await input.press('Enter');
+    await page.waitForFunction(() => !document.querySelector('.workspace-add-task input').value);
+    assert.equal((await stored(page,false,'Folder default fallback'))[0].projectId,'id-task-tasks');
     return { groups: expected, before, after, menuMetrics, tileShape, storedProject: 'beta', deadline };
 }
 
