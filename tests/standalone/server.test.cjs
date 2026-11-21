@@ -45,6 +45,8 @@ test('candidate server attests its exact origin and serves the explicit project-
     const home = await request('/FocusTodo-Local/');
     assert.equal(home.status, 200);
     assert(home.body.includes('Generated server fixture'));
+    assert.equal(home.headers['x-frame-options'], 'DENY');
+    assert.equal(home.headers['content-security-policy'], "frame-ancestors 'none'");
     const asset = await request('/FocusTodo-Local/assets/entry.js');
     assert.equal(asset.status, 200);
     assert.equal(asset.headers['cache-control'], 'no-store');
@@ -64,4 +66,13 @@ test('candidate server excludes source maps, checkout files and resources outsid
     assert.equal((await request('/FocusTodo-Local/', { headers: { Host: 'attacker.example:' + port } })).status, 403);
     assert.equal((await request('/FocusTodo-Local/', { headers: { Host: '127.0.0.1:65536' } })).status, 403);
     assert.throws(() => createStandaloneServer({ root: temporary, basePath: '/unsafe/../' }), /Invalid prototype base path/);
+});
+
+test('candidate accepts only a single loopback Host and origin-form targets', async () => {
+    const base = '/FocusTodo-Local/';
+    assert.equal((await request(base + '?local=1', { headers: { Host: 'localhost:' + port } })).status, 200);
+    assert.equal((await request(base, { headers: ['Host', 'localhost', 'Host', '127.0.0.1'] })).status, 403);
+    for (const target of ['http://localhost' + base, '//' + base.slice(1)]) {
+        assert.equal((await request(target)).status, 400, target);
+    }
 });

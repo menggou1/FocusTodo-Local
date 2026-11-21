@@ -1,4 +1,6 @@
 /* Codec extracted from local-backup.js at 139d0f9; UI/download stays outside. */
+import { preferenceDefinitions } from './preferences.mjs';
+
 export function createBackupCodec({ compression = {}, translate = value => value } = {}) {
     const MAX_BYTES = 128 * 1000 * 1000;
     const THEMES_KEY = 'lexible-custom-themes', ACTIVE_KEY = 'lexible-active-custom-theme';
@@ -53,6 +55,7 @@ export function createBackupCodec({ compression = {}, translate = value => value
     function prepare(snapshot, options) {
         header(snapshot);
         const data = clone(snapshot);
+        delete data.localStorage[preferenceDefinitions.externalNetwork[0]];
         data.meta.scope = options && options.includeWallpapers === false ? 'without-wallpapers' : 'full';
         if (data.meta.scope === 'without-wallpapers') {
             delete data.localStorage[THEMES_KEY];

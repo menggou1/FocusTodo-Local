@@ -98,6 +98,8 @@ async function main() {
     assert(files.includes('index.html'));
     assert(!files.some(name => name.endsWith('.map')), 'Production maps belong outside the served candidate');
     const html = fs.readFileSync(path.join(site, 'index.html'), 'utf8');
+    const scriptPolicy = /; script-src ([^;]+)/.exec(html)?.[1];
+    assert.match(scriptPolicy, /^'self'(?: 'sha256-[A-Za-z0-9+/]{43}='){2}$/);
     const criticalJS = /<script\b[^>]*type="module"[^>]*src="([^"]+)"/.exec(html)?.[1];
     const criticalCSS = /<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/.exec(html)?.[1];
     assert(criticalJS && criticalCSS, 'A built module entry and stylesheet are required for startup-failure tests');

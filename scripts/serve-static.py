@@ -3,17 +3,32 @@ import json
 import argparse
 import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from socketserver import TCPServer
 from urllib.parse import unquote, urlsplit
 
-from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 
-
 # Portable React builds use the same explicit manifest as the Node server.
-APP_ROOT = ROOT if (ROOT / 'build-info.json').is_file() else ROOT / 'dist/app/site'
-APP_FILES = set(json.loads((APP_ROOT / 'runtime-manifest.json').read_text(encoding='utf-8'))['files'])
+def load_manifest(root, layout):
+    files = json.loads((root / 'runtime-manifest.json').read_text(encoding='utf-8'))['files']
+    if not isinstance(files, list):
+        raise ValueError('Invalid runtime manifest')
+    for name in files:
+        if not isinstance(name, str) or any(char in name for char in '\\:\0'):
+            raise ValueError('Unexpected runtime path')
+        parts = name.split('/')
+        if (any(not part or part.startswith('.') or part.lower() in ('node_modules', 'scripts', 'tests') for part in parts)
+                or name.lower().endswith('.map')
+                or (name not in layout['files'] and (len(parts) < 2 or parts[0] not in layout['directories']))):
+            raise ValueError('Unexpected runtime path')
+    return frozenset(files)
+
+
+LAYOUT = json.loads((ROOT / 'scripts/app-layout.json').read_text(encoding='utf-8'))
+APP_ROOT = ROOT if (ROOT / 'build-info.json').is_file() else ROOT / LAYOUT['siteDirectory']
+APP_FILES = load_manifest(APP_ROOT, LAYOUT)
 
 
 class LoopbackHTTPServer(ThreadingHTTPServer):
@@ -28,6 +43,9 @@ class Handler(SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('Referrer-Policy', 'no-referrer')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('Content-Security-Policy', "frame-ancestors 'none'")
         super().end_headers()
 
     def send_head(self):
@@ -39,17 +57,20 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(403)
             return None
         try:
-            name = unquote(urlsplit(self.path).path).lstrip('/')
+            # SimpleHTTPRequestHandler normalizes leading slashes in self.path.
+            target = self.requestline.split()[1]
+            if not target.startswith('/') or target.startswith('//') or '#' in target or '\\' in target.split('?', 1)[0]:
+                raise ValueError('Invalid request target')
+            name = unquote(urlsplit(target).path, errors='strict')[1:]
         except ValueError:
             self.send_error(400)
             return None
         if not name:
             name = 'index.html'
-        source = name if name in APP_FILES else None
-        if not source or '\0' in source:
+        if name not in APP_FILES:
             self.send_error(404)
             return None
-        file = APP_ROOT / source
+        file = APP_ROOT / name
         if not file.is_file() or file.resolve() != file:
             self.send_error(404)
             return None

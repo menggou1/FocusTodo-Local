@@ -12,18 +12,22 @@ function createStandaloneServer(options = {}) {
   if (!Array.isArray(manifest.files)) throw new Error('Invalid runtime manifest');
   const allowed = new Set(manifest.files);
   for (const name of allowed) {
-    if (typeof name !== 'string' || name.split('/').some(part => !part || part.startsWith('.')) || /[\\:\0]/.test(name)
+    if (typeof name !== 'string' || name.split('/').some(part => !part || part.startsWith('.') || ['node_modules', 'scripts', 'tests'].includes(part.toLowerCase())) || /[\\:\0]/.test(name)
       || (!layout.files.includes(name) && !layout.directories.some(dir => name.startsWith(dir + '/')))
-      || name.endsWith('.map')) throw new Error('Unexpected runtime path');
+      || name.toLowerCase().endsWith('.map')) throw new Error('Unexpected runtime path');
   }
   return http.createServer((req, res) => {
     const host = /^(127\.0\.0\.1|localhost)(?::(\d{1,5}))?$/i.exec(req.headers.host || '');
-    if (!host || (host[2] && (Number(host[2]) < 1 || Number(host[2]) > 65535)) || !['GET', 'HEAD'].includes(req.method)) {
+    if (req.headersDistinct.host?.length !== 1 || !host || (host[2] && (Number(host[2]) < 1 || Number(host[2]) > 65535)) || !['GET', 'HEAD'].includes(req.method)) {
       res.writeHead(403); res.end(); return;
     }
-    const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer' };
+    const headers = { 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
+      'X-Frame-Options': 'DENY', 'Content-Security-Policy': "frame-ancestors 'none'" };
     let pathname;
-    try { pathname = decodeURIComponent(new URL(req.url, 'http://' + req.headers.host).pathname); }
+    try {
+      if (!req.url.startsWith('/') || req.url.startsWith('//') || req.url.includes('#') || req.url.split('?')[0].includes('\\')) throw new Error('Invalid request target');
+      pathname = decodeURIComponent(new URL(req.url, 'http://' + req.headers.host).pathname);
+    }
     catch { res.writeHead(400); res.end(); return; }
     if (pathname.includes('\0')) { res.writeHead(400); res.end(); return; }
     if (/\\/.test(pathname) || pathname.split('/').some(part => part.startsWith('.') || ['node_modules', 'scripts', 'tests'].includes(part.toLowerCase()))) { res.writeHead(403); res.end(); return; }

@@ -38,9 +38,9 @@ test('Python fallback binds loopback without reverse DNS', { skip: !python, time
 
 test('Python fallback rejects untrusted Hosts and serves uncached GET/HEAD assets', { skip: !python, timeout: 10000 }, async t => {
     const port = await startServer(t, serverArgs);
-    function request(host, method = 'GET', headers = {}) {
+    function request(host, method = 'GET', headers = {}, target = '/index.html') {
         return new Promise((resolve, reject) => {
-            const req = http.request({ host: '127.0.0.1', port, path: '/index.html', method, headers: { ...headers, Host: host } }, res => {
+            const req = http.request({ host: '127.0.0.1', port, path: target, method, headers: { ...headers, Host: host } }, res => {
                 let size = 0; res.on('data', chunk => { size += chunk.length; });
                 res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, size }));
             }); req.once('error', reject); req.end();
@@ -56,6 +56,35 @@ test('Python fallback rejects untrusted Hosts and serves uncached GET/HEAD asset
         assert.equal(head.headers['content-length'], get.headers['content-length']);
         assert.equal(get.headers['cache-control'], 'no-store');
         assert.equal(get.headers['x-content-type-options'], 'nosniff');
+        assert.equal(get.headers['x-frame-options'], 'DENY');
+        assert.equal(get.headers['content-security-policy'], "frame-ancestors 'none'");
         assert.equal((await request(host, 'GET', { 'If-Modified-Since': new Date(Date.now() + 86400000).toUTCString() })).status, 200);
     }
+    assert.equal((await request('localhost', 'GET', {}, '/index.html?local=1')).status, 200);
+    for (const target of ['http://localhost/index.html', '//index.html']) {
+        assert.equal((await request('localhost', 'GET', {}, target)).status, 400, target);
+    }
+});
+
+test('Python launcher validates the manifest against the runtime layout', { skip: !python }, () => {
+    const check = [
+        'from pathlib import Path',
+        'import json, runpy, tempfile',
+        'load_manifest = runpy.run_path("scripts/serve-static.py")["load_manifest"]',
+        'with tempfile.TemporaryDirectory() as folder:',
+        '    root = Path(folder)',
+        '    manifest = root / "runtime-manifest.json"',
+        '    layout = {"files": ["index.html"], "directories": ["assets"]}',
+        '    manifest.write_text(json.dumps({"files": ["index.html", "assets/app.js"]}))',
+        '    assert load_manifest(root, layout) == {"index.html", "assets/app.js"}',
+        '    for name in ("README.md", "assets/app.js.MAP", "assets/.cache/info", "assets/Tests/info"):',
+        '        manifest.write_text(json.dumps({"files": [name]}))',
+        '        try:',
+        '            load_manifest(root, layout)',
+        '        except ValueError:',
+        '            continue',
+        '        raise AssertionError(name)',
+    ].join('\n');
+    const result = spawnSync(python, ['-c', check], { cwd: root, encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
 });

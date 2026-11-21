@@ -33,11 +33,21 @@ await build({ mode: production ? 'release' : 'isolated', configFile: path.join(r
 // Direct handlers also capture early stylesheet completion on engines whose
 // non-bubbling link events do not reach a window/document capture listener.
 const htmlPath = path.join(site, 'index.html');
-let html = await readFile(htmlPath, 'utf8');
+let html = (await readFile(htmlPath, 'utf8')).replace(/\r\n?/g, '\n');
+const handlers = {
+  stylesLoaded: "window.__prototypeBoot.styles[this.href]='loaded'",
+  stylesFailed: "window.__prototypeBoot.assetFailed('styles',this.href)",
+  entryFailed: "window.__prototypeBoot.assetFailed('entry',this.src)",
+};
 html = html.replace(/<link\b(?=[^>]*rel="stylesheet")[^>]*>/g, tag => tag.slice(0, -1)
-  + ` onload="window.__prototypeBoot.styles[this.href]='loaded'" onerror="window.__prototypeBoot.assetFailed('styles',this.href)">`);
+  + ` onload="${handlers.stylesLoaded}" onerror="${handlers.stylesFailed}">`);
 html = html.replace(/<script\b(?=[^>]*type="module")(?=[^>]*src=)[^>]*>/g, tag => tag.slice(0, -1)
-  + ` onerror="window.__prototypeBoot.assetFailed('entry',this.src)">`);
+  + ` onerror="${handlers.entryFailed}">`);
+const scriptHash = source => `'sha256-${createHash('sha256').update(source).digest('base64')}'`;
+const bootScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(([, source]) => scriptHash(source));
+const scriptPolicy = "script-src 'self' 'unsafe-inline'";
+if (!html.includes(scriptPolicy) || bootScripts.length !== 2) throw new Error('Unexpected startup script policy');
+html = html.replace(scriptPolicy, `script-src 'self' ${bootScripts.join(' ')}; script-src-attr 'unsafe-hashes' ${Object.values(handlers).map(scriptHash).join(' ')}`);
 await writeFile(htmlPath, html);
 await mkdir(debug, { recursive: true });
 await rename(path.join(site, '.vite'), path.join(debug, '.vite'));

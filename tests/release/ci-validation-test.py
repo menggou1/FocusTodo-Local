@@ -3,10 +3,11 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import importlib.util
+import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -143,6 +144,62 @@ class ValidationTests(unittest.TestCase):
             for entries in (names[:-1], names + ['../escape'], names + ['unexpected.txt']):
                 with self.assertRaises(ValueError):
                     policy.unpack(archive, make(entries), '1.2.3', target)
+
+    def test_artifact_limits_include_unpacked_bytes(self):
+        names = ['FocusTodo-1.2.3.zip', 'FocusTodo-1.2.3.tar.gz', 'SHA256SUMS.txt', 'release-notes.md']
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            archive = folder / 'artifact.zip'
+            target = folder / 'unpacked'
+            target.mkdir()
+            with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as package:
+                for name in names:
+                    package.writestr(name, b'x' * 1024)
+            digest = 'sha256:' + hashlib.sha256(archive.read_bytes()).hexdigest()
+            with patch.object(policy, 'MAX_ARTIFACT', archive.stat().st_size - 1):
+                with self.assertRaisesRegex(ValueError, '^Artifact exceeds'):
+                    policy.unpack(archive, digest, '1.2.3', target)
+            with patch.object(policy, 'MAX_ARTIFACT', 2048):
+                with self.assertRaisesRegex(ValueError, 'Unpacked artifact'):
+                    policy.unpack(archive, digest, '1.2.3', target)
+            self.assertEqual(list(target.iterdir()), [])
+
+    def test_reuse_restores_the_tested_batch_only_after_verification(self):
+        for changed_notes in (False, True):
+            with self.subTest(changed_notes=changed_notes), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                dist = root / 'dist'
+                dist.mkdir()
+                (root / 'release.json').write_text('{"localVersion":"1.2.3"}', encoding='utf-8')
+                names = policy.release_artifact_names('1.2.3')
+                fresh = {name: b'fresh' for name in names}
+                tested = {name: b'tested' for name in names}
+                tested['release-notes.md'] = b'other' if changed_notes else fresh['release-notes.md']
+                for name, content in fresh.items():
+                    (dist / name).write_bytes(content)
+
+                proof = {'artifact_id': 20, 'run_id': 10, 'run_url': 'https://example.invalid/ci/10'}
+                archive = root / 'tested.zip'
+                with zipfile.ZipFile(archive, 'w') as package:
+                    for name, content in tested.items():
+                        package.writestr(name, content)
+                proof['artifact_digest'] = 'sha256:' + hashlib.sha256(archive.read_bytes()).hexdigest()
+                env = {'GITHUB_EVENT_NAME': 'push', 'GITHUB_REF': 'refs/heads/release/1.2.3',
+                       'GITHUB_REPOSITORY': REPO, 'GITHUB_SHA': SHA, 'GITHUB_RUN_ID': '99',
+                       'GH_TOKEN': 'fixture', 'RUNNER_TEMP': temporary, 'GITHUB_STEP_SUMMARY': '',
+                       'GITHUB_OUTPUT': str(root / 'output')}
+                api = Mock()
+                api.read.return_value = {'workflow_runs': [self.run]}
+                api.download.side_effect = lambda _, target: target.write_bytes(archive.read_bytes())
+                with (patch.dict(os.environ, env), patch.object(policy, 'ROOT', root),
+                      patch.object(policy, 'API', return_value=api), patch.object(policy, 'proof_for', return_value=proof),
+                      patch.object(policy.subprocess, 'run') as verify):
+                    policy.reuse()
+                    verify.assert_called_once()
+                output = (root / 'output').read_text()
+                expected = fresh if changed_notes else tested
+                self.assertIn('reused=false' if changed_notes else 'reused=true', output)
+                self.assertEqual({name: (dist / name).read_bytes() for name in names}, expected)
 
 
 if __name__ == '__main__':

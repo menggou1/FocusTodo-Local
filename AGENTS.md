@@ -11,7 +11,7 @@
 
 版本发布提交可使用 `chore(release): prepare <版本号>`。不要为统一格式改写已发布的历史提交。
 
-开发、生成文件和发布流程遵循 `docs/MAINTENANCE.md`；未完成工作只维护在 `docs/BACKLOG.md`。`main` 是默认稳定分支及 Pages 唯一部署来源，`dev` 用于日常集成，`release/x.x.x` 用于发布冻结；正式 Tag 必须指向已通过检查的 main 最终发布提交，具体流程见维护指南。
+开发、生成文件和发布流程遵循 `docs/MAINTENANCE.md`；未完成工作只维护在 `docs/BACKLOG.md`。`main` 是默认稳定分支及 Pages 唯一部署来源，`dev` 用于日常集成。首次发布时，Tag `x.x.x` 必须与 `release.json.localVersion` 一致，并指向已通过检查的远端 `release/x.x.x` HEAD。发布后同步 `main` 与 `dev`。
 
 
 设计理论文献仅供娱乐，不属于开发规范。除非用户明确要求，模型不得阅读、参考或修改这些文献；开发决策以用户要求、代码事实和维护指南为准。

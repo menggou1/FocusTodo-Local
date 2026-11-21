@@ -33,9 +33,10 @@ jobs:
       reused_artifact_id: ${{ steps.reuse.outputs.artifact_id }}
       reused_artifact_digest: ${{ steps.reuse.outputs.artifact_digest }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Check tag version identity
         if: github.ref_type == 'tag'
         run: |
@@ -66,11 +67,11 @@ jobs:
             done < "$RUNNER_TEMP/changed-paths"
           fi
           echo "full=$full" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
           cache: npm
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
       - name: Check main production version
@@ -113,7 +114,7 @@ jobs:
         run: python tests/release/package-smoke.py
       - name: Share the same archives across operating systems
         if: steps.scope.outputs.full == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: portable-test-archives
           path: |
@@ -126,7 +127,7 @@ jobs:
           retention-days: 1
       - name: Share the isolated preview across operating systems
         if: steps.scope.outputs.full == 'true' && steps.reuse.outputs.reused != 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: standalone-preview-test
           path: |
@@ -154,11 +155,12 @@ jobs:
         include:
           - os: ubuntu-latest
             node: '24'
-            playwright_image: mcr.microsoft.com/playwright:v1.65.0-resolute
+            playwright_image: mcr.microsoft.com/playwright:v1.65.0-resolute@sha256:916c9fb63a8340822589dd5c821dae82e8012106bb8515a72f278d97f277446a
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
+          persist-credentials: false
       - name: Trust the verified container checkout for this job
         if: matrix.playwright_image
         shell: bash
@@ -173,13 +175,13 @@ jobs:
             echo 'GIT_CONFIG_KEY_0=safe.directory'
             printf 'GIT_CONFIG_VALUE_0=%s\n' "$workspace"
           } >> "$GITHUB_ENV"
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: ${{ matrix.node }}
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: b0ee5e26c133ea273e1634fa52b8a107e1649a69
           path: .legacy-oracle
@@ -187,7 +189,7 @@ jobs:
       - name: Locate immutable historical test oracle
         shell: bash
         run: printf 'FOCUS_LEGACY_ROOT=%s/.legacy-oracle\n' "$GITHUB_WORKSPACE" >> "$GITHUB_ENV"
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         id: python
         with:
           python-version: '3.12'
@@ -196,12 +198,12 @@ jobs:
           PYTHON: ${{ steps.python.outputs.python-path }}
       - name: Standalone contracts and isolated server
         run: node --test tests/standalone/*.test.cjs
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         if: matrix.node == '24'
         with:
           name: portable-test-archives
           path: dist
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         if: matrix.node == '24'
         with:
           name: standalone-preview-test
@@ -215,7 +217,8 @@ jobs:
           PLAYWRIGHT_IMAGE: ${{ matrix.playwright_image }}
         run: |
           version=$(node -p 'require("playwright/package.json").version')
-          if [ "$PLAYWRIGHT_IMAGE" != "mcr.microsoft.com/playwright:v$version-resolute" ]; then
+          if [[ "${PLAYWRIGHT_IMAGE%@*}" != "mcr.microsoft.com/playwright:v$version-resolute" ||
+                ! "${PLAYWRIGHT_IMAGE##*@}" =~ ^sha256:[a-f0-9]{64}$ ]]; then
             echo "Update the CI browser image to match Playwright $version."
             exit 1
           fi
@@ -283,7 +286,7 @@ jobs:
         run: ./scripts/windows-ci-network.ps1 -Phase after
       - name: Upload browser evidence
         if: always() && matrix.node == '24'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: acceptance-${{ matrix.os }}
           path: ${{ runner.temp }}/acceptance/
@@ -297,8 +300,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
       - name: Require successful checks or verified exact-commit evidence
@@ -322,20 +327,22 @@ jobs:
       contents: read
       pages: read
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - name: Build only committed browser runtime files
         run: python scripts/deploy-pages.py --ref HEAD --output dist/pages
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: dist/pages
 
@@ -356,8 +363,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
       - name: Recheck main production version immediately before deployment
@@ -373,7 +382,7 @@ jobs:
           fi
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
 
   release:
     name: Publish version tag
@@ -384,17 +393,19 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v6
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: '3.12'
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: portable-test-archives
           path: dist
       - name: Verify tested assets, version and unchanged tag
+        shell: bash
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
@@ -403,6 +414,7 @@ jobs:
           if [[ -z "$remote_sha" ]]; then remote_sha=$(git ls-remote origin "refs/tags/$RELEASE_TAG" | cut -f1); fi
           test "$remote_sha" = "$(git rev-parse HEAD)"
       - name: Publish or explicitly promote verified release
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -410,7 +422,7 @@ jobs:
           CHANNEL: ${{ github.event_name == 'workflow_dispatch' && inputs.release_channel || 'stable' }}
         run: |
           if gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" > "$RUNNER_TEMP/existing-release.json" 2> "$RUNNER_TEMP/release-error"; then
-            if [[ "$CHANNEL" != stable ]] || ! python -c "import json,sys; r=json.load(open(sys.argv[1])); sys.exit(not (r['prerelease'] and not r['draft']))" "$RUNNER_TEMP/existing-release.json"; then
+            if [[ "$GITHUB_EVENT_NAME" != workflow_dispatch || "$CHANNEL" != stable ]] || ! python -c "import json,sys; r=json.load(open(sys.argv[1])); sys.exit(not (r['prerelease'] and not r['draft']))" "$RUNNER_TEMP/existing-release.json"; then
               echo 'Release already exists; refusing to overwrite it.'; exit 1
             fi
             mkdir "$RUNNER_TEMP/published-assets"
@@ -421,6 +433,8 @@ jobs:
             if ! grep -q 'HTTP 404' "$RUNNER_TEMP/release-error"; then cat "$RUNNER_TEMP/release-error"; exit 1; fi
             flags=(--latest)
             if [[ "$CHANNEL" == prerelease ]]; then flags=(--prerelease --latest=false); fi
+            release_source=$(python scripts/verify-release-workflows.py "$RELEASE_TAG" --check-release-head)
+            printf '%s\n' "$release_source" >> "$GITHUB_STEP_SUMMARY"
             gh release create "$RELEASE_TAG" dist/*.zip dist/*.tar.gz dist/SHA256SUMS.txt \
               --verify-tag --title "FocusTodo $RELEASE_TAG" --notes-file dist/release-notes.md "${flags[@]}"
           fi

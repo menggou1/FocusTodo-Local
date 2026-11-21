@@ -1,11 +1,14 @@
 """Reuse exact-commit dev CI evidence and its immutable, tested release archives."""
 import argparse
+from contextlib import ExitStack
 from datetime import datetime, timezone
+import filecmp
 import hashlib
 import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -138,15 +141,27 @@ def newer_failure(runs, source, sha, current_run, tag_identity_failure=lambda ru
     return False
 
 
+def release_artifact_names(version):
+    return {f'FocusTodo-{version}.zip', f'FocusTodo-{version}.tar.gz', 'SHA256SUMS.txt', 'release-notes.md'}
+
+
 def unpack(archive, digest, version, destination):
-    if 'sha256:' + hashlib.sha256(archive.read_bytes()).hexdigest() != digest:
+    if archive.stat().st_size > MAX_ARTIFACT:
+        raise ValueError('Artifact exceeds the size limit')
+    with archive.open('rb') as source:
+        actual_digest = hashlib.file_digest(source, 'sha256').hexdigest()
+    if 'sha256:' + actual_digest != digest:
         raise ValueError('Artifact digest mismatch')
-    names = {f'FocusTodo-{version}.zip', f'FocusTodo-{version}.tar.gz', 'SHA256SUMS.txt', 'release-notes.md'}
+    names = release_artifact_names(version)
     with zipfile.ZipFile(archive) as package:
-        if set(package.namelist()) != names or len(package.namelist()) != len(names):
+        entries = package.infolist()
+        if {entry.filename for entry in entries} != names or len(entries) != len(names):
             raise ValueError('Unexpected artifact file list')
-        for name in names:
-            (destination / name).write_bytes(package.read(name))
+        if sum(entry.file_size for entry in entries) > MAX_ARTIFACT:
+            raise ValueError('Unpacked artifact exceeds the size limit')
+        for entry in entries:
+            with package.open(entry) as source, (destination / entry.filename).open('wb') as output:
+                shutil.copyfileobj(source, output, length=1024 * 1024)
 
 
 def output(values):
@@ -171,41 +186,39 @@ def reuse():
     repository, sha, current = env['GITHUB_REPOSITORY'], env['GITHUB_SHA'], env['GITHUB_RUN_ID']
     api = API(repository, env['GH_TOKEN'])
     selected = None
-    try:
-        version = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))['localVersion']
-        runs = api.read(f'actions/workflows/ci.yml/runs?head_sha={sha}&per_page=100')['workflow_runs']
-        reason = 'No complete dev test evidence with an unexpired archive batch'
-        for run in runs:
-            if run.get('head_branch') == 'dev' and run.get('head_sha') == sha:
-                selected = proof_for(api, run, repository, sha, current)
-                if selected:
-                    if not newer_failure(runs, run, sha, current, lambda failed: failed_tag_identity(api, failed, version)):
-                        break
-                    reason = 'A newer failed or cancelled run invalidated the dev evidence'
-                selected = None
-        if not selected:
-            output({'reused': 'false'})
-            summary(f'Full tests required: {reason}.')
-            return
-        with tempfile.TemporaryDirectory(prefix='FocusTodo-CI-', dir=env.get('RUNNER_TEMP')) as temporary:
-            stage = Path(temporary)
+    with ExitStack() as stack:
+        try:
+            version = json.loads((ROOT / 'release.json').read_text(encoding='utf-8'))['localVersion']
+            runs = api.read(f'actions/workflows/ci.yml/runs?head_sha={sha}&per_page=100')['workflow_runs']
+            reason = 'No complete dev test evidence with an unexpired archive batch'
+            for run in runs:
+                if run.get('head_branch') == 'dev' and run.get('head_sha') == sha:
+                    selected = proof_for(api, run, repository, sha, current)
+                    if selected:
+                        if not newer_failure(runs, run, sha, current, lambda failed: failed_tag_identity(api, failed, version)):
+                            break
+                        reason = 'A newer failed or cancelled run invalidated the dev evidence'
+                    selected = None
+            if not selected:
+                output({'reused': 'false'})
+                summary(f'Full tests required: {reason}.')
+                return
+            stage = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix='FocusTodo-CI-', dir=env.get('RUNNER_TEMP'))))
             archive = stage / 'artifact.zip'
             api.download(selected['artifact_id'], archive)
             unpack(archive, selected['artifact_digest'], version, stage)
             # Validate every payload byte against a fresh build of this commit.
             subprocess.run(['python', 'scripts/verify-release-workflows.py', version, str(stage), '--reference', 'dist'], cwd=ROOT, check=True)
-            if (stage / 'release-notes.md').read_bytes() != (ROOT / 'dist/release-notes.md').read_bytes():
+            if not filecmp.cmp(stage / 'release-notes.md', ROOT / 'dist/release-notes.md', shallow=False):
                 raise ValueError('Release notes differ from the current commit')
-            # All fallbacks above leave the fresh dist batch untouched. A write
-            # failure here must fail preflight rather than test a mixed batch.
-            selected['staged'] = {name: (stage / name).read_bytes() for name in (
-                f'FocusTodo-{version}.zip', f'FocusTodo-{version}.tar.gz', 'release-notes.md', 'SHA256SUMS.txt')}
-    except (OSError, ValueError, KeyError, TypeError, zipfile.BadZipFile, subprocess.CalledProcessError) as error:
-        output({'reused': 'false'})
-        summary(f'Full tests required: reuse could not be verified ({type(error).__name__}).')
-        return
-    for name, content in selected.pop('staged').items():
-        (ROOT / 'dist' / name).write_bytes(content)
+        except (OSError, ValueError, KeyError, TypeError, zipfile.BadZipFile, subprocess.CalledProcessError) as error:
+            output({'reused': 'false'})
+            summary(f'Full tests required: reuse could not be verified ({type(error).__name__}).')
+            return
+        # Verification leaves the fresh dist batch untouched. A write failure
+        # here fails preflight before another job can use a mixed batch.
+        for name in release_artifact_names(version):
+            shutil.copyfile(stage / name, ROOT / 'dist' / name)
     output({'reused': 'true', 'run_id': selected['run_id'], 'artifact_id': selected['artifact_id'], 'artifact_digest': selected['artifact_digest']})
     summary(f"Reused all six successful matrix jobs for `{sha}` from {selected['run_url']}; restored tested artifact `{selected['artifact_id']}` with `{selected['artifact_digest']}`.")
 

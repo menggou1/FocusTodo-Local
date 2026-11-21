@@ -1,4 +1,5 @@
 import { ServiceError } from './errors.mjs';
+import { preferenceDefinitions } from './preferences.mjs';
 /* Data algorithms migrated from local-data.js at 139d0f9.
  * Explicit capabilities only: no globals, legacy identity hooks, or DB monkey patches.
  * Candidate storage stays namespaced. Backup metadata retains the legacy format.
@@ -274,9 +275,14 @@ export function createDataService({ indexedDB, storage: localStorage, timerCore,
             indexedDB: indexedDBData, localStorage: storageSnapshot()
         };
     }
+    function portableSettings(settings) {
+        const copy = { ...settings };
+        delete copy[preferenceDefinitions.externalNetwork[0]];
+        return copy;
+    }
     async function download(snapshot, prefix) {
         if (!saveBackup) throw new Error('A pre-import backup sink is required.');
-        await saveBackup(snapshot, prefix);
+        await saveBackup({ ...snapshot, localStorage: portableSettings(snapshot.localStorage) }, prefix);
     }
     // Finite numbers outside the Date range still crash date formatting and
     // create unusable index ranges after an import.
@@ -405,7 +411,8 @@ export function createDataService({ indexedDB, storage: localStorage, timerCore,
             await clearOperation(db, operation, true);
             return;
         }
-        try { applySettings(journal.target); }
+        // Older interrupted imports may still have consent in their journal.
+        try { applySettings(portableSettings(journal.target)); }
         catch (error) {
             // Persist the rollback decision with the original rows. A crash or a
             // second settings failure must resume rollback, never replay target.

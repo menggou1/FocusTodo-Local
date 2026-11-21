@@ -136,6 +136,7 @@ test('interrupted replacement keeps a durable journal, blocks writes, and resume
     t.after(h.dispose);
     const replacement = clone(await h.data.snapshot());
     replacement.indexedDB.Task = [{ id: 'replacement' }]; replacement.localStorage.FutureKey = 'preserve';
+    replacement.localStorage['FocusTodo.externalNetwork'] = 'true';
     crash = true;
     await assert.rejects(h.data.replace(replacement), /injected crash/);
     assert.equal(h.data.maintenance, true);
@@ -144,6 +145,7 @@ test('interrupted replacement keeps a durable journal, blocks writes, and resume
     h.dispose();
     const next = await createHarness({ indexedDB: h.indexedDB, storage: h.physicalStorage }); t.after(next.dispose);
     assert.equal(next.storage.getItem('FutureKey'), 'preserve');
+    assert.equal(next.storage.getItem('FocusTodo.externalNetwork'), null);
     assert.deepEqual(await rows(next.data, 'Task'), [{ id: 'replacement' }]);
     assert.deepEqual(await recoveryRows(next.data), []);
 });
@@ -173,6 +175,7 @@ test('repository business reads and writes reject an orphan maintenance marker',
 test('settings quota failure restores the original rows and settings; rollback failures remain recoverable', async t => {
     const h = await createHarness(); t.after(h.dispose);
     await seed(h.data, 'Task', [{ id: 'keep' }]); h.storage.setItem('Keep', 'original');
+    h.storage.setItem('FocusTodo.externalNetwork', 'true');
     const before = await h.data.snapshot(), target = clone(before);
     target.indexedDB.Task = [{ id: 'discard' }]; target.localStorage.Keep = 'replacement';
     let failures = 1;
@@ -182,6 +185,7 @@ test('settings quota failure restores the original rows and settings; rollback f
     await assert.rejects(h.data.replace(target), error => error.rolledBack === true);
     assert.deepEqual((await h.data.snapshot()).indexedDB, before.indexedDB);
     assert.equal(h.storage.getItem('Keep'), 'original');
+    assert.equal(h.storage.getItem('FocusTodo.externalNetwork'), 'true');
     h.physicalStorage.fault = method => { if (method === 'set') throw new Error('quota persists'); };
     await assert.rejects(h.data.replace(target), /恢复与回滚未完成/);
     const journal = (await recoveryRows(h.data)).find(row => row.id === 'settings-journal');
@@ -189,6 +193,7 @@ test('settings quota failure restores the original rows and settings; rollback f
     h.dispose(); h.physicalStorage.fault = () => {};
     const next = await createHarness({ indexedDB: h.indexedDB, storage: h.physicalStorage }); t.after(next.dispose);
     assert.equal(next.storage.getItem('Keep'), 'original');
+    assert.equal(next.storage.getItem('FocusTodo.externalNetwork'), 'true');
     assert.deepEqual(await rows(next.data, 'Task'), before.indexedDB.Task);
     assert.deepEqual(await recoveryRows(next.data), []);
 });

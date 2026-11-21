@@ -1,6 +1,8 @@
-"""Exercise release assets and the workflow's branch-independent gates."""
+"""Exercise release origin, assets, evidence and Pages gates."""
 import importlib.util
+import base64
 import hashlib
+from html.parser import HTMLParser
 import zipfile
 import json
 from pathlib import Path
@@ -9,6 +11,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,7 +34,7 @@ class ReleaseGateTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.temporary.cleanup()
 
-    def test_non_main_tag_can_publish_after_complete_ci(self):
+    def test_release_branch_tag_can_publish_after_complete_ci(self):
         gate.verify(self.tag, self.directory)
         release = self.workflow.split('  release:\n', 1)[1]
         self.assertIn('needs: [preflight, validation]', release)
@@ -44,6 +47,87 @@ class ReleaseGateTests(unittest.TestCase):
         self.assertIn("os: [ubuntu-latest, windows-latest, macos-latest]", self.workflow)
         self.assertIn("node: ['22', '24']", self.workflow)
         self.assertNotIn("if: github.ref_type != 'tag'", self.workflow)
+
+    def test_first_publication_requires_exact_remote_release_head(self):
+        head = 'a' * 40
+        ref = 'refs/heads/release/' + self.tag
+        tag = 'refs/tags/' + self.tag
+        peeled = tag + '^{}'
+        plain_tag = f'{head}\t{tag}\n'
+        annotated_tag = f"{'c' * 40}\t{tag}\n{head}\t{peeled}\n"
+        matching_branch = f'{head}\t{ref}\n'
+        for tag_listing in (plain_tag, annotated_tag):
+            with patch.object(gate.subprocess, 'check_output', side_effect=[head + '\n', matching_branch + tag_listing]) as git:
+                gate.verify_release_head(self.tag)
+                git.assert_called_with(['git', 'ls-remote', 'origin', ref, tag, peeled], cwd=ROOT, text=True, timeout=60)
+        for listing in ('', f"{'b' * 40}\t{ref}\n", f'{head}\t{ref}-other\n',
+                        f'{head}\trefs/heads/dev\n', f'{head}\trefs/heads/feature/candidate\n',
+                        f'{head}\trefs/heads/main\n'):
+            with self.subTest(listing=listing), patch.object(gate.subprocess, 'check_output', side_effect=[head, listing + plain_tag]):
+                with self.assertRaisesRegex(ValueError, 'First publication requires'):
+                    gate.verify_release_head(self.tag)
+        for tag_listing in ('', f"{'b' * 40}\t{tag}\n", f"{head}\t{tag}\n{'b' * 40}\t{peeled}\n"):
+            with self.subTest(tag_listing=tag_listing), patch.object(gate.subprocess, 'check_output', side_effect=[head, matching_branch + tag_listing]):
+                with self.assertRaisesRegex(ValueError, 'remote tag must still point'):
+                    gate.verify_release_head(self.tag)
+        with patch.object(gate.subprocess, 'check_output') as git:
+            with self.assertRaisesRegex(ValueError, 'Tag and release versions'):
+                gate.verify_release_head('0.0.0')
+            git.assert_not_called()
+
+    def test_source_lookup_failure_cannot_publish(self):
+        with patch.object(gate.subprocess, 'check_output', side_effect=[
+            'a' * 40, subprocess.CalledProcessError(128, 'git ls-remote')
+        ]):
+            with self.assertRaises(subprocess.CalledProcessError):
+                gate.verify_release_head(self.tag)
+
+    def test_only_creation_requires_release_head_and_promotion_is_explicit(self):
+        release = self.workflow.split('  release:\n', 1)[1]
+        promotion, creation = release.split('if ! grep -q \'HTTP 404\'', 1)
+        self.assertIn('test "$remote_sha" = "$(git rev-parse HEAD)"', promotion)
+        self.assertIn('"$GITHUB_EVENT_NAME" != workflow_dispatch || "$CHANNEL" != stable', promotion)
+        self.assertIn('gh release edit', promotion)
+        self.assertNotIn('--check-release-head', promotion)
+        gate_index = creation.index('release_source=$(python scripts/verify-release-workflows.py "$RELEASE_TAG" --check-release-head)')
+        self.assertLess(gate_index, creation.index('gh release create'))
+        self.assertIn('--verify-tag', creation)
+
+    def test_production_csp_allows_only_the_generated_startup_code(self):
+        class StartupHTML(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.policy = {}
+                self.inline = []
+                self.handlers = []
+                self.capturing = False
+
+            def handle_starttag(self, tag, attrs):
+                attributes = dict(attrs)
+                if tag == 'meta' and attributes.get('http-equiv') == 'Content-Security-Policy':
+                    self.policy = {parts[0]: parts[1:] for part in attributes['content'].split(';') if (parts := part.split())}
+                self.handlers.extend(value for name, value in attrs if name.startswith('on'))
+                self.capturing = tag == 'script' and 'src' not in attributes
+
+            def handle_data(self, data):
+                if self.capturing:
+                    self.inline.append(data)
+
+            def handle_endtag(self, tag):
+                if tag == 'script':
+                    self.capturing = False
+
+        def digest(text):
+            return "'sha256-" + base64.b64encode(hashlib.sha256(text.encode()).digest()).decode() + "'"
+
+        parser = StartupHTML()
+        parser.feed((ROOT / 'dist/app/site/index.html').read_text(encoding='utf-8'))
+        self.assertEqual(len(parser.inline), 2)
+        self.assertEqual(len(parser.handlers), 3)
+        self.assertEqual(parser.policy['script-src'], ["'self'", *map(digest, parser.inline)])
+        self.assertCountEqual(parser.policy['script-src-attr'], ["'unsafe-hashes'", *map(digest, parser.handlers)])
+        self.assertEqual(parser.policy['base-uri'], ["'none'"])
+        self.assertEqual(parser.policy['form-action'], ["'none'"])
 
     def test_failed_or_unverified_skipped_ci_cannot_publish(self):
         release = self.workflow.split('  release:\n', 1)[1]
