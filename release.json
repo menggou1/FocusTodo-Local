@@ -1,10 +1,39 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "2.1.2",
+  "localVersion": "2.1.3",
   "author": "Lexible",
-  "date": "2026-11-20",
+  "date": "2026-11-21",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "2.1.3",
+      "date": "2026-11-21",
+      "title": "日程交互、工作区动画与本地安全",
+      "titleEn": "Calendar interactions, workspace motion, and local security",
+      "items": [
+        "日程任务面板和时间轴同步收展。同一个加号平移并旋转成叉号，连按可从中途反向，支持减少动态效果。",
+        "计划卡片沿用清单配色和应用样式，按实际宽高优先显示任务名称，再显示起止时间。完整信息可在提示或详情中查看。",
+        "拖动已有安排时在上层实时显示起止时间并保留时长。移动或用原拖动柄调整时长后，从预览直接衔接到保存结果。写入失败和并发冲突时平滑回滚。",
+        "从任务面板拖入日程时，浮动卡片显示任务名称、时长、放置状态和实时预计开始时间。滚动、缩放和跨午夜时，实际安排与预览一致。",
+        "恢复普通和重复任务的完成反馈。任务、自定义清单、系统清单和计时器组件的拖动或方向键排序从当前可见位置接续，写入失败时恢复已保存顺序。",
+        "完成任务报表分别排列任务类别和自定义清单。清单夹的新建任务菜单校验直属可见清单。导出窗口使用圆角内的共享滚动条。",
+        "正式版和隔离预览校验内联启动代码的哈希。本地 Node 和 Python 启动器禁止嵌入并校验请求范围和运行清单。",
+        "备份和导入前安全副本省略外部联网许可。导入保留主题与缓存壁纸，设置日志缺少目标时恢复原数据及本地许可。",
+        "修复 HMR 的 React 开发运行时和 Linux 浏览器镜像校验。CI 固定 Actions 与 Playwright 镜像，并核验附件大小和首次发布分支来源。旧版成就恢复测试排除界面轮询竞态。"
+      ],
+      "itemsEn": [
+        "The calendar task pane and timeline resize together. One plus moves and rotates into a cross, reverses mid-animation on repeated clicks, and respects reduced motion.",
+        "Scheduled cards use list colors and shared app styling. Their actual size determines when to show the name and start and end times. Tooltips and details show the full information.",
+        "A moved plan stays above other cards and shows live start and end times while preserving its duration. Moves and resizes with the existing handle continue from the preview to the saved result, with smooth rollback after a write failure or concurrent edit.",
+        "Dragging from the task pane shows the name, duration, placement status, and live prospective start time. The saved range follows the preview across scrolling, zoom, and midnight.",
+        "Restore completion feedback for ordinary and repeating tasks. Drag and arrow-key reordering for tasks, custom lists, system lists, and timer widgets continue from painted positions, with failed writes returning to the saved order.",
+        "Order task categories and custom lists separately in the completed-task chart. Validate visible direct lists in a folder's new-task picker. Use the shared scrollbar inside rounded export dialogs.",
+        "Check inline startup code hashes in production and isolated previews. The local Node and Python launchers prevent framing and validate the request scope and runtime manifest.",
+        "Backups and pre-import safety copies omit external networking consent. Import preserves themes and cached wallpapers. Restore original data and local consent when a settings journal lacks its target.",
+        "Fix the HMR React development runtime and Linux browser image validation. CI pins Actions and the Playwright image and verifies artifact size limits and first-publication branch provenance. The legacy achievement restore test avoids racing UI polling."
+      ],
+      "report": "docs/releases/UPDATE-2.1.3.md"
+    },
     {
       "version": "2.1.2",
       "date": "2026-11-20",

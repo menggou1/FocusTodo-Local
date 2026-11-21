@@ -2,7 +2,21 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.1.2**, author Lexible.
+Current application: **2.1.3**, author Lexible.
+
+## 2.1.3 · 2026-11-21
+
+- The calendar task pane and timeline resize together. One plus moves and rotates into a cross, reverses mid-animation on repeated clicks, and respects reduced motion.
+- Scheduled cards use list colors and shared app styling. Their actual size determines when to show the name and start and end times. Tooltips and details show the full information.
+- A moved plan stays above other cards and shows live start and end times while preserving its duration. Moves and resizes with the existing handle continue from the preview to the saved result, with smooth rollback after a write failure or concurrent edit.
+- Dragging from the task pane shows the name, duration, placement status, and live prospective start time. The saved range follows the preview across scrolling, zoom, and midnight.
+- Restore completion feedback for ordinary and repeating tasks. Drag and arrow-key reordering for tasks, custom lists, system lists, and timer widgets continue from painted positions, with failed writes returning to the saved order.
+- Order task categories and custom lists separately in the completed-task chart. Validate visible direct lists in a folder's new-task picker. Use the shared scrollbar inside rounded export dialogs.
+- Check inline startup code hashes in production and isolated previews. The local Node and Python launchers prevent framing and validate the request scope and runtime manifest.
+- Backups and pre-import safety copies omit external networking consent. Import preserves themes and cached wallpapers. Restore original data and local consent when a settings journal lacks its target.
+- Fix the HMR React development runtime and Linux browser image validation. CI pins Actions and the Playwright image and verifies artifact size limits and first-publication branch provenance. The legacy achievement restore test avoids racing UI polling.
+
+[English report](releases/UPDATE-2.1.3.md).
 
 ## 2.1.2 · 2026-11-20
 
