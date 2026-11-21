@@ -150,6 +150,27 @@ test('interrupted replacement keeps a durable journal, blocks writes, and resume
     assert.deepEqual(await recoveryRows(next.data), []);
 });
 
+test('a journal with missing target settings rolls back rows and local consent', async t => {
+    const h = await createHarness();
+    t.after(h.dispose);
+    const key = 'FocusTodo.externalNetwork';
+    h.storage.setItem(key, 'true');
+    await seed(h.data, 'Task', [{ id: 'keep', name: 'Original' }]);
+    const backup = await h.data.snapshot();
+    await seed(h.data, 'Task', [{ id: 'keep', name: 'Replaced' }]);
+    const owner = { operationId: 'fixture-operation', ownerId: 'fixture-owner', phase: 'settings' };
+    await seed(h.data, 'LocalMeta', [
+        { id: 'settings-journal', ...owner, backup },
+        { id: 'maintenance', ...owner },
+    ]);
+    h.dispose();
+    const next = await createHarness({ indexedDB: h.indexedDB, storage: h.physicalStorage });
+    t.after(next.dispose);
+    assert.deepEqual(await rows(next.data, 'Task'), backup.indexedDB.Task);
+    assert.equal(next.storage.getItem(key), 'true');
+    assert.deepEqual(await recoveryRows(next.data), []);
+});
+
 test('a failed or missing pre-import backup sink cancels replacement before writing target rows', async t => {
     for (const saveBackup of [undefined, async () => { throw new Error('backup sink failed'); }]) {
         const h = await createHarness({ capabilities: { saveBackup } }); t.after(h.dispose);

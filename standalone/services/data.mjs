@@ -276,9 +276,9 @@ export function createDataService({ indexedDB, storage: localStorage, timerCore,
         };
     }
     function portableSettings(settings) {
-        const copy = { ...settings };
-        delete copy[preferenceDefinitions.externalNetwork[0]];
-        return copy;
+        const [networkKey] = preferenceDefinitions.externalNetwork;
+        const { [networkKey]: _localConsent, ...portable } = settings;
+        return portable;
     }
     async function download(snapshot, prefix) {
         if (!saveBackup) throw new Error('A pre-import backup sink is required.');
