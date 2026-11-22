@@ -32,9 +32,11 @@ async function downloadIconOffset(pair,locale,oldSelector,newSelector){
  const oldIcon=pair.old.locator(oldSelector).first(),newIcon=row.locator(newSelector).first();
  await oldIcon.waitFor();
  await newIcon.waitFor();
- const [oldAnchor,newAnchor]=await Promise.all([oldIcon,newIcon].map(icon=>icon.locator('..').boundingBox()));
- assert(oldAnchor&&newAnchor&&newAnchor.y>oldAnchor.y,'Platform links moved down with the official download row');
- return {platform:{y:newAnchor.y-oldAnchor.y}};
+ const [oldRow,newRow]=await Promise.all([oldIcon.locator('xpath=ancestor::tr[1]').boundingBox(),row.boundingBox()]);
+ assert(oldRow&&newRow&&newRow.y>oldRow.y,'Platform links moved down with the official download row');
+ // Compare the artwork relative to its vertically centered row after the move.
+ const rowShift=(newRow.y+newRow.height/2)-(oldRow.y+oldRow.height/2);
+ return {platform:{y:rowShift}};
 }
 
 async function resetTileOffset(pair){
