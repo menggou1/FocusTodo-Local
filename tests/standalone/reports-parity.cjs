@@ -22,7 +22,9 @@ async function run(locale,dark){
   await p.getByRole('button',{name:'Blue list',exact:true}).first().click();
   await p.locator('.workspace-task-name').filter({hasText:'Reports task 4'}).click();
   await p.locator('.workspace-details .legacy-detail-field').filter({has:p.locator('summary>img[src*=detail-project]')}).locator('summary').click();
-  assert.deepEqual(await p.locator('.workspace-picker-surface .legacy-project-options [role=option]>span:nth-child(2)').allTextContents(),expected);
+  const detailOptions=p.locator('.workspace-picker-surface .legacy-project-options [role=option]>span:nth-child(2)');
+  await detailOptions.first().waitFor();
+  assert.deepEqual(await detailOptions.allTextContents(),expected);
   await p.keyboard.press('Escape');await p.locator('.legacy-detail-bottom').getByRole('button',{name:zh?'关闭':'Close',exact:true}).click();
   // History headings, grouping, duration and actual row geometry use the oracle.
   await o.getByText(zh?'已完成':'Completed',{exact:true}).first().click();await p.getByRole('button',{name:zh?'已完成':'Completed',exact:true}).click();

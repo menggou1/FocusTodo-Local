@@ -2,7 +2,22 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.1.3**, author Lexible.
+Current application: **2.1.4**, author Lexible.
+
+## 2.1.4 · 2026-11-22
+
+- Backup inspection and restore share goal history validation. Both reject corrupt entries and non-text names while preserving older records with omitted names and compatibility fields.
+- Completing or deleting a task rolls back task, subtask, and timer writes if detaching the timer first finds an interruption awaiting confirmation. The action can be retried after confirmation.
+- Daily focus goals update by local calendar date. Editing the duration of a schedule or focus record during the daylight saving fall-back preserves its original start instant.
+- Merge reminder acknowledgements across tabs. A system notification failure preserves the unread reminder in the app and leaves subsequent reminders scheduled.
+- Restore the native mini timer's background brightness, opening fade, and window buttons. Timer controls stay centered when resized.
+- Limit settings dropdown clicks to the visible controls and rename the wallpaper section in Appearance to Background.
+- Restore the 150 ms linear slide of the timer sidebar's 330 px cards and the 180 ms ease-out reorder transition along both axes after dropping a timer widget.
+- Clarify the version, upstream project, and licensing in About. Update details scroll the entries while keeping the title, app tile, and confirmation area fixed.
+- In focus duration charts, sort tasks by priority and task order, followed by custom lists in saved order. Align short segment boundaries to device pixels.
+- Restore title and content spacing in the import and export windows. Scrolling focus records moves the corresponding scrollbar, and saving an edit updates chart segments in place.
+
+[English report](releases/UPDATE-2.1.4.md).
 
 ## 2.1.3 · 2026-11-21
 

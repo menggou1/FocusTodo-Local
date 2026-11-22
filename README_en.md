@@ -1,8 +1,8 @@
 # FocusTodo
 
-Local browser focus and task app · Stable **2.1.2** · **Lexible** · [中文](README.md)
+Local browser focus and task app · Local version **2.1.4** · **Lexible** · [中文](README.md)
 
-The development branch is preparing candidate **2.1.3**. [2.1.3 update report](docs/en/releases/UPDATE-2.1.3.md)
+[2.1.4 update report](docs/en/releases/UPDATE-2.1.4.md)
 
 The application builds from complete React, TypeScript and Vite sources. Tasks, focus history and preferences stay in the browser; no account server is required. It derives from [Lâm Ngọc Khương's FocusTodo 7.1.1](https://github.com/lamngockhuong/focustodo). Original source and history remain on `upstream/7.1.1`.
 

@@ -45,7 +45,8 @@ async function settingsAndUpdate(browser, origin, locale) {
         await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
         await page.locator('[data-settings-tab=about]').click();
         const about = page.locator('.legacy-about');
-        assert.match(await about.innerText(), /FocusTodo-Local[\s\S]*2\.1\.3[\s\S]*Lexible[\s\S]*7\.1\.1[\s\S]*Lâm Ngọc Khương/);
+        const versionPattern = localVersion.replaceAll('.', '\\.');
+        assert.match(await about.innerText(), new RegExp(String.raw`FocusTodo-Local[\s\S]*${versionPattern}(?=\s|$)[\s\S]*Lexible[\s\S]*7\.1\.1[\s\S]*Lâm Ngọc Khương`));
         assert.equal(await about.getByText(/^(Help|Feedback|User guide|帮助|反馈|使用教程)$/).count(), 0);
         assert.equal(await about.getByRole('link', { name: /Lexible/ }).getAttribute('href'), 'https://github.com/menggou1/FocusTodo-Local');
         assert.equal(await about.getByRole('link', { name: 'MIT' }).count(), 1);
