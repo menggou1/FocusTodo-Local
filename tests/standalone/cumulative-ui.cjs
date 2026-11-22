@@ -145,15 +145,17 @@ async function timerOverflow(browser, origin, engine, deviceScaleFactor, width) 
         await stopSample('reverse, collapse, expand');
         await page.locator('.legacy-timer-edit-widgets button').click();
         const editor = page.locator('.legacy-widget-editor');
-        const source = editor.locator(':scope > ul:not(.workspace-drag-preview) li button').first();
+        const handles = editor.locator('ul:not(.workspace-drag-preview) > li button');
         await startSample('.legacy-widget-editor');
         for (let i = 0; i < 2; i++) {
+            const source = handles.nth(i);
             const r = await source.boundingBox();
+            const row = await source.locator('..').boundingBox();
             await page.mouse.move(r.x + 10, r.y + 18);
             await page.mouse.down();
             await page.mouse.move(r.x + 126, r.y + 26, { steps: 5 });
             const ghost = editor.locator('.workspace-drag-preview');
-            assert((await ghost.boundingBox()).x > r.x - 145);
+            assert(Math.abs((await ghost.boundingBox()).x - row.x - 116) < 1);
             await page.mouse.up();
             await ghost.waitFor({ state: 'detached' });
         }

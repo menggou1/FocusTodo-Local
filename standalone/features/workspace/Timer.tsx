@@ -67,7 +67,7 @@ function WidgetEditor({close:onClose}:{close():void}) {
  const [order,setOrder]=useState<number[]>([...preferences.widgetOrder]),[visible,setVisible]=useState<number[]>([...preferences.visibleWidgets]);
  const [dragging,setDragging]=useState<number|null>(null),[preview,setPreview]=useState<number[]|null>(null);
  const projection=useRef<number[]|null>(null);
- const captureMotion=useRowMotion(ref,'ul:not(.workspace-drag-preview)>li[data-widget-type]','data-widget-type',true);
+ const captureMotion=useRowMotion(ref,'ul:not(.workspace-drag-preview)>li[data-widget-type]','data-widget-type');
  const titles=[services.language.legacyText('rpt_time_today'),services.language.legacyText('cmm_today'),services.language.legacyText('tmr_today_detail').replaceAll("''","'")];
  useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.showModal();return()=>{ref.current?.close();if(previous?.isConnected)previous.focus()}},[]);
  function move(rows:number[],id:number,target:number) {
@@ -91,10 +91,11 @@ function WidgetEditor({close:onClose}:{close():void}) {
    captureMotion(String(id));
    projection.current=move(rows,id,to);setPreview(projection.current);
   },
-  end(id,x,y,handoff){release(id,handoff,!!document.elementFromPoint(x,y)?.closest('.legacy-widget-editor>ul'))},
+  end(id,x,y,handoff){release(id,handoff,!!document.elementFromPoint(x,y)?.closest('.legacy-widget-editor-content>ul'))},
   cancel(id,handoff){release(id,handoff,false)},
  });
  return <dialog ref={ref} className={"legacy-widget-editor "+motion} aria-labelledby="legacy-widget-editor-title" onCancel={event=>{event.preventDefault();if(!busy)close()}}>
+  <div className="legacy-widget-editor-content">
   <h2 id="legacy-widget-editor-title">{services.language.legacyText('tmr_edit_widget')}</h2>
   <ul>{(preview||order).map(type=><li key={type} data-widget-type={type} data-dragging={dragging===type||undefined}
     onPointerDown={busy||blocked?undefined:event=>dragWidget(event,type,'widget')}>
@@ -109,6 +110,7 @@ function WidgetEditor({close:onClose}:{close():void}) {
     }}><img src={timerImage('drag_flag')} alt=""/></button>
    </li>)}</ul>
   <footer><button type="button" disabled={busy} onClick={close}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{if(await run(()=>services.settings.setWidgetLayout(order,order.filter(type=>visible.includes(type)))))close()}}>{services.language.legacyText('cmm_ok')}</button></footer>
+  </div>
  </dialog>;
 }
 

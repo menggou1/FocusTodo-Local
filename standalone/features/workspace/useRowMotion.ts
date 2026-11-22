@@ -3,7 +3,7 @@ import { useLayoutEffect, useRef, type RefObject } from 'react';
 export type DragHandoff = { rect: DOMRect; remove(): void };
 type Position = { x: number; y: number };
 /** Retarget from the painted positions, including any interrupted animation. */
-export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: string, attribute: string, verticalOnly = false) {
+export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: string, attribute: string) {
   const running = useRef(new Map<HTMLElement, Animation>());
   const pending = useRef<{
     order: string;
@@ -79,7 +79,7 @@ export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: str
     for (const [element, destination] of destinations) {
       const first = firstPositions.get(id(element));
       if (!first || element.dataset.dragging === 'true') continue;
-      const x = verticalOnly ? 0 : first.x - destination.x, y = first.y - destination.y;
+      const x = first.x - destination.x, y = first.y - destination.y;
       if (Math.abs(x) < .5 && Math.abs(y) < .5) continue;
       if (id(element) === previous.active) element.dataset.reorderActive = 'true';
       const animation = element.animate([{ transform: `translate(${x}px,${y}px)` }, { transform: 'translate(0px,0px)' }],

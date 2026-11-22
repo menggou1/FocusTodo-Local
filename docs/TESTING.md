@@ -38,6 +38,8 @@ paired 对照默认为归档和隔离 React 各启动随机端口，均使用临
 
 `node tests/standalone/folder-composer-parity.cjs` 使用同一批合成任务核对清单夹的实际分组、创建入口和下拉菜单的几何尺寸，并验证通知与相邻弹层的交互。
 
+`node tests/standalone/timer-widget-motion.cjs` 检查计时侧栏和组件编辑器的实际动画帧、滚动边界、拖动层级和保存结果。设置 `FOCUS_MOTION_BASELINE_SITE` 指向从 `58853d2` 构建的隔离 `site` 目录，逐帧对照基准。可另设 `FOCUS_MOTION_REGRESSION_SITE` 指向 `67ddc15` 的隔离构建，验证测试能检出擦除式收展和松手横向跳跃。
+
 ## 判定与证据
 
 时间轴用超过 70 天的合成记录，逐帧核对 CSS 高度、bitmap/DPR、坐标轴和从下往上的揭示。字体与 ResizeObserver 不能挤压行距。弹窗检查覆盖停止、普通/重复任务删除、子任务、清单/文件夹/标签、补记、日程、设置、备份/清空、安全确认、主题删除、计时组件、恢复、更新与各选择器，核对取消/确认、焦点返回、层级和动画，保留注入错误反例。
