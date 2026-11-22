@@ -23,7 +23,7 @@
 .legacy-settings[data-tab=general] .legacy-settings-content{padding-top:24px}.legacy-settings button{cursor:pointer;font:inherit;color:inherit}
 .legacy-account-row{display:flex;align-items:center;min-height:48px;gap:0;font-size:14px;border:0!important}.legacy-account-row>span:first-child{flex:0 0 120px}.legacy-account-row>div{display:flex;align-items:center;gap:8px}
 .legacy-account-row .domain-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover}.legacy-account-row button{border:0;background:transparent;color:var(--workspace-accent);padding:0 8px}
-.legacy-account-row input{max-width:270px!important;width:270px!important;border:0!important;background:transparent!important;padding:0!important}.legacy-account-actions{gap:16px!important;flex-wrap:wrap}.legacy-account-actions button{padding:0}.legacy-platforms{gap:10px!important}.legacy-platforms img{width:24px;height:24px}.legacy-account-row a{color:#1890ff;text-decoration:none}.legacy-local-info{align-items:flex-start;margin-top:14px;padding-top:12px;border-top:1px solid var(--workspace-line)!important}.legacy-local-info>div{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.legacy-account-row input{max-width:270px!important;width:270px!important;border:0!important;background:transparent!important;padding:0!important}.legacy-account-actions{gap:16px!important;flex-wrap:wrap}.legacy-account-actions button{padding:0}.legacy-platforms{gap:10px!important}.legacy-platforms img{width:24px;height:24px}.legacy-account-row a{color:#1890ff;text-decoration:none}
 .legacy-profile-actions{padding:8px 0 8px 120px}.legacy-profile-actions button{margin-right:10px}
 .legacy-theme-title{margin-top:16px!important}.legacy-settings .domain-theme-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-right:0}
 .legacy-settings .legacy-theme{position:relative;padding:0!important;border:0;border-radius:6px;background:transparent;width:100%;aspect-ratio:1.55;height:auto;overflow:hidden}.legacy-theme>span{display:block;width:100%;height:100%;border-radius:6px;overflow:hidden}.legacy-theme>span>img{width:100%;height:100%;object-fit:cover}.legacy-theme .legacy-theme-selected{position:absolute;right:6px;bottom:6px;width:20px;height:20px}.legacy-bing small{position:absolute;bottom:8px;left:10px;color:var(--workspace-text)}.legacy-upload>span{display:flex;flex-direction:column;justify-content:center;gap:8px;background:var(--workspace-selected);font-size:12px}.legacy-upload b{font-size:24px}.legacy-custom-theme{position:relative}.legacy-theme-remove{position:absolute;right:2px;top:2px;border:0;background:var(--workspace-panel);border-radius:50%}
@@ -46,7 +46,7 @@
 .legacy-settings>nav{margin-top:14px}.legacy-settings>nav>button[aria-current=page]{color:var(--workspace-text)}
 .legacy-settings .domain-theme-grid{grid-template-columns:256px 256px;gap:0}.legacy-settings .legacy-theme{width:256px;height:182px;aspect-ratio:auto;border-radius:0;padding:0 6px 12px 0!important;overflow:visible}.legacy-theme>span{width:250px;height:170px;border:1px solid transparent;border-radius:10px;padding:4px;overflow:hidden}.legacy-theme[aria-pressed=true]>span{border-color:#fd5553}.legacy-theme>span>img{width:240px;height:160px;border-radius:8px}.legacy-theme .legacy-theme-selected{bottom:36px;right:36px;width:20px;height:20px}.legacy-upload>span{display:flex;border:2px dashed #ccc;font-size:14px}.legacy-upload b{font-size:36px}
 
-.legacy-settings[data-tab=account] .legacy-settings-content,.legacy-settings[data-tab=about] .legacy-settings-content{padding-top:16px}.legacy-account-row>span:first-child{flex-basis:198px}.legacy-account-row>div{gap:8px}.legacy-account-row input{width:194px!important;max-width:194px!important;height:30px!important;border:1px solid #e5e5e5!important;padding:0 8px!important}.legacy-account-row button{font-size:12px;height:30px;border:1px solid #e5e5e5;border-radius:5px;padding:0 12px;background:var(--workspace-panel);color:var(--workspace-text)}.legacy-account-row button.danger{border-color:#ff5155;color:#ff5155}.legacy-account-actions{gap:8px!important}.legacy-account-actions button{padding:0 12px}.legacy-platforms{gap:8px!important}.legacy-platforms img{width:20px;height:20px}.legacy-local-info{margin:0;padding:0;border:0!important;min-height:70px}.legacy-local-info>div{gap:0}.legacy-local-info>span{line-height:20px}.legacy-local-info .legacy-local-links{display:flex;gap:10px;align-items:center;margin-top:6px}.legacy-local-info .legacy-local-links a:last-child{font-size:12px;color:#ff5155;text-decoration:underline}.legacy-settings[data-tab=general] hr{margin:30px 0}.legacy-settings[data-tab=general] h3{margin-top:14px}
+.legacy-settings[data-tab=account] .legacy-settings-content,.legacy-settings[data-tab=about] .legacy-settings-content{padding-top:16px}.legacy-account-row>span:first-child{flex-basis:198px}.legacy-account-row>div{gap:8px}.legacy-account-row input{width:194px!important;max-width:194px!important;height:30px!important;border:1px solid #e5e5e5!important;padding:0 8px!important}.legacy-account-row button{font-size:12px;height:30px;border:1px solid #e5e5e5;border-radius:5px;padding:0 12px;background:var(--workspace-panel);color:var(--workspace-text)}.legacy-account-row button.danger{border-color:#ff5155;color:#ff5155}.legacy-account-actions{gap:8px!important}.legacy-account-actions button{padding:0 12px}.legacy-platforms{gap:8px!important}.legacy-platforms img{width:20px;height:20px}.legacy-settings[data-tab=general] hr{margin:30px 0}.legacy-settings[data-tab=general] h3{margin-top:14px}
 /* Settings restoration: dimensions and control order measured from running 1.9.3. */
 .domain-overlay:has(.legacy-settings){width:820px;max-width:100vw;height:600px}
 .legacy-settings{width:100%;min-width:0;height:550px;display:flex;flex-direction:row;gap:16px}
@@ -71,8 +71,8 @@
 .legacy-account-row>div,.legacy-account-row input{flex:none}.legacy-account-row input{width:193px!important;max-width:193px!important;border-radius:6px!important}
 .legacy-account-row button{padding:0 16px;font:400 12px/28px var(--workspace-font);border-radius:6px;min-width:70px;height:30px}.legacy-account-actions{flex-wrap:nowrap;gap:8px!important}.legacy-account-actions button{padding:0 16px}
 .legacy-account-row button.primary{background:var(--workspace-accent);color:#fff;border-color:var(--workspace-accent)}
-.legacy-settings[data-tab=about] .legacy-settings-content{padding:16px 0 0}.legacy-platforms img{margin-bottom:4px}.legacy-local-info{height:auto;min-height:0;align-items:flex-start}.legacy-local-info>span:first-child{padding-top:8px}.legacy-local-info>div{gap:0;line-height:1.8}
-.legacy-local-info .legacy-local-links{gap:0;display:block;margin-top:0}.legacy-local-links a:first-child{display:inline-flex;vertical-align:middle;padding:4px;border-radius:5px}.legacy-local-links a:last-child{font-size:14px!important}
+.legacy-settings[data-tab=about] .legacy-settings-content{padding:16px 0 0}.legacy-platforms img{margin-bottom:4px}
+
 .legacy-settings .legacy-sound-settings{display:block;width:calc(100% + 28px)}
 .legacy-settings .legacy-sound-settings .legacy-sound-row{width:100%;height:48px;min-height:48px;margin:0;display:flex;justify-content:flex-start;align-items:center;gap:0;font:14px/20px var(--workspace-font)}
 .legacy-sound-row>span:first-child{width:198px;flex:none}.legacy-settings .legacy-sound-row select{margin:0}.legacy-settings .legacy-sound-completion>span:first-child{width:198px;flex:none}
@@ -87,7 +87,7 @@
 .legacy-backup-dialog{width:600px;max-width:calc(100vw - 48px);max-height:90vh;padding:26px;border-radius:14px;font:15px/1.75 var(--workspace-font);box-shadow:0 20px 80px #0004}
 .legacy-backup-dialog::backdrop{background:#17202b99}.legacy-backup-dialog>header{height:auto;min-height:38.5px;padding:0;margin:0 0 12px;display:block;box-shadow:none;text-align:left}.legacy-backup-dialog>header>h2{font-size:22px;font-weight:700;line-height:1.75;margin:0}.legacy-backup-dialog>header>button{display:none}
 .legacy-backup-restore[open],.legacy-backup-export[open]{display:flex;flex-direction:column;overflow:hidden}
-.legacy-backup-restore>header,.legacy-backup-export>header{flex:none}
+.legacy-backup-restore>header,.legacy-backup-export>header{flex:none;margin-bottom:2px}
 .legacy-backup-scroll{position:relative;display:flex;flex-direction:column;min-height:0}
 .legacy-backup-scroll>form{min-height:0;overflow:auto;overscroll-behavior:contain}
 .legacy-backup-export .legacy-scroll-track:not([hidden]){opacity:1;pointer-events:auto}
@@ -200,6 +200,24 @@
 .legacy-alarm-option-preview img{display:block;width:14px;height:14px}
 .legacy-release-dialog article>footer{display:flex;justify-content:flex-end;gap:8px;margin:20px 0 0}
 .legacy-release-dialog article>footer button{display:grid;place-items:center;height:30px;min-width:75px;border-radius:6px;font:12px/1 var(--workspace-font);padding:0 16px;background:var(--workspace-accent);color:#fff}
+.legacy-release-dialog[open]{display:flex;flex-direction:column;width:min(640px,calc(100vw - 24px));overflow:hidden}
+.legacy-release-dialog>header{flex:none}
+.legacy-release-dialog article{display:flex;flex-direction:column;min-height:0;padding:16px 24px}
+.legacy-release-dialog article>h3,.legacy-release-dialog article>.legacy-meta,.legacy-release-dialog article>footer{flex:none}
+.legacy-release-dialog article>h3{margin:0}
+.legacy-release-dialog article>.legacy-meta{margin:4px 0 8px}
+.legacy-release-scroll{position:relative;display:flex;min-height:0;border-radius:6px;overflow:clip}
+.legacy-release-scroll>[data-local-scroll]{width:100%;overflow:auto;overscroll-behavior:contain;padding-right:12px;overflow-wrap:anywhere}
+.legacy-release-scroll>[data-local-scroll]:focus-visible{outline:2px solid var(--workspace-accent);outline-offset:-2px}
+.legacy-release-scroll ul{margin:0;padding-left:20px}
+.legacy-release-dialog article>footer{padding:0;margin-top:12px}
+.legacy-about{padding:4px 0 16px}
+.legacy-about header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px}
+.legacy-about h2{margin:0;font-size:18px;font-weight:600}
+.legacy-about header>span{color:var(--workspace-muted)}
+.legacy-about>p{margin:10px 0 16px;max-width:52ch;line-height:1.55}
+.legacy-about .legacy-account-row{min-height:44px;height:auto;flex-wrap:wrap;gap:4px 12px;padding:6px 0}
+.legacy-about .legacy-account-row>span:first-child,.legacy-about .legacy-account-row>a:first-child{flex-basis:186px}
 
 /* A transaction locks actions without flashing the entire settings control set. */
 .legacy-settings button:disabled,.legacy-settings input:disabled,.legacy-settings select:disabled{opacity:1;color:inherit;-webkit-text-fill-color:currentColor}

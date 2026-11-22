@@ -335,7 +335,7 @@ apr_dark_mode = Tmavý režim
 apr_light = Světlý
 apr_dark = Tmavý
 apr_sys = Automaticky
-apr_theme = Téma
+apr_theme = Pozadí
 
 gen_play_complete_sound = Přehrát zvuk dokončení úkolu
 gen_new_task_on_top = Přidávat nové úkoly na začátek seznamu

@@ -335,7 +335,7 @@ apr_dark_mode = డార్క్ మోడ్
 apr_light = కాంతి
 apr_dark = చీకటి
 apr_sys = ఆటోమేటిక్
-apr_theme = థీమ్
+apr_theme = నేపథ్యం
 
 gen_play_complete_sound = పని పూర్తయ్యేటప్పుడు శబ్దాన్ని వినిపించు
 gen_new_task_on_top = కొత్త పనులను పై భాగంలో చేర్చండి

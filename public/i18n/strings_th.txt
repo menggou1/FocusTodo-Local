@@ -335,7 +335,7 @@ apr_dark_mode = โหมดสี
 apr_light = สว่าง
 apr_dark = มืด
 apr_sys = อัตโนมัติ
-apr_theme = รูปแบบ
+apr_theme = พื้นหลัง
 
 gen_play_complete_sound = เล่นเสียงเมื่อทำงานเสร็จ
 gen_new_task_on_top = เพิ่มงานใหม่ไว้ด้านบน

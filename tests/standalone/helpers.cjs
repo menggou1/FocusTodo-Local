@@ -86,4 +86,31 @@ async function assertNoLegacyRuntime(page, requests) {
     assert.deepEqual(globals, [], 'The candidate must not install legacy runtime globals');
 }
 
-module.exports = { assert, fs, path, root, evidence, deferred, launch, contextFor, collectFiles, assertNoLegacyRuntime };
+async function diagnoseClick(page, name, selector, click) {
+    if (process.env.FOCUS_INTERACTION_DIAGNOSTICS !== '1') return click();
+    await page.evaluate(selector => {
+        let lastFrame = performance.now(), request;
+        const samples = [];
+        const frame = time => { lastFrame = time; request = requestAnimationFrame(frame); };
+        request = requestAnimationFrame(frame);
+        const interval = setInterval(() => {
+            const element = document.querySelector(selector), active = document.activeElement;
+            const rect = element?.getBoundingClientRect();
+            const hit = rect && document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2);
+            const style = element && getComputedStyle(element);
+            samples.push({ time: performance.now(), lastFrame, hidden: document.hidden, rect: rect?.toJSON(),
+                target: element?.outerHTML.slice(0, 300), hit: hit?.outerHTML.slice(0, 200), active: active?.outerHTML.slice(0, 200),
+                state: style && [style.visibility, style.display, style.pointerEvents],
+                animations: document.getAnimations().map(a => [a.playState, a.currentTime]) });
+        }, 50);
+        window.stopInteractionSample = () => { cancelAnimationFrame(request); clearInterval(interval); return samples; };
+    }, selector);
+    let error;
+    try { await click(); } catch (failure) { error = failure; throw failure; }
+    finally {
+        const samples = await page.evaluate(() => window.stopInteractionSample()).catch(() => []);
+        fs.writeFileSync(path.join(evidence, name + '.json'), JSON.stringify({ error: error?.message, samples }, null, 2));
+    }
+}
+
+module.exports = { assert, fs, path, root, evidence, deferred, launch, contextFor, collectFiles, assertNoLegacyRuntime, diagnoseClick };

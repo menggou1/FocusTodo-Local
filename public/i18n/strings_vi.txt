@@ -335,7 +335,7 @@ apr_dark_mode = Chế Độ Tối
 apr_light = Sáng
 apr_dark = Tối
 apr_sys = Tự động
-apr_theme = Chủ đề
+apr_theme = Hình nền
 
 gen_play_complete_sound = Phát âm thanh khi hoàn thành nhiệm vụ
 gen_new_task_on_top = Thêm công việc mới lên trên cùng

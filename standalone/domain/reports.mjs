@@ -1,4 +1,5 @@
 import { invariant } from '../services/errors.mjs';
+import { orderedProjects } from './project-order.mjs';
 export const visibleRecord = row => row && row.state !== -1 && Number.isFinite(row.interval) && row.interval > 0 && Number.isFinite(row.endDate) && row.endDate > 0;
 export function aggregateRecords(records, start, end, tasks = []) {
     invariant(Number.isFinite(start) && Number.isFinite(end) && end > start, 'Invalid report range');
@@ -43,6 +44,31 @@ export function reminderState(tasks, read, now) {
     const due = active.filter(row => row.reminderDate <= now).sort((a, b) => b.reminderDate - a.reminderDate);
     const seen = new Set(read);
     return { due, unread: due.filter(row => !seen.has(reminderIdentity(row))), next: active.reduce((next, row) => row.reminderDate > now ? Math.min(next, row.reminderDate) : next, Infinity) };
+}
+
+/** Project totals stay intact. A task-backed segment takes the position of
+ * its first contributing task in priority/order; custom lists use saved order.
+ */
+export function focusStacks(tasks, projects, reports) {
+    const index = value => Number.isFinite(value) ? value : 0;
+    const lists = orderedProjects(projects.filter(project => project.type === 1000));
+    const listIds = new Set(lists.map(list => list.id));
+    const taskOrder = tasks.filter(task => !listIds.has(task.projectId)).sort((a, b) =>
+        index(b.priority) - index(a.priority) || index(a.order) - index(b.order) || a.id.localeCompare(b.id));
+    return reports.map(({ byTask, byProject }) => {
+        const seconds = new Map(Object.entries(byProject));
+        const segments = [];
+        const append = (id, kind) => {
+            if (!seconds.has(id)) return;
+            segments.push({ id, seconds: seconds.get(id), kind });
+            seconds.delete(id);
+        };
+        for (const task of taskOrder) if (Object.hasOwn(byTask, task.id)) append(task.projectId || 'null', 'tasks');
+        // Unassigned records and references to removed tasks still contribute.
+        for (const id of seconds.keys()) if (!listIds.has(id)) append(id, 'tasks');
+        for (const list of lists) append(list.id, 'project');
+        return segments;
+    });
 }
 /** Stack segments in visual top-to-bottom order. Only custom-list segments
  * participate in project ordering. Every segment keeps its original count and ID.

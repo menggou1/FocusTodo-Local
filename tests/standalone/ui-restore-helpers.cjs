@@ -8,8 +8,17 @@ async function paired({locale='zh-CN',dark=false,width=1280,height=900,deviceSca
  // The separate immutable archive supplies the historical UI.
 
  const shared=process.env.FOCUS_RESTORE_SHARED==='1';
- const servers=shared?[]:[createServer(),createStandaloneServer()];
- for(const server of servers)await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const builtSite=process.env.FOCUS_RESTORE_SITE;
+ if(builtSite)assert.equal(JSON.parse(fs.readFileSync(path.join(builtSite,'prototype-build.json'),'utf8')).kind,'isolated-prototype');
+ const servers=shared?[]:[createServer(),createStandaloneServer({root:builtSite})];
+ for(const server of servers){
+  // Windows can assign 6666 through listen(0); Chromium rejects that port.
+  do{
+   await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+   if(server.address().port>=11000)break;
+   await new Promise(resolve=>server.close(resolve));
+  }while(true);
+ }
  const browser=await launch('chromium'),handles=[];
  try{for(let i=0;i<2;i++){
   const origin=shared?'http://127.0.0.1:'+(i?Number(process.env.FOCUS_RESTORE_NEW_PORT||5511):5513):'http://127.0.0.1:'+servers[i].address().port;

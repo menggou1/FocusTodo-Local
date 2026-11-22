@@ -335,7 +335,7 @@ apr_dark_mode = Mode Gelap
 apr_light = Terang
 apr_dark = Gelap
 apr_sys = Otomatis
-apr_theme = Tema
+apr_theme = Latar belakang
 
 gen_play_complete_sound = Putar suara saat tugas selesai
 gen_new_task_on_top = Tambahkan tugas baru di bagian atas

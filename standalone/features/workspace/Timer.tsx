@@ -15,7 +15,7 @@ import { themeURL } from './Settings';
 import { LegacyIcon } from './LegacyIcon';
 const timerArtwork=import.meta.glob<string>('../../../public/img/{timer-*,tmr_*,fullscreen-*,float-timer-*,widget_empty,widget_show,widget_hide,task-start,task_no_priority,new-task-project-selected,setting-play,folder_project_checked,folder_project_unchecked,drag_flag,add_widget}.png',{eager:true,query:'?url',import:'default'});
 const timerImage=(name:string)=>timerArtwork['../../../public/img/'+name+'.png'];
-const miniArtwork=import.meta.glob<string>('../../../public/img/{timer-start,timer-pause,timer-stop,timer-complete,float-timer-close}.png',{eager:true,query:'?inline',import:'default'});
+const miniArtwork=import.meta.glob<string>('../../../public/img/{timer-start,timer-pause,timer-stop,timer-complete,float-timer-close,float-timer-zoomup}.png',{eager:true,query:'?inline',import:'default'});
 const miniImage=(name:string)=>miniArtwork['../../../public/img/'+name+'.png'];
 
 type MiniAPI = { requestWindow(options: {width: number; height: number; preferInitialWindowPlacement: boolean}): Promise<Window> };
@@ -67,7 +67,7 @@ function WidgetEditor({close:onClose}:{close():void}) {
  const [order,setOrder]=useState<number[]>([...preferences.widgetOrder]),[visible,setVisible]=useState<number[]>([...preferences.visibleWidgets]);
  const [dragging,setDragging]=useState<number|null>(null),[preview,setPreview]=useState<number[]|null>(null);
  const projection=useRef<number[]|null>(null);
- const captureMotion=useRowMotion(ref,'ul:not(.workspace-drag-preview)>li[data-widget-type]','data-widget-type');
+ const captureMotion=useRowMotion(ref,'ul:not(.workspace-drag-preview)>li[data-widget-type]','data-widget-type',true);
  const titles=[services.language.legacyText('rpt_time_today'),services.language.legacyText('cmm_today'),services.language.legacyText('tmr_today_detail').replaceAll("''","'")];
  useEffect(()=>{const previous=document.activeElement as HTMLElement|null;ref.current?.showModal();return()=>{ref.current?.close();if(previous?.isConnected)previous.focus()}},[]);
  function move(rows:number[],id:number,target:number) {
@@ -258,11 +258,13 @@ export function Timer({ expanded, openExpanded, closeExpanded }: { expanded: boo
   </section>;
   return <>
     {expanded?<dialog className="domain-full-timer" ref={fullscreen} aria-label={text.timer} onCancel={e=>{e.preventDefault();closeExpanded()}} style={{backgroundImage:`url("${string(wallpaper?.dataUrl)||themeURL(theme.theme||'Leaf')}")`,'--float-size':task?'232px':'147px','--float-offset':task?'-108px':'-60px'} as React.CSSProperties}>{surface}</dialog>:surface}
-    {mini && !mini.closed && createPortal(<div className="legacy-mini-frame" style={{backgroundImage:"url(\""+(miniBackdrop?.source===backdrop?miniBackdrop.data:new URL(backdrop,document.baseURI).href)+"\")"}}>
+    {mini && !mini.closed && createPortal(<div className="legacy-mini-frame">
+      <div className="legacy-mini-wallpaper" aria-hidden="true" style={{backgroundImage:"url(\""+(miniBackdrop?.source===backdrop?miniBackdrop.data:new URL(backdrop,document.baseURI).href)+"\")"}}/>
       <section data-app-interaction-root className={'workspace-mini-native workspace-floating-timer'+(task||subtask?' has-task':'')} aria-label={text.mini} data-state={state}>
         {floatingClock()}{(task||subtask)&&<p className="legacy-floating-task">{subtask?.name||task?.name}</p>}{controls(true,true)}
       </section>
-      <button className="legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={miniImage('float-timer-close')} alt=""/></button>
+      <button className="legacy-mini-window-button" aria-label={t('返回主窗口','Return to main window')} onClick={() => mini.close()}><img src={miniImage('float-timer-zoomup')} alt=""/></button>
+      <button className="legacy-mini-window-button legacy-mini-close" aria-label={text.closeMini} onClick={() => mini.close()}><img src={miniImage('float-timer-close')} alt=""/></button>
     </div>, mini.document.body)}
     {miniError&&<div className="legacy-timer-notice" role="status">{miniError}</div>}
     {confirmation && <ConfirmDialog title={services.language.legacyText('tmr_stop_title')} message={services.language.legacyText('tmr_stop_prompt')} canClose={!busy} close={() => setConfirmation(false)}>{dismiss=><><button disabled={busy} onClick={dismiss}>{text.cancel}</button><button className="primary" disabled={busy || blocked} onClick={async () => {

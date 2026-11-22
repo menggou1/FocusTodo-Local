@@ -129,7 +129,7 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
     category:el.classList.contains('legacy-settings-category'),
    })));
   assert.deepEqual(general.slice(0,7), [
-   {tag:'LABEL',title:'语言',category:false},
+   {tag:'DIV',title:'语言',category:false},
    {tag:'LABEL',title:'新任务添加至其他任务上方',category:false},
    {tag:'HR',title:'',category:false},
    {tag:'H3',title:'通知',category:true},
@@ -141,7 +141,7 @@ const engines=(process.env.FOCUS_STANDALONE_ENGINES||'chromium').split(',');
   assert.equal(await p.getByText(/^(播放完成任务提示音|任务完成提示音)$/).count(),0);
   await open('appearance');await p.getByRole('button',{name:'Ocean',exact:true}).click();await p.waitForFunction(()=>document.querySelector('[aria-label=Ocean]').getAttribute('aria-pressed')==='true');
   await p.evaluate(()=>{window.settingsProbe.writes=[];window.settingsProbe.themeMutations=0;window.settingsOpens=window.settingsProbe.opens});await p.getByRole('button',{name:'Ocean',exact:true}).click();await p.waitForTimeout(150);assert.deepEqual(await p.evaluate(()=>window.settingsProbe.writes),[],'current theme produces no writes');assert.equal(await p.evaluate(()=>window.settingsProbe.themeMutations),0);
-  for(const theme of ['Leaf','Ocean','Trees','Ocean']){await p.getByRole('button',{name:theme,exact:true}).click();await p.waitForFunction(theme=>document.querySelector('[aria-label='+theme+']').getAttribute('aria-pressed')==='true',theme);const bg=await p.getByTestId('timer-floating').evaluate(e=>e.style.backgroundImage);assert(bg.toLowerCase().includes(theme.toLowerCase()));}
+  for(const theme of ['Leaf','Ocean','Trees','Ocean']){const choose=()=>p.getByRole('button',{name:theme,exact:true}).click();if(theme==='Trees')await require('./helpers.cjs').diagnoseClick(p,engine+'-settings-trees','[aria-label=Trees]',choose);else await choose();await p.waitForFunction(theme=>document.querySelector('[aria-label='+theme+']').getAttribute('aria-pressed')==='true',theme);const bg=await p.getByTestId('timer-floating').evaluate(e=>e.style.backgroundImage);assert(bg.toLowerCase().includes(theme.toLowerCase()));}
   await open('pomodoro');const alarms=p.locator('.legacy-sound-alarm select');
   for(const alarm of await alarms.all()){
    assert.equal(await alarm.locator('option').first().getAttribute('value'),'alm_None');

@@ -335,7 +335,7 @@ apr_dark_mode = ダークモード
 apr_light = 通常(白)
 apr_dark = ダークモード
 apr_sys = 自動
-apr_theme = テーマ
+apr_theme = 背景
 
 gen_play_complete_sound = タスク完了時に音を再生
 gen_new_task_on_top = 新しいタスクを上部に追加

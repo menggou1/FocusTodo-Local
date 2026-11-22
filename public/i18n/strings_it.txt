@@ -335,7 +335,7 @@ apr_dark_mode = Modalità scura
 apr_light = Modalità luce
 apr_dark = Scuro
 apr_sys = Automatico
-apr_theme = Tema
+apr_theme = Sfondo
 
 gen_play_complete_sound = Riproduci suono al completamento dell'attività
 gen_new_task_on_top = Aggiungi le nuove attività in cima

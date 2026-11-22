@@ -26,16 +26,67 @@ test('one project snapshot keeps all presets before custom lists, stable ties an
 
 test('report cache invalidates after committed record edits and task/project reassociation', async t => {
     const h = await createApplication(); t.after(h.dispose);
+    const { focusStacks } = await import('../../standalone/domain/reports.mjs');
     const task=await h.app.business.command({type:'addTask',values:{id:'task',name:'Task',projectId:'id-task-tasks'}});
     await seed(h.app.repository,'Pomodoro',[{id:'record',objType:'POMODORO',state:0,taskId:task.id,interval:1500,pomodoroInterval:1500,endDate:h.clock.value}]);
     await h.app.business.refresh();
     const get=()=>h.app.business.report(h.clock.value-3600000,h.clock.value+1);
     const before=get(); assert.equal(before.time,1500); assert.strictEqual(get(),before);
+    const published=[];
+    t.after(h.app.business.subscribe(()=>{
+        const {tasks,projects}=h.app.business.getSnapshot();
+        published.push(focusStacks(tasks,projects,[get()])[0]);
+    }));
     await h.app.business.command({type:'addProject',values:{id:'new-list',name:'New'}});
     await h.app.business.command({type:'updateTask',id:task.id,changes:{projectId:'new-list'},expected:task});
     assert.deepEqual(get().byProject,{'new-list':1500});
-    await seed(h.app.repository,'Pomodoro',[{id:'record',objType:'POMODORO',state:0,taskId:task.id,interval:1800,pomodoroInterval:1500,endDate:h.clock.value}]);
-    await h.app.business.refresh(); assert.equal(get().time,1800); assert.equal(before.time,1500);
+    await h.app.business.command({type:'updateRecord',id:'record',changes:{interval:1800},expected:{interval:1500}});
+    assert.equal(get().time,1800); assert.equal(before.time,1500);
+    assert.deepEqual(published.at(-1),[{id:'new-list',seconds:1800,kind:'project'}]);
+    const second=await h.app.business.command({type:'addProject',values:{id:'second',name:'Second',order:10000}});
+    const secondTask=await h.app.business.command({type:'addTask',values:{name:'Second',projectId:second.id}});
+    await h.app.business.command({type:'addRecord',values:{taskId:secondTask.id,interval:2400,pomodoroInterval:1500}});
+    const lists=h.app.business.getSnapshot().projects.filter(project=>project.type===1000);
+    await h.app.business.command({type:'reorderProjects',from:'second',to:'new-list',snapshot:lists.map(({id,order})=>({id,order}))});
+    assert.deepEqual(published.at(-1),[{id:'second',seconds:2400,kind:'project'},{id:'new-list',seconds:1800,kind:'project'}]);
+});
+
+test('focus chart projects exact seconds through independent task and list ordering domains', async () => {
+    const { aggregateRecords, calendarRange, focusStacks } = await import('../../standalone/domain/reports.mjs');
+    const at = +new Date(2026, 10, 18, 12);
+    const projects = [
+        { id: 'large', type: 1000, order: Number.MAX_SAFE_INTEGER },
+        { id: 'missing', type: 1000 },
+        { id: 'first', type: 1000, order: -Number.MAX_SAFE_INTEGER },
+        { id: 'system', type: 7005, order: Number.MAX_SAFE_INTEGER },
+    ];
+    const tasks = [
+        { id: 'a', projectId: 'system', priority: 1, order: -Number.MAX_SAFE_INTEGER },
+        { id: 'b', projectId: 'high-last', priority: 3 },
+        { id: 'c', projectId: 'high-first', priority: 3, order: -Number.MAX_SAFE_INTEGER },
+        { id: 'd', projectId: 'first', priority: 3 },
+        { id: 'e', projectId: 'large', priority: 3 },
+        { id: 'f', projectId: 'missing', priority: 3 },
+    ];
+    const input = [['a', 15], ['a', 75], ['b', 800], ['c', 100], ['d', 1500], ['e', 30], ['f', 900], ['deleted-task', 60]];
+    const records = input.map(([taskId, interval]) => ({ taskId, interval, endDate: at, pomodoroInterval: 1500 }));
+    const ranges = ['day', 'week', 'month', 'year'].map(period => calendarRange(at, period));
+    const summaries = () => ranges.map(({start, end}) => aggregateRecords(records, start, end, tasks));
+    const expected = [['high-first', 100], ['high-last', 800], ['system', 90], ['null', 60], ['first', 1500], ['missing', 900], ['large', 30]];
+    const check = rows => {
+        const reports = summaries();
+        for (const [i, segments] of focusStacks(tasks, projects, reports).entries()) {
+            assert.deepEqual(segments.map(({ id, seconds }) => [id, seconds]), rows);
+            assert.deepEqual(segments.map(({ kind }) => kind), ['tasks', 'tasks', 'tasks', 'tasks', 'project', 'project', 'project']);
+            assert.equal(segments.reduce((sum, { seconds }) => sum + seconds, 0), reports[i].time);
+            assert.deepEqual(Object.fromEntries(segments.map(({id, seconds}) => [id, seconds])), reports[i].byProject);
+        }
+    };
+    check(expected);
+    projects[0].order = -Number.MAX_SAFE_INTEGER;
+    records[0].interval = 3000;
+    tasks[0].priority = 4;
+    check([['system', 3075], ...expected.slice(0, 2), expected[3], expected[6], ...expected.slice(4, 6)]);
 });
 
 test('shared legacy display formats cover year/day boundaries, midnight, seconds and minute carry', async () => {

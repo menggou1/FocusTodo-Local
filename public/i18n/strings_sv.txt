@@ -335,7 +335,7 @@ apr_dark_mode = Mörkt läge
 apr_light = Ljust
 apr_dark = Mörkt
 apr_sys = Automatiskt
-apr_theme = Tema
+apr_theme = Bakgrund
 
 gen_play_complete_sound = Spela upp ljud när en uppgift slutförs
 gen_new_task_on_top = Lägg till nya uppgifter överst i listan

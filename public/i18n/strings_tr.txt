@@ -335,7 +335,7 @@ apr_dark_mode = Koyu Mod
 apr_light = Açık
 apr_dark = Koyu
 apr_sys = Otomatik
-apr_theme = Tema
+apr_theme = Arka plan
 
 gen_play_complete_sound = Görev tamamlandığında ses çal
 gen_new_task_on_top = Yeni görevleri en üste ekle

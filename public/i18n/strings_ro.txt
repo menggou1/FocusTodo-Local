@@ -335,7 +335,7 @@ apr_dark_mode = Modul întunecat
 apr_light = Luminos
 apr_dark = Întunecat
 apr_sys = Automat
-apr_theme = Temă
+apr_theme = Fundal
 
 gen_play_complete_sound = Redă sunetul la finalizarea sarcinii
 gen_new_task_on_top = Adaugă sarcinile noi în partea de sus

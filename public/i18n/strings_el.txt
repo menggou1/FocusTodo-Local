@@ -335,7 +335,7 @@ apr_dark_mode = Σκουρόχρωμη Λειτουργία
 apr_light = Φωτεινή
 apr_dark = Σκουρόχρωμη
 apr_sys = Αυτόματη
-apr_theme = Θέμα
+apr_theme = Φόντο
 
 gen_play_complete_sound = Αναπαραγωγή ήχου ολοκλήρωσης εργασίας
 gen_new_task_on_top = Προσθήκη νέων εργασιών στην κορυφή της λίστας

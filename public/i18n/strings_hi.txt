@@ -335,7 +335,7 @@ apr_dark_mode = डार्क मोड
 apr_light = रोशनी
 apr_dark = अँधेरा
 apr_sys = स्वचालित
-apr_theme = थीम
+apr_theme = पृष्ठभूमि
 
 gen_play_complete_sound = कार्य पूर्ण होने पर ध्वनि चलाएँ
 gen_new_task_on_top = नए कार्य सबसे ऊपर जोड़ें

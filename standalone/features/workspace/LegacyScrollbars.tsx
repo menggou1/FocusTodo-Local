@@ -15,6 +15,18 @@ export function LegacyScrollbars() {
       const local = view.matches('[data-local-scroll],[data-forest-scroll]');
       if (local) track.classList.add('legacy-local-scroll-track');
       let timer: ReturnType<typeof setTimeout> | undefined, dragging = false, startY = 0, startScroll = 0, travel = 0, maxScroll = 0;
+      function positionThumb() {
+        if (view.dataset.timerScrollbar === 'hidden') return;
+        thumb.style.transform = `translateY(${maxScroll > 0 ? travel * view.scrollTop / maxScroll : 0}px)`;
+      }
+      function positionTrack() {
+        const rect = view.getBoundingClientRect();
+        track.style.left = rect.right - 8 + 'px';
+        track.style.top = rect.top + 'px';
+      }
+      function ancestorScroll(event: Event) {
+        if (view.dataset.timerScrollbar !== 'hidden' && event.target !== view && event.target instanceof Node && event.target.contains(view)) positionTrack();
+      }
       function clear() { clearTimeout(timer); }
       function hide() { clear(); if (!dragging) { track.dataset.visible = 'false'; track.dataset.highlight = 'false'; } }
       function show(highlight: boolean, timeout = true) {
@@ -26,24 +38,25 @@ export function LegacyScrollbars() {
         // Timer's hidden tracks never paint or accept input. Avoid forcing
         // layout on every frame of its rail-width transition for these tracks.
         if (view.dataset.timerScrollbar === 'hidden') return;
-        const r = view.getBoundingClientRect(), height = Math.max(view.clientHeight / view.scrollHeight * view.clientHeight, 30);
-        maxScroll = view.scrollHeight - view.clientHeight; travel = Math.max(view.clientHeight - height, 0);
+        const viewport = view.clientHeight, content = view.scrollHeight;
+        const height = Math.min(viewport, Math.max(content ? viewport * viewport / content : 0, 30));
+        maxScroll = content - viewport; travel = viewport - height;
         track.hidden = maxScroll <= 1;
-        Object.assign(track.style, local ? { right: '2px', top: '0px', height: view.clientHeight + 'px' } : { left: r.right - 8 + 'px', top: r.top + 'px', height: view.clientHeight + 'px' });
-        thumb.style.height = height + 'px'; thumb.style.transform = `translateY(${maxScroll > 0 ? travel * view.scrollTop / maxScroll : 0}px)`;
+        if (local) Object.assign(track.style, { right: '2px', top: '0px' }); else positionTrack();
+        track.style.height = viewport + 'px'; thumb.style.height = height + 'px'; positionThumb();
       }
       const move = (e: MouseEvent) => { if(view.dataset.timerScrollbar==='hidden')return;if (Math.abs(view.getBoundingClientRect().right - e.clientX) < 10) show(true); else if (track.dataset.highlight === 'true') show(false); };
       const wheel = (e: WheelEvent) => { e.stopPropagation();if(view.dataset.timerScrollbar==='hidden')return;show(Math.abs(view.getBoundingClientRect().right - e.clientX) < 10); };
       const enterTrack = () => show(true, false), leaveTrack = () => { if (!dragging) show(false); };
-      const drag = (e: PointerEvent) => { if (dragging && travel > 0) { e.preventDefault(); view.scrollTop = Math.max(0, Math.min(maxScroll, startScroll + (e.clientY - startY) * maxScroll / travel)); update(); } };
+      const drag = (e: PointerEvent) => { if (dragging && travel > 0) { e.preventDefault(); view.scrollTop = Math.max(0, Math.min(maxScroll, startScroll + (e.clientY - startY) * maxScroll / travel)); } };
       const end = () => { dragging = false; show(true); };
       const down = (e: PointerEvent) => { if (e.button !== 0) return; e.preventDefault(); dragging = true; startY = e.clientY; startScroll = view.scrollTop; thumb.setPointerCapture(e.pointerId); show(true, false); };
-      view.addEventListener('mousemove', move); view.addEventListener('mouseleave', hide); view.addEventListener('wheel', wheel, { passive: true }); view.addEventListener('scroll', update);
+      view.addEventListener('mousemove', move); view.addEventListener('mouseleave', hide); view.addEventListener('wheel', wheel, { passive: true }); view.addEventListener('scroll', positionThumb);
       track.addEventListener('mouseenter', enterTrack); track.addEventListener('mousemove', enterTrack); track.addEventListener('mouseleave', leaveTrack);
       thumb.addEventListener('pointerdown', down); thumb.addEventListener('pointermove', drag); thumb.addEventListener('pointerup', end); thumb.addEventListener('pointercancel', end);
       const resize = new ResizeObserver(update); resize.observe(view); for (const child of view.children) resize.observe(child);
-      window.addEventListener('resize', update); window.addEventListener('scroll', update, true); update();
-      return { refresh: update, dispose() { clear(); resize.disconnect(); window.removeEventListener('resize', update); window.removeEventListener('scroll', update, true); view.classList.remove('legacy-scroll-view'); track.remove(); view.removeEventListener('mousemove', move); view.removeEventListener('mouseleave', hide); view.removeEventListener('wheel', wheel); view.removeEventListener('scroll', update); } };
+      window.addEventListener('resize', update); if (!local) window.addEventListener('scroll', ancestorScroll, true); update();
+      return { refresh: update, dispose() { clear(); resize.disconnect(); window.removeEventListener('resize', update); window.removeEventListener('scroll', ancestorScroll, true); view.classList.remove('legacy-scroll-view'); track.remove(); view.removeEventListener('mousemove', move); view.removeEventListener('mouseleave', hide); view.removeEventListener('wheel', wheel); view.removeEventListener('scroll', positionThumb); } };
     }
     function sync(records?:MutationRecord[]) {
       // Rail children are absolutely positioned over the workspace: their

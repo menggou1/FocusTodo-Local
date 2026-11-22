@@ -335,7 +335,7 @@ apr_dark_mode = Тёмная тема
 apr_light = Светлая
 apr_dark = Тёмная
 apr_sys = Автоматически
-apr_theme = Тема
+apr_theme = Фон
 
 gen_play_complete_sound = Воспроизводить звук при завершении задачи
 gen_new_task_on_top = Добавлять новые задачи вверху списка

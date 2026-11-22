@@ -335,7 +335,7 @@ apr_dark_mode = Dark Mode
 apr_light = Light
 apr_dark = Dark
 apr_sys = Automatic
-apr_theme = Theme
+apr_theme = Background
 
 gen_play_complete_sound = Play task completion sound
 gen_new_task_on_top = Add new tasks above other tasks

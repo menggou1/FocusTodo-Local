@@ -335,7 +335,7 @@ apr_dark_mode = Donkere Modus
 apr_light = Licht
 apr_dark = Donker
 apr_sys = Automatisch
-apr_theme = Tema
+apr_theme = Bakgrunn
 
 gen_play_complete_sound = Spill av lyd ved fullført oppgave
 gen_new_task_on_top = Legg til nye oppgaver øverst i listen

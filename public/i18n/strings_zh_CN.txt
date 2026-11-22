@@ -335,7 +335,7 @@ apr_dark_mode = 深色模式
 apr_light = 浅色
 apr_dark = 深色
 apr_sys = 跟随系统
-apr_theme = 主题
+apr_theme = 背景
 
 gen_play_complete_sound = 播放完成任务提示音
 gen_new_task_on_top = 新任务添加至其他任务上方

@@ -335,7 +335,7 @@ apr_dark_mode = Madilim na Mode
 apr_light = Maliwanag
 apr_dark = Madilim
 apr_sys = Awtomatiko
-apr_theme = Tema
+apr_theme = Background
 
 gen_play_complete_sound = Patugtugin ang tunog kapag natapos ang gawain
 gen_new_task_on_top = Idagdag ang mga bagong gawain sa itaas

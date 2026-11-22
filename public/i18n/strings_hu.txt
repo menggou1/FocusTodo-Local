@@ -335,7 +335,7 @@ apr_dark_mode = Sötét mód
 apr_light = Világos
 apr_dark = Sötét
 apr_sys = Automatikus
-apr_theme = Téma
+apr_theme = Háttér
 
 gen_play_complete_sound = Feladat befejezésekor hang lejátszása
 gen_new_task_on_top = Új feladatok hozzáadása a lista tetejére

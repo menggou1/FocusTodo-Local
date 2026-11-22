@@ -1,4 +1,4 @@
-import { completionStacks } from '../../domain/reports.mjs';
+import { completionStacks, focusStacks } from '../../domain/reports.mjs';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { Entity } from '../../services/core.mjs';
 import { useWorkspace } from './Context';
@@ -92,28 +92,166 @@ const chartFont="12px Helvetica,Tahoma,Arial,'Microsoft YaHei','微软雅黑',Si
 function chartContext(canvas:HTMLCanvasElement,height:number){const width=canvas.clientWidth,dpr=devicePixelRatio||1;canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);const ctx=canvas.getContext('2d');if(!ctx)return null;ctx.scale(dpr,dpr);ctx.font=chartFont;return {ctx,width,height};}
 function ReviewTimeline({edit}:{edit(row:Entity):void}){
  const{services,text}=useWorkspace(),snapshot=useSyncExternalStore(services.business.subscribe,services.business.getSnapshot),zh=services.language.locale.startsWith('zh'),head=useRef<HTMLCanvasElement>(null),body=useRef<HTMLCanvasElement>(null);
- const today=range(Date.now()).start,records=useMemo(()=>snapshot.records.filter(row=>row.state!==-1&&number(row.interval)>0),[snapshot]),first=Math.min(today,...records.map(row=>number(row.endDate)-number(row.interval)*1000)),days=Math.min(1096,Math.max(15,Math.round((today-range(first).start)/86400000)+1));
- const recordsByDay=useMemo(()=>{const result=new Map<number,Entity[]>(),oldest=shift(today,-days+1,'day'),last=shift(today,1,'day');for(const record of records){const finish=Math.min(last,number(record.endDate));for(let day=range(Math.max(oldest,number(record.endDate)-number(record.interval)*1000)).start;day<finish;day=shift(day,1,'day')){if(!result.has(day))result.set(day,[]);result.get(day)!.push(record)}}return result},[records,today,days]);
- const rows:{day:number;y:number;month:boolean}[]=[];let contentHeight=0;for(let i=0;i<days;i++){const day=shift(today,-i,'day');if(i&&new Date(day).getMonth()!==new Date(rows.at(-1)!.day).getMonth()){rows.push({day,y:contentHeight,month:true});contentHeight+=30}rows.push({day,y:contentHeight,month:false});contentHeight+=20}
- const dateLabel=(day:number)=>day===today?text.today:day===shift(today,-1,'day')?(zh?'昨天':'Yesterday'):new Date(day).toLocaleDateString(services.language.locale,{month:'short',day:'numeric'});
- useLayoutEffect(()=>{let stopped=false,frame=0;const started=performance.now(),animate=!matchMedia('(prefers-reduced-motion: reduce)').matches;const draw=()=>{if(stopped||!head.current||!body.current)return;const header=chartContext(head.current,20),drawing=chartContext(body.current,contentHeight);if(!header||!drawing)return;const progress=animate?Math.min(1,(performance.now()-started)/180):1;const{ctx,width}=drawing,css=getComputedStyle(body.current),muted=css.getPropertyValue('--workspace-muted'),line=css.getPropertyValue('--workspace-line');const left=Math.max(...rows.filter(row=>!row.month).map(row=>ctx.measureText(dateLabel(row.day)).width))+4,chartWidth=width-left;
-  ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();let monthStart=0;for(let i=0;i<rows.length;i++){const row=rows[i];let bottom=row.y+(row.month?30:20);ctx.moveTo(left,bottom-.5);ctx.lineTo(width,bottom-.5);if(row.month||i===rows.length-1){const end=row.month?row.y:bottom;for(let slot=1;slot<12;slot++){const x=Math.ceil(left+chartWidth*slot/12)-.5;ctx.moveTo(x,monthStart);ctx.lineTo(x,end)}monthStart=bottom}}ctx.moveTo(left,0);ctx.lineTo(left,contentHeight);ctx.moveTo(width,0);ctx.lineTo(width,contentHeight);ctx.stroke();
-  ctx.fillStyle=muted;for(const row of rows){if(row.month){ctx.textAlign='center';ctx.fillText(new Date(row.day).toLocaleDateString(services.language.locale,{year:'numeric',month:'long'}),left+chartWidth/2,row.y+20)}else{ctx.textAlign='left';ctx.fillText(dateLabel(row.day),0,row.y+15);const end=shift(row.day,1,'day');for(const record of recordsByDay.get(row.day)||[]){if(row.y<(1-progress)*292)continue;const start=Math.max(row.day,number(record.endDate)-number(record.interval)*1000),finish=Math.min(end,number(record.endDate));if(finish<=start)continue;const task=snapshot.tasks.find(task=>task.id===record.taskId),project=snapshot.projects.find(project=>project.id===task?.projectId);ctx.fillStyle=project?.color?'#'+String(project.color).replace('#',''):'#AEBDC3';ctx.fillRect(left+(start-row.day)/(end-row.day)*chartWidth,row.y+.5,(finish-start)/(end-row.day)*chartWidth,18);ctx.fillStyle=muted}}}
-  const hc=header.ctx;hc.fillStyle=muted;for(let i=0;i<12;i++){hc.textAlign=i===0?'left':'center';hc.fillText(i*2+':00',left+i*chartWidth/12,12)}head.current.dataset.chartLeft=String(left);body.current.dataset.chartLeft=String(left);body.current.dataset.recordCount=String(records.length);body.current.dataset.reveal=String(progress);if(progress<1){cancelAnimationFrame(frame);frame=requestAnimationFrame(draw)}
- };draw();void document.fonts.ready.then(draw);const observer=new ResizeObserver(draw);if(head.current)observer.observe(head.current);return()=>{stopped=true;cancelAnimationFrame(frame);observer.disconnect()};},[snapshot,services.language.locale,contentHeight]);
- return <section className="domain-card legacy-review-chart"><h2>{services.language.legacyText('rpt_review')}</h2><div className="legacy-review-hours"><canvas ref={head} aria-hidden="true"/></div><div className="legacy-review-scroll"><canvas ref={body} style={{height:contentHeight}} role="img" aria-label={zh?'番茄记录时间轴':'Pomodoro records timeline'} onClick={e=>{const rect=e.currentTarget.getBoundingClientRect(),y=e.clientY-rect.top,x=e.clientX-rect.left,left=Number(e.currentTarget.dataset.chartLeft),row=rows.find(row=>!row.month&&y>=row.y&&y<row.y+20);if(!row)return;const at=row.day+(x-left)/(rect.width-left)*(shift(row.day,1,'day')-row.day),record=records.find(record=>number(record.endDate)>=at&&number(record.endDate)-number(record.interval)*1000<=at);if(record)edit(record)}}/>{records.map(record=><button key={record.id} className="workspace-sr" aria-label={stamp(number(record.endDate),services.language.locale)} onClick={()=>edit(record)}>{stamp(number(record.endDate),services.language.locale)}</button>)}</div></section>
+ const revealStart=useRef<number|null>(null);
+ const today=range(Date.now()).start,locale=services.language.locale;
+ const records=useMemo(()=>snapshot.records.filter(row=>row.state!==-1&&number(row.interval)>0),[snapshot.records]);
+ const {rows,contentHeight}=useMemo(()=>{
+  const first=records.reduce((earliest,row)=>Math.min(earliest,number(row.endDate)-number(row.interval)*1000),today);
+  const days=Math.min(1096,Math.max(15,Math.round((today-range(first).start)/86400000)+1));
+  const rows:{day:number;end:number;y:number;month:boolean;label:string}[]=[];
+  const dateFormat=new Intl.DateTimeFormat(locale,{month:'short',day:'numeric'});
+  const monthFormat=new Intl.DateTimeFormat(locale,{year:'numeric',month:'long'});
+  let contentHeight=0,end=shift(today,1,'day');
+  for(let i=0;i<days;i++){
+   const day=shift(today,-i,'day');
+   if(i&&new Date(day).getMonth()!==new Date(end).getMonth()){
+    rows.push({day,end,y:contentHeight,month:true,label:monthFormat.format(day)});contentHeight+=30;
+   }
+   rows.push({day,end,y:contentHeight,month:false,label:i===0?text.today:i===1?(zh?'昨天':'Yesterday'):dateFormat.format(day)});
+   contentHeight+=20;end=day;
+  }
+  return {rows,contentHeight};
+ },[records,today,locale,text.today,zh]);
+ const byDay=useMemo(()=>{
+  const tasks=new Map(snapshot.tasks.map(task=>[task.id,task.projectId]));
+  const colors=new Map(snapshot.projects.map(project=>[project.id,project.color?'#'+String(project.color).replace('#',''):'#AEBDC3']));
+  const oldest=rows.at(-1)!.day,last=rows[0].end;
+  const days=new Map<number,{record:Entity;start:number;end:number;color:string}[]>();
+  for(const record of records){
+   const start=Math.max(oldest,number(record.endDate)-number(record.interval)*1000),end=Math.min(last,number(record.endDate));
+   const color=colors.get(String(tasks.get(String(record.taskId))))||'#AEBDC3';
+   for(let day=range(start).start;day<end;day=shift(day,1,'day')){
+    const entries=days.get(day)||[];
+    entries.push({record,start,end,color});days.set(day,entries);
+   }
+  }
+  return days;
+ },[records,rows,snapshot.tasks,snapshot.projects]);
+ const theme=document.documentElement.dataset.theme;
+ useLayoutEffect(()=>{
+  const header=head.current!,canvas=body.current!;
+  const started=revealStart.current??=performance.now(),animate=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let stopped=false,frame=0,width=0,dpr=0,left=0,paintedFrom=Infinity,context:CanvasRenderingContext2D|null=null;
+  const drawRecords=()=>{
+   const ctx=context;
+   if(!ctx||stopped)return;
+   const progress=animate?Math.min(1,(performance.now()-started)/180):1,from=(1-progress)*292;
+   for(const row of rows){
+    if(row.month||row.y<from||row.y>=paintedFrom)continue;
+    for(const entry of byDay.get(row.day)||[]){
+     const start=Math.max(row.day,entry.start),end=Math.min(row.end,entry.end),dayLength=row.end-row.day;
+     if(end<=start)continue;
+     ctx.fillStyle=entry.color;
+     ctx.fillRect(left+(start-row.day)/dayLength*(width-left),row.y+.5,(end-start)/dayLength*(width-left),18);
+    }
+   }
+   paintedFrom=from;canvas.dataset.reveal=String(progress);
+   if(progress<1)frame=requestAnimationFrame(drawRecords);
+  };
+  const rebuild=(fontsChanged=false)=>{
+   if(stopped||!fontsChanged&&width===canvas.clientWidth&&dpr===devicePixelRatio)return;
+   const heading=chartContext(header,20),drawing=chartContext(canvas,contentHeight);
+   if(!heading||!drawing)return;
+   const {ctx}=drawing,css=getComputedStyle(canvas),muted=css.getPropertyValue('--workspace-muted');
+   width=drawing.width;dpr=devicePixelRatio;context=ctx;paintedFrom=Infinity;
+   left=Math.max(...rows.filter(row=>!row.month).map(row=>ctx.measureText(row.label).width))+4;
+   const chartWidth=width-left;
+   ctx.strokeStyle=css.getPropertyValue('--workspace-line');ctx.lineWidth=1;ctx.beginPath();
+   let monthStart=0;
+   for(const [i,row] of rows.entries()){
+    const bottom=row.y+(row.month?30:20);
+    ctx.moveTo(left,bottom-.5);ctx.lineTo(width,bottom-.5);
+    if(row.month||i===rows.length-1){
+     const end=row.month?row.y:bottom;
+     for(let slot=1;slot<12;slot++){const x=Math.ceil(left+chartWidth*slot/12)-.5;ctx.moveTo(x,monthStart);ctx.lineTo(x,end)}
+     monthStart=bottom;
+    }
+   }
+   ctx.moveTo(left,0);ctx.lineTo(left,contentHeight);ctx.moveTo(width,0);ctx.lineTo(width,contentHeight);ctx.stroke();
+   ctx.fillStyle=muted;
+   for(const row of rows){
+    ctx.textAlign=row.month?'center':'left';
+    ctx.fillText(row.label,row.month?left+chartWidth/2:0,row.y+(row.month?20:15));
+   }
+   const hc=heading.ctx;hc.fillStyle=muted;
+   for(let i=0;i<12;i++){hc.textAlign=i===0?'left':'center';hc.fillText(i*2+':00',left+i*chartWidth/12,12)}
+   header.dataset.chartLeft=String(left);canvas.dataset.chartLeft=String(left);canvas.dataset.recordCount=String(records.length);
+   cancelAnimationFrame(frame);drawRecords();
+  };
+  rebuild();
+  const fontsPending=document.fonts.status==='loading';
+  if(fontsPending)void document.fonts.ready.then(()=>rebuild(true));
+  const observer=new ResizeObserver(()=>rebuild());
+  observer.observe(header);window.addEventListener('resize',resize);
+  function resize(){rebuild()}
+  return()=>{stopped=true;cancelAnimationFrame(frame);observer.disconnect();window.removeEventListener('resize',resize)};
+ },[rows,byDay,records,contentHeight,theme]);
+ const title=zh?'番茄记录时间轴':'Pomodoro records timeline';
+ return <section className="domain-card legacy-review-chart"><h2>{services.language.legacyText('rpt_review')}</h2>
+  <div className="legacy-review-hours"><canvas ref={head} aria-hidden="true"/></div>
+  <div className="legacy-review-viewport"><div className="legacy-review-scroll" data-local-scroll tabIndex={0} role="region" aria-label={title}>
+   <canvas ref={body} style={{height:contentHeight}} role="img" aria-label={title} onClick={e=>{
+    const rect=e.currentTarget.getBoundingClientRect(),y=e.clientY-rect.top,x=e.clientX-rect.left,left=Number(e.currentTarget.dataset.chartLeft);
+    const row=rows.find(row=>!row.month&&y>=row.y&&y<row.y+20);
+    if(!row||x<left)return;
+    const at=row.day+(x-left)/(rect.width-left)*(row.end-row.day);
+    const hit=byDay.get(row.day)?.find(entry=>entry.start<=at&&at<=entry.end);
+    if(hit)edit(hit.record);
+   }}/>
+   {records.map(record=><button key={record.id} className="workspace-sr" aria-label={stamp(number(record.endDate),locale)} onClick={()=>edit(record)}>{stamp(number(record.endDate),locale)}</button>)}
+  </div></div>
+ </section>;
 }
+function paintFocusColumn(ctx:CanvasRenderingContext2D,segments:{id:string;seconds:number}[],x:number,bottom:number,scale:number,color:(id:string)=>string){
+ const dpr=devicePixelRatio||1;
+ let edge=Math.round(bottom*dpr);
+ const total=segments.reduce((sum,segment)=>sum+segment.seconds,0);
+ const end=Math.round((bottom-total*scale)*dpr);
+ const minimum=edge-end>=segments.length?1:0;
+ for(const [index,segment] of segments.entries()){
+  bottom-=segment.seconds*scale;
+  const remaining=segments.length-index-1;
+  const top=Math.max(end+remaining*minimum,Math.min(edge-minimum,Math.round(bottom*dpr))),rows=edge-top;
+  edge=top;
+  if(rows<=0)continue;
+  // A divider may only consume unused pixels within a segment. Sharing the
+  // snapped boundary keeps neighboring colors from drawing over short slices.
+  const gap=Math.min(rows-1,Math.round((index===0?1:2)*dpr));
+  const height=(rows-gap)/dpr;
+  ctx.fillStyle=color(segment.id);
+  if(index===segments.length-1&&height>=4){
+   ctx.beginPath();ctx.roundRect(x,top/dpr,15,height,[2,2,0,0]);ctx.fill();
+  }else ctx.fillRect(x,top/dpr,15,height);
+ }
+}
+
 function ReportBar({kind}:{kind:'focus'|'tasks'}){
  const{services}=useWorkspace(),t=(zh:string,en:string)=>services.language.locale.startsWith('zh')?zh:en,[period,setPeriod]=useState<Period>('day'),[date,setDate]=useState(Date.now()),canvas=useRef<HTMLCanvasElement>(null),[hover,setHover]=useState(-1),snapshot=useSyncExternalStore(services.business.subscribe,services.business.getSnapshot);
  const current=range(date,period),start=shift(current.start,-14,period);
  const buckets=useMemo(()=>Array.from({length:15},(_,i)=>{const from=shift(start,i,period);return {start:from,end:shift(from,1,period)}}),[start,period]);
  const focus=useMemo(()=>kind==='focus'?buckets.map(row=>services.business.report(row.start,row.end)):[],[kind,buckets,snapshot,services]);
+ const focusSegments=useMemo(()=>focusStacks(snapshot.tasks,snapshot.projects,focus),[snapshot,focus]);
  const completion=useMemo(()=>kind==='tasks'?completionStacks(snapshot.tasks,snapshot.projects,buckets):[],[kind,snapshot,buckets]);
  const values=buckets.map((_,i)=>kind==='focus'?Math.round(focus[i].time/36)/100:completion[i].reduce((n,item)=>n+item.value,0)),minutes=focus.map(row=>row.time/60),max=Math.max(0,...values),top=max?Math.ceil(max/(max<=80?4:20))*(max<=80?4:20):4;
  const display=(i:number)=>kind==='focus'?formatMinutesDuration(minutes[i],services.language.locale):values[i]+t('个',' tasks'),label=(at:number)=>period==='year'?String(new Date(at).getFullYear()):period==='month'?formatMonth(at,services.language.locale):period==='week'?formatTaskDate(at,services.language.locale)+'-'+formatTaskDate(shift(at,1,'week')-1,services.language.locale):formatTaskDate(at,services.language.locale);
  useEffect(()=>{if(!canvas.current)return;let stopped=false;const draw=()=>{if(stopped||!canvas.current)return;const drawing=chartContext(canvas.current,300);if(!drawing)return;const{ctx,width,height}=drawing,css=getComputedStyle(canvas.current),muted=css.getPropertyValue('--workspace-muted'),line=css.getPropertyValue('--workspace-line'),left=Math.max(...[top,top/2,top/4,top*.75,0].map(n=>ctx.measureText(String(n)).width))+8,y=52,w=width-left,h=height-72;
   ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle=muted;for(let i=0;i<5;i++)ctx.fillText(String(top-top*i/4),0,y+h*i/4,left);ctx.textBaseline='top';ctx.fillText(label(buckets[0].start),left,y+h+8);if(period!=='week'){ctx.textAlign='center';ctx.fillText(label(buckets[7].start),left+w/2,y+h+8)}ctx.textAlign='right';ctx.fillText(label(buckets[14].start),width,y+h+8);ctx.lineWidth=1;ctx.strokeStyle=line;ctx.beginPath();for(let i=0;i<5;i++){ctx.moveTo(left,y+h*i/4-.5);ctx.lineTo(width,y+h*i/4-.5)}ctx.stroke();
-  for(let i=0;i<15;i++){let bottom=y+h;const entries=kind==='focus'?Object.entries(focus[i].byProject).map(([id,seconds])=>({id,value:Math.round(seconds/36)/100,project:snapshot.projects.find(project=>project.id===id)})).sort((a,b)=>number(b.project?.order)-number(a.project?.order)):[...completion[i]].reverse().map(item=>({...item,project:snapshot.projects.find(project=>project.id===item.id)}));for(let j=0;j<entries.length;j++){const item=entries[j];if(item.value<=0)continue;const bh=item.value/top*h,x=Math.round(left+(w-15)/14*i);bottom-=bh;ctx.fillStyle=item.project?.color?'#'+String(item.project.color).replace('#',''):'#d2dfe0';ctx.beginPath();ctx.roundRect(x,bottom,15,Math.max(1,bh-(j===0?2:3)),j===entries.length-1?[2,2,0,0]:0);ctx.strokeStyle=ctx.fillStyle;ctx.stroke();ctx.fill()}}
+  const colors=new Map(snapshot.projects.map(project=>[project.id,project.color?'#'+String(project.color).replace('#',''):'#d2dfe0']));
+  for(let i=0;i<15;i++){
+   const x=Math.round(left+(w-15)/14*i);
+   let bottom=y+h;
+   if(kind==='focus'){
+    paintFocusColumn(ctx,[...focusSegments[i]].reverse(),x,bottom,h/(top*3600),id=>colors.get(id)||'#d2dfe0');
+    continue;
+   }
+   const entries=[...completion[i]].reverse();
+   for(let j=0;j<entries.length;j++){
+    const item=entries[j],bh=item.value/top*h;
+    bottom-=bh;ctx.fillStyle=colors.get(item.id)||'#d2dfe0';
+    ctx.beginPath();ctx.roundRect(x,bottom,15,Math.max(1,bh-(j===0?2:3)),j===entries.length-1?[2,2,0,0]:0);
+    ctx.strokeStyle=ctx.fillStyle;ctx.stroke();ctx.fill();
+   }
+  }
   if(hover>=0){const x=left+(w-15)/14*hover+7.5,value=display(hover),dateText=label(buckets[hover].start);ctx.strokeStyle='#fd5553';ctx.beginPath();ctx.moveTo(x,y+h-1);ctx.lineTo(x,y-8);ctx.stroke();ctx.font='14px Helvetica,Arial,sans-serif';const tooltipWidth=Math.max(ctx.measureText(value).width,ctx.measureText(dateText).width)+16,tx=Math.min(width-tooltipWidth,Math.max(left,x-tooltipWidth/2));ctx.fillStyle='#fd5553';ctx.beginPath();ctx.roundRect(tx,0,tooltipWidth,44,6);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(value,tx+tooltipWidth/2,7);ctx.font='10px Helvetica,Arial,sans-serif';ctx.fillText(dateText,tx+tooltipWidth/2,27)}
   canvas.current.dataset.chartLeft=String(left);canvas.current.dataset.series=JSON.stringify(values);canvas.current.dataset.axisMax=String(top);
  };draw();void document.fonts.ready.then(draw);const observer=new ResizeObserver(draw);observer.observe(canvas.current);return()=>{stopped=true;observer.disconnect()};},[snapshot,period,date,hover,services.language.locale]);

@@ -158,7 +158,7 @@ export interface CoreServices {
     readonly reminders: SnapshotSource<{due: readonly Entity[]; unread: readonly Entity[]; next: number}> & {
         refresh(notify?: boolean): {due: readonly Entity[]; unread: readonly Entity[]; next: number} | undefined;
         markRead(): Promise<{due: readonly Entity[]; unread: readonly Entity[]; next: number}>; dispose(): void };
-    readonly release: { readonly metadata: {version: string; sourceVersion: string; schemaVersion: 3; updates: readonly CompatibleRecord[]};
+    readonly release: { readonly metadata: {version: string; sourceVersion: string; author: string; date: string; schemaVersion: 3; updates: readonly CompatibleRecord[]};
         hasUnread(): boolean; entries(): CompatibleRecord[]; markRead(version: string): Promise<void>;
         identify(value: string): {kind: 'legacy-local' | 'independent'; version: string; parts: readonly number[]} | null };
     refresh(): Promise<void>; suspend(): void; resume(): void;

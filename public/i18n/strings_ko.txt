@@ -335,7 +335,7 @@ apr_dark_mode = 다크모드
 apr_light = 밝기
 apr_dark = 다크
 apr_sys = 자동
-apr_theme = 주제
+apr_theme = 배경
 
 gen_play_complete_sound = 작업 완료 시 소리 재생
 gen_new_task_on_top = 새 작업을 맨 위에 추가
