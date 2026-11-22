@@ -102,6 +102,7 @@
   "备份来自较新的数据库版本，请先更新程序。": "This backup uses a newer database version. Update the app first.",
   "备份缺少数据表：": "The backup is missing a table: ",
   " 存在无效或重复 ID。": " contains an invalid or duplicate ID.",
+  " 名称必须是文本：": " name must be text: ",
   "专注记录包含无效时长或日期：": "A focus record has an invalid duration or date: ",
   "备份包含无效设置：": "The backup contains an invalid setting: ",
   "无效计时会话备份。": "Invalid timer session backup.",

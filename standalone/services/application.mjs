@@ -62,7 +62,7 @@ export async function createCoreServices({ storage: physicalStorage, indexedDB, 
         onIntent(field, value) { if (field === 'externalNetwork' && !value) { network.cancel();wallpaper.cancel(); } } });
     const language = createLanguageService({ settings, catalog, languages, encodeBase64 });
     const notifications = createNotificationService({ api: notification, focus, onError: report, icon: notificationIcon });
-    business = createBusinessService({ data, core, now, randomUUID, settings, onError: report, fault, onTaskCompleted() {
+    business = createBusinessService({ data, core, now, randomUUID, settings, translate, onError: report, fault, onTaskCompleted() {
         if (settings.getSnapshot().completeSoundEnabled) audio?.effect('Complete.m4a');
     } });
     if (createAudio) audio = createAudioService({ createAudio, locks, settings, visible, onError: report, notice: message => onEvent('notice', message) });

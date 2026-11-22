@@ -16,7 +16,7 @@ function collect(tx, done, fail, apply, beforeCommit = () => {}) {
         };
     }
 }
-export function createBusinessService({ data, core, now, randomUUID, settings, onError, fault = () => {}, onTaskCompleted = () => {} }) {
+export function createBusinessService({ data, core, now, randomUUID, settings, translate = value => value, onError, fault = () => {}, onTaskCompleted = () => {} }) {
     const state = snapshotSource({ projects: [], tasks: [], subtasks: [], schedules: [], records: [], sessions: [] }, onError);
     let disposed = false, revision = 0, latestRefresh;
     const reportCache = new Map();
@@ -57,6 +57,7 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
                 const session = values.sessions.find(row => row.id === 'active');
                 if (session && predicate(session)) {
                     const result = core.reduce(session, { type: 'detach', expectedSession: session.sessionId }, now());
+                    invariant(result.session.state !== 'recovery', translate('请先处理待确认的中断时间。'), 'conflict');
                     for (const row of result.records) tx.objectStore('Pomodoro').add(row);
                     tx.objectStore('TimerSession').put(result.session);
                     values.records.push(...result.records); values.sessions = [result.session];
@@ -214,10 +215,11 @@ export function createBusinessService({ data, core, now, randomUUID, settings, o
         batch: commands => command({type:'batch',commands}),
         search(keyword) {
             const query = String(keyword).trim().toLowerCase(); if (!query) return [];
-            const value = state.getSnapshot(), tags = new Map(value.projects.filter(row => row.type === 3000 && row.state === 0).map(row => [row.id, row.name.toLowerCase()]));
+            const searchableName = name => typeof name === 'string' ? name.toLowerCase() : '';
+            const value = state.getSnapshot(), tags = new Map(value.projects.filter(row => row.type === 3000 && row.state === 0).map(row => [row.id, searchableName(row.name)]));
             return value.tasks.filter(row => row.state === 0 && ([row.name, row.remark].some(text => String(text || '').toLowerCase().includes(query))
                 || String(row.tags || '').split(',').some(id => tags.get(id.trim())?.includes(query))
-                || value.subtasks.some(child => child.taskId === row.id && child.state === 0 && child.name.toLowerCase().includes(query))));
+                || value.subtasks.some(child => child.taskId === row.id && child.state === 0 && searchableName(child.name).includes(query))));
         },
         report(start, end) {
             const key = `${start}:${end}`;

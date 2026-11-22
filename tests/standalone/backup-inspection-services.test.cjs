@@ -28,6 +28,70 @@ test('inspection keeps restore safety-backup cancellation and atomicity unchange
  await h.app.backup.inspect(JSON.stringify(target));await assert.rejects(h.app.backup.restore(JSON.stringify(target)),/cancelled/);assert.deepEqual((await snapshot(h)).tables,before.tables);assert.deepEqual((await snapshot(h)).storage,before.storage);assert.equal(h.app.business.getSnapshot().tasks[0].name,'Keep on cancellation');
 });
 
+test('broken goal history or non-text names are rejected before replacing persisted data', async t => {
+    const h = await createApplication({ application: { setTimeout() {}, clearTimeout() {} } });
+    t.after(h.dispose);
+    await h.app.business.command({ type: 'addTask', values: { id: 'current', name: 'Keep me' } });
+    await h.app.settings.setGoal(90);
+    await h.app.startForTask('current', '', 'countup');
+    const exported = (await h.app.backup.export({ format: 'json' })).data;
+    const before = await snapshot(h);
+    const cases = [
+        ...['[null]', '[', '{}', '[{"time":8640000000000001,"value":90}]', '[{"time":0,"value":-1}]',
+            '[{"time":"0","value":90}]', '[{"time":0,"value":"90"}]', '[{"type":"TIME","time":0}]']
+            .map(raw => ['Goals', target => { target.localStorage.Goals = raw; }]),
+        ['Project', target => { target.indexedDB.Project.push({ id: 'bad-tag', state: 0, type: 3000, name: { text: 'Tag' } }); }],
+        ['Task', target => { target.indexedDB.Task.push({ id: 'bad-task', state: 0, name: false }); }],
+        ['Subtask', target => { target.indexedDB.Subtask.push({ id: 'bad-child', state: 0, taskId: 'current', name: ['Child'] }); }],
+    ];
+    for (const version of [1, 2]) {
+        for (const [field, damage] of cases) {
+            const target = clone(exported);
+            target.meta.exportVersion = version;
+            if (version === 1) {
+                delete target.meta.scope;
+                delete target.indexedDB.TimerSession;
+            }
+            damage(target);
+            const json = JSON.stringify(target), input = version === 1 ? json : gzipSync(json);
+            await assert.rejects(h.app.backup.inspect(input), new RegExp(field));
+            await assert.rejects(h.app.backup.restore(input), new RegExp(field));
+            assert.deepEqual(await snapshot(h), before);
+        }
+    }
+});
+
+test('v1 restore preserves sparse names, historical goals and unknown fields', async t => {
+    const h = await createApplication();
+    t.after(h.dispose);
+    const target = clone((await h.app.backup.export({ format: 'json' })).data);
+    target.meta.exportVersion = 1;
+    delete target.meta.scope;
+    delete target.indexedDB.TimerSession;
+    const tag = { id: 'old-tag', state: 0, type: 3000, future: { keep: true } };
+    const child = { id: 'old-child', state: 0, taskId: 'parent', name: null, future: [1, 2] };
+    const parent = { id: 'parent', state: 0, name: 'Find me', tags: tag.id };
+    const unnamed = { id: 'old-task', state: 0 };
+    const goals = [{ time: 0, type: 'TIME', value: 120, future: { keep: true } }, { time: h.clock.value, value: 90 }];
+    target.indexedDB.Project.push(tag);
+    target.indexedDB.Subtask.push(child);
+    target.indexedDB.Task.push(parent, unnamed);
+    target.localStorage.Goals = JSON.stringify(goals);
+    target.localStorage.FuturePreference = '{"keep":true}';
+    const input = JSON.stringify(target);
+    await h.app.backup.inspect(input);
+    await h.app.backup.restore(input);
+    const saved = await h.data.snapshot();
+    assert.deepEqual(saved.indexedDB.Project.find(row => row.id === tag.id), tag);
+    assert.deepEqual(saved.indexedDB.Subtask, [child]);
+    assert.deepEqual(saved.indexedDB.Task, [unnamed, parent]);
+    assert.equal(saved.localStorage.Goals, target.localStorage.Goals);
+    assert.equal(saved.localStorage.FuturePreference, target.localStorage.FuturePreference);
+    assert.deepEqual(h.app.settings.goals(), goals);
+    assert.deepEqual(h.app.business.search('Find').map(row => row.id), ['parent']);
+    assert.deepEqual(h.app.business.search('absent'), []);
+});
+
 test('portable backups cannot grant network access and cached Bing wallpaper survives restore', async t => {
     const url = 'https://www.bing.com/HPImageArchive.aspx';
     const key = 'FocusTodo.externalNetwork';

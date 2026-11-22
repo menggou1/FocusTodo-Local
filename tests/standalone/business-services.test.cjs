@@ -125,6 +125,61 @@ test('task detach and history commit atomically, stale edits and duplicate IDs c
     assert.notEqual(h.app.business.getSnapshot().projects.find(item=>item.id===row.id).name,'discard');
 });
 
+test('a task cannot be completed or deleted when detaching first discovers an interrupted timer', async t => {
+    const h = await createApplication({ application: { setTimeout() {}, clearTimeout() {} } });
+    t.after(h.dispose);
+    await h.app.business.command({ type: 'addTask', values: { id: 'focus', name: 'Focus', pomodoroInterval: 1500 } });
+    await h.app.business.command({ type: 'addSubtask', values: { id: 'child', taskId: 'focus', name: 'Child' } });
+    await h.app.startForTask('focus', 'child', 'countup');
+    const session = await h.app.repository.session();
+    const tasks = await rows(h.data, 'Task'), subtasks = await rows(h.data, 'Subtask');
+    h.clock.value += h.core.GAP_MS + 1000;
+    for (const input of [
+        { type: 'completeTask', id: 'focus' },
+        { type: 'removeTask', id: 'focus', preserveHistory: true },
+        { type: 'batch', commands: [
+            { type: 'updateTask', id: 'focus', changes: { name: 'Uncommitted' } },
+            { type: 'removeSubtask', id: 'child' },
+        ] },
+    ]) {
+        await assert.rejects(h.app.business.command(input), { code: 'conflict' });
+        assert.deepEqual(await rows(h.data, 'Task'), tasks);
+        assert.deepEqual(await rows(h.data, 'Subtask'), subtasks);
+        assert.deepEqual(await h.app.repository.session(), session);
+        assert.deepEqual(await rows(h.data, 'Pomodoro'), []);
+    }
+    await h.app.timer.command({ type: 'tick', expectedSession: session.sessionId });
+    assert.equal((await h.app.repository.session()).state, 'recovery');
+    await h.app.timer.command({ type: 'resolve', cutoff: session.cursorAt + 60000, continue: false });
+    await h.app.business.command({ type: 'removeTask', id: 'focus', preserveHistory: true });
+    const detached = await h.app.repository.session();
+    assert.equal(detached.taskId, '');
+    assert.equal(detached.subtaskId, '');
+    assert.equal((await rows(h.data, 'Task'))[0].state, -1);
+    assert.equal((await rows(h.data, 'Subtask'))[0].state, -1);
+    assert.deepEqual((await rows(h.data, 'Pomodoro')).map(row => [row.interval, row.taskId, row.subtaskId]), [[60, 'focus', 'child']]);
+});
+
+test('daily goals persist separate local dates and replace only the current date', async t => {
+    const previous = process.env.TZ;
+    process.env.TZ = 'America/New_York';
+    t.after(() => { if (previous === undefined) delete process.env.TZ; else process.env.TZ = previous; });
+    const early = Date.parse('2026-11-01T00:15:00-04:00');
+    const late = Date.parse('2026-11-01T23:45:00-05:00');
+    const nextDay = Date.parse('2026-11-02T07:00:00-05:00');
+    const clock = { value: early };
+    const h = await createApplication({ clock });
+    t.after(h.dispose);
+    await h.app.settings.setGoal(180);
+    clock.value = late;
+    await h.app.settings.setGoal(120);
+    clock.value = nextDay;
+    await h.app.settings.setGoal(60);
+    clock.value += 3600000;
+    await h.app.settings.setGoal(90);
+    assert.deepEqual(JSON.parse(h.storage.getItem('Goals')).map(row => [row.time, row.value]), [[late, 120], [clock.value, 90]]);
+});
+
 test('preset task queries, calendar layout and record progress match legacy rules',async t=>{
     const h=await pair(t),date=new Date(h.clock.value);date.setHours(0,0,0,0);const start=date.getTime();
     for(const [id,deadline,priority]of [['none',0,0],['old',start-1,3],['today',start+3600000,2],['tomorrow',start+90000000,1]]){

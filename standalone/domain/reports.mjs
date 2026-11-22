@@ -37,12 +37,12 @@ export function reportBuckets(records, start, end, unit = 'day', tasks = []) {
     }
     return result;
 }
+export const reminderIdentity = row => JSON.stringify([row.id, row.reminderDate]);
 export function reminderState(tasks, read, now) {
-    const key = row => JSON.stringify([row.id, row.reminderDate]);
     const active = tasks.filter(row => row.state === 0 && !row.isFinished && Number.isFinite(row.reminderDate) && row.reminderDate > 0);
     const due = active.filter(row => row.reminderDate <= now).sort((a, b) => b.reminderDate - a.reminderDate);
     const seen = new Set(read);
-    return { due, unread: due.filter(row => !seen.has(key(row))), next: active.reduce((next, row) => row.reminderDate > now ? Math.min(next, row.reminderDate) : next, Infinity) };
+    return { due, unread: due.filter(row => !seen.has(reminderIdentity(row))), next: active.reduce((next, row) => row.reminderDate > now ? Math.min(next, row.reminderDate) : next, Infinity) };
 }
 /** Stack segments in visual top-to-bottom order. Only custom-list segments
  * participate in project ordering. Every segment keeps its original count and ID.

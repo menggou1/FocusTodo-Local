@@ -110,11 +110,17 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
     if(e.button!==0||event.type!=='schedule'||busy||blocked||edit)return;
     const origin=point(e.clientX,e.clientY,false);if(origin===null)return;
     const card=e.currentTarget.closest<HTMLElement>('.domain-time-event')!;
-    e.preventDefault();e.stopPropagation();let latest:EventEdit|null=null,paintedDelta=0;
+    e.preventDefault();e.stopPropagation();
+    let latest:EventEdit|null=null,paintedDelta:number|null=null,moved=false;
     track(e,p=>{
-      if(!latest&&Math.abs(p.clientY-e.clientY)<4&&Math.abs(p.clientX-e.clientX)<4)return;
-      const position=point(p.clientX,p.clientY);if(position===null)return;
-      if(!latest){
+      if(!moved&&Math.abs(p.clientY-e.clientY)<4&&Math.abs(p.clientX-e.clientX)<4)return;
+      moved=true;
+      const position=point(p.clientX,p.clientY,true,true);
+      if(position===null){
+        if(latest){latest=null;setEdit(null)}
+        return;
+      }
+      if(paintedDelta===null){
         // A new gesture can catch a card partway through its CSS rollback.
         const bounds=card.getBoundingClientRect(),axis=card.parentElement!.getBoundingClientRect();
         const pixelsPerMinute=axis.height/1440;
@@ -126,8 +132,10 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
       const end=resize?Math.max(start+60000,Math.min(start+28800000,event.end+delta)):start+event.end-event.start;
       latest={event,start,end,pointer:{x:p.clientX,y:p.clientY}};setEdit(latest);
     },async()=>{
+      if(!moved)return;
+      suppressGestureClick();
       if(!latest)return;
-      suppressGestureClick();closeEditor();setMenu(null);
+      closeEditor();setMenu(null);
       const {start,end}=latest,pending={event,start,end};
       setEdit(pending);
       const saved=await run(()=>services.calendar.put({...event.record,endDate:end,interval:(end-start)/1000},event.record));
@@ -205,7 +213,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
   }
   const dateLabel=mode==='day'?dateInput(date):dateInput(date).slice(0,7);
   return <section ref={root} className={'domain-calendar legacy-calendar '+mode+(!dual&&mode==='day'?' single':'')+(editor?.row?' has-inspector':'')} data-testid="calendar-page" data-pane-open={pane} style={{'--legacy-hour-height':hourHeight+'px'} as CSSProperties}>
-    <div className="legacy-calendar-main"><div className="legacy-calendar-toolbar"><div className="legacy-calendar-navigation"><button onClick={()=>setDate(Date.now())}>{text.today}</button><button aria-label={t('上一期','Previous period')} onClick={()=>setDate(shift(date,-1,mode))}>‹</button><button aria-label={t('下一期','Next period')} onClick={()=>setDate(shift(date,1,mode))}>›</button><PickerField className="legacy-calendar-date"><summary><span>{dateLabel}</span><span className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-date-popover"><DatePicker value={dateInput(date)} allowPast shortcutHidden actionsHidden calendar cancel={()=>{}} confirm={value=>{if(value)setDate(+new Date(value));root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-date').forEach(el=>el.open=false)}}/></div></PickerField></div><div className="legacy-calendar-actions"><select aria-label={t('日程视图','Schedule view')} value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>{(['day','week','month'] as const).map((p,i)=><option key={p} value={p}>{[t('日','Day'),t('周','Week'),t('月','Month')][i]}</option>)}</select></div></div>
+    <div className="legacy-calendar-main"><div className="legacy-calendar-toolbar"><div className="legacy-calendar-navigation"><button onClick={()=>setDate(Date.now())}>{text.today}</button><button aria-label={t('上一期','Previous period')} onClick={()=>setDate(shift(date,-1,mode))}>‹</button><button aria-label={t('下一期','Next period')} onClick={()=>setDate(shift(date,1,mode))}>›</button><PickerField className="legacy-calendar-date"><summary><span>{dateLabel}</span><span className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-date-popover"><DatePicker value={dateInput(date)} allowPast shortcutHidden actionsHidden calendar cancel={()=>{}} confirm={value=>{if(value)setDate(+new Date(value+'T12:00'));root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-date').forEach(el=>el.open=false)}}/></div></PickerField></div><div className="legacy-calendar-actions"><select aria-label={t('日程视图','Schedule view')} value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>{(['day','week','month'] as const).map((p,i)=><option key={p} value={p}>{[t('日','Day'),t('周','Week'),t('月','Month')][i]}</option>)}</select></div></div>
     <div className="legacy-calendar-body">
       {mode==='day'&&<h2 className="legacy-calendar-day-title"><span>{range(date).start===today?text.today:new Date(date).toLocaleDateString(services.language.locale,{month:'short',day:'numeric'})} {new Date(date).toLocaleDateString(services.language.locale,{weekday:'long'})}</span></h2>}
       {mode==='month'?<><div className="legacy-calendar-weekdays">{Array.from({length:7},(_,i)=><span key={i}>{new Date(shift(range(date,'week').start,i,'day')).toLocaleDateString(services.language.locale,{weekday:'short'})}</span>)}</div><div className="legacy-month-scroll"><div className="domain-calendar-grid month">{days.map(day=>{const rows=events.filter(row=>row.start<shift(day,1,'day')&&row.end>day);return <section key={day} className="domain-calendar-day" data-date={dateInput(day)} data-other-month={new Date(day).getMonth()!==new Date(date).getMonth()||undefined} onClick={()=>{setDate(day);setMode('day')}}><button className="legacy-month-day-number" data-today={day===today||undefined}>{new Date(day).getDate()}</button><div className="legacy-month-events">{rows.slice(0,3).map(event=><button key={event.id} className={'domain-month-event '+event.type} onClick={e=>{e.stopPropagation();pendingMonthEvent.current=event;setDate(day);setMode('day')}} style={(()=>{const task=snapshot.tasks.find(row=>row.id===event.record.taskId),project=snapshot.projects.find(row=>row.id===task?.projectId),color='#'+String(project?.color||'4670F6').replace('#','');return{background:color+(event.type==='focus'?'8c':'2e'),borderColor:color,color:event.type==='focus'?'#fff':undefined}})()}>{!event.record.isAllDay&&<small>{time(event.start)}</small>}<span>{eventTitle(event.record)}</span></button>)}{rows.length>3&&<span className="legacy-month-more">+{rows.length-3}</span>}</div></section>})}</div></div></>:

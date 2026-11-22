@@ -1,4 +1,5 @@
 import { invariant, snapshotSource } from './errors.mjs';
+import { calendarRange } from '../domain/reports.mjs';
 export const preferenceDefinitions = Object.freeze({
     workInterval: ['WorkInterval', 1500], shortBreakInterval: ['ShortBreakInterval', 300], longBreakInterval: ['LongBreakInterval', 900], longBreakPomodoros: ['LongBreakPomodoros', 4],
     autoWorkEnabled: ['AutoWork', false], autoBreakEnabled: ['AutoBreak', false], banBreakEnabled: ['BanBreak', false],
@@ -9,6 +10,13 @@ export const preferenceDefinitions = Object.freeze({
     language: ['FocusTodo.language', 'auto'], externalNetwork: ['FocusTodo.externalNetwork', false], isDarkMode: ['DarkMode', null],
     widgetOrder: ['AllWidgets', [0,1,2]], visibleWidgets: ['Widgets', [0,1,2]], widgetExpanded: ['WidgetExpanded', true],
 });
+export function parseGoals(raw) {
+    const rows = raw ? JSON.parse(raw) : [];
+    invariant(Array.isArray(rows) && rows.every(row => row && Number.isFinite(row.time) && Math.abs(row.time) <= 8.64e15 &&
+        Number.isFinite(row.value) && row.value >= 0), 'Invalid Goals history');
+    return rows;
+}
+
 export function createPreferencesService({ data, storage, now, randomUUID, encodeBase64, decodeBase64, onError, onIntent = () => {} }) {
     const read = () => {
         const result = {};
@@ -69,8 +77,19 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
             await data.themeStorageOperation(()=>{storage.setItem('AllWidgets',order.join(','));storage.setItem('Widgets',visible.join(','));});
             const result=refresh();data.changed('settings');return result;
         },
-        goals() { const raw = storage.getItem('Goals'); const rows = raw ? JSON.parse(raw) : [{time:0,type:'TIME',value:180,default:true}]; invariant(Array.isArray(rows) && rows.every(row=>Number.isFinite(row.time)&&Number.isFinite(row.value)&&row.value>=0), 'Invalid daily goals'); return rows; },
-        setGoal: minutes => data.themeStorageOperation(()=>{ invariant(Number.isInteger(minutes)&&minutes>=0&&minutes<=1440,'Invalid daily goal'); const rows = JSON.parse(storage.getItem('Goals')||'[]'), time=now(); invariant(Array.isArray(rows),'Invalid daily goals'); const last=rows.at(-1); if(last && time-last.time<86400000)rows.pop(); rows.push({time,type:'TIME',value:minutes,sync:false}); storage.setItem('Goals',JSON.stringify(rows)); data.changed('settings'); }),
+        goals() {
+            const raw = storage.getItem('Goals');
+            return raw ? parseGoals(raw) : [{ time: 0, type: 'TIME', value: 180, default: true }];
+        },
+        setGoal: minutes => data.themeStorageOperation(() => {
+            invariant(Number.isInteger(minutes) && minutes >= 0 && minutes <= 1440, 'Invalid daily goal');
+            const time = now(), { start } = calendarRange(time);
+            const rows = parseGoals(storage.getItem('Goals')).filter(row => calendarRange(row.time).start !== start);
+            rows.push({ time, type: 'TIME', value: minutes, sync: false });
+            rows.sort((a, b) => a.time - b.time);
+            storage.setItem('Goals', JSON.stringify(rows));
+            data.changed('settings');
+        }),
         timerConfig: task => ({ interval: task?.pomodoroInterval || state.getSnapshot().workInterval,
             shortBreak: state.getSnapshot().shortBreakInterval, longBreak: state.getSnapshot().longBreakInterval,
             longEvery: state.getSnapshot().longBreakPomodoros, autoWork: state.getSnapshot().autoWorkEnabled,

@@ -1,5 +1,5 @@
 import { ServiceError } from './errors.mjs';
-import { preferenceDefinitions } from './preferences.mjs';
+import { parseGoals, preferenceDefinitions } from './preferences.mjs';
 /* Data algorithms migrated from local-data.js at 139d0f9.
  * Explicit capabilities only: no globals, legacy identity hooks, or DB monkey patches.
  * Candidate storage stays namespaced. Backup metadata retains the legacy format.
@@ -301,9 +301,13 @@ export function createDataService({ indexedDB, storage: localStorage, timerCore,
             const records = data.indexedDB[name];
             if (!Array.isArray(records)) throw new Error(translate('备份缺少数据表：') + name);
             const seen = new Set(), key = keys[name] || 'id';
+            const hasName = ['Project', 'Task', 'Subtask'].includes(name);
             records.forEach(record => {
                 if (!record || Array.isArray(record) || typeof record[key] !== 'string' || !record[key] || seen.has(record[key])) throw new Error(name + translate(' 存在无效或重复 ID。'));
                 seen.add(record[key]);
+                if (hasName && record.name != null && typeof record.name !== 'string') {
+                    throw new ServiceError('validation', name + translate(' 名称必须是文本：') + record[key]);
+                }
                 if (name === 'Pomodoro' && (!validDate(record.endDate) || !validDate(record.endDate - record.interval * 1000) || !Number.isFinite(record.interval) ||
                     record.interval <= 0 || record.interval > 28800 || !Number.isFinite(record.pomodoroInterval) || record.pomodoroInterval <= 0 || record.pomodoroInterval > 28800)) {
                     throw new Error(translate('专注记录包含无效时长或日期：') + record[key]);
@@ -313,6 +317,8 @@ export function createDataService({ indexedDB, storage: localStorage, timerCore,
         Object.keys(data.localStorage).forEach(key => {
             if (['__proto__', 'constructor', 'prototype', 'setItem', 'removeItem'].includes(key) || typeof data.localStorage[key] !== 'string') throw new Error(translate('备份包含无效设置：') + key);
         });
+        try { parseGoals(data.localStorage.Goals); }
+        catch (error) { throw new ServiceError('validation', translate('备份包含无效设置：') + 'Goals', error); }
         // Preserve unfinished work without counting time after the backup was taken.
         const sessions = data.indexedDB.TimerSession === undefined ? [] : data.indexedDB.TimerSession;
         if (!Array.isArray(sessions) || sessions.length > 1) throw new Error(translate('无效计时会话备份。'));

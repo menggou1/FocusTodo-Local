@@ -93,6 +93,20 @@ async function sampleFrames(card, count) {
 }
 
 const cases = [
+    ['schedule drag cancelled over the completed lane or outside the viewport keeps the stored time', {}, async ({page}, {rows}) => {
+        const endDate = when('09:30'), interval = 1800;
+        await prepare(page, 'en', [{id: 'moving', endDate, interval}]);
+        const card = page.locator(schedule('moving'));
+        const box = await page.locator(scroll).boundingBox();
+        const original = await rows(page, 'Schedule');
+        for (const [x, y] of [[box.x + box.width * 0.75, box.y + 190], [box.x + box.width * 0.25, box.y - 5]]) {
+            await drag(page, card, 0, 62, '09:30–10:00');
+            await page.mouse.move(x, y);
+            await page.mouse.up();
+            await page.waitForFunction(() => !document.querySelector('[data-calendar-edit]'));
+            assert.deepEqual(await rows(page, 'Schedule'), original);
+        }
+    }],
     ['calendar task pane and a single glyph animate, reverse and survive view and window changes', {reducedMotion: 'no-preference'}, async ({page}, {engine}) => {
         await prepare(page, 'en', []);
         const frames = await page.evaluate(({ panel, toggle }) => new Promise(resolve => {

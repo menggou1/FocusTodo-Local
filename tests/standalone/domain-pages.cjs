@@ -25,6 +25,59 @@ async function detailsSave(page){await page.evaluate(()=>document.activeElement?
    await page.getByLabel('Schedule view',{exact:true}).selectOption('week');assert.equal(await page.locator('.domain-calendar-day').count(),7);await page.getByLabel('Schedule view',{exact:true}).selectOption('month');assert.equal(await page.locator('.domain-calendar-day').count(),42);
    await page.getByLabel('Schedule view',{exact:true}).selectOption('day');await page.locator('.domain-time-event.schedule').first().locator('.legacy-event-title').click();inspector=page.locator('.legacy-record-inspector');await inspector.locator('footer').getByRole('button',{name:'Delete',exact:true}).click();await inspector.waitFor({state:'hidden'});assert.equal(await page.locator('dialog.workspace-dialog[open]').count(),0);assert.equal((await store(page,'Schedule')).filter(r=>r.state!==-1).length,2);
   });
+  await run(browser,engine,'calendar picker keeps the selected local day west of UTC',async({page})=>{
+   await page.clock.setFixedTime(new Date('2026-11-15T12:00:00-05:00'));
+   await page.getByRole('button',{name:'Schedule',exact:true}).click();
+   await page.locator('.legacy-calendar-date>summary').click();
+   await page.locator('.legacy-calendar-date-popover').getByRole('button',{name:'2026-11-01',exact:true}).click();
+   assert.equal(await page.locator('.domain-calendar-grid.day > .domain-calendar-day').getAttribute('data-date'),'2026-11-01');
+   await page.getByRole('button',{name:'New schedule 2026-11-01 09:00',exact:true}).dblclick({position:{x:60,y:1}});
+   const quick=page.locator('dialog.legacy-record-quick[open]');
+   await quick.getByLabel('Name',{exact:true}).fill('Local date schedule');
+   await quick.locator('form>footer').getByRole('button',{name:'Confirm',exact:true}).click();
+   await quick.waitFor({state:'hidden'});
+   const [saved]=await store(page,'Schedule');
+   assert.equal(saved.endDate-saved.interval*1000,Date.parse('2026-11-01T09:00:00-05:00'));
+  },{timezoneId:'America/New_York'});
+  await run(browser,engine,'changing duration keeps the second occurrence of a repeated local hour',async({page})=>{
+   const start=Date.parse('2026-11-01T01:20:00-05:00'), interval=1500;
+   await page.clock.setFixedTime(new Date('2026-11-01T12:00:00-05:00'));
+   await page.evaluate(({start,interval})=>new Promise((resolve,reject)=>{
+    const opening=indexedDB.open('FocusTodoStandalone.PomodoroDB6',3);
+    opening.onerror=()=>reject(opening.error);
+    opening.onsuccess=()=>{
+     const db=opening.result,tx=db.transaction(['Schedule','Pomodoro'],'readwrite');
+     tx.oncomplete=()=>{db.close();resolve()};tx.onabort=()=>{db.close();reject(tx.error)};
+     const timed={state:0,creationDate:start,endDate:start+interval*1000,interval,taskId:'',subtaskId:'',sync:0};
+     tx.objectStore('Schedule').add({...timed,id:'fold-schedule',objType:'SCHEDULE',isAllDay:false});
+     tx.objectStore('Pomodoro').add({...timed,id:'fold-record',objType:'POMODORO',pomodoroInterval:interval});
+    };
+   }),{start,interval});
+   await page.reload();await ready(page);
+   await page.getByRole('button',{name:'Schedule',exact:true}).click();
+   await page.locator('[data-event-id="fold-schedule"] .legacy-event-title').click();
+   const inspector=page.locator('.legacy-record-inspector');
+   await inspector.locator('.legacy-record-field>summary').nth(2).click();
+   await page.getByRole('option',{name:'30 Minutes',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('.legacy-record-inspector form')?.dataset.pending==='0');
+   const [schedule]=await store(page,'Schedule');
+   assert.equal(schedule.interval,1800);
+   assert.equal(schedule.endDate-schedule.interval*1000,start,'editing a schedule preserves its exact start');
+   await inspector.locator('.legacy-record-field>summary').nth(1).click();
+   await page.locator('.workspace-picker-surface:not(.is-closing) .legacy-date-picker.reminder').getByRole('button',{name:'Confirm',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('.legacy-record-inspector form')?.dataset.pending==='0');
+   assert.deepEqual(await store(page,'Schedule'),[schedule],'confirming the same local time preserves the second occurrence');
+   await page.getByRole('button',{name:'Completed',exact:true}).click();
+   await page.locator('[data-record-id="fold-record"] .legacy-history-record-title').click();
+   const modal=page.locator('dialog.legacy-record-modal[open]');
+   await modal.locator('.legacy-record-field>summary').nth(2).click();
+   await modal.getByRole('option',{name:'30 Minutes',exact:true}).click();
+   await modal.locator('form>footer').getByRole('button',{name:'OK',exact:true}).click();
+   await modal.waitFor({state:'hidden'});
+   const [record]=await store(page,'Pomodoro');
+   assert.equal(record.interval,1800);
+   assert.equal(record.endDate-record.interval*1000,start,'editing a focus record preserves its exact start');
+  },{timezoneId:'America/New_York'});
   await run(browser,engine,'calendar schedule starts timer, returns to calendar and writes a reportable record',async({page})=>{
    await page.clock.install({time:new Date('2026-11-12T08:00:00+08:00')});await page.getByRole('button',{name:'Schedule',exact:true}).click();
    const slot=page.getByRole('button',{name:'New schedule 2026-11-12 09:00',exact:true});await slot.dblclick({position:{x:60,y:1}});
