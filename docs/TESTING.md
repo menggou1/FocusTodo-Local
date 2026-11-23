@@ -50,6 +50,10 @@ paired 对照默认为归档和隔离 React 各启动随机端口，均使用临
 
 `node tests/standalone/settings-regression.cjs` 使用合成数据、随机隔离端口验证设置、头像、主题解码、菜单、音频反馈及文件选择结果；`node tests/standalone/settings-legacy-reference.cjs` 只核对指定的旧版控件与 VolumeTip 资源。Windows 使用 `FOCUS_TEST_BUNDLED_BROWSER=1` 选择 Playwright 自带 Chromium，使用独立浏览器安装；不要接入日常 Profile。支持 Web Audio 的浏览器直接使用应用内嵌的原始 WAV，校验解码、字节一致、拖动释放前静音和无独立 WAV HTTP 请求。Windows WebKit 等仅提供原生媒体播放的环境使用同字节本地 URL，验证实际解码和字节一致。
 
+`node tests/standalone/about-settings.cjs` 在 Chromium 中对照不可变的 1.9.4 归档与隔离构建。检查双列几何、原始图标、中英明暗、窄视口、滚动、悬停、键盘焦点和新窗口目标。新窗口响应使用测试夹具，保持浏览器验收离线。
+
+CI 复用回归核对流向、正式引用身份、原始矩阵和浏览器作业、附件有效期、更新失败、内容与摘要不符、循环指针和回退全测。发布时核对 Tag、main 和同步后 dev 的实际 Actions 作业，以及预检与独立门禁记录的原始附件摘要。
+
 `python tests/release/ci-validation-test.py` 验证同 SHA CI 复用的来源、六项矩阵、附件有效期/摘要/测试时序、更新失败记录、非法跳过和压缩及解包大小上限。`release-gate-test.py` 覆盖版本、轻量及附注 Tag、远端同版本发布分支的精确 SHA、首次创建及显式晋升条件、附件核验和 Pages 来源。发布来源反例使用模拟 Git 返回值。
 
 安全回归校验正式产物 CSP 的启动脚本及事件处理程序哈希，并在三引擎启动场景中验证隔离产物和资源加载失败处理。Node/Python 测试覆盖防嵌入响应头和本地请求范围。备份合同覆盖旧版 JSON/Gzip 导入、导出、自动安全备份、日志恢复及失败回滚。成功导入后保留缓存壁纸，Bing 联网可在设置中重新授权。

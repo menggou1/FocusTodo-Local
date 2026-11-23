@@ -26,9 +26,9 @@ async function open(pair){await pair.old.locator('img[src="img/header-setting.pn
 const commonOld={modal:'[class^=Settings-root]',navigation:'[class*=Settings-navigation]',firstNav:'[class*=Settings-menu-]',firstIcon:'[class*=Settings-menuIcon]',content:'[class*=Settings-content]'};
 const commonNew={modal:'.domain-overlay:has(.legacy-settings)',navigation:'.legacy-settings>nav',firstNav:'.legacy-settings>nav>button',firstIcon:'.legacy-settings>nav>button>img',content:'.legacy-settings-content'};
 async function downloadIconOffset(pair,locale,oldSelector,newSelector){
- const row=pair.new.locator('.legacy-about>.legacy-account-row:last-child');
- const download=row.getByRole('link',{name:locale==='en'?'Download the official version':'官方版本下载',exact:true});
- assert.equal(await download.getAttribute('href'), 'https://www.focustodo.cn/'+(locale==='en'?'':'?lang=zh_CN')+'#products');
+ const row=pair.new.locator('.legacy-about>.legacy-account-row:has(.legacy-platforms)');
+ const label=row.locator(':scope > span');
+ assert.equal(await label.innerText(), locale==='en'?'Download the official version':'下载官方版本');
  const oldIcon=pair.old.locator(oldSelector).first(),newIcon=row.locator(newSelector).first();
  await oldIcon.waitFor();
  await newIcon.waitFor();

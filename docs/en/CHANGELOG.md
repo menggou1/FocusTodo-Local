@@ -2,7 +2,17 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.1.4**, author Lexible.
+Current application: **2.1.5**, author Lexible.
+
+## 2.1.5 · 2026-11-23
+
+- Organize each release around one main theme and use semantic versioning. Record the theme, scope, and acceptance criteria for the current batch and summarize its changes in bilingual release reports.
+- Reuse the original CI matrix and artifacts for the exact commit according to ref identity. Preflight and the independent gate still check version, build, provenance, and digests.
+- Restore two-column settings rows in About for the version, author, upstream project, licenses, local data, and official channels. Content wraps and scrolls in narrow windows.
+- Restore the original GitHub repository icon. The six platform icons share its hover and keyboard focus feedback and open the corresponding official channels.
+- Add the official website and a note supporting the official app below the downloads, with clear attribution for the local edition.
+
+[English report](releases/UPDATE-2.1.5.md).
 
 ## 2.1.4 · 2026-11-22
 

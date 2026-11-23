@@ -10,10 +10,11 @@ import { string } from './model';
 import { usePreferenceChanges } from './usePreferenceChanges';
 
 const themes=import.meta.glob<string>('../../../public/img/timer-bg-*.jpg',{query:'?url',import:'default',eager:true});
-const icons=import.meta.glob<string>('../../../public/img/{setting-*,header-portrait,theme-selected}.*',{query:'?url',import:'default',eager:true});
+const icons=import.meta.glob<string>('../../../public/img/{setting-*,header-portrait,github,theme-selected}.*',{query:'?url',import:'default',eager:true});
 const icon=(name:string)=>icons['../../../public/img/'+name];
 export const classicThemes: Record<string,string>={Leaf:'leaf',Ocean:'ocean',Trees:'trees',StarrySky:'starrysky',Desert:'desert',Forest:'forest',Mountain:'mountain',Beach:'beach',City:'city',Lake:'lake'};
-const officialDownload = (zh: boolean) => 'https://www.focustodo.cn/' + (zh ? '?lang=zh_CN' : '') + '#products';
+const platformNames = {apple: 'Apple', android: 'Android', windows: 'Windows', mac: 'macOS', chrome: 'Chrome', edge: 'Edge'};
+const externalLink = {target: '_blank', rel: 'noopener noreferrer'} as const;
 const platformLinks=(zh:boolean):Record<string,string>=>({apple:'https://itunes.apple.com/'+(zh?'CN':'US')+'/app/id966057213?mt=8',android:zh?'https://sj.qq.com/myapp/detail.htm?apkName=com.superelement.pomodoro':'https://play.google.com/store/apps/details?id=com.superelement.pomodoro',windows:'https://www.microsoft.com/store/apps/9N8GPB2TK8GB',mac:'https://itunes.apple.com/'+(zh?'CN':'US')+'/app/id1258530160?mt=12',chrome:'https://chrome.google.com/webstore/detail/ngceodoilcgpmkijopinlkmohnfifjfb',edge:'https://microsoftedge.microsoft.com/addons/detail/ffhiojdfkpecinnmmbhmijmgffknaokd'});
 export function themeURL(theme:string) {return themes['../../../public/img/timer-bg-'+(classicThemes[theme==='Sea'?'Ocean':theme]||'leaf')+'.jpg']}
 // Cache decoded images, keeping the old painted timer until the next is ready.
@@ -84,14 +85,55 @@ export function Settings({initialTab='pomodoro'}:{initialTab?:string}) {
       </div><input ref={wallpaperInput} type="file" hidden accept="image/*" disabled={busy||blocked} aria-label={t('上传图片','Upload image')} onChange={e=>{const image=e.target.files?.[0];if(image)void run(async()=>{await services.wallpaper.add(image,image.name);setVersion(v=>v+1)});e.target.value=''}}/></>}
     {tab==='projects'&&<><h2 className="workspace-sr">{labels.projects}</h2><SettingsProjects projects={data.projects}/></>}
     {tab==='account'&&<><h2 className="workspace-sr">{t('账号资料','Profile')}</h2><div className="legacy-account-row"><span>{legacy('usr_portrait')}</span><div><Avatar className="domain-avatar" src={avatarDraft||profile.avatar} alt=""/>{avatarDraft?<><button className="primary" disabled={busy||blocked} onClick={()=>{void run(async()=>{await services.settings.saveProfile('avatar',avatarDraft);setAvatarDraft('')})}}>{legacy('cmm_ok')}</button><button disabled={busy} onClick={()=>setAvatarDraft('')}>{text.cancel}</button></>:<button type="button" onClick={()=>avatarInput.current?.click()}>{legacy('usr_upload')}</button>}<input ref={avatarInput} type="file" hidden accept="image/png,image/jpeg,image/gif" aria-label={legacy('usr_portrait')} disabled={busy||blocked} onChange={e=>{const image=e.target.files?.[0];if(image)void run(async()=>{const value=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(reader.error);reader.readAsDataURL(image)});const cropped=await new Promise<string>((resolve,reject)=>{const source=new Image();source.onload=()=>{try{const side=Math.min(source.naturalWidth,source.naturalHeight);if(!side)throw new Error('Invalid avatar dimensions');if(!avatarCanvas.current){avatarCanvas.current=document.createElement('canvas');avatarCanvas.current.width=avatarCanvas.current.height=64}const canvas=avatarCanvas.current,context=canvas.getContext('2d');if(!context){reject(new Error('Canvas unavailable'));return}context.drawImage(source,(source.width-side)/2,(source.height-side)/2,side,side,0,0,64,64);resolve(canvas.toDataURL())}catch(error){reject(Object.assign(error as Error,{code:'validation'}))}};source.onerror=()=>reject(Object.assign(new Error('Invalid avatar'),{code:'validation'}));source.src=value});setAvatarDraft(cropped)}).then(saved=>{if(!saved)setNotice(t('头像上传失败，请选择有效图片。','Avatar upload failed. Choose a valid image.'))});e.target.value=''}}/></div></div><label className="legacy-account-row"><span>{legacy('usr_username')}</span><input aria-label={text.name} required maxLength={50} value={name} onChange={e=>setName(e.target.value)} onBlur={()=>{void saveName()}} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();e.currentTarget.blur()}}}/></label><div className="legacy-account-row"><span>{legacy('usr_acct_management')}</span><div className="legacy-account-actions">{accountButtons}</div></div></>}
-    {tab==='about'&&<div className="legacy-about">
-      <header><h2>FocusTodo-Local</h2><span>{t('版本','Version')} {services.release.metadata.version} · {services.release.metadata.date}</span></header>
-      <p>{t('任务、专注记录和设置保存在当前浏览器中。本地启动后可离线使用，默认关闭外部联网。','Tasks, focus records, and settings are stored in this browser. The local app works offline, with external networking off by default.')}</p>
-      <div className="legacy-account-row"><span>{t('本地版作者','Local edition by')}</span><a href="https://github.com/menggou1/FocusTodo-Local" target="_blank" rel="noreferrer">{services.release.metadata.author} · {t('项目仓库','Project repository')}</a></div>
-      <div className="legacy-account-row"><span>{t('来源项目','Source project')}</span><a href="https://github.com/lamngockhuong/focustodo" target="_blank" rel="noreferrer">FocusTodo {services.release.metadata.sourceVersion} · Lâm Ngọc Khương</a></div>
-      <div className="legacy-account-row"><span>{t('许可与版权','Licenses and credits')}</span><div><a href="https://github.com/menggou1/FocusTodo-Local/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT</a><a href="https://github.com/menggou1/FocusTodo-Local/blob/main/THIRD-PARTY-NOTICES.txt" target="_blank" rel="noreferrer">{t('第三方声明','Third-party notices')}</a></div></div>
-      <div className="legacy-account-row"><a href={officialDownload(services.language.locale.startsWith('zh'))} target="_blank" rel="noreferrer">{t('官方版本下载','Download the official version')}</a><div className="legacy-platforms">{Object.entries(platformLinks(services.language.locale.startsWith('zh'))).map(([platform,href])=><a key={platform} href={href} target="_blank" rel="noreferrer" aria-label={platform}><img draggable={false} src={icon('setting-logo-'+platform+'.png')} alt=""/></a>)}</div></div>
-    </div>}
+    {tab==='about'&&<section className="legacy-about" aria-label={labels.about}>
+      <div className="legacy-account-row">
+        <span>{t('版本','Version')}</span>
+        <span data-selectable>{services.release.metadata.version} · {services.release.metadata.date}</span>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('本地版作者','Local edition by')}</span>
+        <div>
+          <span>{services.release.metadata.author}</span>
+          <a className="about-icon-link" href="https://github.com/menggou1/FocusTodo-Local" {...externalLink} aria-label={t('GitHub 项目仓库','GitHub project repository')}>
+            <img className="about-github-icon" src={icon('github.svg')} width="24" height="24" alt="" draggable={false}/>
+          </a>
+        </div>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('来源项目','Source project')}</span>
+        <a href="https://github.com/lamngockhuong/focustodo" {...externalLink}>FocusTodo {services.release.metadata.sourceVersion} · Lâm Ngọc Khương</a>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('许可与版权','Licenses and credits')}</span>
+        <div>
+          <a href="https://github.com/menggou1/FocusTodo-Local/blob/main/LICENSE" {...externalLink}>MIT</a>
+          <a href="https://github.com/menggou1/FocusTodo-Local/blob/main/THIRD-PARTY-NOTICES.txt" {...externalLink}>{t('第三方声明','Third-party notices')}</a>
+        </div>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('本地数据','Local data')}</span>
+        <p className="legacy-about-note">{t('任务、专注记录和设置保存在当前浏览器中。本地启动后可离线使用，默认关闭外部联网。','Tasks, focus records, and settings are stored in this browser. The local app works offline, with external networking off by default.')}</p>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('下载官方版本','Download the official version')}</span>
+        <div className="legacy-platforms">
+          {Object.entries(platformLinks(services.language.locale.startsWith('zh'))).map(([platform,href])=>{
+            const name = platformNames[platform as keyof typeof platformNames];
+            return <a className="about-icon-link" key={platform} href={href} {...externalLink} aria-label={t(name+' 官方版本下载','Official '+name+' download')}>
+              <img draggable={false} src={icon('setting-logo-'+platform+'.png')} alt=""/>
+            </a>;
+          })}
+        </div>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('官方网站','Official Website')}</span>
+        <a data-selectable href="https://www.focustodo.cn/" {...externalLink}>www.focustodo.cn</a>
+      </div>
+      <div className="legacy-account-row">
+        <span>{t('支持正版','Support the official app')}</span>
+        <p className="legacy-about-note">{t('本地版基于原项目开发。感谢原作者的工作，欢迎通过官方渠道支持正版 Focus To-Do。','This local edition is based on the original project. We thank its creators and encourage you to support Focus To-Do through its official channels.')}</p>
+      </div>
+    </section>}
   </div>
   {notice&&<div className="legacy-settings-notice" role="status">{notice}</div>}
   <input ref={importInput} type="file" hidden accept=".json,.gz,.gzip,application/json,application/gzip" aria-label={lt('导入数据')} onChange={e=>{const picked=e.target.files?.[0];if(picked){setFile(picked);setInspection(null);setModal('restore')}e.target.value=''}}/>

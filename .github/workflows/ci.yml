@@ -50,6 +50,18 @@ jobs:
           if tag != version:
               raise SystemExit(f'Tag {tag!r} must match localVersion {version!r}')
           PY
+      - name: Check release branch version identity
+        if: startsWith(github.ref, 'refs/heads/release/')
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          branch = os.environ['GITHUB_REF']
+          version = json.loads(Path('release.json').read_text(encoding='utf-8'))['localVersion']
+          if branch != f'refs/heads/release/{version}':
+              raise SystemExit(f'Release branch {branch!r} must match localVersion {version!r}')
+          PY
       - name: Select test scope
         id: scope
         env:
@@ -103,7 +115,7 @@ jobs:
           else
             python scripts/package-release.py
           fi
-      - name: Restore verified dev archives for this exact commit when available
+      - name: Restore original tested archives for this exact commit when available
         id: reuse
         if: steps.scope.outputs.full == 'true'
         env:
@@ -253,6 +265,7 @@ jobs:
           node tests/standalone/final-ui-parity.cjs
           node tests/standalone/folder-composer-parity.cjs
           node tests/standalone/inspector-dialog-parity.cjs
+          node tests/standalone/about-settings.cjs
           node tests/standalone/settings-legacy-reference.cjs
           node tests/standalone/settings-regression.cjs
         env:

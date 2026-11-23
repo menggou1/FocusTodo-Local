@@ -48,6 +48,10 @@ Current-commit results belong in the release report. Historical evidence keeps i
 
 Set `FOCUS_TEST_BUNDLED_BROWSER=1` to use bundled Chromium without a daily browser profile. Browsers with Web Audio use the WAV bytes embedded in the application. Native playback checks confirm decoding, byte equality, silence until the gesture ends and the absence of a separate HTTP request. Media-only ports such as Windows WebKit use the packaged URL and verify the same WAV bytes and native playback.
 
+`node tests/standalone/about-settings.cjs` pairs the immutable 1.9.4 archive with the isolated build in Chromium. It checks the column geometry and original artwork, both languages and themes, compact layouts, scrolling, hover, keyboard focus and popup destinations. Popup responses come from fixtures to keep browser tests offline.
+
+CI reuse tests cover direction, published ref identity, original matrix and browser jobs, artifact freshness, newer failures, content and digest mismatches, circular reuse pointers, and fallback to the full matrix. For a release, verify the Actions job results and original artifact digest in the preflight and independent gate summaries for the tag, main, and synchronized dev.
+
 `python tests/release/ci-validation-test.py` checks exact-commit provenance, all six matrix jobs, artifact expiry/digest/test chronology, newer failures, unsafe skips, and compressed and extracted size limits. The release-gate tests cover version identity, lightweight and annotated tags, the matching remote release branch SHA, first publication, explicit promotion, artifact verification, and Pages provenance. Release-origin failure cases use mocked Git responses.
 
 Security regressions verify the production CSP hashes for startup scripts and handlers. The three-engine startup suite exercises the isolated build and asset failure handling. Node and Python tests cover anti-framing headers and the loopback request boundary. Backup contracts cover legacy JSON/Gzip imports, exports, automatic safety copies, journal recovery, and rollback. Successful imports retain cached wallpaper and users can enable Bing network access again in Settings.

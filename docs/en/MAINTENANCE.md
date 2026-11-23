@@ -56,6 +56,16 @@ release.json owns version, author, date, repository and updates. build:release s
 
 Keep every pushed tag permanently, including tags for failed, cancelled or unpublished candidates. Never move, delete, recreate or reuse a pushed tag. Preserve the historical record, archives, copyright and licenses. Never overwrite public assets.
 
+### Release themes and version numbers
+
+Starting with 2.1.5, each release has one main theme and may include a few necessary, low-risk related fixes. Ship closely related work together based on behavior and risk. Schedule large unrelated changes to settings, the calendar, animation, reports, or data structures in separate batches. High-risk security fixes may ship separately and take priority. Individual commits and minor adjustments do not trigger releases.
+
+- PATCH fixes existing functionality, restores consistent interactions, or improves stability.
+- MINOR adds backward-compatible functionality or a significant capability.
+- MAJOR introduces an explicit incompatible change.
+
+Choose the version increment based on compatibility and functional impact. Lines changed, time spent, and CI run counts do not determine it.
+
 ### Failed release candidates
 
 This policy takes effect when preparing 2.1.0 and applies to 2.1.0 and later versions.
@@ -69,7 +79,7 @@ This policy takes effect when preparing 2.1.0 and applies to 2.1.0 and later ver
 
 Generate metadata and build both variants, then run all [test commands](TESTING.md), including units, service contracts, browsers, production upgrade/backup, archive startup and Python fallback. Commit build inputs before the committed-source Pages check. Commit valid generated output and run git diff --check. Never remove necessary tests, weaken assertions, shrink data or relax visual thresholds to pass CI.
 
-main is the stable default and sole Pages source. Development pushes run Windows/macOS/Linux × Node 22/24. Release/main/tag runs may reuse exact-commit dev evidence under the policy below. Node 24 verifies the same portable archives and Chromium; Linux also runs Firefox/WebKit. Preflight verifies generated files, builds, Pages allowlists and release gates. Archived regressions complement independent React startup, business, recovery, UI and production-entry tests.
+main is the stable default and sole Pages source. Ordinary development pushes run Windows/macOS/Linux × Node 22/24. Release workflow refs may reuse original exact-commit evidence under the policy below. Node 24 verifies the same portable archives and Chromium; Linux also runs Firefox/WebKit. Preflight verifies generated files, builds, Pages allowlists and release gates. Archived regressions complement independent React startup, business, recovery, UI and production-entry tests.
 
 Direct Actions references use full commit SHAs from official repositories. The Playwright image uses an OCI digest for the lockfile version. Verify these references against their official sources when updating dependencies. Checkout steps leave Git credentials unpersisted.
 
@@ -104,8 +114,19 @@ Lexible maintains the local app, based on [lamngockhuong/focustodo](https://gith
 
 Current documents live in docs and docs/en; reports use releases. Historical reports retain historical facts. Only docs/BACKLOG.md maintains unfinished engineering, human acceptance and post-release checks. Update links, metadata and package manifests when moving documents.
 
+At the start of development, record the theme, scope, and acceptance criteria in the [current development batch](../NEXT-UPDATE.md). During release preparation, summarize the batch’s accepted changes in bilingual version reports and restore the empty template. Keep unfinished work in [Backlog](../BACKLOG.md) and preserve published reports and release history.
+
 ## Exact-commit CI reuse
 
-dev always runs the full matrix. Release/main/tag reuse requires successful jobs for all six matrix combinations in the same repository/workflow at the exact SHA, with an unexpired, checksummed archive batch created before all three Node 24 archive-testing jobs. Newer failed, cancelled or timed-out runs invalidate older success. A tag with a different version is an exception only when the separate tag version step explicitly fails. [Abandoned 2.1.1 candidate](releases/UPDATE-2.1.1.md)
+| Current ref | Original evidence sources in priority order |
+|---|---|
+| Matching release branch | dev when the remote release branch HEAD matches the current SHA. |
+| Version tag | The matching release branch first, then original dev evidence, when the remote tag and matching release branch HEAD both resolve to the current SHA. |
+| main | The published Stable tag at this SHA, then the matching release branch if it still points to this SHA, then dev. |
+| Synchronized dev | The Stable tag or matching release branch at this SHA, after verifying the remote tag and the published Stable Release. |
 
-Preflight still validates generated files, builds, metadata, Pages provenance and release gates. It restores the original tested archives only after checking the Actions artifact digest, portable checksums and byte-for-byte contents against a fresh build, then smoke-tests extraction/startup. Missing or unverifiable evidence falls back to full tests. An independent validation job rechecks evidence. Failures, cancellation and unverified skips block deployment and publication. Sources appear in the Actions Step Summary.
+A source must be a completed successful run from the same repository and CI workflow at the exact SHA. Verify its ref against the commit version and current remote identity. The independent Verify CI evidence job and all six Windows/macOS/Linux × Node 22/24 jobs must have actually succeeded. Require the Node 24 archive and browser acceptance steps, including Firefox and WebKit on Linux. The Actions artifact must be unexpired, have a valid SHA-256 digest, and have existed before all three Node 24 archive jobs. Order candidates by eligible source and recency. Newer failed, cancelled, or timed-out runs invalidate older success. A tag with a different version is an exception only when the separate tag version step explicitly fails. [Abandoned 2.1.1 candidate](releases/UPDATE-2.1.1.md)
+
+A run that skipped its matrix only consumes evidence. Each reuse resolves directly to the run that executed all six matrix jobs and its original artifact. Unfinished runs and reuse pointers supply no original test evidence and cannot create a dependency cycle.
+
+Preflight still validates generated files, builds, metadata, Pages provenance and release gates. It restores the original tested archives only after checking the Actions artifact digest, portable checksums and byte-for-byte contents against a fresh build, then smoke-tests extraction/startup. Missing or unverifiable evidence falls back to full tests. An independent validation job rechecks evidence. Failures, cancellation and unverified skips block deployment and publication. Preflight and the independent gate record the original ref, SHA, run number, artifact ID and SHA-256 in the Actions Step Summary.
