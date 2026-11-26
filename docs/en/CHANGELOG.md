@@ -2,7 +2,19 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.1.5**, author Lexible.
+Current application: **2.2.0**, author Lexible.
+
+## 2.2.0 · 2026-11-26
+
+- Index tasks and subtasks per snapshot and cache normalized queries to speed up searches with large subtask collections. Task names, notes, tags, and subtasks remain searchable.
+- Group search results in list order and preserve task order within each group. Give the results the full workspace area and keep matches for completed tasks and tasks without an available list.
+- Keep the 300 ms debounce and immediate Enter action. Search waits for IME composition to finish, Escape returns after clearing, and matching task details stay open. Notifications and other navigation cancel pending searches.
+- Restore the light and dark composer text colors. Clicking the plus button or pressing Enter creates tasks and subtasks. The composer and picker share the saved default due date.
+- Highlight eligible sidebar targets while dragging a task. A folder grouped by list allows reordering within the same list, and date aggregates prevent internal reordering.
+- Move group headings with task rows. When a successful drop takes a task out of the current view, its drag preview exits toward the target.
+- Restore the pomodoro counts shown when hovering over the three time totals in Reports. Fix inspector date shortcut highlighting and the Next 7 Days tooltip. The inspector and context menu share the same deletion flow.
+
+[English report](releases/UPDATE-2.2.0.md).
 
 ## 2.1.5 · 2026-11-23
 

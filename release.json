@@ -1,10 +1,35 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "2.1.5",
+  "localVersion": "2.2.0",
   "author": "Lexible",
-  "date": "2026-11-23",
+  "date": "2026-11-26",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "2.2.0",
+      "date": "2026-11-26",
+      "title": "主工作区交互与搜索优化",
+      "titleEn": "Workspace interactions and search optimization",
+      "items": [
+        "为任务搜索建立快照索引和关键词缓存，减少大量子任务下的等待。任务名、备注、标签和子任务仍可匹配。",
+        "恢复按清单分组的搜索结果和组内顺序。搜索时留出完整结果区域，仍显示已完成任务和缺少清单的匹配项。",
+        "搜索保留 300 毫秒防抖和回车立即提交，支持中文输入法合成、清空后按 Escape 返回，以及保留仍匹配的详情。通知和其他导航可取消等待中的搜索。",
+        "还原创建框的明暗主题文字颜色，主任务和子任务可点击加号或按回车创建。创建框和日期选择使用同一个已保存的默认到期日。",
+        "任务拖动时侧栏显示合法目标和悬停反馈。清单夹按清单分组时可在同一清单内排序，日期聚合区禁止内部排序。",
+        "分组标题随任务移动。任务放置成功并离开当前视图时，拖影朝目标退场。",
+        "恢复报表顶部三项的悬停番茄统计格式，修复详情日期快捷按钮的高亮和未来七天提示。详情和右键菜单共用删除确认与处理流程。"
+      ],
+      "itemsEn": [
+        "Index tasks and subtasks per snapshot and cache normalized queries to speed up searches with large subtask collections. Task names, notes, tags, and subtasks remain searchable.",
+        "Group search results in list order and preserve task order within each group. Give the results the full workspace area and keep matches for completed tasks and tasks without an available list.",
+        "Keep the 300 ms debounce and immediate Enter action. Search waits for IME composition to finish, Escape returns after clearing, and matching task details stay open. Notifications and other navigation cancel pending searches.",
+        "Restore the light and dark composer text colors. Clicking the plus button or pressing Enter creates tasks and subtasks. The composer and picker share the saved default due date.",
+        "Highlight eligible sidebar targets while dragging a task. A folder grouped by list allows reordering within the same list, and date aggregates prevent internal reordering.",
+        "Move group headings with task rows. When a successful drop takes a task out of the current view, its drag preview exits toward the target.",
+        "Restore the pomodoro counts shown when hovering over the three time totals in Reports. Fix inspector date shortcut highlighting and the Next 7 Days tooltip. The inspector and context menu share the same deletion flow."
+      ],
+      "report": "docs/releases/UPDATE-2.2.0.md"
+    },
     {
       "version": "2.1.5",
       "date": "2026-11-23",
