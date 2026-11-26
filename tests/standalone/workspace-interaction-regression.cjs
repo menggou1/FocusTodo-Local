@@ -126,6 +126,7 @@ async function startDrag(page, from) {
     await page.mouse.down();
     await page.mouse.move(x + 8, y);
     await page.locator('.workspace-drag-preview').waitFor();
+    await from.and(page.locator('[data-dragging=true]')).waitFor();
 }
 
 async function hoverDrop(page, locator, height = .5) {
