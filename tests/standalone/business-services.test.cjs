@@ -29,6 +29,38 @@ test('projects/tasks/subtasks CRUD, completion, search and tombstones match lega
     const legacy = await old.data.snapshot();
     for (const [field, table] of [['tasks','Task'],['subtasks','Subtask'],['records','Pomodoro']]) assert.deepEqual(clone(app.business.getSnapshot()[field]), clone(legacy.indexedDB[table]));
 });
+test('search indexes active related rows and invalidates normalized results on refresh', async t => {
+    const { app, dispose } = await createApplication();
+    t.after(dispose);
+    await seed(app.repository, 'Project', [
+        { id: 'search-tag', type: 3000, state: 0, name: 'Keyword' },
+        { id: 'hidden-tag', type: 3000, state: 1, name: 'Keyword' },
+    ]);
+    await seed(app.repository, 'Task', [
+        { id: 'child-match', name: 'Finished task', state: 0, isFinished: true, projectId: 'missing' },
+        { id: 'excluded', name: 'Hidden relations', state: 0, tags: 'hidden-tag' },
+        { id: 'tag-match', name: 'Detached task', state: 0, tags: 'missing, search-tag ' },
+        { id: 'deleted', name: 'Keyword', state: -1 },
+    ]);
+    await seed(app.repository, 'Subtask', [
+        { id: 'one', taskId: 'child-match', state: 0, name: '中文 Keyword' },
+        { id: 'two', taskId: 'child-match', state: 0, name: 'Keyword again' },
+        { id: 'removed', taskId: 'excluded', state: -1, name: 'Keyword' },
+    ]);
+    await app.business.refresh();
+    const result = app.business.search(' Keyword ');
+    assert.deepEqual(result.map(row => row.id), ['child-match', 'tag-match']);
+    assert.strictEqual(app.business.search('KEYWORD'), result);
+    assert.deepEqual(app.business.search('中文').map(row => row.id), ['child-match']);
+    assert.deepEqual(app.business.search('unpublished'), []);
+
+    await app.business.command({ type: 'updateSubtask', id: 'one', changes: { name: 'Unpublished text' } });
+    await app.business.command({ type: 'updateProject', id: 'search-tag', changes: { name: 'Renamed label' } });
+    assert.deepEqual(app.business.search('中文'), []);
+    assert.deepEqual(app.business.search('keyword').map(row => row.id), ['child-match']);
+    assert.deepEqual(app.business.search('unpublished').map(row => row.id), ['child-match']);
+    assert.deepEqual(app.business.search('renamed label').map(row => row.id), ['tag-match']);
+});
 test('recurrence matches old calendar arithmetic through leap days, month clamp, weekdays and catch-up', async t => {
     const h = await pair(t), { nextRepetitionDate } = await import('../../standalone/domain/recurrence.mjs');
     for (const zone of ['Asia/Shanghai','America/New_York']) {

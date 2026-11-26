@@ -83,6 +83,7 @@ export type BusinessCommand =
     | { type: 'setProjectHidden'; id: string; hidden: boolean; expected?: CompatibleRecord }
     | { type: 'reorderProjects'; snapshot: {id: string; order: number}[]; from: string; to: string }
     | { type: 'reorderTasks'; snapshot: Entity[]; from: string; to: string; after: boolean }
+    | { type: 'dropTaskOnSidebar'; id: string; projectId: string; expected: CompatibleRecord }
     | { type: 'restoreProjectOrder' };
 export interface Report { time: number; count: number; byTask: Record<string, number>; byProject: Record<string, number> }
 export interface PreferenceState {

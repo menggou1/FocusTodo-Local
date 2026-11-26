@@ -83,6 +83,50 @@ test('task reorder resolves occupied and extreme slots, and never uses stale nei
     assert.deepEqual(orderedTasks(business.getSnapshot().tasks).map(row => row.id), ['a', 'c', 'b']);
 });
 
+test('a sidebar drop applies the target meaning, while reorder is atomic within one list', async t => {
+    const { app, clock, dispose } = await createApplication();
+    t.after(dispose);
+    const { business } = app;
+    const command = input => business.command(input);
+    await command({ type: 'addProject', values: { id: 'math', name: 'Math' } });
+    await command({ type: 'addProject', values: { id: 'english', name: 'English' } });
+    await command({ type: 'addProject', values: { id: 'exam', name: 'Exam', type: 2000 } });
+    await command({ type: 'addProject', values: { id: 'tag', name: 'Review', type: 3000 } });
+    const deadline = new Date(clock.value).setHours(23, 59, 59, 999);
+    const initial = await command({ type: 'addTask', values: {
+        id: 'a', name: 'A', projectId: 'math', order: 20, deadline, rCycle: 1, rUnit: 'days', rFirstDeadline: deadline,
+    } });
+    await command({ type: 'addTask', values: { id: 'b', name: 'B', projectId: 'english', order: 30 } });
+    const drop = (projectId, expected = business.getSnapshot().tasks.find(row => row.id === 'a')) =>
+        command({ type: 'dropTaskOnSidebar', id: 'a', projectId, expected });
+    const original = business.getSnapshot().tasks;
+    await assert.rejects(command({ type: 'reorderTasks', from: 'a', to: 'b', after: true, snapshot: [...original] }), { code: 'conflict' });
+    await assert.rejects(drop('exam'), { code: 'conflict' });
+    await assert.rejects(drop('id-deadline-upcoming'), { code: 'conflict' });
+    assert.deepEqual(business.getSnapshot().tasks, original);
+    const moved = await drop('english');
+    assert.equal(moved.projectId, 'english');
+    assert.equal(moved.deadline, deadline);
+    assert.equal(moved.order, initial.order);
+    await assert.rejects(drop('id-task-tasks', initial), { code: 'conflict' });
+    const tomorrow = new Date(clock.value);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    await command({ type: 'updateProject', id: 'id-deadline-tomorrow', changes: { state: 0 } });
+    const scheduled = await drop('id-deadline-tomorrow');
+    assert.equal(scheduled.deadline, tomorrow.setHours(23, 59, 59, 999));
+    assert.equal(scheduled.rFirstDeadline, scheduled.deadline);
+    assert.equal(scheduled.projectId, 'english');
+    const tagged = await drop('tag');
+    assert.equal(tagged.tags, 'tag');
+    assert.deepEqual(await drop('tag'), tagged);
+    await command({ type: 'setProjectHidden', id: 'math', hidden: true });
+    await assert.rejects(drop('math'), { code: 'conflict' });
+    await command({ type: 'updateProject', id: 'id-deadline-someday', changes: { state: 0 } });
+    const someday = await drop('id-deadline-someday');
+    assert.deepEqual([someday.projectId, someday.deadline, someday.rCycle, someday.rFirstDeadline, someday.rUnit], ['english', 0, 0, 0, '']);
+    assert.equal((await drop('id-task-tasks')).projectId, 'id-task-tasks');
+});
+
 test('queued reordering awaits the published snapshot when another refresh supersedes the commit read', async t => {
     const { app, dispose } = await createApplication();
     t.after(dispose);

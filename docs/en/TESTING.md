@@ -21,7 +21,7 @@ First run npm ci, npm run build:release, npm run check, npm run build, npm run b
 | Complete historical browser regression against the separate archive | `npm run test:browser` |
 | Historical Firefox/WebKit capability fallback baseline | `npm run test:compat` |
 | Bilingual light/dark UI, shared dialogs and first-frame animation | `node tests/standalone/final-ui-parity.cjs` |
-| Inspector deletion, subtask flags and history preservation/removal | `node tests/standalone/inspector-dialog-parity.cjs` |
+| Inspector and context-menu deletion parity, subtask flags and focus-history removal | `node tests/standalone/inspector-dialog-parity.cjs` |
 | Version/checksum/tamper rejection and workflow gates | `python tests/release/release-gate-test.py` |
 | Production ZIP/tar.gz and Python fallback | `python scripts/package-release.py`, `python tests/release/package-smoke.py` |
 | Byte-for-byte Pages comparison with committed sources | `python tests/release/pages-build-test.py` after committing build inputs |
@@ -35,6 +35,8 @@ The read-only tests/helpers/legacy-runtime.cjs uses archive/1.9.4 at b0ee5e26c13
 Paired tests start independent ephemeral servers for the archive and isolated React application. FOCUS_RESTORE_SHARED=1 is only for manually prepared 5513/5511 comparison servers; verify their ownership first. FOCUS_RESTORE_NEW_PORT selects an isolated preview, never the daily stable service.
 
 Specialist scripts remain under tests/standalone: reports-parity, r2-r3-overlays-parity, visual-settings, r4-r5-settings-drag-parity, visual-timer-forest, calendar-overlay-equivalence and window-scroll-equivalence. They compare real DOM, computed styles, screenshots, interactions and animation while preserving intentional legacy bug fixes. Obsolete one-time bundle audit tools are removed; their historical evidence remains in Git and docs/acceptance.
+
+`npm run test:workspace` covers search grouping, task selection, notification navigation, debounce, and composition events. Run `node tests/standalone/search-benchmark.cjs` to compare cold, uncached, and repeated queries against 2.1.5. The benchmark times search service calls after loading synthetic snapshots with 1,000 to 8,000 tasks and two subtasks per task.
 
 ## Evidence and limits
 

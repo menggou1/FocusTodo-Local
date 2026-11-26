@@ -39,7 +39,7 @@ export function createPreferencesService({ data, storage, now, randomUUID, encod
         }
         const deadline = parseFloat(storage.getItem('DefaultDeadline'));
         const today = new Date(now()); today.setHours(23,59,59,999);
-        result.defaultDeadline = Number.isNaN(deadline) ? today.getTime() : deadline;
+        result.defaultDeadline = Number.isFinite(deadline) && Math.abs(deadline) <= 8.64e15 ? deadline : today.getTime();
         result.groupEnabled = false; result.rankingListEnabled = false;
         return result;
     };

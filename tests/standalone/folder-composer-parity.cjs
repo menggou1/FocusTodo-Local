@@ -122,6 +122,14 @@ async function checkMatrix(pair, backup) {
 async function checkFolder(pair, key, locale) {
     const { old, new: page } = pair;
     await oldNav(old, 'Oracle Folder').click();
+    await projectButton(page, 'folder').click();
+    const colors = [];
+    for (const input of [old.locator(oldComposer+' input').first(), page.locator(newComposer+' input').first()]) {
+        await input.fill('Composer text color');
+        colors.push(await input.evaluate(element => getComputedStyle(element).color));
+        await input.clear();
+    }
+    assert.equal(colors[0], colors[1], 'The typed composer color matches 1.9.4');
     const completedToggle = page.locator('.workspace-completed-toggle');
     const earlier = '[data-task-id="Earlier beta completion"]';
     await projectButton(page, 'id-deadline-today').click();

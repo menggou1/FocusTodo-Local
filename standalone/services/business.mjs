@@ -3,9 +3,30 @@ import { repetitionDeadline } from '../domain/recurrence.mjs';
 import { aggregateRecords, reportBuckets, reminderState, visibleRecord, calendarRange } from '../domain/reports.mjs';
 import { folderProjects, orderedProjects } from '../domain/project-order.mjs';
 import { taskMoveOrders } from '../domain/task-order.mjs';
+import { sidebarTaskChanges } from '../domain/task-edits.mjs';
 
 const tables = ['Project', 'Task', 'Subtask', 'Schedule', 'Pomodoro', 'TimerSession'];
 const names = ['projects', 'tasks', 'subtasks', 'schedules', 'records', 'sessions'];
+function indexTaskSearch({ projects, tasks, subtasks }) {
+    const searchableName = name => typeof name === 'string' ? name.toLowerCase() : '';
+    const tags = new Map(projects.filter(row => row.type === 3000 && row.state === 0)
+        .map(row => [row.id, searchableName(row.name)]));
+    const index = new Map();
+    for (const task of tasks) {
+        if (task.state !== 0) continue;
+        const fields = [task.name, task.remark].map(value => String(value || '').toLowerCase());
+        for (const id of String(task.tags || '').split(',')) {
+            const tag = tags.get(id.trim());
+            if (tag) fields.push(tag);
+        }
+        index.set(task.id, { task, fields });
+    }
+    for (const child of subtasks) {
+        if (child.state === 0) index.get(child.taskId)?.fields.push(searchableName(child.name));
+    }
+    return [...index.values()];
+}
+
 function collect(tx, done, fail, apply, beforeCommit = () => {}) {
     const values = {}; let pending = tables.length;
     for (let index = 0; index < tables.length; index++) {
@@ -20,6 +41,8 @@ export function createBusinessService({ data, core, now, randomUUID, settings, t
     const state = snapshotSource({ projects: [], tasks: [], subtasks: [], schedules: [], records: [], sessions: [] }, onError);
     let disposed = false, revision = 0, latestRefresh;
     const reportCache = new Map();
+    let searchIndex;
+    const searchCache = new Map();
     const refresh = async () => {
         invariant(!disposed, 'Service disposed', 'disposed');
         const request = ++revision;
@@ -28,6 +51,8 @@ export function createBusinessService({ data, core, now, randomUUID, settings, t
             // if a refresh triggered by another window superseded its read.
             if (request !== revision) return latestRefresh;
             reportCache.clear();
+            searchIndex = undefined;
+            searchCache.clear();
             state.publish({ ...value, projects: orderedProjects(value.projects) });
             return state.getSnapshot();
         });
@@ -137,8 +162,19 @@ export function createBusinessService({ data, core, now, randomUUID, settings, t
                         'Task order changed', 'conflict');
                     return row;
                 });
+                const source = rows.find(row => row.id === input.from);
+                const project = source && values.projects.find(row => row.id === source.projectId && row.state === 0);
+                invariant(project && [1000, 7005].includes(project.type) && rows.every(row => row.projectId === project.id),
+                    'Task order must stay within an active list', 'conflict');
                 return taskMoveOrders(rows, input.from, input.to, input.after)
                     .map(({ id, order }) => update('Task', find('tasks', id), { order }));
+            }
+            case 'dropTaskOnSidebar': {
+                const row = find('tasks', input.id); check(row);
+                const project = find('projects', input.projectId);
+                const changes = sidebarTaskChanges(row, project, now());
+                invariant(row.state === 0 && !row.isFinished && changes, 'Task cannot be dropped here', 'conflict');
+                return Object.keys(changes).length ? update('Task', row, changes) : row;
             }
             case 'addTask': {
                 const row = { ...taskDefaults(), ...input.values }; title(row);
@@ -215,11 +251,16 @@ export function createBusinessService({ data, core, now, randomUUID, settings, t
         batch: commands => command({type:'batch',commands}),
         search(keyword) {
             const query = String(keyword).trim().toLowerCase(); if (!query) return [];
-            const searchableName = name => typeof name === 'string' ? name.toLowerCase() : '';
-            const value = state.getSnapshot(), tags = new Map(value.projects.filter(row => row.type === 3000 && row.state === 0).map(row => [row.id, searchableName(row.name)]));
-            return value.tasks.filter(row => row.state === 0 && ([row.name, row.remark].some(text => String(text || '').toLowerCase().includes(query))
-                || String(row.tags || '').split(',').some(id => tags.get(id.trim())?.includes(query))
-                || value.subtasks.some(child => child.taskId === row.id && child.state === 0 && searchableName(child.name).includes(query))));
+            const cached = searchCache.get(query);
+            if (cached) return cached;
+            searchIndex ??= indexTaskSearch(state.getSnapshot());
+            const matches = [];
+            for (const { task, fields } of searchIndex) {
+                if (fields.some(field => field.includes(query))) matches.push(task);
+            }
+            if (searchCache.size >= 16) searchCache.delete(searchCache.keys().next().value);
+            searchCache.set(query, Object.freeze(matches));
+            return matches;
         },
         report(start, end) {
             const key = `${start}:${end}`;

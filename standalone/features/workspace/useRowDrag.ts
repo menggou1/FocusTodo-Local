@@ -1,5 +1,5 @@
 import { useEffect, useRef, type PointerEvent } from 'react';
-import type { DragHandoff } from './useRowMotion';
+import { rowMotionTiming, type DragHandoff } from './useRowMotion';
 
 /** Legacy-style floating row and live hover projection, without browser text drag. */
 export function useRowDrag<T>({start,move,end,cancel}:{
@@ -30,7 +30,19 @@ export function useRowDrag<T>({start,move,end,cancel}:{
       const preview=ghost!;
       ghost=null;
       released.current.add(preview);
-      return {rect:preview.getBoundingClientRect(),remove:()=>{preview.remove();released.current.delete(preview)}};
+      const rect = preview.getBoundingClientRect();
+      const remove = () => { preview.remove(); released.current.delete(preview); };
+      return { rect, remove, exitToward(target: DOMRect) {
+        if (!preview.isConnected || matchMedia('(prefers-reduced-motion: reduce)').matches) { remove(); return; }
+        const x = target.left + (target.width - rect.width) / 2 - rect.left;
+        const y = target.top + (target.height - rect.height) / 2 - rect.top;
+        const transform = preview.style.transform;
+        const animation = preview.animate([
+          { transform, opacity: 1 },
+          { transform: `${transform} translate(${x}px,${y}px)`, opacity: 0 },
+        ], rowMotionTiming);
+        animation.onfinish = animation.oncancel = remove;
+      }};
     };
     const moving=(e:globalThis.PointerEvent)=>{
       if(e.pointerId!==pointerId||!ghost&&Math.hypot(e.clientX-x,e.clientY-y)<5)return;

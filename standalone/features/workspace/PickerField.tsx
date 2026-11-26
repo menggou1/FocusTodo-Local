@@ -1,13 +1,14 @@
-import { Children, useEffect, useLayoutEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
+import { Children, Fragment, useEffect, useLayoutEffect, useRef, useState, type ComponentProps, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 /** Native disclosure state, with the legacy body-level overlay outside scroll clips.
  * A modal's overlays stay inside its top layer. All fields share root-close,
  * viewport clamping and the 150ms legacy popover fade.
  */
-export function PickerField({children, restoreFocusOnEscape=false, gap=10, ...props}: ComponentProps<'details'> & {restoreFocusOnEscape?:boolean;gap?:number}) {
+export function PickerField({children, restoreFocusOnEscape=false, resetOnOpen=false, gap=10, ...props}: ComponentProps<'details'> & {restoreFocusOnEscape?:boolean;resetOnOpen?:boolean;gap?:number}) {
   const field = useRef<HTMLDetailsElement>(null), surface = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false), [mounted, setMounted] = useState(false), exit = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [revision, setRevision] = useState(0);
   const [position, setPosition] = useState({left:0, top:0, arrow:0});
   useEffect(() => () => { if (exit.current) clearTimeout(exit.current); }, []);
   const parts = Children.toArray(children), summary = parts[0], content = parts.slice(1) as ReactNode;
@@ -45,11 +46,14 @@ export function PickerField({children, restoreFocusOnEscape=false, gap=10, ...pr
     const next = event.currentTarget.open;
     if (exit.current) clearTimeout(exit.current);
     setOpen(next);
-    if (next) setMounted(true);
+    if (next) {
+      setMounted(true);
+      if (resetOnOpen) setRevision(value => value + 1);
+    }
     else exit.current = setTimeout(() => setMounted(false), matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 150);
     props.onToggle?.(event);
   }}>
     {summary}
-    {mounted && createPortal(<div data-app-interaction-root className={'workspace-picker-surface '+(open?'':'is-closing ')+(props.className || '')} ref={surface} style={{left:position.left,top:position.top,'--picker-arrow':position.arrow+'px'} as React.CSSProperties}>{content}</div>, field.current?.closest('dialog') || document.body)}
+    {mounted && createPortal(<div data-app-interaction-root className={'workspace-picker-surface '+(open?'':'is-closing ')+(props.className || '')} ref={surface} style={{left:position.left,top:position.top,'--picker-arrow':position.arrow+'px'} as React.CSSProperties}><Fragment key={revision}>{content}</Fragment></div>, field.current?.closest('dialog') || document.body)}
   </details>;
 }

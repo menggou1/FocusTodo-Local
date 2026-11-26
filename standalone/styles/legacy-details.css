@@ -20,7 +20,7 @@
 .legacy-detail-subtasks{border-top:1px solid var(--workspace-line);margin:8px 16px 0;padding:0 0 10px;border-bottom:1px solid var(--workspace-line)}
 .workspace-details .legacy-detail-subtasks>form{height:44px;display:flex;align-items:center;gap:4px;margin:0 -4px}
 .workspace-details .legacy-detail-subtasks>form input{border:0;padding:0;margin:0;line-height:20px;height:30px;flex:1;width:0;outline:0;background:transparent}
-.legacy-detail-subtasks>form input::placeholder{color:var(--workspace-muted)}.legacy-detail-subtasks>form>.legacy-icon{width:24px;height:24px}
+.legacy-detail-subtasks>form input::placeholder{color:var(--workspace-muted)}.legacy-detail-subtasks>form>button{display:grid;place-items:center;flex:none;width:24px;height:24px;padding:0}
 .workspace-subtask{position:relative;gap:4px}.workspace-subtask>.workspace-handle{position:absolute;left:-18px;opacity:0}.workspace-subtask:hover>.workspace-handle,.workspace-subtask>.workspace-handle:focus-visible{opacity:1}
 .workspace-details .legacy-detail-note{display:block;resize:none;margin:6px 14px 0 16px;padding:8px 0 0;width:calc(100% - 30px);height:171px;border:0;background:transparent;line-height:20px;font-size:14px;outline:0;flex:none}
 .legacy-detail-note::placeholder{color:var(--workspace-muted)}.workspace-details .legacy-detail-bottom{position:relative;flex:none;margin:0;padding:0 12px;display:flex;align-items:center;gap:0;height:42px;border-top:1px solid var(--workspace-line);background:var(--workspace-panel)}
@@ -72,7 +72,7 @@
 .legacy-subtask-delete>.legacy-icon{display:none;width:10px;height:10px}.workspace-subtask:hover>.legacy-subtask-delete>.legacy-icon,.legacy-subtask-delete:focus-visible>.legacy-icon{display:inline}
 .workspace-subtask:hover>.legacy-subtask-delete,.legacy-subtask-delete:focus-visible{width:10px}
 .workspace-details .legacy-detail-subtasks>form{height:44px;display:flex;align-items:center;gap:0;margin:0;padding:0 10px 0 12px}
-.workspace-details .legacy-detail-subtasks>form>.legacy-icon{width:24px;height:24px;margin-right:0}
+.workspace-details .legacy-detail-subtasks>form>button>.legacy-icon{width:24px;height:24px}
 .workspace-details .legacy-detail-subtasks>form input{height:44px;line-height:44px;padding:0 0 0 8px;border:0;border-radius:0;background:var(--workspace-panel)}
 
 /* W5: legacy detail keeps its 340px overlay at narrower windows. */

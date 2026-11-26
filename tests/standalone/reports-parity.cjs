@@ -7,6 +7,29 @@ function near(a,b,label,props=['x','y','width','height']){for(const prop of prop
 async function colors(page,selector){return page.locator(selector).evaluate(canvas=>{const d=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data,colors=new Set();for(let i=0;i<d.length;i+=4)if(d[i+3])colors.add([d[i],d[i+1],d[i+2]].join(','));return [...colors]})}
 async function reports(pair){await pair.old.locator('[class*=HomeHeader-report]').click();const p=pair.new;await p.evaluate(()=>{window.reportFrames=[];const start=performance.now(),sample=()=>{const root=document.querySelector('[data-testid=reports-page]');if(root)window.reportFrames.push({t:performance.now()-start,busy:root.getAttribute('aria-busy'),reveal:document.querySelector('.legacy-review-scroll canvas')?.dataset.reveal,height:document.querySelector('.legacy-review-scroll canvas')?.clientHeight,pixels:document.querySelector('.legacy-review-scroll canvas')?.height,dpr:devicePixelRatio});if(performance.now()-start<500)requestAnimationFrame(sample)};requestAnimationFrame(sample)});await pair.new.locator('[data-view=reports]').click();await pair.new.getByTestId('report-total').waitFor();await pair.old.waitForTimeout(350)}
 async function closeReports(pair){await pair.old.locator('[class*=Report-close]').click();await pair.new.getByTestId('close-page').click()}
+async function summaryHover(old, page) {
+ const oldCards = old.locator('[class*=Summary-item-]');
+ const newCards = page.locator('.legacy-report-stat');
+ const snapshot = (card, title, value, number, unit) => card.evaluate((element, selectors) => {
+  const get = selector => element.querySelector(selector);
+  const style = getComputedStyle(get(selectors.number));
+  return { title: get(selectors.title).textContent, value: get(selectors.value).textContent.trim(),
+   units: [...element.querySelectorAll(selectors.unit)].map(unit => unit.textContent), color: style.color, size: style.fontSize };
+ }, { title, value, number, unit });
+ for (let i=0;i<3;i++) {
+  const before = await snapshot(oldCards.nth(i),'[class*=Summary-title]','[class*=Summary-value]','[class*=Summary-number]','[class*=Summary-unit]');
+  const readNew = () => snapshot(newCards.nth(i),'div','p','strong','small');
+  assert.deepEqual(await readNew(),before);
+  await oldCards.nth(i).hover();
+  await newCards.nth(i).hover();
+  const hovered = await snapshot(oldCards.nth(i),'[class*=Summary-title]','[class*=Summary-value]','[class*=Summary-number]','[class*=Summary-unit]');
+  assert.notEqual(hovered.title,before.title);
+  assert.deepEqual(await readNew(),hovered);
+  await oldCards.nth(3).hover();
+  await newCards.nth(3).hover();
+  assert.deepEqual(await readNew(),before);
+ }
+}
 async function run(locale,dark){
  const zh=locale.startsWith('zh'),pair=await paired({locale,dark,reducedMotion:'no-preference'}),o=pair.old,p=pair.new,key=locale+'-'+(dark?'dark':'light');
  try{
@@ -50,6 +73,7 @@ async function run(locale,dark){
   assert.equal(await p.locator('.legacy-review-scroll canvas').getAttribute('data-reveal'),'1');
   const oldMetrics=await metrics(o,{frame:'[class*=Report-width]',stat:'[class*=Summary-item]',review:'[class*=ReviewChart-root]',focus:'[class*=FocusTime-root]',distribution:'[class*=ProjectChart-root]',goals:'[class*=DailyGoal-root]',bar:'[class*=BarChart-root]'}),nextMetrics=await metrics(p,{frame:'.legacy-reports',stat:'.legacy-report-stat',review:'.legacy-review-chart',focus:'.legacy-focus-time',distribution:'.legacy-project-chart',goals:'.legacy-goals',bar:'.legacy-bar-chart'});
   for(const part of Object.keys(oldMetrics))near(oldMetrics[part],nextMetrics[part],'report '+part);
+  await summaryHover(o,p);
   const oc=await o.locator('[class*=Report-close] img').boundingBox(),pc=await p.getByTestId('close-page').boundingBox();near({x:oc.x,y:oc.y},{x:pc.x,y:pc.y+16},'close artwork',['x','y']);
   assert(await p.evaluate(()=>{const timer=document.querySelector('.workspace-floating-timer'),r=timer.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2).closest('.legacy-report-overlay')!==null}),'Report covers timer');
   assert.equal(await p.getByTestId('report-total').innerText(),String(Math.round((3620+1500+90+30+25)/60*100)/100));

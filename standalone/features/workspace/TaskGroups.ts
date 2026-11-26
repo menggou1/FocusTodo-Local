@@ -36,17 +36,20 @@ function priorityLabel(priority: number, locale: string) {
 export function taskGroups(rows: readonly Entity[], project: Entity | undefined, projects: readonly Entity[], text: WorkspaceText, locale = 'zh-CN', now = new Date()) {
   const rule = project ? number(project.orderingRule) : 3;
   if (rule === 3) return [{ id: 'tasks', title: '', rows: ordered(rows) }];
+  const lists = rule === 0 ? new Map(projects.map((row, position) => [row.id, { row, position }])) : undefined;
   const groups = new Map<string, { id: string; title: string; order: number; rows: Entity[] }>();
   for (const row of ordered(rows)) {
-    const parent = projects.find(item => item.id === row.projectId);
-    const date = dateInput(row.deadline);
-    const id = rule === 0 ? string(row.projectId) : rule === 1 ? date : String(number(row.priority));
-    const title = rule === 0 ? parent ? projectName(parent, text) : text.none : rule === 1 ? formatTaskDateGroup(number(row.deadline), locale, text, now) : priorityLabel(number(row.priority), locale);
+    const parent = lists?.get(string(row.projectId));
+    const id = rule === 0 ? string(row.projectId) : rule === 1 ? dateInput(row.deadline) : String(number(row.priority));
     // The business snapshot owns project order, including preset precedence.
-    const position=projects.findIndex(item=>item.id===row.projectId);
-    const order = rule === 0 ? position<0?Number.MAX_SAFE_INTEGER:position : rule === 1 ? number(row.deadline) || Number.MAX_SAFE_INTEGER : -number(row.priority);
-    if (!groups.has(id)) groups.set(id, { id, title, order, rows: [] });
-    groups.get(id)!.rows.push(row);
+    let group = groups.get(id);
+    if (!group) {
+      const title = rule === 0 ? parent ? projectName(parent.row, text) : text.none : rule === 1 ? formatTaskDateGroup(number(row.deadline), locale, text, now) : priorityLabel(number(row.priority), locale);
+      const order = rule === 0 ? parent?.position ?? Number.MAX_SAFE_INTEGER : rule === 1 ? number(row.deadline) || Number.MAX_SAFE_INTEGER : -number(row.priority);
+      group = { id, title, order, rows: [] };
+      groups.set(id, group);
+    }
+    group.rows.push(row);
   }
   return [...groups.values()].sort((a, b) => rule === 1 && [4000, 4006].includes(number(project?.type)) ? (b.order === Number.MAX_SAFE_INTEGER ? -1 : a.order === Number.MAX_SAFE_INTEGER ? 1 : b.order - a.order) : a.order - b.order);
 }

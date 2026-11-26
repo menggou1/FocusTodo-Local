@@ -1,4 +1,4 @@
-/* Inspector deletion: actual legacy dialog, cancellation, child flags and history choice. */
+/* Inspector deletion: actual legacy dialog, cancellation, child flags and task deletion parity. */
 const {paired,copyFixture,metrics,assert,fs,path}=require('./ui-restore-helpers.cjs');
 const deadlines = [
  ['Inspector no date', 0, 0, null, false],
@@ -62,9 +62,31 @@ async function check(locale,dark){
   assert.equal(await content.locator('p').innerText(),await o.locator('[class*=ConfirmDialog-detail] p').innerText());
   await o.locator('[class*=ConfirmDialog-cancel]').click();await n.locator('.legacy-task-delete footer button:first-child').click();await n.locator('.legacy-task-delete').waitFor({state:'hidden'});assert.equal((await rows(n,'Subtask')).filter(row=>row.state===0).length,1);
   await n.getByLabel((zh?'删除子任务':'Delete subtask')+': Inspector child',{exact:true}).click();await n.locator('.legacy-task-delete .primary').click();await n.locator('.legacy-task-delete').waitFor({state:'hidden'});assert.equal((await rows(n,'Subtask')).filter(row=>row.state===0).length,0);assert.equal((await rows(n,'Task')).find(row=>row.name==='Inspector sample').hasSubtask,false);
-  await n.locator('.legacy-detail-bottom').getByRole('button',{name:zh?'删除':'Delete',exact:true}).click();const keep=n.getByRole('checkbox',{name:zh?'保留专注历史':'Keep focus history',exact:true});assert(await keep.isChecked());await n.locator('.legacy-task-delete footer button:first-child').click();await n.locator('.legacy-task-delete').waitFor({state:'hidden'});assert.equal((await rows(n,'Task')).find(row=>row.name==='Inspector sample').state,0);
-  await n.locator('.legacy-detail-bottom').getByRole('button',{name:zh?'删除':'Delete',exact:true}).click();if(dark)await keep.uncheck();await n.locator('.legacy-task-delete .primary').click();await n.locator('.workspace-details').waitFor({state:'hidden'});assert.equal((await rows(n,'Task')).find(row=>row.name==='Inspector sample').state,-1);assert.equal((await rows(n,'Pomodoro'))[0].state,dark?-1:0);assert.equal(await n.locator('dialog[open]').count(),0);
-  for(const h of pair.handles){assert.deepEqual(h.errors,[]);assert.deepEqual(h.external,[])}results.push({locale,dark,passed:true,subtaskDialog:{old:a,new:b},historyPreserved:!dark});console.log('PASS inspector dialogs '+locale+' '+dark);
+  const deleteTask = n.locator('.legacy-detail-bottom').getByRole('button',{name:zh?'删除':'Delete',exact:true});
+  const dialog = n.locator('dialog.legacy-task-delete');
+  const dialogContent = async () => {
+   await dialog.waitFor();
+   assert.equal(await dialog.getByRole('checkbox').count(),0);
+   return { text:await dialog.locator('.legacy-delete-content').innerText(), options:await dialog.locator('footer button').allTextContents() };
+  };
+  await deleteTask.click();
+  const detailConfirmation = await dialogContent();
+  await dialog.locator('footer button').first().click();
+  await dialog.waitFor({state:'hidden'});
+  assert.equal((await rows(n,'Task')).find(row=>row.name==='Inspector sample').state,0);
+  assert.equal((await rows(n,'Pomodoro'))[0].state,0);
+  await n.getByRole('button',{name:'Inspector sample',exact:true}).click({button:'right'});
+  await n.getByRole('menuitem',{name:zh?'删除任务':'Delete Task',exact:true}).click();
+  assert.deepEqual(await dialogContent(),detailConfirmation);
+  await dialog.locator('footer button').first().click();
+  await dialog.waitFor({state:'hidden'});
+  await deleteTask.click();
+  await dialog.locator('.primary').click();
+  await n.locator('.workspace-details').waitFor({state:'hidden'});
+  assert.equal((await rows(n,'Task')).find(row=>row.name==='Inspector sample').state,-1);
+  assert.equal((await rows(n,'Pomodoro'))[0].state,-1);
+  assert.equal(await n.locator('dialog[open]').count(),0);
+  for(const h of pair.handles){assert.deepEqual(h.errors,[]);assert.deepEqual(h.external,[])}results.push({locale,dark,passed:true,subtaskDialog:{old:a,new:b},historyDeleted:true});console.log('PASS inspector dialogs '+locale+' '+dark);
  }finally{await pair.close();fs.writeFileSync(path.join(output,'results.json'),JSON.stringify({results},null,2))}
 }
 (async()=>{fs.mkdirSync(output,{recursive:true});for(const locale of ['zh-CN','en'])for(const dark of [false,true])await check(locale,dark)})().catch(error=>{console.error(error.stack);process.exitCode=1});

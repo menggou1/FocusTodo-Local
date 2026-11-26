@@ -11,7 +11,12 @@ import { durationParts, formatClock, formatTaskDate, formatMonth, formatMinutesD
 import { ScrollWheel } from './ScrollWheel';
 const emptyArtwork=import.meta.glob<string>('../../../public/img/rpt_no_data.png',{eager:true,query:'?url',import:'default'});
 function EmptyData(){const{services}=useWorkspace();return <div className="legacy-report-empty"><img src={emptyArtwork['../../../public/img/rpt_no_data.png']} alt=""/><p>{services.language.legacyText('rpt_no_data')}</p></div>}
-function Duration({seconds}:{seconds:number}){const{services,text}=useWorkspace(),parts=durationParts(seconds/60),minutes=parts.minutes,hours=parts.hours;return <>{hours>0&&<><strong>{hours}</strong><small>{services.language.locale.startsWith('zh')?'小时':'h'}</small></>}{(minutes>0||hours===0)&&<><strong>{minutes}</strong><small>{services.language.locale.startsWith('zh')?text.minutes:'m'}</small></>}</>}
+function Duration({seconds,summary=false}:{seconds:number;summary?:boolean}){
+ const{services,text}=useWorkspace();
+ const{hours,minutes}=summary ? {hours:Math.floor(seconds/3600),minutes:Math.round(seconds%3600/60)} : durationParts(seconds/60);
+ return <>{hours>0&&<><strong>{hours}</strong><small>{summary?services.language.legacyText('cmm_local_hour',''):services.language.locale.startsWith('zh')?'小时':'h'}</small></>}
+ {(minutes>0||hours===0)&&<><strong>{minutes}</strong><small>{summary?services.language.legacyText('cmm_local_minute',''):services.language.locale.startsWith('zh')?text.minutes:'m'}</small></>}</>;
+}
 function PeriodTabs({value,onChange,label}:{value:Period;onChange(value:Period):void;label:string}){const{services}=useWorkspace();return <div className="legacy-period-tabs" role="group" aria-label={label+' options'}>{(['day','week','month','year'] as const).map((item,i)=><button key={item} aria-pressed={value===item} onClick={()=>onChange(item)}>{services.language.legacyText(['rpt_daily','rpt_weekly','rpt_monthly','rpt_yearly'][i])}</button>)}<select className="workspace-sr" aria-label={label} value={value} onChange={e=>onChange(e.target.value as Period)}>{['day','week','month','year'].map(item=><option key={item}>{item}</option>)}</select></div>}
 function PeriodDate({date,period,onChange,label}:{date:number;period:Period;onChange(value:number):void;label:string}){const{services}=useWorkspace(),bounds=range(date,period),formatted=period==='year'?String(new Date(date).getFullYear()):period==='month'?formatMonth(date,services.language.locale):period==='week'?formatTaskDate(bounds.start,services.language.locale)+'-'+formatTaskDate(bounds.end-1,services.language.locale):formatTaskDate(date,services.language.locale);return <div className="legacy-report-date"><button aria-label={label+' previous'} onClick={()=>onChange(shift(date,-1,period))}>‹</button><label><span>{formatted}</span><input type="date" aria-label={label} value={dateInput(date)} onChange={e=>{if(e.target.value)onChange(+new Date(e.target.value+'T12:00'))}}/></label><button aria-label={label+' next'} disabled={range(date,period).start>=range(Date.now(),period).start} onClick={()=>onChange(shift(date,1,period))}>›</button></div>}
 
@@ -34,9 +39,24 @@ function useReportProgress() {
  useEffect(()=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;let frame=0;const start=performance.now(),tick=(now:number)=>{const t=Math.min(1,(now-start)/220);setProgress(1-Math.pow(1-t,3));if(t<1)frame=requestAnimationFrame(tick)};frame=requestAnimationFrame(tick);return()=>cancelAnimationFrame(frame)},[]);
  return progress;
 }
-function ReportStats({times,counts}:{times:number[];counts:number[]}){
+function ReportStats({totals,counts}:{totals:{time:number;count:number}[];counts:number[]}){
  const{services}=useWorkspace(),progress=useReportProgress();
- return <div className="domain-stats">{['rpt_time_total','rpt_time_week','rpt_time_today','rpt_tsk_total','rpt_tsk_week','rpt_tsk_today'].map((key,i)=><div className="legacy-report-stat" key={key}><div>{services.language.legacyText(key)}</div><p aria-label={i<3?formatMinutesDuration(times[i]/60,services.language.locale):String(counts[i-3])}>{i<3?<Duration seconds={times[i]*progress}/>:<strong>{Math.round(counts[i-3]*progress)}</strong>}</p></div>)}</div>;
+ const [hovered,setHovered]=useState('');
+ return <div className="domain-stats">
+   {['total','week','today'].map((period,i)=>{
+     const showingCount=hovered===period, {time,count}=totals[i];
+     const pomodoros=String(Number(count.toFixed(1)));
+     return <div className="legacy-report-stat" key={period}
+       onMouseEnter={()=>setHovered(period)} onMouseLeave={()=>setHovered('')}>
+       <div>{services.language.legacyText((showingCount?'rpt_pomo_':'rpt_time_')+period)}</div>
+       <p aria-label={showingCount?pomodoros:undefined}>{showingCount?<strong>{pomodoros}</strong>:<Duration summary seconds={time*progress}/>}</p>
+     </div>;
+   })}
+   {['total','week','today'].map((period,i)=><div className="legacy-report-stat" key={'tasks-'+period}>
+     <div>{services.language.legacyText('rpt_tsk_'+period)}</div>
+     <p aria-label={String(counts[i])}><strong>{Math.round(counts[i]*progress)}</strong></p>
+   </div>)}
+ </div>;
 }
 function ReportContent({openTask}:{openTask(id:string):void}) {
  const{services,text,run,busy,blocked}=useWorkspace(),t=(zh:string,en:string)=>services.language.locale.startsWith('zh')?zh:en;
@@ -69,7 +89,7 @@ function ReportContent({openTask}:{openTask(id:string):void}) {
  const distributionRange=range(distributionDate,distributionPeriod),distributionReport=services.business.report(distributionRange.start,distributionRange.end),distribution=Object.entries(distributionReport.byProject).filter(([,seconds])=>Math.round(seconds/60)>0).sort((a,b)=>b[1]-a[1]);
  const color=(id:string)=>{const project=snapshot.projects.find(row=>row.id===id);return project?.color?'#'+String(project.color).replace('#',''):'#AEBDC3'};
  const name=(id:string,task=false)=>id==='null'?services.language.legacyText(task?'pomo_without_task':'rpt_no_project'):task?snapshot.tasks.find(row=>row.id===id)?.name||text.noTask:snapshot.projects.find(row=>row.id===id)?projectName(snapshot.projects.find(row=>row.id===id)!,text):text.none;
- return <section className="domain-reports legacy-reports" data-testid="reports-page" aria-busy="false"><ReportStats times={totals.map(row=>row.time)} counts={counts}/>
+ return <section className="domain-reports legacy-reports" data-testid="reports-page" aria-busy="false"><ReportStats totals={totals} counts={counts}/>
 
  <div className="domain-report-grid"><ReviewTimeline edit={setEditor}/>
  <section className="domain-card legacy-focus-time"><header><h2>{services.language.legacyText('rpt_focus_time')}</h2><div className="legacy-focus-mode" ref={modeRef}><button aria-haspopup="menu" aria-expanded={modeMenu} onClick={()=>setModeMenu(!modeMenu)}>{focusMode==='tasks'?services.language.legacyText('rpt_focus_time_show_task'):focusMode==='projects'?services.language.legacyText('rpt_focus_time_show_project'):services.language.legacyText('rpt_focus_time_show_tag')}</button>{modeMenu&&<div className="legacy-focus-menu" role="menu" onKeyDown={e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();setModeMenu(false)}}}>{(['tasks','projects','tags'] as const).map((mode,i)=><button key={mode} role="menuitem" onClick={()=>{setFocusMode(mode);setModeMenu(false)}}>{[services.language.legacyText('rpt_focus_time_show_task'),services.language.legacyText('rpt_focus_time_show_project'),services.language.legacyText('rpt_focus_time_show_tag')][i]}</button>)}</div>}</div></header><p className="legacy-report-detail">{services.language.legacyText('rpt_focus_time_desc',formatMinutesDuration(focusRows.reduce((n,row)=>n+Math.round(row[1]/60),0),services.language.locale))}<output className="workspace-sr" data-testid="report-total">{Math.round(report.time/60*100)/100}</output></p><PeriodTabs value={period} onChange={value=>{setPeriod(value);setDate(Date.now())}} label={t('报表周期','Report period')}/><PeriodDate date={date} period={period} onChange={setDate} label={t('报表日期','Report date')}/>{!focusRows.length?<EmptyData/>:<div className="legacy-focus-items" ref={focusRef}>{focusRows.map(([id,seconds])=><div key={id}><button onClick={()=>{if(focusMode==='tasks'&&id!=='null')openTask(id)}}>{focusMode==='tags'?'#'+name(id):name(id,focusMode==='tasks')}</button><div><i style={{width:`calc((100% - var(--report-duration-width, 48px) - 8px) * ${seconds/Math.max(1,...focusRows.map(row=>row[1]))})`,background:color(focusMode==='tasks'?String(snapshot.tasks.find(task=>task.id===id)?.projectId||''):id)}}/><span>{formatMinutesDuration(seconds/60,services.language.locale)}</span></div></div>)}</div>}</section>

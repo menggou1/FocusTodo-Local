@@ -6,19 +6,35 @@ const python = process.env.PYTHON || ['python3', 'python']
     .find(command => spawnSync(command, ['--version']).status === 0);
 const serverArgs = ['scripts/serve-static.py', '--port', '0'];
 
-async function startServer(t, args) {
+async function startServer(t, args, connection = {}) {
     const child = spawn(python, args, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
     const closed = new Promise(resolve => child.once('close', resolve));
-    t.after(async () => { child.kill(); await closed; });
+    let stdout = '', stderr = '';
+    let phase = 'startup';
+    const describe = () => JSON.stringify({
+        phase, pid: child.pid, exitCode: child.exitCode, signal: child.signalCode,
+        port: connection.port, request: connection.request, stdout: stdout.slice(-1000), stderr: stderr.slice(-2000),
+    });
+    const onTimeout = () => t.diagnostic('Python fallback state on abort: ' + describe());
+    t.signal.addEventListener('abort', onTimeout, { once: true });
+    t.after(async () => {
+        phase = 'shutdown';
+        child.kill();
+        await closed;
+        t.signal.removeEventListener('abort', onTimeout);
+    });
     return new Promise((resolve, reject) => {
-        let stdout = '', stderr = '';
         child.stderr.setEncoding('utf8').on('data', chunk => { stderr += chunk; });
         child.once('error', reject);
-        child.once('close', (code, signal) => reject(new Error(`Python exited before startup (${code ?? signal}): ${stderr.trim()}`)));
+        child.once('close', () => reject(new Error('Python exited before startup: ' + describe())));
         child.stdout.setEncoding('utf8').on('data', chunk => {
             stdout += chunk;
             const match = stdout.match(/127\.0\.0\.1:(\d+)\/index\.html/);
-            if (match) resolve(Number(match[1]));
+            if (match) {
+                phase = 'ready';
+                connection.port = Number(match[1]);
+                resolve(connection.port);
+            }
         });
     });
 }
@@ -37,12 +53,15 @@ test('Python fallback binds loopback without reverse DNS', { skip: !python, time
 });
 
 test('Python fallback rejects untrusted Hosts and serves uncached GET/HEAD assets', { skip: !python, timeout: 10000 }, async t => {
-    const port = await startServer(t, serverArgs);
+    const connection = {};
+    const port = await startServer(t, serverArgs, connection);
     function request(host, method = 'GET', headers = {}, target = '/index.html') {
+        connection.request = { host, method, target, phase: 'request' };
         return new Promise((resolve, reject) => {
-            const req = http.request({ host: '127.0.0.1', port, path: target, method, headers: { ...headers, Host: host } }, res => {
+            const req = http.request({ host: '127.0.0.1', port, path: target, method, signal: t.signal, headers: { ...headers, Host: host } }, res => {
+                connection.request.phase = 'response';
                 let size = 0; res.on('data', chunk => { size += chunk.length; });
-                res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, size }));
+                res.on('end', () => { connection.request.phase = 'complete'; resolve({ status: res.statusCode, headers: res.headers, size }); });
             }); req.once('error', reject); req.end();
         });
     }

@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, type RefObject } from 'react';
 
-export type DragHandoff = { rect: DOMRect; remove(): void };
+export type DragHandoff = { rect: DOMRect; remove(): void; exitToward(target: DOMRect): void };
+export const rowMotionTiming = { duration: 180, easing: 'ease-out' };
 type Position = { x: number; y: number };
 /** Retarget from the painted positions, including any interrupted animation. */
 export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: string, attribute: string) {
@@ -83,7 +84,7 @@ export function useRowMotion(scope: RefObject<HTMLElement | null>, selector: str
       if (Math.abs(x) < .5 && Math.abs(y) < .5) continue;
       if (id(element) === previous.active) element.dataset.reorderActive = 'true';
       const animation = element.animate([{ transform: `translate(${x}px,${y}px)` }, { transform: 'translate(0px,0px)' }],
-        { duration: 180, easing: 'ease-out' });
+        rowMotionTiming);
       running.current.set(element, animation);
       animation.onfinish = animation.oncancel = () => stop(element, animation);
     }

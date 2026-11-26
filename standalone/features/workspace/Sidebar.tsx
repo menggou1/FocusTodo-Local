@@ -8,6 +8,7 @@ import { ProjectEditor } from './Projects';
 import { ConfirmDialog } from './ConfirmDialog';
 import { useRowDrag } from './useRowDrag';
 import { useRowMotion } from './useRowMotion';
+import { sidebarTaskDropKind } from '../../domain/task-edits.mjs';
 import { sidebarItems, sidebarMinutes, sidebarMove } from './SidebarModel.mjs';
 import { expected, number, projectName } from './model';
 
@@ -22,25 +23,26 @@ interface Props {
   projects: readonly Entity[];
   view: SidebarView;
   navigate(next: SidebarView, focus?: boolean): void;
-  query: string;
-  setQuery(value: string): void;
+  searchInput(value: string, immediate: boolean): void;
+  searchReset: { value: string };
+  cancelPendingSearch(): void;
   summary(row: Entity): Summary;
   width: number;
   mobileNav: boolean;
+  taskDragActive: boolean;
+  taskDropTarget: string;
 }
 
 const customTypes = [1000, 2000, 3000];
 const isCustom = (row: Entity) => customTypes.includes(number(row.type));
 const menuLabel = (services: ReturnType<typeof useWorkspace>['services']) => services.language.locale.startsWith('zh') ? '清单菜单' : 'List menu';
 
-export function Sidebar({ projects, view, navigate, query, setQuery, summary, width, mobileNav }: Props) {
+export function Sidebar({ projects, view, navigate, searchInput, searchReset, cancelPendingSearch, summary, width, mobileNav, taskDragActive, taskDropTarget }: Props) {
   const { services, text, run, queue, busy, blocked } = useWorkspace();
   const scroll = useRef<HTMLDivElement>(null);
   const projection = useRef<DropPreview | null>(null);
   const dragContext = useRef<Entity[]>([]);
   const captureMotion = useRowMotion(scroll, '.sidebar-custom,.sidebar-empty-folder', 'data-motion-id');
-  const input = useRef<HTMLInputElement>(null), searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const previousView = useRef<SidebarView | null>(null), lastViewKind = useRef(view.kind);
   const [menu, setMenu] = useState<MenuState | null>(null), [editor, setEditor] = useState<EditorState | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [dragging, setDragging] = useState(''), [overId, setOverId] = useState('');
@@ -56,64 +58,13 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   const items = projectedItems(preview);
   const today = presets.find(row => number(row.type) === 4000) || projects.find(row => row.id === 'id-deadline-today');
 
-  const clearSearchTimer = () => { if (searchTimer.current) { clearTimeout(searchTimer.current); searchTimer.current = null; } };
   function clearFolderExpand() { if (folderExpand.current) { clearTimeout(folderExpand.current.timer); folderExpand.current = null; } }
-  useEffect(() => () => { clearSearchTimer(); clearFolderExpand(); }, []);
-  useEffect(() => {
-    if (lastViewKind.current === 'search' && view.kind !== 'search') { clearSearchTimer(); setQuery(''); previousView.current = null; }
-    lastViewKind.current = view.kind;
-  }, [view.kind, setQuery]);
+  useEffect(() => clearFolderExpand, []);
 
   function fallbackView(): SidebarView {
     return today ? { kind: 'project', id: today.id } : { kind: 'project', id: 'id-deadline-today' };
   }
-  function restoreSearch(focus = true) {
-    clearSearchTimer();
-    const shouldNavigate = view.kind === 'search' || previousView.current !== null;
-    const target = previousView.current || fallbackView();
-    previousView.current = null;
-    setQuery('');
-    if (shouldNavigate) navigate(target, false);
-    if (focus) requestAnimationFrame(() => input.current?.focus());
-  }
-  function commitSearch(value: string) {
-    clearSearchTimer();
-    const keyword = value.trim();
-    if (!keyword) { if (view.kind === 'search') restoreSearch(); return; }
-    if (view.kind !== 'search') previousView.current = view;
-    navigate({ kind: 'search' }, false);
-  }
-  function scheduleSearch(value: string) {
-    clearSearchTimer();
-    searchTimer.current = setTimeout(() => {
-      if (value.trim()) commitSearch(value);
-      else if (view.kind === 'search') restoreSearch();
-    }, 300);
-  }
-  function changeSearch(value: string) {
-    setQuery(value);
-    if (value.trim()) scheduleSearch(value);
-    else {
-      clearSearchTimer();
-      if (view.kind === 'search') searchTimer.current = setTimeout(() => restoreSearch(), 300);
-    }
-  }
-  function searchKey(event: ReactKeyboardEvent<HTMLInputElement>) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      if (query.trim()) commitSearch(query);
-      else if (view.kind === 'search') restoreSearch();
-      return;
-    }
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      clearSearchTimer();
-      if (query.trim()) restoreSearch();
-      else input.current?.blur();
-    }
-  }
   function chooseRow(row: Entity) {
-    clearSearchTimer(); previousView.current = null; setQuery('');
     navigate({ kind: 'project', id: row.id });
   }
   function toggleFolder(event: ReactMouseEvent, row: Entity) {
@@ -152,7 +103,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   }
   function summaryFor(row: Entity) { return summary(row); }
   function rowMenuLabel() { return menuLabel(services); }
-  function projectSearchLabel() { return services.language.locale.startsWith('zh') ? '清除搜索' : 'Clear search'; }
+
 
   function clearDrag() {
     projection.current = null;
@@ -229,6 +180,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
     return <div key={item.id} className={'sidebar-item' + (custom ? ' sidebar-custom' : '') + (item.parent ? ' sidebar-child' : '') + (menu?.row.id === project.id ? ' sidebar-menu-open' : '')}
       onPointerDown={custom&&(!busy||committingMoves.length>0)&&!blocked?event=>pointerDrag(event,project,'project'):undefined}
       data-project-id={project.id} data-motion-id={item.id} data-dragging={dragging === project.id || undefined} data-over={overId === project.id || undefined}
+      data-task-drop={taskDragActive && sidebarTaskDropKind(project) ? (taskDropTarget === project.id ? 'over' : 'available') : undefined}
       onContextMenu={event => openMenu(event, project)}>
       {item.parent && <span className="sidebar-child-line" style={{ '--sidebar-parent': '#' + String(item.parent.color || 'aeaeae').replace('#', '') } as CSSProperties} />}
       <button type="button" className="workspace-nav sidebar-nav-main" aria-label={projectName(project, text)} data-project-id={project.id}
@@ -250,14 +202,7 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
   const menuRow = menu?.row;
   return <nav className="workspace-sidebar" data-open={mobileNav} aria-label={text.lists} style={{ '--sidebar-width': width + 'px' } as CSSProperties}>
     <div className="workspace-projects" ref={scroll}>
-      <div className="workspace-search">
-        <div className="workspace-search-box">
-          <LegacyIcon name="search-icon" />
-          <span className="workspace-sr">{text.search}</span>
-          <input ref={input} type="search" placeholder={text.search} title={text.searchHelp} value={query} onChange={event => changeSearch(event.target.value)} onKeyDown={searchKey} />
-          {!!query && <button type="button" className="workspace-search-clear" aria-label={projectSearchLabel()} title={projectSearchLabel()} onClick={() => restoreSearch()}><span /></button>}
-        </div>
-      </div>
+      <SearchBox active={view.kind === 'search'} searchInput={searchInput} searchReset={searchReset} cancelPendingSearch={cancelPendingSearch} />
       <div className="sidebar-presets">{presets.map(project => row({ id: project.id, project, parent: null }))}</div>
       {items.length > 0 && <div className="sidebar-custom-separator" />}
       <div className="sidebar-customs">{items.map(item => row(item))}</div>
@@ -272,6 +217,60 @@ export function Sidebar({ projects, view, navigate, query, setQuery, summary, wi
       <button type="button" onClick={dismiss}>{services.language.legacyText('cmm_cancel')}</button><button type="button" className="primary" disabled={busy || blocked} onClick={() => { if (confirm.kind === 'hide') void hideProject(confirm.row,dismiss); else void removeProject(confirm.row,dismiss); }}>{services.language.legacyText('cmm_ok')}</button>
     </>}</ConfirmDialog>}
   </nav>;
+}
+
+function SearchBox({ active, searchInput, searchReset, cancelPendingSearch }: Pick<Props, 'searchInput' | 'searchReset' | 'cancelPendingSearch'> & { active: boolean }) {
+  const { services, text } = useWorkspace();
+  const input = useRef<HTMLInputElement>(null), composing = useRef(false);
+  const [query, setQuery] = useState('');
+  useLayoutEffect(() => {
+    composing.current = false;
+    setQuery(searchReset.value);
+  }, [searchReset]);
+
+  function clearSearch() {
+    composing.current = false;
+    setQuery('');
+    searchInput('', true);
+    input.current?.focus();
+  }
+  function changeSearch(value: string) {
+    setQuery(value);
+    if (!composing.current) searchInput(value, false);
+  }
+  function searchKey(event: ReactKeyboardEvent<HTMLInputElement>) {
+    if (composing.current || event.nativeEvent.isComposing || event.keyCode === 229) return;
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      searchInput(event.currentTarget.value, true);
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (active || query) clearSearch();
+      else {
+        cancelPendingSearch();
+        input.current?.blur();
+      }
+    }
+  }
+  function projectSearchLabel() { return services.language.locale.startsWith('zh') ? '清除搜索' : 'Clear search'; }
+
+  return <div className="workspace-search">
+    <div className="workspace-search-box">
+      <LegacyIcon name="search-icon" />
+      <span className="workspace-sr">{text.search}</span>
+      <input ref={input} type="search" placeholder={text.search} title={text.searchHelp} value={query}
+        onChange={event => changeSearch(event.target.value)} onKeyDown={searchKey}
+        onCompositionStart={() => { composing.current = true; cancelPendingSearch(); }}
+        onCompositionEnd={event => {
+          if (!composing.current) return;
+          composing.current = false;
+          changeSearch(event.currentTarget.value);
+        }} />
+      {!!query && <button type="button" className="workspace-search-clear" aria-label={projectSearchLabel()} title={projectSearchLabel()} onClick={clearSearch}><span /></button>}
+    </div>
+  </div>;
 }
 
 function SidebarMenu({ row, x, y, close, edit, hide, remove }: { row: Entity; x: number; y: number; close(): void; edit(): void; hide(): void; remove(): void }) {

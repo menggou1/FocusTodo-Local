@@ -32,7 +32,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
   const savedBaseRef = useRef(base);
   const savedDraftRef = useRef(draft), draftRef = useRef(draft);
   const [pending,setPending]=useState(0),[saveFailed,setSaveFailed]=useState(false);
-  const [subtaskName, setSubtaskName] = useState(''), [deleting, setDeleting] = useState(false), [preserve, setPreserve] = useState(true);
+  const [subtaskName, setSubtaskName] = useState(''), [deleting, setDeleting] = useState(false);
   const [selectedSubtask,selectSubtask]=useState('');
   const [editing, setEditing] = useState<Entity | null>(null), [validation, setValidation] = useState('');
   const [createTag, setCreateTag] = useState(false);
@@ -124,9 +124,9 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
         <SubtaskName subtask={row} selected={selectedSubtask===row.id}/>
         <button type="button" className="legacy-subtask-delete" aria-label={text.deleteSubtask + ': ' + row.name} disabled={busy || blocked} onClick={event => { event.currentTarget.focus(); setEditing(row);setDeleting(true); }}><LegacyIcon name="detail-subtask-delete"/></button>
       </div>)}
-      <form onSubmit={async event => { event.preventDefault(); if (await run(() => services.business.batch([{ type: 'addSubtask', values: { name: subtaskName.trim(), taskId: task.id,
+      <form onSubmit={async event => { event.preventDefault(); const name = subtaskName.trim(); if (!name) return; if (await run(() => services.business.batch([{ type: 'addSubtask', values: { name, taskId: task.id,
         order: Math.max(0, ...children.map(row => number(row.order))) + 10000 } },{type:'updateTask',id:task.id,changes:{hasSubtask:true},expected:{hasSubtask:task.hasSubtask}}]))) setSubtaskName(''); }}>
-        <LegacyIcon name="detail-subtask-add"/><label className="workspace-sr" htmlFor="new-subtask">{text.addSubtask}</label><input id="new-subtask" name="new-subtask" autoComplete="off" spellCheck={false} tabIndex={-10} placeholder={text.addSubtask+'...'} value={subtaskName} maxLength={1000} required disabled={busy || blocked} onChange={event => setSubtaskName(event.target.value)} />
+        <button type="submit" aria-label={text.createSubtask} disabled={busy || blocked}><LegacyIcon name="detail-subtask-add"/></button><label className="workspace-sr" htmlFor="new-subtask">{text.addSubtask}</label><input id="new-subtask" name="new-subtask" autoComplete="off" spellCheck={false} tabIndex={-10} placeholder={text.addSubtask+'...'} value={subtaskName} maxLength={1000} required disabled={busy || blocked} onChange={event => setSubtaskName(event.target.value)} />
       </form>
       <div className="legacy-subtask-separator bottom"/>
     </section>
@@ -134,7 +134,7 @@ export function TaskDetails({ task, projects, subtasks, close, onStart }: { task
     </div>
     <footer className="legacy-detail-bottom"><button type="button" aria-label={text.close} onClick={close}><LegacyIcon name="detail-close"/></button><span>{chinese?'创建于':'Created '}{formatTaskDate(number(task.creationDate||task.createDate||task.createdDate),services.language.locale)}</span><button type="button" aria-label={chinese?'手动补记':'Add focus record'} onClick={()=>{setCreateRecord(true)}}><LegacyIcon name="add-pomodoro"/></button><button type="button" aria-label={text.remove} disabled={busy||blocked} onClick={event=>{event.currentTarget.focus();setEditing(null);setDeleting(true)}}><LegacyIcon name="detail-delete"/></button></footer>
     </div>
-    {deleting&&!editing&&<TaskDeleteDialog task={task} close={()=>setDeleting(false)} afterDelete={close} preserveHistory={preserve} extra={<label className="legacy-confirm-option"><input type="checkbox" checked={preserve} disabled={busy||blocked} onChange={event=>setPreserve(event.target.checked)}/>{text.preserveHistory}</label>}/>}
+    {deleting&&!editing&&<TaskDeleteDialog task={task} close={()=>setDeleting(false)} afterDelete={close}/>}
     {deleting&&editing&&<ConfirmDialog canClose={!busy} title={services.language.legacyText('tsk_del_title',String(editing.name))} message={services.language.legacyText('sbt_del_msg')} close={()=>{setDeleting(false);setEditing(null)}}>{dismiss=><>
       <button disabled={busy} onClick={dismiss}>{text.cancel}</button><button className="primary" disabled={busy||blocked} onClick={async()=>{
         const command={type:'removeSubtask' as const,id:editing.id,expected:editing};

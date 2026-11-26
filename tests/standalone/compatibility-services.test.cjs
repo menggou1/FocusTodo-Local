@@ -92,6 +92,24 @@ test('v1/v2 imports preserve historical compatibility records and unsupported fo
     const before=await h.app.backup.export({format:'json'}),bad=clone(before.data);bad.meta.dbVersion=4;
     await assert.rejects(h.app.backup.restore(JSON.stringify(bad)));assert.deepEqual((await h.app.backup.export({format:'json'})).data.indexedDB,before.data.indexedDB);
 });
+test('legacy backup keeps the historical default and an explicit Someday round-trips as zero', async t => {
+    const h = await createApplication();
+    t.after(h.dispose);
+    const { backup, business, settings } = h.app;
+    const oldDeadline = new Date(2026, 8, 29, 23, 59, 59, 999).getTime();
+    const oldTask = await business.command({ type: 'addTask', values: { name: 'Imported task', deadline: oldDeadline } });
+    const exported = (await backup.export({ format: 'json' })).data;
+    exported.meta.exportVersion = 1;
+    exported.localStorage.DefaultDeadline = String(oldDeadline);
+    await backup.restore(JSON.stringify(exported));
+    assert.equal(settings.getSnapshot().defaultDeadline, oldDeadline);
+    await settings.set('defaultDeadline', 0);
+    const updated = (await backup.export({ format: 'json' })).data;
+    assert.equal(updated.localStorage.DefaultDeadline, '0');
+    await backup.restore(JSON.stringify(updated));
+    assert.equal(settings.getSnapshot().defaultDeadline, 0);
+    assert.deepEqual(business.getSnapshot().tasks.find(row => row.id === oldTask.id), oldTask);
+});
 test('theme journal failure at each key boundary matches legacy rollback and preserves corrupt journals',async()=>{
     const {createThemeJournal}=await import('../../standalone/services/theme-journal.mjs'),oldFactory=require(require('../helpers/legacy-runtime.cjs').file('src/js/local-theme-storage.js')),{MemoryStorage}=require('./core-helpers.cjs');
     for(let failAt=1;failAt<=7;failAt++){

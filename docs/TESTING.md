@@ -21,7 +21,7 @@
 | 全部历史浏览器回归，对独立归档运行 | `npm run test:browser` |
 | 历史 Firefox/WebKit 能力降级基线 | `npm run test:compat` |
 | 中英明暗 UI、共享弹窗与首帧动画 | `node tests/standalone/final-ui-parity.cjs` |
-| 详情删除、子任务标志及保留/清除记录 | `node tests/standalone/inspector-dialog-parity.cjs` |
+| 详情与右键删除确认一致性、子任务标志和专注记录删除 | `node tests/standalone/inspector-dialog-parity.cjs` |
 | 发布版本、校验和、篡改拒绝及工作流门禁 | `python tests/release/release-gate-test.py` |
 | 正式 ZIP/tar.gz 与 Python 备用启动 | `python scripts/package-release.py`，`python tests/release/package-smoke.py` |
 | 已提交来源的 Pages 内容逐字节核对 | `python tests/release/pages-build-test.py`（先提交构建输入） |
@@ -37,6 +37,8 @@ paired 对照默认为归档和隔离 React 各启动随机端口，均使用临
 专项脚本保留在 tests/standalone：reports-parity、r2-r3-overlays-parity、visual-settings、r4-r5-settings-drag-parity、visual-timer-forest、calendar-overlay-equivalence 和 window-scroll-equivalence。这些检查覆盖实际 DOM、computed style、截图、输入和动画；已修复的旧版缺陷不回退。历史一次性 bundle 审计工具已删除，原结果保留在 Git 历史与 docs/acceptance。
 
 `node tests/standalone/folder-composer-parity.cjs` 使用同一批合成任务核对清单夹的实际分组、创建入口和下拉菜单的几何尺寸，并验证通知与相邻弹层的交互。
+
+`npm run test:workspace` 同时覆盖搜索分组、详情保留、通知跳转、防抖和输入法合成。用 `node tests/standalone/search-benchmark.cjs` 对照 2.1.5 与当前搜索服务的冷查询、未缓存关键词及重复关键词耗时。该脚本使用 1,000 至 8,000 个任务，每项两个子任务，计时范围为业务快照就绪后的搜索调用。
 
 `node tests/standalone/timer-widget-motion.cjs` 检查计时侧栏和组件编辑器的实际动画帧、滚动边界、拖动层级和保存结果。设置 `FOCUS_MOTION_BASELINE_SITE` 指向从 `58853d2` 构建的隔离 `site` 目录，逐帧对照基准。可另设 `FOCUS_MOTION_REGRESSION_SITE` 指向 `67ddc15` 的隔离构建，验证测试能检出擦除式收展和松手横向跳跃。
 
