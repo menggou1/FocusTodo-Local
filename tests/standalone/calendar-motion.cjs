@@ -109,42 +109,75 @@ const cases = [
     }],
     ['calendar task pane and a single glyph animate, reverse and survive view and window changes', {reducedMotion: 'no-preference'}, async ({page}, {engine}) => {
         await prepare(page, 'en', []);
-        const frames = await page.evaluate(({ panel, toggle }) => new Promise(resolve => {
+        await page.locator(toggle).waitFor();
+        const frames = await page.evaluate(async ({panel, toggle}) => {
             const aside = document.querySelector(panel), button = document.querySelector(toggle);
             const glyph = button.firstElementChild, axis = document.querySelector('.legacy-calendar-main');
-            const result = [];
-            const sample = () => {
+            const targets = [
+                [aside, 'width'], [glyph, 'transform'],
+                [button, 'top'], [button, 'right'], [button, 'width'], [button, 'height'],
+            ];
+            function sample() {
                 const transform = getComputedStyle(glyph).transform, rect = glyph.getBoundingClientRect();
                 return {width: aside.getBoundingClientRect().width, axis: axis.getBoundingClientRect().width,
                     angle: transform === 'none' ? 0 : Math.atan2(new DOMMatrixReadOnly(transform).b, new DOMMatrixReadOnly(transform).a),
                     x: rect.x + rect.width / 2, y: rect.y + rect.height / 2,
                     same: glyph === button.firstElementChild && document.querySelectorAll('.legacy-calendar-pane-glyph').length === 1};
-            };
+            }
+            function toggleAndPause(expanded) {
+                // Capture the real CSS transitions as soon as React commits their
+                // target styles. A slow renderer can skip the midpoint entirely.
+                return new Promise((resolve, reject) => {
+                    const observer = new MutationObserver(() => {
+                        if (button.getAttribute('aria-expanded') !== String(expanded)) return;
+                        observer.disconnect();
+                        try {
+                            const transitions = targets.map(([element, property]) => {
+                                const transition = element.getAnimations().find(animation => animation.transitionProperty === property);
+                                const duration = transition?.effect.getComputedTiming().duration;
+                                if (!(duration > 0)) throw new Error('Missing calendar transition for ' + element.className + ' / ' + property);
+                                transition.pause();
+                                transition.currentTime = 0;
+                                return {transition, duration};
+                            });
+                            resolve(transitions);
+                        } catch (error) { reject(error); }
+                    });
+                    observer.observe(button, {attributes: true, attributeFilter: ['aria-expanded']});
+                    button.click();
+                });
+            }
+            function seekMidpoint(transitions) {
+                for (const {transition, duration} of transitions) transition.currentTime = duration / 2;
+            }
+
             const closed = sample();
             button.focus();
-            button.click();
-            let reverseAt = -1;
-            const tick = () => {
-                const frame = sample();
-                result.push(frame);
-                if (reverseAt < 0 && frame.width >= 100 && frame.width <= 320) {
-                    reverseAt = result.length - 1;
-                    button.click();
-                }
-                if (result.length < 70 && (reverseAt < 0 || frame.width > 0 || result.length - reverseAt < 3)) requestAnimationFrame(tick);
-                else resolve({closed, result, reverseAt, focused: document.activeElement === button});
-            };
-            requestAnimationFrame(tick);
-        }), {panel,toggle});
-        assert(frames.reverseAt >= 0, 'the panel was observed mid-open');
-        assert(frames.focused && frames.result.every(frame => frame.same), 'the same button and glyph persist throughout reversal');
-        for (const frame of frames.result) close(frame.axis + frame.width, frames.closed.axis, 'the adjacent timeline and panel share one width');
-        const turn = frames.result[frames.reverseAt];
-        assert(turn.angle > 0 && turn.angle < Math.PI / 4 && turn.x < frames.closed.x && turn.y < frames.closed.y);
-        const following = frames.result[frames.reverseAt + 1];
-        assert(following.width > 0 && following.width < 420 && following.angle > 0 && following.angle < Math.PI / 4, 'reverse from the painted intermediate geometry');
-        close(frames.result.at(-1).width, 0, 'reverse ends at closed');
-        close(frames.result.at(-1).angle, 0, 'the glyph returns to plus');
+            seekMidpoint(await toggleAndPause(true));
+            // Let the browser paint the held geometry before triggering reversal.
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            const turn = sample();
+            const reverse = await toggleAndPause(false);
+            const reverseStart = sample();
+            seekMidpoint(reverse);
+            const following = sample();
+            await Promise.all(reverse.map(({transition}) => {
+                transition.play();
+                return transition.finished;
+            }));
+            return {closed, turn, reverseStart, following, end: sample(), focused: document.activeElement === button};
+        }, {panel,toggle});
+        const {closed, turn, reverseStart, following, end} = frames;
+        assert(turn.width >= 100 && turn.width <= 320, 'the panel renders a mid-open width: ' + turn.width);
+        const samples = [closed, turn, reverseStart, following, end];
+        assert(frames.focused && samples.every(frame => frame.same), 'the same button and glyph persist throughout reversal');
+        for (const frame of samples) close(frame.axis + frame.width, closed.axis, 'the adjacent timeline and panel share one width');
+        assert(turn.angle > 0 && turn.angle < Math.PI / 4 && turn.x < closed.x && turn.y < closed.y);
+        for (const key of ['width', 'x', 'y']) close(reverseStart[key], turn[key], 'reverse preserves the painted ' + key);
+        close(reverseStart.angle * 100, turn.angle * 100, 'reverse preserves the painted glyph angle');
+        assert(following.width > 0 && following.width < turn.width && following.angle > 0 && following.angle < turn.angle, 'reverse from the painted intermediate geometry');
+        close(end.width, 0, 'reverse ends at closed');
+        close(end.angle, 0, 'the glyph returns to plus');
 
         await page.locator(toggle).click();
         await page.waitForFunction(panel => document.querySelector(panel).getBoundingClientRect().width === 420, panel);
