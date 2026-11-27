@@ -1,5 +1,7 @@
 # 日程专项返工验收
 
+第三轮复现更正：本报告第 3 项仅核对详情栏关闭，任务侧栏在表格外点空白仍保持展开。第 4 项核对的是工作区输入，保存后的 `14:20–15:20` 卡片标题仍会裁切字形。这两项的实际验收以[第三轮报告](calendar-third-round-2026-11-27.md)为准。
+
 2026-11-27（Asia/Shanghai）。基准为远端 dev `445cbb900587e6f8d29ddcc7f3e89517c2268f48`。浏览器运行当前隔离构建，使用随机回环端口、临时上下文与合成数据。
 
 下表逐项关联原始要求、此前遗漏、实际改动及 [calendar-rework.cjs](../../tests/standalone/calendar-rework.cjs) 的浏览器断言。已有 [calendar-fixes.cjs](../../tests/standalone/calendar-fixes.cjs) 和 [calendar-motion.cjs](../../tests/standalone/calendar-motion.cjs) 继续运行。

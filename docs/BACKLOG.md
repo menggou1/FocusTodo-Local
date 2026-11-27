@@ -39,7 +39,7 @@
 | E23 | P2 | CI #189 首次 Windows / Node 24 的两项 Python 用例分别在 10043ms 和 10013ms 触发 10 秒超时。原始日志未记录阻塞阶段。同提交第二次运行通过，本地 Windows Node 22/24 和 Python 3.12.16 也未重现。再次出现时按新增诊断核对启动、响应与退出阶段。[首次失败作业](https://github.com/menggou1/FocusTodo-Local/actions/runs/45179802683/job/137710995266) |
 | E24 | P3 | 本地 WebKit 全量运行时，导出滚动和日程响应式用例各有一次设置按钮首击等待稳定超时。附件记录了开发基线和当时构建的定向通过。本轮 Windows WebKit 的工作区导出滚动和领域日程响应式用例均通过。保留全量失败记录以及原交互和断言，后续复验持续运行时的首击稳定性。 |
 | E25 | P3 | 搜索输入法已覆盖浏览器合成事件。真实系统中文输入法的候选窗、确认和取消键仍待人工复验。 |
-| E26 | P2 | 日程专项的用户实机复核及真实 Safari。返工以远端 dev `445cbb9` 为基线，七项需求的浏览器操作、布局和数据证据见[日程返工验收报告](https://github.com/menggou1/FocusTodo-Local/blob/dev/docs/acceptance/calendar-rework-2026-11-27.md)。在实际平台复核窄窗文字、任务侧栏滚动、拖入和空白关闭。 |
+| E26 | P2 | 日程专项的用户实机复核及真实 Safari。第三轮以远端 dev `e87c02b` 为基线，七项操作与真实浏览器画面见[第三轮验收报告](https://github.com/menggou1/FocusTodo-Local/blob/dev/docs/acceptance/calendar-third-round-2026-11-27.md)。在实际平台复核窄窗文字、任务侧栏滚动、拖入和两类侧栏空白关闭。 |
 | E27 | P3 | [CI #200 Ubuntu / Node 24](https://github.com/menggou1/FocusTodo-Local/actions/runs/45938397755/job/140307037603) 的固定归档主题切换兼容用例在 `browser-acceptance.cjs:361` 等待背景发布时超时。日程补丁未改动该测试、运行适配器或不可变归档；本机同用例通过。原因尚未证明，再现时保留主题事务、图像解码与背景发布顺序，不能以重跑通过替代原因确认。 |
 
 ## 候选计划

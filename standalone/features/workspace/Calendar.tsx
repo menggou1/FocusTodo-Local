@@ -17,7 +17,7 @@ import { SettingsSelect } from './SoundSettings';
 // Time slots keep their own click and gesture behavior. Workspace controls and
 // portaled surfaces handle their own clicks, including their scrollbars.
 const calendarInteraction = [
-  '.legacy-record-inspector', '.legacy-calendar-task', '.legacy-calendar-menu-layer',
+  '.legacy-record-inspector', '.legacy-calendar-pane', '.legacy-calendar-menu-layer',
   '.legacy-scroll-track', '[data-app-interaction-root]', 'dialog',
   'button', 'a[href]', 'input', 'select', 'textarea', 'label', 'details',
   '[contenteditable]:not([contenteditable="false"])', '[tabindex]:not([tabindex="-1"])',
@@ -80,15 +80,17 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
   const closeEditor=useCallback(()=>{setEditor(null);setPreview(null)},[]);
   const inspecting=!!editor?.row;
   useEffect(()=>{
-    if(!inspecting)return;
+    if(!inspecting&&!pane)return;
     function dismissOnBlank(event:MouseEvent){
       const target=event.target;
       if(!(target instanceof Element)||event.defaultPrevented||suppressClick.current>performance.now())return;
-      if(!target.closest(calendarInteraction))closeEditor();
+      if(target.closest(calendarInteraction))return;
+      if(inspecting)closeEditor();
+      if(pane)setPane(false);
     }
     document.addEventListener('click',dismissOnBlank);
     return()=>document.removeEventListener('click',dismissOnBlank);
-  },[inspecting,closeEditor]);
+  },[inspecting,pane,closeEditor]);
   function blank(){if(suppressClick.current>performance.now()){suppressClick.current=0;return}closeEditor();setPane(false);setMenu(null)}
   function quick(start:number,end:number,anchored=false){setPane(false);setMenu(null);setPreview({start,end});setEditor({kind:'schedule',start,interval:(end-start)/1000,quick:true,anchored})}
   function inspect(event:CalendarEvent){if(suppressClick.current>performance.now()){suppressClick.current=0;return}setPane(false);setPreview(null);setMenu(null);setEditor({kind:event.type==='schedule'?'schedule':'record',row:event.record})}

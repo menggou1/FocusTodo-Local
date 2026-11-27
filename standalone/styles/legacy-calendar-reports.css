@@ -396,7 +396,13 @@
 }
 @container (min-height:26px) and (min-width:70px){
   .legacy-calendar .legacy-event-title{justify-content:flex-start;padding:4px 6px}
-  .legacy-calendar .legacy-event-title>span{font-size:13px}
+  .legacy-calendar .legacy-event-title>span{
+    font-size:13px;padding-inline-start:2px;margin-inline-start:-2px;
+  }
+  /* Keep the title and time aligned while allowing descenders beyond the line box. */
+  .legacy-calendar .domain-time-event:not(.legacy-calendar-selection) .legacy-event-title>span{
+    padding-block:2px;margin-block:-2px;
+  }
 }
 @container (min-height:45px) and (min-width:101px){
   .legacy-calendar .legacy-event-title small{display:block}
