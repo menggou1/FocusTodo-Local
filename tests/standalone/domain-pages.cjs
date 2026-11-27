@@ -91,7 +91,7 @@ async function detailsSave(page){await page.evaluate(()=>document.activeElement?
    const recorded=await store(page,'Pomodoro');assert(recorded.some(row=>row.interval>=60),'timer stop writes a reportable record');
    await page.locator('[data-view="reports"]').click();await page.getByLabel('Report date',{exact:true}).fill('2026-11-12');assert(Number(await page.getByTestId('report-total').innerText())>0,'calendar timer record appears in reports');
   });
-  for(const [name,options,test] of [...require('./calendar-motion.cjs').cases,...require('./calendar-fixes.cjs').cases]) {
+  for(const [name,options,test] of [...require('./calendar-motion.cjs').cases,...require('./calendar-fixes.cjs').cases,...require('./calendar-rework.cjs').cases]) {
    await run(browser,engine,name,context=>test(context,{engine,rows:store}),options);
   }
   await run(browser,engine,'history manual record/edit/delete and cross-midnight report aggregation with goal persistence',async({page})=>{

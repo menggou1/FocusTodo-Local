@@ -195,15 +195,18 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
       setAdded(current=>current===committed?null:current);
     });
   }
-  async function removeSchedule(row:Entity){
-    if(!await confirmInApp(services.language.text('删除此日程？'),
-      services.language.text('此操作会移除该日程安排，相关任务和专注记录会保留。'),text.remove))return;
-    if(await run(()=>services.business.command({type:'removeSchedule',id:row.id,expected:row})))closeEditor();
+  async function removeCalendarRow(row: Entity, kind: Editor['kind']) {
+    const scheduled = kind === 'schedule';
+    const title = scheduled ? '删除此日程？' : '删除此专注记录？';
+    const message = scheduled ? '此操作会移除该日程安排，相关任务和专注记录会保留。' : '此操作会移除此专注记录，关联任务会保留。';
+    if (!await confirmInApp(services.language.text(title), services.language.text(message), text.remove)) return;
+    const type = scheduled ? 'removeSchedule' : 'removeRecord';
+    if (await run(() => services.business.command({type, id: row.id, expected: row}))) closeEditor();
   }
   function action(remove:boolean){
     const event=menu?.event;
     if(!event)return;
-    if(remove){void removeSchedule(event.record);return}
+    if(remove){void removeCalendarRow(event.record, 'schedule');return}
     const {id,...values}=event.record;void id;
     void run(()=>services.business.command({type:'addSchedule',values:{...values,endDate:event.end+(number(event.record.interval)+services.settings.getSnapshot().shortBreakInterval)*1000}}));
   }
@@ -257,7 +260,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
         {day===today&&<div className="legacy-calendar-now" style={{top:(new Date(now).getHours()*60+new Date(now).getMinutes()+new Date(now).getSeconds()/60)*hourHeight/60}}/>}
       </div></section>)}{days.flatMap(timedEvents)}</div></div></>}
     </div></div>
-    <div className="legacy-calendar-pane" id="calendar-task-panel" inert={!pane}>{paneMounted&&<aside className="domain-calendar-tasks"><header><PickerField className="legacy-calendar-list-picker" align="start" fitViewport restoreFocusOnEscape><summary><span>{paneView?projectName(paneView,text):text.today}</span><i className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-project-menu" role="listbox" aria-label={text.project}>{paneOptions.map(project=><button type="button" key={project.id} style={{paddingLeft:project.parentId?32:16}} role="option" aria-selected={project.id===paneProject} onClick={()=>{setPaneProject(project.id);root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-list-picker').forEach(el=>el.open=false)}}><>{project.parentId&&<i className="legacy-calendar-folder-indicator" style={{backgroundColor:'#'+String(paneProjects.find(row=>row.id===project.parentId)?.color||'aeaeae')}}/>}<ProjectIcon type={number(project.type)} color={String(project.color||'')}/></><span>{projectName(project,text)}</span>{project.id===paneProject&&<i className="legacy-option-check"/>}</button>)}</div></PickerField></header><div className="legacy-calendar-task-list">{paneTasks.map(row=><div className="legacy-calendar-task" key={row.id} onPointerDown={e=>dragTask(e,row)} draggable={false}><span className="legacy-calendar-task-name">{String(row.name)}</span><TimerTaskPomodoros task={row} state="idle"/></div>)}</div></aside>}</div>
+    <div className="legacy-calendar-pane" id="calendar-task-panel" inert={!pane}>{paneMounted&&<aside className="domain-calendar-tasks"><header><PickerField className="legacy-calendar-list-picker" align="start" fitViewport restoreFocusOnEscape><summary><span>{paneView?projectName(paneView,text):text.today}</span><i className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-project-menu" role="listbox" aria-label={text.project}>{paneOptions.map(project=><button type="button" key={project.id} style={{paddingLeft:project.parentId?32:16}} role="option" aria-selected={project.id===paneProject} onClick={()=>{setPaneProject(project.id);root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-list-picker').forEach(el=>el.open=false)}}><>{project.parentId&&<i className="legacy-calendar-folder-indicator" style={{backgroundColor:'#'+String(paneProjects.find(row=>row.id===project.parentId)?.color||'aeaeae')}}/>}<ProjectIcon type={number(project.type)} color={String(project.color||'')}/></><span>{projectName(project,text)}</span>{project.id===paneProject&&<i className="legacy-option-check"/>}</button>)}</div></PickerField></header><div className="legacy-calendar-task-viewport"><div className="legacy-calendar-task-list" data-local-scroll tabIndex={0} role="region" aria-label={t('可安排的任务','Tasks to schedule')}>{paneTasks.map(row=><div className="legacy-calendar-task" key={row.id} onPointerDown={e=>dragTask(e,row)} draggable={false}><span className="legacy-calendar-task-name">{String(row.name)}</span><TimerTaskPomodoros task={row} state="idle"/></div>)}</div></div></aside>}</div>
     <button type="button" className="legacy-calendar-pane-toggle" aria-label={pane?t('收起任务面板','Hide task panel'):t('显示任务面板','Show task panel')}
       aria-expanded={pane} aria-controls="calendar-task-panel" onClick={()=>{closeEditor();setPaneMounted(true);setPane(value=>!value)}}>
       <span className="legacy-calendar-pane-glyph" aria-hidden="true"/>
@@ -274,7 +277,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
         <span>{taskGhost.start!==undefined?t('开始','Starts')+' '+time(taskGhost.start):taskGhost.invalid?t('无法放置','Cannot place here'):t('未安排','Unplaced')}</span></div>
       {number(taskGhost.row.estimatePomoNum)>1&&<small>{number(taskGhost.row.estimatePomoNum)} × {durationLabel(taskGhost.seconds)} ≈ {durationLabel(number(taskGhost.row.estimatePomoNum)*taskGhost.seconds)}</small>}
     </div>,document.body)}
-    {editor&&<RecordEditor key={editor.row?.id||String(editor.start)} {...editor} inspector close={closeEditor} removeSchedule={removeSchedule} previewChange={(title,seconds)=>setPreview(value=>value?{...value,title,end:value.start+seconds*1000}:value)}/>}
+    {editor&&<RecordEditor key={editor.row?.id||String(editor.start)} {...editor} inspector close={closeEditor} removeRow={removeCalendarRow} previewChange={(title,seconds)=>setPreview(value=>value?{...value,title,end:value.start+seconds*1000}:value)}/>}
     {menu&&<CalendarContextMenu key={menu.event.id+':'+menu.x+':'+menu.y} x={menu.x} y={menu.y} close={()=>setMenu(null)} choose={action}/>}
 
   </section>;

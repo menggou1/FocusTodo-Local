@@ -13,9 +13,15 @@ import { ProjectIcon } from './ProjectIcon';
 
 export type RecordAnchor={x:number;y:number;width:number;height:number};
 type RecordFields = { selected?: string; child?: string; begin?: number; minutes?: number };
-export function RecordEditor({kind,row,start=Date.now(),taskId='',interval,quick=false,anchored=false,previewChange,inspector=false,close,removeSchedule}:{kind:'schedule'|'record';row?:Entity;start?:number;taskId?:string;interval?:number;quick?:boolean;anchored?:boolean;previewChange?(name:string,seconds:number):void;inspector?:boolean;close():void;removeSchedule?(row:Entity):Promise<void>}){
+type RecordKind = 'schedule' | 'record';
+type RecordEditorProps = {
+ kind: RecordKind; row?: Entity; start?: number; taskId?: string; interval?: number;
+ quick?: boolean; anchored?: boolean; previewChange?(name: string, seconds: number): void; close(): void;
+} & ({inspector: true; removeRow(row: Entity, kind: RecordKind): Promise<void>} | {inspector?: false; removeRow?: never});
+
+export function RecordEditor({kind,row,start=Date.now(),taskId='',interval,quick=false,anchored=false,previewChange,inspector=false,close,removeRow}:RecordEditorProps){
  const{services,text,run,queue,busy,blocked}=useWorkspace(),zh=services.language.locale.startsWith('zh'),t=(a:string,b:string)=>zh?a:b;
- const data=useSyncExternalStore(services.business.subscribe,services.business.getSnapshot),prefs=services.settings.getSnapshot(),isQuick=kind==='schedule'&&!row&&(!taskId||quick),sidebar=!!row&&(kind==='schedule'||inspector);
+ const data=useSyncExternalStore(services.business.subscribe,services.business.getSnapshot),prefs=services.settings.getSnapshot(),isQuick=kind==='schedule'&&!row&&(!taskId||quick),sidebar=!!row&&inspector;
  // A local input value can refer to two instants on the autumn clock change.
  const [begin, setBegin] = useState(() => row ? number(row.endDate) - number(row.interval) * 1000
    : kind === 'record' ? start - (interval || prefs.workInterval) * 1000 : start);
@@ -49,11 +55,8 @@ export function RecordEditor({kind,row,start=Date.now(),taskId='',interval,quick
    setBegin(time);
    if (Number.isFinite(time)) void persist({ begin: time });
  }
- async function remove(){
-   const current=baseRef.current;
-   if(!current)return;
-   if(kind==='schedule'){await removeSchedule?.(current);return}
-   if(await run(()=>services.business.command({type:'removeRecord',id:current.id,expected:current})))close();
+ function remove() {
+   if (baseRef.current && removeRow) void removeRow(baseRef.current, kind);
  }
  const taskField=<PickerField className="legacy-record-field"><summary><LegacyIcon name="pomo-task"/><span>{services.language.legacyText('pomo_task_title')}</span><span className="legacy-record-value">{selectedName||text.none}</span>{selected&&<button type="button" className="legacy-record-unlink" aria-label={t('移除任务关联','Remove task association')} onClick={e=>{e.preventDefault();setSelected('');setChild('');void persist({selected:'',child:''})}}>×</button>}</summary><div className="legacy-detail-popover legacy-record-task-picker"><RecordTaskPicker projects={data.projects} tasks={data.tasks} selected={selected} choose={id=>{setSelected(id);setChild('');void persist({selected:id,child:''});closeFields()}}/></div></PickerField>;
  const startField=<PickerField className="legacy-record-field"><summary><LegacyIcon name="pomo-starttime"/><span>{services.language.legacyText('pomo_start_time')}</span><span className="legacy-record-value">{startLabel}</span></summary><div className="legacy-detail-popover legacy-date-popover"><DatePicker reminder allowPast recordTime value={beginInput} cancel={closeFields} confirm={value=>{if(!value)return;if(value!==beginInput.slice(0,16))changeStart(value);closeFields()}}/></div></PickerField>;
