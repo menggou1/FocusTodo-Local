@@ -1,7 +1,8 @@
 import { formatCompactDuration as durationLabel, formatClock } from '../../domain/display.mjs';
 import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import type { Entity } from '../../services/core.mjs';
+import { confirmInApp } from '../../services/confirmation';
 import { useWorkspace } from './Context';
 import { range, shift, stamp } from './Dates';
 import { RecordEditor } from './RecordEditor';
@@ -11,6 +12,16 @@ import { DatePicker } from './Pickers';
 import { ProjectIcon } from './ProjectIcon';
 import { TimerTaskPomodoros } from './TimerWidgets';
 import { useWindowClose } from './Dialog';
+import { SettingsSelect } from './SoundSettings';
+
+// Time slots keep their own click and gesture behavior. Workspace controls and
+// portaled surfaces handle their own clicks, including their scrollbars.
+const calendarInteraction = [
+  '.legacy-record-inspector', '.legacy-calendar-task', '.legacy-calendar-menu-layer',
+  '.legacy-scroll-track', '[data-app-interaction-root]', 'dialog',
+  'button', 'a[href]', 'input', 'select', 'textarea', 'label', 'details',
+  '[contenteditable]:not([contenteditable="false"])', '[tabindex]:not([tabindex="-1"])',
+].join(',');
 
 type CalendarEvent={id:string;type:string;start:number;end:number;record:Entity};
 type TimeRange={start:number;end:number};
@@ -66,13 +77,26 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
   useEffect(()=>{if(!pane)root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-list-picker').forEach(field=>field.open=false)},[pane]);
   const previousPeriod=useRef({date,mode});
   useEffect(()=>{if(previousPeriod.current.date===date&&previousPeriod.current.mode===mode)return;previousPeriod.current={date,mode};setEditor(pendingMonthEvent.current?{kind:pendingMonthEvent.current.type==='schedule'?'schedule':'record',row:pendingMonthEvent.current.record}:null);pendingMonthEvent.current=null;setPreview(null);setMenu(null);gesture.current?.()},[date,mode]);
-  const closeEditor=()=>{setEditor(null);setPreview(null)};
+  const closeEditor=useCallback(()=>{setEditor(null);setPreview(null)},[]);
+  const inspecting=!!editor?.row;
+  useEffect(()=>{
+    if(!inspecting)return;
+    function dismissOnBlank(event:MouseEvent){
+      const target=event.target;
+      if(!(target instanceof Element)||event.defaultPrevented||suppressClick.current>performance.now())return;
+      if(!target.closest(calendarInteraction))closeEditor();
+    }
+    document.addEventListener('click',dismissOnBlank);
+    return()=>document.removeEventListener('click',dismissOnBlank);
+  },[inspecting,closeEditor]);
   function blank(){if(suppressClick.current>performance.now()){suppressClick.current=0;return}closeEditor();setPane(false);setMenu(null)}
   function quick(start:number,end:number,anchored=false){setPane(false);setMenu(null);setPreview({start,end});setEditor({kind:'schedule',start,interval:(end-start)/1000,quick:true,anchored})}
   function inspect(event:CalendarEvent){if(suppressClick.current>performance.now()){suppressClick.current=0;return}setPane(false);setPreview(null);setMenu(null);setEditor({kind:event.type==='schedule'?'schedule':'record',row:event.record})}
   function point(x:number,y:number,planned=true,inside=false){
     const viewport=scroll.current?.getBoundingClientRect();
-    if(!viewport||(inside&&(x<viewport.left||x>=viewport.right||y<viewport.top||y>=viewport.bottom)))return null;
+    if(!viewport)return null;
+    if(inside&&(x<viewport.left||x>=viewport.right||y<viewport.top||y>=viewport.bottom||
+      document.elementFromPoint(x,y)?.closest('.legacy-calendar-pane')))return null;
     for(const column of root.current?.querySelectorAll<HTMLElement>('.domain-calendar-grid:not(.month)>.domain-calendar-day')||[]){
       const rect=column.getBoundingClientRect();
       if(x<rect.left||x>=rect.right)continue;
@@ -171,7 +195,18 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
       setAdded(current=>current===committed?null:current);
     });
   }
-  async function action(remove:boolean){const event=menu?.event;if(!event)return;if(remove){if(await run(()=>services.business.command({type:'removeSchedule',id:event.id,expected:event.record})))closeEditor()}else{const {id,...values}=event.record;void id;await run(()=>services.business.command({type:'addSchedule',values:{...values,endDate:event.end+(number(event.record.interval)+services.settings.getSnapshot().shortBreakInterval)*1000}}))}}
+  async function removeSchedule(row:Entity){
+    if(!await confirmInApp(services.language.text('删除此日程？'),
+      services.language.text('此操作会移除该日程安排，相关任务和专注记录会保留。'),text.remove))return;
+    if(await run(()=>services.business.command({type:'removeSchedule',id:row.id,expected:row})))closeEditor();
+  }
+  function action(remove:boolean){
+    const event=menu?.event;
+    if(!event)return;
+    if(remove){void removeSchedule(event.record);return}
+    const {id,...values}=event.record;void id;
+    void run(()=>services.business.command({type:'addSchedule',values:{...values,endDate:event.end+(number(event.record.interval)+services.settings.getSnapshot().shortBreakInterval)*1000}}));
+  }
   function context(e:React.MouseEvent,event:CalendarEvent){e.preventDefault();e.stopPropagation();if(event.type==='schedule')setMenu({event,x:e.clientX,y:e.clientY})}
   const cardAccent=(task?:Entity)=>'#'+String(projectsById.get(String(task?.projectId))?.color||'4670F6').replace('#','');
   const editedId=edit?.event.id;
@@ -188,7 +223,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
     const segment=day===Math.max(first,range(event.start).start)?'start':day;
     return <div key={mode+':'+first+':'+event.type+':'+event.id+':'+segment} role={draft?undefined:'button'} tabIndex={draft?undefined:0}
       aria-label={draft?undefined:title} className={'domain-time-event '+event.type+(draft?' legacy-calendar-selection':'')}
-      data-event-id={event.id} data-calendar-edit={changing?(edit?.pointer?'dragging':'saving'):undefined}
+      data-event-id={event.id} data-calendar-quick-draft={draft&&editor?.quick||undefined} data-calendar-edit={changing?(edit?.pointer?'dragging':'saving'):undefined}
       style={{top:wall*hourHeight/60,height,left:'calc('+((dayIndex+offset/100)/dayCount*100)+'% + '+(6+column*(4-gutter)-offset*border/100)+'px)',
         width:'calc('+(part/dayCount)+'% - '+(gutter+part*border/100)+'px)','--calendar-card-accent':color,
         background:event.type==='focus'?(mode==='day'?color:color+'8c'):undefined,borderColor:event.type==='focus'?color:undefined} as CSSProperties}
@@ -213,7 +248,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
   }
   const dateLabel=mode==='day'?dateInput(date):dateInput(date).slice(0,7);
   return <section ref={root} className={'domain-calendar legacy-calendar '+mode+(!dual&&mode==='day'?' single':'')+(editor?.row?' has-inspector':'')} data-testid="calendar-page" data-pane-open={pane} style={{'--legacy-hour-height':hourHeight+'px'} as CSSProperties}>
-    <div className="legacy-calendar-main"><div className="legacy-calendar-toolbar"><div className="legacy-calendar-navigation"><button onClick={()=>setDate(Date.now())}>{text.today}</button><button aria-label={t('上一期','Previous period')} onClick={()=>setDate(shift(date,-1,mode))}>‹</button><button aria-label={t('下一期','Next period')} onClick={()=>setDate(shift(date,1,mode))}>›</button><PickerField className="legacy-calendar-date"><summary><span>{dateLabel}</span><span className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-date-popover"><DatePicker value={dateInput(date)} allowPast shortcutHidden actionsHidden calendar cancel={()=>{}} confirm={value=>{if(value)setDate(+new Date(value+'T12:00'));root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-date').forEach(el=>el.open=false)}}/></div></PickerField></div><div className="legacy-calendar-actions"><select aria-label={t('日程视图','Schedule view')} value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>{(['day','week','month'] as const).map((p,i)=><option key={p} value={p}>{[t('日','Day'),t('周','Week'),t('月','Month')][i]}</option>)}</select></div></div>
+    <div className="legacy-calendar-main"><div className="legacy-calendar-toolbar"><div className="legacy-calendar-navigation"><button onClick={()=>setDate(Date.now())}>{services.language.text('回到今天')}</button><button aria-label={t('上一期','Previous period')} onClick={()=>setDate(shift(date,-1,mode))}>‹</button><button aria-label={t('下一期','Next period')} onClick={()=>setDate(shift(date,1,mode))}>›</button><PickerField className="legacy-calendar-date"><summary><span>{dateLabel}</span><span className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-date-popover"><DatePicker value={dateInput(date)} allowPast shortcutHidden actionsHidden calendar cancel={()=>{}} confirm={value=>{if(value)setDate(+new Date(value+'T12:00'));root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-date').forEach(el=>el.open=false)}}/></div></PickerField></div><div className="legacy-calendar-actions"><SettingsSelect searchable={false} aria-label={t('日程视图','Schedule view')} value={mode} onChange={e=>setMode(e.target.value as typeof mode)}>{(['day','week','month'] as const).map((p,i)=><option key={p} value={p}>{[t('日','Day'),t('周','Week'),t('月','Month')][i]}</option>)}</SettingsSelect></div></div>
     <div className="legacy-calendar-body">
       {mode==='day'&&<h2 className="legacy-calendar-day-title"><span>{range(date).start===today?text.today:new Date(date).toLocaleDateString(services.language.locale,{month:'short',day:'numeric'})} {new Date(date).toLocaleDateString(services.language.locale,{weekday:'long'})}</span></h2>}
       {mode==='month'?<><div className="legacy-calendar-weekdays">{Array.from({length:7},(_,i)=><span key={i}>{new Date(shift(range(date,'week').start,i,'day')).toLocaleDateString(services.language.locale,{weekday:'short'})}</span>)}</div><div className="legacy-month-scroll"><div className="domain-calendar-grid month">{days.map(day=>{const rows=events.filter(row=>row.start<shift(day,1,'day')&&row.end>day);return <section key={day} className="domain-calendar-day" data-date={dateInput(day)} data-other-month={new Date(day).getMonth()!==new Date(date).getMonth()||undefined} onClick={()=>{setDate(day);setMode('day')}}><button className="legacy-month-day-number" data-today={day===today||undefined}>{new Date(day).getDate()}</button><div className="legacy-month-events">{rows.slice(0,3).map(event=><button key={event.id} className={'domain-month-event '+event.type} onClick={e=>{e.stopPropagation();pendingMonthEvent.current=event;setDate(day);setMode('day')}} style={(()=>{const task=snapshot.tasks.find(row=>row.id===event.record.taskId),project=snapshot.projects.find(row=>row.id===task?.projectId),color='#'+String(project?.color||'4670F6').replace('#','');return{background:color+(event.type==='focus'?'8c':'2e'),borderColor:color,color:event.type==='focus'?'#fff':undefined}})()}>{!event.record.isAllDay&&<small>{time(event.start)}</small>}<span>{eventTitle(event.record)}</span></button>)}{rows.length>3&&<span className="legacy-month-more">+{rows.length-3}</span>}</div></section>})}</div></div></>:
@@ -222,7 +257,7 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
         {day===today&&<div className="legacy-calendar-now" style={{top:(new Date(now).getHours()*60+new Date(now).getMinutes()+new Date(now).getSeconds()/60)*hourHeight/60}}/>}
       </div></section>)}{days.flatMap(timedEvents)}</div></div></>}
     </div></div>
-    <div className="legacy-calendar-pane" id="calendar-task-panel" inert={!pane}>{paneMounted&&<aside className="domain-calendar-tasks"><header><PickerField className="legacy-calendar-list-picker"><summary><span>{paneView?projectName(paneView,text):text.today}</span><i className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-project-menu" role="listbox">{paneOptions.map(project=><button key={project.id} style={{paddingLeft:project.parentId?32:16}} role="option" aria-selected={project.id===paneProject} onClick={()=>{setPaneProject(project.id);root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-list-picker').forEach(el=>el.open=false)}}><>{project.parentId&&<i className="legacy-calendar-folder-indicator" style={{backgroundColor:'#'+String(paneProjects.find(row=>row.id===project.parentId)?.color||'aeaeae')}}/>}<ProjectIcon type={number(project.type)} color={String(project.color||'')}/></><span>{projectName(project,text)}</span>{project.id===paneProject&&<i className="legacy-option-check"/>}</button>)}</div></PickerField></header><div className="legacy-calendar-task-list">{paneTasks.map(row=><div className="legacy-calendar-task" key={row.id} onPointerDown={e=>dragTask(e,row)} draggable={false}><span className="legacy-calendar-task-name">{String(row.name)}</span><TimerTaskPomodoros task={row} state="idle"/></div>)}</div></aside>}</div>
+    <div className="legacy-calendar-pane" id="calendar-task-panel" inert={!pane}>{paneMounted&&<aside className="domain-calendar-tasks"><header><PickerField className="legacy-calendar-list-picker" align="start" fitViewport restoreFocusOnEscape><summary><span>{paneView?projectName(paneView,text):text.today}</span><i className="legacy-date-caret"/></summary><div className="legacy-detail-popover legacy-calendar-project-menu" role="listbox" aria-label={text.project}>{paneOptions.map(project=><button type="button" key={project.id} style={{paddingLeft:project.parentId?32:16}} role="option" aria-selected={project.id===paneProject} onClick={()=>{setPaneProject(project.id);root.current?.querySelectorAll<HTMLDetailsElement>('.legacy-calendar-list-picker').forEach(el=>el.open=false)}}><>{project.parentId&&<i className="legacy-calendar-folder-indicator" style={{backgroundColor:'#'+String(paneProjects.find(row=>row.id===project.parentId)?.color||'aeaeae')}}/>}<ProjectIcon type={number(project.type)} color={String(project.color||'')}/></><span>{projectName(project,text)}</span>{project.id===paneProject&&<i className="legacy-option-check"/>}</button>)}</div></PickerField></header><div className="legacy-calendar-task-list">{paneTasks.map(row=><div className="legacy-calendar-task" key={row.id} onPointerDown={e=>dragTask(e,row)} draggable={false}><span className="legacy-calendar-task-name">{String(row.name)}</span><TimerTaskPomodoros task={row} state="idle"/></div>)}</div></aside>}</div>
     <button type="button" className="legacy-calendar-pane-toggle" aria-label={pane?t('收起任务面板','Hide task panel'):t('显示任务面板','Show task panel')}
       aria-expanded={pane} aria-controls="calendar-task-panel" onClick={()=>{closeEditor();setPaneMounted(true);setPane(value=>!value)}}>
       <span className="legacy-calendar-pane-glyph" aria-hidden="true"/>
@@ -239,8 +274,8 @@ export function Calendar({startTask}:{startTask(id:string,child?:string):void;op
         <span>{taskGhost.start!==undefined?t('开始','Starts')+' '+time(taskGhost.start):taskGhost.invalid?t('无法放置','Cannot place here'):t('未安排','Unplaced')}</span></div>
       {number(taskGhost.row.estimatePomoNum)>1&&<small>{number(taskGhost.row.estimatePomoNum)} × {durationLabel(taskGhost.seconds)} ≈ {durationLabel(number(taskGhost.row.estimatePomoNum)*taskGhost.seconds)}</small>}
     </div>,document.body)}
-    {editor&&<RecordEditor key={editor.row?.id||String(editor.start)} {...editor} inspector close={closeEditor} previewChange={(title,seconds)=>setPreview(value=>value?{...value,title,end:value.start+seconds*1000}:value)}/>}
-    {menu&&<CalendarContextMenu key={menu.event.id+':'+menu.x+':'+menu.y} x={menu.x} y={menu.y} close={()=>setMenu(null)} choose={remove=>void action(remove)}/>}
+    {editor&&<RecordEditor key={editor.row?.id||String(editor.start)} {...editor} inspector close={closeEditor} removeSchedule={removeSchedule} previewChange={(title,seconds)=>setPreview(value=>value?{...value,title,end:value.start+seconds*1000}:value)}/>}
+    {menu&&<CalendarContextMenu key={menu.event.id+':'+menu.x+':'+menu.y} x={menu.x} y={menu.y} close={()=>setMenu(null)} choose={action}/>}
 
   </section>;
 }

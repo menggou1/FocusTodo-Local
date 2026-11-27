@@ -361,4 +361,4 @@ const cases = [
     ])),
 ];
 
-module.exports = {cases};
+module.exports = {cases,prepare};

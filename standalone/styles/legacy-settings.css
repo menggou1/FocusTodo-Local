@@ -55,7 +55,7 @@
 .legacy-settings>nav>button>img{margin-top:4px}.legacy-settings>nav>button>span{height:24px;margin-top:2px;line-height:20px}
 .legacy-settings .legacy-settings-content{flex:1;width:0;min-width:0;max-width:none;height:550px;padding:24px 28px 16px 0;overflow:auto;scrollbar-width:none}
 .legacy-settings-content::-webkit-scrollbar{display:none}
-.legacy-settings select{flex:none;max-width:200px!important;border-radius:6px;padding:0 32px 0 8px;font:14px/28px var(--workspace-font);background-image:url('../../public/img/dropdown-indicator.png');background-size:20px;background-repeat:no-repeat;background-position:right 8px center;appearance:none}
+.legacy-settings select,.workspace-shell .legacy-settings-select>select{flex:none;max-width:200px!important;border-radius:6px;padding:0 32px 0 8px;font:14px/28px var(--workspace-font);background-image:url('../../public/img/dropdown-indicator.png');background-size:20px;background-repeat:no-repeat;background-position:right 8px center;appearance:none}
 .legacy-settings .domain-setting select{padding:0 32px 0 8px;background-image:url('../../public/img/dropdown-indicator.png');background-size:20px}
 .legacy-settings .legacy-switch{background:#d2d2d2;transform:translateY(2.5px)}.legacy-settings .legacy-switch:checked{background:#fd5553}
 .legacy-settings .legacy-settings-category{height:40px;min-height:40px;font:600 14px/20px var(--workspace-font);margin:0!important;padding:12px 0 8px}
