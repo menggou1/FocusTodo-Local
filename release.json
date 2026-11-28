@@ -1,10 +1,33 @@
 {
   "officialVersion": "7.1.1",
-  "localVersion": "2.2.0",
+  "localVersion": "2.2.1",
   "author": "Lexible",
-  "date": "2026-11-26",
+  "date": "2026-11-28",
   "repositoryRemote": "Focustodo-local",
   "updates": [
+    {
+      "version": "2.2.1",
+      "date": "2026-11-28",
+      "title": "日程交互与文字显示修复",
+      "titleEn": "Calendar interactions and text rendering fixes",
+      "items": [
+        "调整日程加号、卡片和详情文字布局，窄窗口保留任务拖入空间。",
+        "日程安排与专注记录从详情删除时均先确认，取消保留原记录。",
+        "点击时间表内外的非交互空白可关闭任务侧栏或详情栏，保留原收展动画。",
+        "修复工作区待定任务输入及日程快建、保存卡片的字形裁切，保留原字号和文字位置。",
+        "任务侧栏从顶端排列，长列表使用项目统一滚动条。",
+        "日、周、月共用统一视图下拉，返回当天按钮使用「回到今天」及 “Back to Today”。"
+      ],
+      "itemsEn": [
+        "Adjust the calendar toggle, card text, and inspector layout while preserving drag targets in narrow windows.",
+        "Confirm deletion of both schedules and focus records from their details; cancelling preserves the original record.",
+        "Dismiss the task pane or inspector from non-interactive blank space inside or outside the timetable, preserving the existing transitions.",
+        "Prevent clipped glyphs in Someday task input, calendar quick creation, and saved cards while retaining font size and text positions.",
+        "Align task pane rows at the top and use the shared scrollbar for overflowing lists.",
+        "Use the shared day/week/month selector and label the return button Back to Today."
+      ],
+      "report": "docs/releases/UPDATE-2.2.1.md"
+    },
     {
       "version": "2.2.0",
       "date": "2026-11-26",

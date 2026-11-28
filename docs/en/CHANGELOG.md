@@ -2,7 +2,18 @@
 
 [Documentation](README.md) · [Maintenance](MAINTENANCE.md) · [Backlog](BACKLOG.md)
 
-Current application: **2.2.0**, author Lexible.
+Current application: **2.2.1**, author Lexible.
+
+## 2.2.1 · 2026-11-28
+
+- Adjust the calendar toggle, card text, and inspector layout while preserving drag targets in narrow windows.
+- Confirm deletion of both schedules and focus records from their details; cancelling preserves the original record.
+- Dismiss the task pane or inspector from non-interactive blank space inside or outside the timetable, preserving the existing transitions.
+- Prevent clipped glyphs in Someday task input, calendar quick creation, and saved cards while retaining font size and text positions.
+- Align task pane rows at the top and use the shared scrollbar for overflowing lists.
+- Use the shared day/week/month selector and label the return button Back to Today.
+
+[English report](releases/UPDATE-2.2.1.md).
 
 ## 2.2.0 · 2026-11-26
 

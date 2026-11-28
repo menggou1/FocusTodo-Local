@@ -1,6 +1,6 @@
 {
   "name": "focustodo",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "FocusTodo web version",
   "scripts": {
     "dev": "vite --config vite.standalone.config.mjs",

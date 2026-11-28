@@ -2,7 +2,7 @@
 
 [首页](../README.md) · [维护](MAINTENANCE.md) · [测试](TESTING.md)
 
-更新日期：2026-11-27（Asia/Shanghai）。本文是未完成工程、人工验收和未来计划状态的唯一维护入口；版本报告记录实际行为与证据，不复制任务清单。
+更新日期：2026-11-28（Asia/Shanghai）。本文是未完成工程、人工验收和未来计划状态的唯一维护入口；版本报告记录实际行为与证据，不复制任务清单。
 
 ## 当前发布审核
 
@@ -10,6 +10,12 @@
 |---|---|---|---|
 | V07 | P1 | 用户长期数据库升级与大规模恢复 | 合成同 origin 升级和历史备份差分不代替用户长期数据；使用授权隔离副本核对任务/记录ID、设置、计时恢复及回退，不在稳定5500或真实Profile上试验。 |
 | V10 | P1 | 安全加固及发布来源的托管验证 | 在授权的 CI 或后续版本发布中确认六项矩阵、来源校验摘要、附件复用、Stable/Prerelease/Latest 和 Pages。GitHub API 在本轮预检显示 main 和 dev 未启用分支保护。继续核对实际 Pages 响应头及托管规则与仓库发布门禁的配合。 |
+
+## 2.2.1 发布验收门禁
+
+日程专项冻结基线为 `c96aebee718adce1cdec5b4ff564cd99086fee86`。[dev CI #204](https://github.com/menggou1/FocusTodo-Local/actions/runs/45958591094) 的六项实际矩阵、三平台附件启动、Linux Firefox/WebKit 及独立证据门禁已通过。七项原始需求的最终实际验收均通过，见[第三轮报告](https://github.com/menggou1/FocusTodo-Local/blob/c96aebee718adce1cdec5b4ff564cd99086fee86/docs/acceptance/calendar-third-round-2026-11-27.md)；此前遗漏以第三轮纠正后的记录为准。未发现本次专项的发布阻断问题，E26 等实机证据边界仍保留。
+
+本次发布按维护指南串行验收：发布分支最终 SHA 完整 CI 与独立证据门禁 → 同 SHA 的 2.2.1 Tag CI 和 Stable/Latest Release → main 仅快进及 CI/Pages → dev 仅快进及 CI → 附件 SHA256、来源和线上版本核验 → 清理临时发布分支。托管结果以 [2.2.1 发布分支运行](https://github.com/menggou1/FocusTodo-Local/actions?query=branch%3Arelease%2F2.2.1)、[Tag 运行](https://github.com/menggou1/FocusTodo-Local/actions?query=branch%3A2.2.1) 和 [Release](https://github.com/menggou1/FocusTodo-Local/releases/tag/2.2.1) 的实际记录为准；准备文档不预先宣称发布完成。版本元数据生成使发布提交区别于 dev 基线，必须取得最终 SHA 的原始矩阵；后续 Tag/main/dev 仅复用该原始证据及附件。
 
 ## 实际环境证据
 
@@ -39,7 +45,7 @@
 | E23 | P2 | CI #189 首次 Windows / Node 24 的两项 Python 用例分别在 10043ms 和 10013ms 触发 10 秒超时。原始日志未记录阻塞阶段。同提交第二次运行通过，本地 Windows Node 22/24 和 Python 3.12.16 也未重现。再次出现时按新增诊断核对启动、响应与退出阶段。[首次失败作业](https://github.com/menggou1/FocusTodo-Local/actions/runs/45179802683/job/137710995266) |
 | E24 | P3 | 本地 WebKit 全量运行时，导出滚动和日程响应式用例各有一次设置按钮首击等待稳定超时。附件记录了开发基线和当时构建的定向通过。本轮 Windows WebKit 的工作区导出滚动和领域日程响应式用例均通过。保留全量失败记录以及原交互和断言，后续复验持续运行时的首击稳定性。 |
 | E25 | P3 | 搜索输入法已覆盖浏览器合成事件。真实系统中文输入法的候选窗、确认和取消键仍待人工复验。 |
-| E26 | P2 | 日程专项的用户实机复核及真实 Safari。第三轮以远端 dev `e87c02b` 为基线，七项操作与真实浏览器画面见[第三轮验收报告](https://github.com/menggou1/FocusTodo-Local/blob/dev/docs/acceptance/calendar-third-round-2026-11-27.md)。在实际平台复核窄窗文字、任务侧栏滚动、拖入和两类侧栏空白关闭。 |
+| E26 | P2 | 日程专项的用户实机复核及真实 Safari。2.2.1 冻结于 dev `c96aebe`，第三轮七项实际浏览器验收全部通过；报告中的 `e87c02b` 是修复前复现基线，最终修复提交为 `c96aebe`。操作与真实浏览器画面见[第三轮验收报告](https://github.com/menggou1/FocusTodo-Local/blob/c96aebee718adce1cdec5b4ff564cd99086fee86/docs/acceptance/calendar-third-round-2026-11-27.md)。在实际平台复核窄窗文字、任务侧栏滚动、拖入和两类侧栏空白关闭。 |
 | E27 | P3 | [CI #200 Ubuntu / Node 24](https://github.com/menggou1/FocusTodo-Local/actions/runs/45938397755/job/140307037603) 的固定归档主题切换兼容用例在 `browser-acceptance.cjs:361` 等待背景发布时超时。日程补丁未改动该测试、运行适配器或不可变归档；本机同用例通过。原因尚未证明，再现时保留主题事务、图像解码与背景发布顺序，不能以重跑通过替代原因确认。 |
 
 ## 候选计划
